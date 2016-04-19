@@ -118,3 +118,5 @@ log4j.main = {
 
 
 tempDirectory = "${System.getProperty("java.io.tmpdir")}"
+
+grails.app.context = "/"
