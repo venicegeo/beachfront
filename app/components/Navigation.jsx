@@ -17,8 +17,8 @@
 import React, {Component} from 'react'
 import Link from 'react-router/lib/Link'
 import styles from './Navigation.css'
-import brand from '../images/brand-experimental.svg'
-import brandSmall from '../images/brand-experimental-small.svg'
+import brand from '../images/brand.svg'
+import brandSmall from '../images/brand-small.svg'
 
 export default class Navigation extends Component {
   static propTypes = {
