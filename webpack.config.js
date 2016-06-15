@@ -72,6 +72,7 @@ module.exports = {
     }),
     new HtmlWebpackPlugin({
       template: 'index.ejs',
+      favicon: 'images/favicon.png',
       hash: true,
       xhtml: true
     }),
