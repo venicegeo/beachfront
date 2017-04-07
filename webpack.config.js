@@ -25,6 +25,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 const cssnext = require('postcss-cssnext')
 const cssimport = require('postcss-import')
 const pkg = require('./package')
+const CheckerPlugin = require('awesome-typescript-loader').CheckerPlugin
 
 const __environment__ = process.env.NODE_ENV || 'development'
 
@@ -64,7 +65,7 @@ module.exports = {
     loaders: [
       {
         test: /\.tsx?$/,
-        loader: 'ts',
+        loader: 'awesome-typescript-loader',
         exclude: /node_modules/
       },
       {
@@ -104,6 +105,7 @@ module.exports = {
   },
 
   plugins: [
+    new CheckerPlugin(),
     new CopyWebpackPlugin([{
       from: require.resolve('openlayers/dist/ol-debug.js'),
       to: 'ol.js',
