@@ -15,5 +15,9 @@
     "./typings/index.d.ts",
     "./beachfront.d.ts",
     "./src/**/*"
-  ]
+  ],
+  "awesomeTypescriptLoaderOptions": {
+    "useTranspileModule": true,
+    "useCache": true
+  }
 }
