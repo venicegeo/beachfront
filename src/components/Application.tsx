@@ -88,6 +88,10 @@ interface State {
   searchCriteria?: SearchCriteria
   searchError?: any
   searchResults?: beachfront.ImageryCatalogPage
+
+  // Inactivity Timeout state
+  idleTime?: number
+  idleInterval?: any
 }
 
 export const createApplication = (element) => render(
@@ -586,6 +590,28 @@ export class Application extends React.Component<Props, State> {
       }
     })
   }
+}
+
+//
+// Inactivity Timeout
+//
+function timerIncrement() {
+  if (this.state.isLoggedIn) {
+    idleTime = idleTime + 1
+    if (idleTime > 14) {
+      this.logout()
+    }
+  }
+}
+
+// Increment the idle time counter every minute.
+function startIdleTimer() {
+  idleTime = 0
+  return setInterval(timerIncrement, 60000)
+}
+
+function stopIdleTimer() {
+  clearInterval(idleInterval)
 }
 
 //
