@@ -653,7 +653,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     })
 
     // Additions
-    const insertionIndex = this.basemapLayers.length
+    const insertionIndex = this.map.getLayers().getArray().indexOf(this.imageryLayer) + 1
     previewables
       .filter(f => shouldRender[f.sceneId] && !alreadyRendered[f.sceneId])
       .forEach(f => {
