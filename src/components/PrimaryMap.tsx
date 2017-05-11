@@ -424,8 +424,8 @@ export class PrimaryMap extends React.Component<Props, State> {
       layers: [
         // Order matters here
         ...this.basemapLayers,
-        this.frameLayer,
         this.drawLayer,
+        this.frameLayer,
         this.imageryLayer,
         this.highlightLayer,
       ],
