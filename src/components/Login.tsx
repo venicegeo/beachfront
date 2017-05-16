@@ -21,6 +21,7 @@ import {API_ROOT} from '../config'
 import {CONSENT_BANNER_TEXT} from '../config'
 import * as React from 'react'
 import {Modal} from './Modal'
+import {startIdleTimer} from './Application'
 
 export const Login = () => (
   <Modal className={styles.parent} onDismiss={() => {/* noop */}} onInitialize={() => {/* noop */}}>
@@ -31,7 +32,7 @@ export const Login = () => (
         className={styles.warning}
         dangerouslySetInnerHTML={CONSENT_BANNER_TEXT}
       />
-      <a className={styles.button} href={API_ROOT + '/login/geoaxis'}>
+      <a className={styles.button} onClick={startIdleTimer()} href={API_ROOT + '/login/geoaxis'}>
         <span className={styles.buttonIcons}>
             <span className="fa fa-lock"/>
         </span>

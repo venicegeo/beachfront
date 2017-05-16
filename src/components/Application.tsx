@@ -559,6 +559,7 @@ export class Application extends React.Component<Props, State> {
     this.setState({
       isSessionLoggedOut: true,
     })
+    stopIdleTimer()
     return null
   }
 
@@ -597,21 +598,27 @@ export class Application extends React.Component<Props, State> {
 //
 function timerIncrement() {
   if (this.state.isLoggedIn) {
-    idleTime = idleTime + 1
-    if (idleTime > 14) {
+    this.setState({
+      idleTime: this.state.idleTime + 1,
+    })
+    if (this.state.idleTime > 14) {
       this.logout()
     }
   }
 }
 
 // Increment the idle time counter every minute.
-function startIdleTimer() {
-  idleTime = 0
-  return setInterval(timerIncrement, 60000)
+export function startIdleTimer() {
+  this.setState({
+    idleTime: 0,
+  })
+
+  this.state.idleInterval = setInterval(timerIncrement, 60000)
+  return true
 }
 
 function stopIdleTimer() {
-  clearInterval(idleInterval)
+  clearInterval(this.state.idleInterval)
 }
 
 //
