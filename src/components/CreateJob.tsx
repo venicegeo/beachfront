@@ -190,5 +190,5 @@ export class CreateJob extends React.Component<Props, State> {
 //
 
 function generateName(sceneId): string {
-  return sceneId.replace(/^(rapideye|planetscope|landsat):/, '')
+  return sceneId.replace(/^(rapideye|planetscope|landsat|sentinel):/, '')
 }

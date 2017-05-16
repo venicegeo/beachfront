@@ -1067,7 +1067,7 @@ function toPreviewable(features: Array<beachfront.Job|beachfront.Scene>) {
 }
 
 function normalizeSceneId(id: string) {
-  return id ? id.replace(/^(planetscope|rapideye|landsat):/, '') : null
+  return id ? id.replace(/^(planetscope|rapideye|landsat|sentinel):/, '') : null
 }
 
 function tileLoadFunction(imageTile, src) {

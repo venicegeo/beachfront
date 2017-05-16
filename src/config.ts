@@ -54,4 +54,10 @@ export const SCENE_TILE_PROVIDERS = [
     maxZoom:  13,
     attributions: '&copy; <a href="https://www.planet.com" target="_blank" rel="noopener">Planet Labs (Landsat8)</a>',
   },
+  {
+    prefix: 'sentinel',
+    url: 'https://tiles{0-3}.planet.com/v1/experimental/tiles/Sentinel2L1C/__SCENE_ID__/{z}/{x}/{y}.png?api_key=__API_KEY__',
+    maxZoom:  13,
+    attributions: '&copy; <a href="https://www.planet.com" target="_blank" rel="noopener">Planet Labs (Copernicus Sentinel-2)</a>',
+  },
 ]
