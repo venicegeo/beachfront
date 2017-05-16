@@ -21,6 +21,7 @@ import {
   SOURCE_PLANETSCOPE,
   SOURCE_RAPIDEYE,
   SOURCE_LANDSAT,
+  SOURCE_SENTINEL,
 } from '../constants'
 
 let _client: AxiosInstance
@@ -56,6 +57,9 @@ export function search({
     case SOURCE_PLANETSCOPE:
     case SOURCE_LANDSAT:
       itemType = source
+      break
+    case SOURCE_SENTINEL:
+      itemType = 'sentinel'
       break
     default:
       return Promise.reject(new Error(`Unknown data source prefix: '${source}'`))

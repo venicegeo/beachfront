@@ -27,6 +27,7 @@ export const STATUS_CANCELLED = 'Cancelled'
 export const SOURCE_PLANETSCOPE = 'planetscope'
 export const SOURCE_RAPIDEYE = 'rapideye'
 export const SOURCE_LANDSAT = 'landsat'
+export const SOURCE_SENTINEL = 'sentinel'
 
 // Feature Properties
 export const TYPE_JOB = 'JOB'

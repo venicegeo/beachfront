@@ -222,7 +222,7 @@ export class JobStatus extends React.Component<Props, State> {
 //
 
 function normalizeSceneId(sceneId) {
-  return sceneId.replace(/^(rapideye|planetscope|landsat):/, '')
+  return sceneId.replace(/^(rapideye|planetscope|landsat|sentinel):/, '')
 }
 
 function segmentIfNeeded(s: string) {
