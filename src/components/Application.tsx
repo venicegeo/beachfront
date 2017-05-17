@@ -127,6 +127,9 @@ export class Application extends React.Component<Props, State> {
     this.navigateTo = this.navigateTo.bind(this)
     this.panTo = this.panTo.bind(this)
     this.logout = this.logout.bind(this)
+    this.startIdleTimer = this.startIdleTimer.bind(this)
+    this.stopIdleTimer = this.stopIdleTimer.bind(this)
+    this.timerIncrement = this.timerIncrement.bind(this)
   }
 
   componentDidUpdate(_, prevState: State) {
@@ -151,6 +154,7 @@ export class Application extends React.Component<Props, State> {
       this.startBackgroundTasks()
       this.refreshRecords()
           .then(this.importJobsIfNeeded.bind(this))
+      this.startIdleTimer()
     }
   }
 
@@ -555,11 +559,41 @@ export class Application extends React.Component<Props, State> {
     ])
   }
 
+  //
+  // Inactivity Timeout
+  //
+
+  // Increment the idle time counter every minute.
+  private startIdleTimer() {
+    this.setState({
+      idleTime: 0,
+    })
+
+    this.state.idleInterval = setInterval(this.timerIncrement, 60000)
+    return null
+  }
+
+  private timerIncrement() {
+    if (this.state.isLoggedIn && !this.state.isSessionExpired) {
+      this.setState({
+        idleTime: this.state.idleTime + 1,
+      })
+      console.log('idleTimer at ' + this.state.idleTime.toString())
+      if (this.state.idleTime > 14) {
+        this.logout()
+      }
+    }
+  }
+
+  private stopIdleTimer() {
+    clearInterval(this.state.idleInterval)
+  }
+
   private logout() {
     this.setState({
       isSessionLoggedOut: true,
     })
-    stopIdleTimer()
+    this.stopIdleTimer()
     return null
   }
 
@@ -591,34 +625,6 @@ export class Application extends React.Component<Props, State> {
       }
     })
   }
-}
-
-//
-// Inactivity Timeout
-//
-function timerIncrement() {
-  if (this.state.isLoggedIn) {
-    this.setState({
-      idleTime: this.state.idleTime + 1,
-    })
-    if (this.state.idleTime > 14) {
-      this.logout()
-    }
-  }
-}
-
-// Increment the idle time counter every minute.
-export function startIdleTimer() {
-  this.setState({
-    idleTime: 0,
-  })
-
-  this.state.idleInterval = setInterval(timerIncrement, 60000)
-  return true
-}
-
-function stopIdleTimer() {
-  clearInterval(this.state.idleInterval)
 }
 
 //
