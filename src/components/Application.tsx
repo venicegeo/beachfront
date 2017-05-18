@@ -130,6 +130,7 @@ export class Application extends React.Component<Props, State> {
     this.startIdleTimer = this.startIdleTimer.bind(this)
     this.stopIdleTimer = this.stopIdleTimer.bind(this)
     this.timerIncrement = this.timerIncrement.bind(this)
+    this.resetTimer = this.resetTimer.bind(this)
   }
 
   componentDidUpdate(_, prevState: State) {
@@ -158,15 +159,12 @@ export class Application extends React.Component<Props, State> {
     }
   }
 
-  onMouseMove() {
-    if (this.state.idleTime > 0) {
-      this.setState({
-        idleTime: 0,
-      })
-    }
+  componentDidMount() {
+    document.addEventListener('mousemove', this.resetTimer)
+    document.addEventListener('keyup', this.resetTimer)
   }
 
-  onKeypress() {
+  resetTimer() {
     if (this.state.idleTime > 0) {
       this.setState({
         idleTime: 0,
