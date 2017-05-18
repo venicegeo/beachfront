@@ -158,6 +158,22 @@ export class Application extends React.Component<Props, State> {
     }
   }
 
+  onMouseMove() {
+    if (this.state.idleTime > 0) {
+      this.setState({
+        idleTime: 0,
+      })
+    }
+  }
+
+  onKeypress() {
+    if (this.state.idleTime > 0) {
+      this.setState({
+        idleTime: 0,
+      })
+    }
+  }
+
   render() {
     return (
       <div className={styles.root}>
