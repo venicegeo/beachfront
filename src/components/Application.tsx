@@ -47,7 +47,11 @@ import * as sessionService from '../api/session'
 import * as updateService from '../api/update'
 import {createCollection, Collection} from '../utils/collections'
 import {getFeatureCenter} from '../utils/geometries'
-import {RECORD_POLLING_INTERVAL} from '../config'
+import {
+  RECORD_POLLING_INTERVAL,
+  SESSION_IDLE_INTERVAL,
+  SESSION_IDLE_TIMEOUT,
+} from '../config'
 
 import {
   STATUS_SUCCESS,
@@ -91,7 +95,6 @@ interface State {
 
   // Inactivity Timeout state
   idleTime?: number
-  idleInterval?: any
 }
 
 export const createApplication = (element) => render(
@@ -103,6 +106,7 @@ export const createApplication = (element) => render(
 export class Application extends React.Component<Props, State> {
   private initializationPromise: Promise<any>
   private pollingInstance: number
+  private idleInterval: any
 
   constructor(props) {
     super(props)
@@ -162,14 +166,6 @@ export class Application extends React.Component<Props, State> {
   componentDidMount() {
     document.addEventListener('mousemove', this.resetTimer)
     document.addEventListener('keyup', this.resetTimer)
-  }
-
-  resetTimer() {
-    if (this.state.idleTime > 0) {
-      this.setState({
-        idleTime: 0,
-      })
-    }
   }
 
   render() {
@@ -583,7 +579,7 @@ export class Application extends React.Component<Props, State> {
       idleTime: 0,
     })
 
-    this.state.idleInterval = setInterval(this.timerIncrement, 60000)
+    this.idleInterval = setInterval(this.timerIncrement, SESSION_IDLE_INTERVAL)
     return null
   }
 
@@ -592,15 +588,22 @@ export class Application extends React.Component<Props, State> {
       this.setState({
         idleTime: this.state.idleTime + 1,
       })
-      console.log('idleTimer at ' + this.state.idleTime.toString())
-      if (this.state.idleTime > 14) {
+      if (this.state.idleTime >= SESSION_IDLE_TIMEOUT) {
         this.logout()
       }
     }
   }
 
   private stopIdleTimer() {
-    clearInterval(this.state.idleInterval)
+    clearInterval(this.idleInterval)
+  }
+
+  private resetTimer() {
+    if (this.state.idleTime > 0) {
+      this.setState({
+        idleTime: 0,
+      })
+    }
   }
 
   private logout() {
@@ -673,6 +676,8 @@ function generateInitialState(): State {
     searchCriteria: createSearchCriteria(),
     searchError: null,
     searchResults: null,
+
+    idleTime: 0,
   }
 
   const deserializedState = deserialize()
