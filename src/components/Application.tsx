@@ -47,7 +47,11 @@ import * as sessionService from '../api/session'
 import * as updateService from '../api/update'
 import {createCollection, Collection} from '../utils/collections'
 import {getFeatureCenter} from '../utils/geometries'
-import {RECORD_POLLING_INTERVAL} from '../config'
+import {
+  RECORD_POLLING_INTERVAL,
+  SESSION_IDLE_INTERVAL,
+  SESSION_IDLE_TIMEOUT,
+} from '../config'
 
 import {
   STATUS_SUCCESS,
@@ -88,6 +92,9 @@ interface State {
   searchCriteria?: SearchCriteria
   searchError?: any
   searchResults?: beachfront.ImageryCatalogPage
+
+  // Inactivity Timeout state
+  idleTime?: number
 }
 
 export const createApplication = (element) => render(
@@ -99,6 +106,7 @@ export const createApplication = (element) => render(
 export class Application extends React.Component<Props, State> {
   private initializationPromise: Promise<any>
   private pollingInstance: number
+  private idleInterval: any
 
   constructor(props) {
     super(props)
@@ -123,6 +131,10 @@ export class Application extends React.Component<Props, State> {
     this.navigateTo = this.navigateTo.bind(this)
     this.panTo = this.panTo.bind(this)
     this.logout = this.logout.bind(this)
+    this.startIdleTimer = this.startIdleTimer.bind(this)
+    this.stopIdleTimer = this.stopIdleTimer.bind(this)
+    this.timerIncrement = this.timerIncrement.bind(this)
+    this.resetTimer = this.resetTimer.bind(this)
   }
 
   componentDidUpdate(_, prevState: State) {
@@ -147,7 +159,13 @@ export class Application extends React.Component<Props, State> {
       this.startBackgroundTasks()
       this.refreshRecords()
           .then(this.importJobsIfNeeded.bind(this))
+      this.startIdleTimer()
     }
+  }
+
+  componentDidMount() {
+    document.addEventListener('mousemove', this.resetTimer)
+    document.addEventListener('keyup', this.resetTimer)
   }
 
   render() {
@@ -551,10 +569,48 @@ export class Application extends React.Component<Props, State> {
     ])
   }
 
+  //
+  // Inactivity Timeout
+  //
+
+  // Increment the idle time counter every minute.
+  private startIdleTimer() {
+    this.setState({
+      idleTime: 0,
+    })
+
+    this.idleInterval = setInterval(this.timerIncrement, SESSION_IDLE_INTERVAL)
+    return null
+  }
+
+  private timerIncrement() {
+    if (this.state.isLoggedIn && !this.state.isSessionExpired) {
+      this.setState({
+        idleTime: this.state.idleTime + 1,
+      })
+      if (this.state.idleTime >= SESSION_IDLE_TIMEOUT) {
+        this.logout()
+      }
+    }
+  }
+
+  private stopIdleTimer() {
+    clearInterval(this.idleInterval)
+  }
+
+  private resetTimer() {
+    if (this.state.idleTime > 0) {
+      this.setState({
+        idleTime: 0,
+      })
+    }
+  }
+
   private logout() {
     this.setState({
       isSessionLoggedOut: true,
     })
+    this.stopIdleTimer()
     return null
   }
 
@@ -620,6 +676,8 @@ function generateInitialState(): State {
     searchCriteria: createSearchCriteria(),
     searchError: null,
     searchResults: null,
+
+    idleTime: 0,
   }
 
   const deserializedState = deserialize()
