@@ -124,6 +124,7 @@ export class MeasureControl extends ol.control.Control {
 
 function generateDialog() {
   const dialog = document.createElement('form')
+  dialog.className = 'measure-dialog'
   dialog.style.display = 'none'
   dialog.style.position = 'absolute'
   dialog.style.top = '40px'
