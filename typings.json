@@ -4,7 +4,7 @@
     "enzyme": "registry:dt/enzyme#2.4.1+20161004164857",
     "geojson": "registry:dt/geojson#0.0.0+20160619034323",
     "mocha": "registry:dt/mocha#2.2.5+20161119044246",
-    "openlayers-3.14.2": "github:dbazile/DefinitelyTyped/openlayers/openlayers-3.14.2.d.ts#0a4e0c6ae3e302da60bdb15d004d0aa2c868d295",
+    "openlayers-3.14.2": "github:dbazile/DefinitelyTyped/openlayers/openlayers-3.14.2.d.ts",
     "react": "registry:dt/react#0.14.0+20161008064207",
     "react-dom": "registry:dt/react-dom#0.14.0+20160412154040",
     "sinon": "registry:dt/sinon#1.16.1+20161208163514"
