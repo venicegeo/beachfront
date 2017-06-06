@@ -209,16 +209,17 @@ export class Application extends React.Component<Props, State> {
         )}
         {this.state.isSessionLoggedOut && (
           <SessionLoggedOut
-            onDismiss={() => {
+            onDismiss={() => { /*  Do nothing */ }}
+            onInitialize={() => {
+              sessionStorage.clear()
               this.setState({
                 isLoggedIn: false,
                 isSessionLoggedOut: false,
               })
-            }}
-            onInitialize={() => {
-              sessionStorage.clear()
               const client = sessionService.getClient()
-              client.get(`/logout`)
+              client.get(`/logout`).then(response => {
+                window.location.href = response.data
+              })
             }}
           />
         )}
