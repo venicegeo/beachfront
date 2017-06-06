@@ -19,6 +19,7 @@ const styles: any = require('./Application.css')
 import * as React from 'react'
 import {render} from 'react-dom'
 import * as debounce from 'lodash/debounce'
+import * as moment from 'moment'
 import {About} from './About'
 import {ClassificationBanner} from './ClassificationBanner'
 import {CreateJob, SearchCriteria, createSearchCriteria} from './CreateJob'
@@ -51,6 +52,8 @@ import {
   RECORD_POLLING_INTERVAL,
   SESSION_IDLE_INTERVAL,
   SESSION_IDLE_TIMEOUT,
+  SESSION_IDLE_STORE,
+  SESSION_IDLE_UNITS,
 } from '../config'
 
 import {
@@ -92,9 +95,6 @@ interface State {
   searchCriteria?: SearchCriteria
   searchError?: any
   searchResults?: beachfront.ImageryCatalogPage
-
-  // Inactivity Timeout state
-  idleTime?: number
 }
 
 export const createApplication = (element) => render(
@@ -575,9 +575,7 @@ export class Application extends React.Component<Props, State> {
 
   // Increment the idle time counter every minute.
   private startIdleTimer() {
-    this.setState({
-      idleTime: 0,
-    })
+    localStorage.setItem(SESSION_IDLE_STORE, moment().utc().format())
 
     this.idleInterval = setInterval(this.timerIncrement, SESSION_IDLE_INTERVAL)
     return null
@@ -585,10 +583,9 @@ export class Application extends React.Component<Props, State> {
 
   private timerIncrement() {
     if (this.state.isLoggedIn && !this.state.isSessionExpired) {
-      this.setState({
-        idleTime: this.state.idleTime + 1,
-      })
-      if (this.state.idleTime >= SESSION_IDLE_TIMEOUT) {
+      const lastActivity = moment(localStorage.getItem(SESSION_IDLE_STORE))
+      const timeSinceLast = moment().utc().diff(lastActivity, SESSION_IDLE_UNITS)
+      if (timeSinceLast >= SESSION_IDLE_TIMEOUT) {
         this.logout()
       }
     }
@@ -599,10 +596,13 @@ export class Application extends React.Component<Props, State> {
   }
 
   private resetTimer() {
-    if (this.state.idleTime > 0) {
-      this.setState({
-        idleTime: 0,
-      })
+    // Only bother with resetting the timer if we're logged in
+    if (this.state.isLoggedIn && !this.state.isSessionExpired) {
+      const timeSinceLastActivity = moment().utc().diff(moment(localStorage.getItem(SESSION_IDLE_STORE)), SESSION_IDLE_UNITS)
+      // Only reset the timer if we're more than a minute out of date
+      if (timeSinceLastActivity > 0) {
+        localStorage.setItem(SESSION_IDLE_STORE, moment().utc().format())
+      }
     }
   }
 
@@ -676,8 +676,6 @@ function generateInitialState(): State {
     searchCriteria: createSearchCriteria(),
     searchError: null,
     searchResults: null,
-
-    idleTime: 0,
   }
 
   const deserializedState = deserialize()

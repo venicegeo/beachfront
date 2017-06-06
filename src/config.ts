@@ -27,7 +27,9 @@ export const RECORD_POLLING_INTERVAL = 30 * time.second
 export const UPDATE_WORKER_INTERVAL = 15 * time.minute
 
 export const SESSION_IDLE_TIMEOUT = 15
+export const SESSION_IDLE_UNITS = 'minutes'
 export const SESSION_IDLE_INTERVAL = time.minute
+export const SESSION_IDLE_STORE = 'lastActivity'
 
 export const BASEMAP_TILE_PROVIDERS = [
   {
