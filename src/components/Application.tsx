@@ -217,7 +217,9 @@ export class Application extends React.Component<Props, State> {
                 isSessionLoggedOut: false,
               })
               const client = sessionService.getClient()
-              client.get(`/logout`).then(response => window.location.href = response.data.redirect)
+              client.get(`/logout`).then(response => {
+                window.location.href = response.data
+              })
             }}
           />
         )}
