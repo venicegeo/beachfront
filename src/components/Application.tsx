@@ -218,7 +218,7 @@ export class Application extends React.Component<Props, State> {
             onInitialize={() => {
               sessionStorage.clear()
               const client = sessionService.getClient()
-              client.get(`/logout`)
+              client.get(`/logout`).then(response => window.location.href = response.data.redirect)
             }}
           />
         )}
