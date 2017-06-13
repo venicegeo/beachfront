@@ -184,7 +184,7 @@ export class Application extends React.Component<Props, State> {
           highlightedFeature={this.state.hoveredFeature}
           imagery={this.state.searchResults}
           isSearching={this.state.isSearching}
-	  logout={this.logout}
+          logout={this.logout}
           mode={this.mapMode}
           selectedFeature={this.state.selectedFeature}
           view={this.state.mapView}
@@ -243,7 +243,6 @@ export class Application extends React.Component<Props, State> {
         <Login/>
       )
     }
-    
     switch (this.state.route.pathname) {
       case '/about':
         return (
