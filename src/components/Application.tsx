@@ -172,7 +172,6 @@ export class Application extends React.Component<Props, State> {
     return (
       <div className={styles.root}>
         <ClassificationBanner anchor="top"/>
-        <div className={styles.logout}><a onClick={this.logout}>Sign Out</a></div>
         <Navigation
           activeRoute={this.state.route}
           onClick={this.navigateTo}
@@ -185,6 +184,7 @@ export class Application extends React.Component<Props, State> {
           highlightedFeature={this.state.hoveredFeature}
           imagery={this.state.searchResults}
           isSearching={this.state.isSearching}
+	  logout={this.logout}
           mode={this.mapMode}
           selectedFeature={this.state.selectedFeature}
           view={this.state.mapView}
@@ -238,11 +238,12 @@ export class Application extends React.Component<Props, State> {
   }
 
   renderRoute() {
-    if (!this.state.isLoggedIn) {
+    /*if (!this.state.isLoggedIn) {
       return (
         <Login/>
       )
     }
+    */
     switch (this.state.route.pathname) {
       case '/about':
         return (

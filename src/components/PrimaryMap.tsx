@@ -92,6 +92,7 @@ interface Props {
   onSearchPageChange(page: {count: number, startIndex: number})
   onSelectFeature(feature: beachfront.Job | beachfront.Scene)
   onViewChange(view: MapView)
+  logout()
 }
 
 interface State {
@@ -209,6 +210,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     const basemapNames = BASEMAP_TILE_PROVIDERS.map(b => b.name)
     return (
       <main className={`${styles.root} ${this.props.shrunk ? styles.notHome : styles.home} ${this.state.loadingRefCount > 0 ? styles.isLoading : ''}`} ref="container" tabIndex={1}>
+        <div className={styles.logout}><a onClick={this.props.logout}>Sign Out</a></div>
         <BasemapSelect
           className={styles.basemapSelect}
           index={this.state.basemapIndex}
