@@ -238,12 +238,12 @@ export class Application extends React.Component<Props, State> {
   }
 
   renderRoute() {
-    /*if (!this.state.isLoggedIn) {
+    if (!this.state.isLoggedIn) {
       return (
         <Login/>
       )
     }
-    */
+    
     switch (this.state.route.pathname) {
       case '/about':
         return (
