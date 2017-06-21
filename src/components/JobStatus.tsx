@@ -27,6 +27,7 @@ import {
   STATUS_RUNNING,
   STATUS_ERROR,
   STATUS_TIMED_OUT,
+  STATUS_CANCELLED,
 } from '../constants'
 
 interface Props {
@@ -176,6 +177,7 @@ export class JobStatus extends React.Component<Props, State> {
       case STATUS_RUNNING: return styles.running
       case STATUS_TIMED_OUT: return styles.timedOut
       case STATUS_ERROR: return styles.failed
+      case STATUS_CANCELLED: return styles.cancelled
       default: return ''
     }
   }

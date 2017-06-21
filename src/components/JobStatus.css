@@ -20,7 +20,9 @@
   --padding-size: 15px;
   --bgcolor-active: #f2faff;
   --bgcolor-failed: var(--COLOR_RED);
+  --bgcolor-cancelled: var(--COLOR_GREY);
   --bordercolor-active: hsla(201, 100%, 50%, 0.27);
+  --bordercolor-cancelled: var(--COLOR_GREY);
   --bordercolor-failed: hsla(344, 100%, 34%, 0.46);
   --control-bgcolor: var(--COLOR_CONTROL);
   --control-bgcolor-hover: var(--COLOR_BRAND_DARK);
@@ -67,6 +69,11 @@
 
 .timedOut {
   composes: failed;
+}
+
+.cancelled {
+  background-color: var(--bgcolor-cancelled);
+  border-color: var(--bordercolor-cancelled);
 }
 
 /* =========================================================================
@@ -167,7 +174,7 @@
 }
 
 .metadata dd {
-  flex: 1 200px;
+  flex: 1 calc(70% - 14px);
   word-break: break-all;
 }
 

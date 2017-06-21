@@ -44,6 +44,7 @@ import {
   STATUS_RUNNING,
   STATUS_SUCCESS,
   STATUS_TIMED_OUT,
+  STATUS_CANCELLED,
   TYPE_SCENE,
   TYPE_JOB,
 } from '../constants'
@@ -1057,6 +1058,7 @@ function getColorForStatus(status) {
     case STATUS_TIMED_OUT:
     case STATUS_FAIL:
     case STATUS_ERROR: return 'hsl(349, 100%, 60%)'
+    case STATUS_CANCELLED: return 'hsl(0, 0%, 70%)'
     default: return 'magenta'
   }
 }
