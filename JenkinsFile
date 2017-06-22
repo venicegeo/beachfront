@@ -76,7 +76,9 @@ node {
                   ./node_modules/.bin/typings install
                   npm run build
                   cp nginx.conf dist/
-                  tar -czf ${archiveName} -C ${root} public
+                  ls
+                  exit 1
+                  tar -czf ${archiveName} -C ${root} src
                 """
             }
             sh "mvn -X --settings ~/.m2/settings.xml deploy:deploy-file -Dfile=${archiveName} -DrepositoryId=nexus	-Durl="${env.ARTIFACT_STORAGE_DEPLOY_URL}" -DgroupId="org.venice.piazza" -DgeneratePom=false -Dpackaging=tgz -Dmaven.repo.local="${root}/.m2/repository" -DartifactId=bf-ui -Dversion=${appvers}"
@@ -193,4 +195,3 @@ node {
         }
     }
 }
-
