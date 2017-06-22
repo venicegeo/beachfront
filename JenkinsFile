@@ -12,6 +12,10 @@ node {
         } else {
             git url: "${env.GIT_URL}", branch: "${env.GIT_BRANCH}"
         }
+        sh """
+          npm install
+          ./node_modules/.bin/typings install
+        """
     }
     def appvers = sh(script: """git describe --long --tags --always | sed 's/\\./-/'g""", returnStdout: true)
     appvers = appvers.trim()
@@ -72,8 +76,6 @@ node {
               "NODE_ENV=production"
             ]) {
                 sh """
-                  npm install
-                  ./node_modules/.bin/typings install
                   npm run build
                   cp nginx.conf dist/
                   ls
