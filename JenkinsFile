@@ -14,9 +14,18 @@ node {
         }
         withEnv([
           "PATH+=${nodejs}/bin",
-          "NODE_ENV=production"
+          "NODE_ENV=production",
+          "NPM_CONFIG_CACHE=${root}/.npmcache",
+          "HOME=${WORKSPACE}"
         ]) {
+            if(fileExists("/jslave/.npmrc")) {
+                sh """
+                  cp /jslave/.npmrc .
+                  cat .npmrc
+                """
+            }
             sh """
+              rm npm-shrinkwrap.json
               npm install
               npm run typings:install
             """
