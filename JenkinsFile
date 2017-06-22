@@ -25,7 +25,6 @@ node {
                 """
             }
             sh """
-              rm npm-shrinkwrap.json
               npm install
               npm run typings:install
             """
