@@ -1,6 +1,6 @@
 #!/usr/bin/groovy
 
-node {
+node ('sl62') {
     def root = pwd()
     def mvn = tool 'M3'
     def zapHome = tool 'ZAProxy_v2_5_0'
@@ -12,27 +12,28 @@ node {
         } else {
             git url: "${env.GIT_URL}", branch: "${env.GIT_BRANCH}"
         }
-        withEnv([
-          "PATH+=${nodejs}/bin",
-          "NODE_ENV=production",
-          "NPM_CONFIG_CACHE=${root}/.npmcache",
-          "HOME=${WORKSPACE}"
-        ]) {
-            if(fileExists("/jslave/.npmrc")) {
-                sh """
-                  cp /jslave/.npmrc .
-                  cat .npmrc
-                """
-            }
+        withEnv(["PATH+=${nodejs}/bin", "NPM_CONFIG_CACHE=${root}/.npmcache", "HOME=${WORKSPACE}"]) {
             sh """
               npm install
-              npm run typings:install
+              ./node_modules/.bin/typings install
             """
+            
         }
     }
     def appvers = sh(script: """git describe --long --tags --always | sed 's/\\./-/'g""", returnStdout: true)
     appvers = appvers.trim()
-    def appName = "bf-ui-${appvers}"
+    def appName = "beachfront-${appvers}"
+    stage("Karma Tests") {
+        withEnv(["PATH+=${nodejs}/bin", "NPM_CONFIG_CACHE=${root}/.npmcache", "HOME=${WORKSPACE}"]) {
+          withCredentials([[$class: 'UsernamePasswordBinding', credentialsId: "${env.ARTIFACT_STORAGE_CREDS}", variable: 'NPM_AUTH']]) {
+            def base64encoded = sh(script: "echo -n ${NPM_AUTH} | base64", returnStdout: true).trim()
+            if (fileExists('/jslave/.npmrc')) {
+                sh "cp /jslave/.npmrc ."
+            }
+            sh 'xvfb-run npm run test:ci'
+          }
+        }
+    }
     if(params.SIDECAR_CONFIG_REPO) {
         stage("Security Env Extra Configs") {
             sh "mkdir -p .sec-configs"
@@ -65,39 +66,45 @@ node {
     //     }
     // }
     stage("Sonar") {
+        withEnv([
+          "PATH+=${nodejs}/bin",
+          "NODE_ENV=production",
+          "NPM_CONFIG_CACHE=${root}/.npmcache",
+          "HOME=${WORKSPACE}"
+        ]) {
         sh """
           ./node_modules/.bin/tsc
+          ls
           cp report/coverage/lcov.info report/coverage/lcov.info~
           sed -E 's/\\.tsx?\$/.js/' report/coverage/lcov.info~ > report/coverage/lcov.info
         """
+        }
         withCredentials([
           string(credentialsId: "${env.SONAR_TOKEN}", variable: "USERNAME")
         ]) {
             def sonar = tool 'SonarQube Runner 2.8'
             def projectId = "venicegeo:beachfront:bf-ui"
-            sh "${sonar}/bin/sonar-scanner -Dsonar.javascript.lcov.reportPath=report/coverage/lcov.info -Dsonar.host.url=${env.SONAR_URL} -Dsonar.projectKey=${projectId} -Dsonar.projectName=${projectId} -Dsonar.language=js -Dsonar.sources=public/app -Dsonar.tests=test -Dsonar.projectBaseDir=${root} -Dsonar.projectVersion=${appvers} -Dsonar.login=${USERNAME}"
+            sh "${sonar}/bin/sonar-scanner -Dsonar.javascript.lcov.reportPath=report/coverage/lcov.info -Dsonar.host.url=${env.SONAR_URL} -Dsonar.projectKey=${projectId} -Dsonar.projectName=${projectId} -Dsonar.language=js -Dsonar.sources=src -Dsonar.tests=test -Dsonar.projectBaseDir=${root} -Dsonar.projectVersion=${appvers} -Dsonar.login=${USERNAME}"
         }
     }
     stage("Archive") {
-        def archiveName = "bf-ui.tgz"
-        def getDependencyStatus = sh(script: """mvn --quiet --settings ~/.m2/settings.xml dependency:get -Dmaven.repo.local="${root}/.m2/repository" -DrepositoryId=nexus -DartifactId=bf-ui -Dversion=${appvers} -DgroupId="org.venice.piazza" -Dpackaging=tgz -DremoteRepositories="nexus::default::${env.ARTIFACT_STORAGE_DEPLOY_URL}" >> /dev/null 2>&1""", returnStatus: true)
+        def archiveName = "beachfront.zip"
+        withEnv([
+          "PATH+=${nodejs}/bin",
+          "NODE_ENV=production"
+        ]) {
+            sh """
+              npm run build
+              cp nginx.conf dist/
+              zip -r ${archiveName} .
+            """
+        }
+        def getDependencyStatus = sh(script: """mvn --quiet --settings ~/.m2/settings.xml dependency:get -Dmaven.repo.local="${root}/.m2/repository" -DrepositoryId=nexus -DartifactId=beachfront -Dversion=${appvers} -DgroupId="org.venice.beachfront" -Dpackaging=zip -DremoteRepositories="nexus::default::${env.ARTIFACT_STORAGE_DEPLOY_URL}" >> /dev/null 2>&1""", returnStatus: true)
         if(getDependencyStatus == 0) {
             echo "Artifact version ${appvers} exists in Nexus, nothing to do"
         } else {
-            withEnv([
-              "PATH+=${nodejs}/bin",
-              "NODE_ENV=production"
-            ]) {
-                sh """
-                  npm run build
-                  cp nginx.conf dist/
-                  ls
-                  exit 1
-                  tar -czf ${archiveName} -C ${root} src
-                """
-            }
             sh """
-              mvn -X --settings ~/.m2/settings.xml deploy:deploy-file -Dfile=${archiveName} -DrepositoryId=nexus	-Durl="${env.ARTIFACT_STORAGE_DEPLOY_URL}" -DgroupId="org.venice.piazza" -DgeneratePom=false -Dpackaging=tgz -Dmaven.repo.local="${root}/.m2/repository" -DartifactId=bf-ui -Dversion=${appvers}
+              mvn -X --settings ~/.m2/settings.xml deploy:deploy-file -Dfile=${archiveName} -DrepositoryId=nexus  -Durl="${env.ARTIFACT_STORAGE_DEPLOY_URL}" -DgroupId="org.venice.beachfront" -DgeneratePom=false -Dpackaging=zip -Dmaven.repo.local="${root}/.m2/repository" -DartifactId=beachfront -Dversion=${appvers}
             """
         }
     }
@@ -143,8 +150,8 @@ node {
                   cf auth ${CFUSER} ${CFPASS}
                   cf target -o ${env.PCF_ORG} -s ${env.PHASE_ONE_PCF_SPACE}
                 """
-                def legacyAppNames = sh(script: """cf routes | grep \"bf-ui \" | awk '{print \$4}'""", returnStdout: true)
-                sh "cf map-route ${appName} ${env.PHASE_ONE_PCF_DOMAIN} --hostname bf-ui"
+                def legacyAppNames = sh(script: """cf routes | grep \"beachfront \" | awk '{print \$4}'""", returnStdout: true)
+                sh "cf map-route ${appName} ${env.PHASE_ONE_PCF_DOMAIN} --hostname beachfront"
                 // Remove legacy applications
                 for (Object legacyApp : legacyAppNames.trim().tokenize(',')) {
                     def legacyAppName = legacyApp.toString().trim()
@@ -198,8 +205,8 @@ node {
                   cf auth ${CFUSER} ${CFPASS}
                   cf target -o ${env.PCF_ORG} -s ${env.PHASE_TWO_PCF_SPACE}
                 """
-                def legacyAppNames = sh(script: """cf routes | grep \"bf-ui \" | awk '{print \$4}'""", returnStdout: true)
-                sh "cf map-route ${appName} ${env.PHASE_TWO_PCF_DOMAIN} --hostname bf-ui"
+                def legacyAppNames = sh(script: """cf routes | grep \"beachfront \" | awk '{print \$4}'""", returnStdout: true)
+                sh "cf map-route ${appName} ${env.PHASE_TWO_PCF_DOMAIN} --hostname beachfront"
                 // Remove legacy applications
                 for (Object legacyApp : legacyAppNames.trim().tokenize(',')) {
                     def legacyAppName = legacyApp.toString().trim()
