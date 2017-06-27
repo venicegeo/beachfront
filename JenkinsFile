@@ -43,28 +43,6 @@ node ('sl62') {
             }
         }
     }
-    // stage("Dependency Check") {
-    //         withCredentials([
-    //           [$class: 'StringBinding', credentialsId: "${env.THREADFIX_API_KEY}", variable: "THREADFIX_KEY"]
-    //         ]) {
-    //             sh """
-    //               /jslave/dependency-check/dependency-check/bin/dependency-check.sh --version
-    //               /jslave/dependency-check/dependency-check/bin/dependency-check.sh --project "bf-ui" --scan "." --format "XML" --enableExperimental --disableBundleAudit
-    //               /bin/curl -v --insecure -H 'Accept: application/json' -X POST --form file=@dependency-check-report.xml ${env.THREADFIX_URL}/rest/applications/${THREADFIX_ID}/upload?apiKey=${THREADFIX_KEY}
-    //             """
-    //         }
-    //     }
-    // stage("Fortify Scans") {
-    //     withCredentials([
-    //       [$class: 'StringBinding', credentialsId: "${env.THREADFIX_API_KEY}", variable: "THREADFIX_KEY"]
-    //     ]) {
-    //         sh """
-    //           /opt/hp_fortify_sca/bin/sourceanalyzer -b ${env.BUILD_NUMBER} '**/*.js' -exclude 'test/*.js' -exclude package.json -exclude 'node_modules/**/*.js' -exclude 'public/js/**/*.js'
-    //           /opt/hp_fortify_sca/bin/sourceanalyzer -b ${env.BUILD_NUMBER}  -scan -Xmx1G -f fortifyResults-${env.BUILD_NUMBER}.fpr
-    //           /bin/curl -v --insecure -H 'Accept: application/json' -X POST --form file=@fortifyResults-${env.BUILD_NUMBER}.fpr ${env.THREADFIX_URL}/rest/applications/${THREADFIX_ID}/upload?apiKey=${THREADFIX_KEY}
-    //         """
-    //     }
-    // }
     stage("Sonar") {
         withEnv([
           "PATH+=${nodejs}/bin",
@@ -85,6 +63,28 @@ node ('sl62') {
             def sonar = tool 'SonarQube Runner 2.8'
             def projectId = "venicegeo:beachfront:bf-ui"
             sh "${sonar}/bin/sonar-scanner -Dsonar.javascript.lcov.reportPath=report/coverage/lcov.info -Dsonar.host.url=${env.SONAR_URL} -Dsonar.projectKey=${projectId} -Dsonar.projectName=${projectId} -Dsonar.language=js -Dsonar.sources=src -Dsonar.tests=test -Dsonar.projectBaseDir=${root} -Dsonar.projectVersion=${appvers} -Dsonar.login=${USERNAME}"
+        }
+    }
+    stage("Dependency Check") {
+        withCredentials([
+          [$class: 'StringBinding', credentialsId: "${env.THREADFIX_API_KEY}", variable: "THREADFIX_KEY"]
+        ]) {
+            sh """
+              /jslave/dependency-check/dependency-check/bin/dependency-check.sh --version
+              /jslave/dependency-check/dependency-check/bin/dependency-check.sh --project "bf-ui" --scan "." --format "XML" --enableExperimental --disableBundleAudit
+              /bin/curl -v --insecure -H 'Accept: application/json' -X POST --form file=@dependency-check-report.xml ${env.THREADFIX_URL}/rest/applications/${THREADFIX_ID}/upload?apiKey=${THREADFIX_KEY}
+            """
+        }
+    }
+    stage("Fortify Scans") {
+        withCredentials([
+          [$class: 'StringBinding', credentialsId: "${env.THREADFIX_API_KEY}", variable: "THREADFIX_KEY"]
+        ]) {
+            sh """
+              /opt/hp_fortify_sca/bin/sourceanalyzer -b ${env.BUILD_NUMBER} '**/*.js' -exclude 'test/*.js' -exclude package.json -exclude 'node_modules/**/*.js' -exclude 'public/js/**/*.js'
+              /opt/hp_fortify_sca/bin/sourceanalyzer -b ${env.BUILD_NUMBER}  -scan -Xmx1G -f fortifyResults-${env.BUILD_NUMBER}.fpr
+              /bin/curl -v --insecure -H 'Accept: application/json' -X POST --form file=@fortifyResults-${env.BUILD_NUMBER}.fpr ${env.THREADFIX_URL}/rest/applications/${THREADFIX_ID}/upload?apiKey=${THREADFIX_KEY}
+            """
         }
     }
     stage("Archive") {
@@ -165,56 +165,104 @@ node ('sl62') {
             }
         }
     }
-    stage("Phase Two Deploy") {
-        if(!fileExists('.cf')) {
-            sh "mkdir -p .cf"
-        }
-        withEnv([
-          "CF_HOME=.cf"
-        ]) {
+    if(!params.SKIP_INTEGRATION_TESTS) {
+        stage("Phase One Integration Tests") {
+                        if(!fileExists("integration-tests")) {
+                sh "mkdir -p integration-tests"
+            }
             withCredentials([
-              [$class: 'UsernamePasswordMultiBinding', credentialsId: "${env.PCF_CREDS}", usernameVariable: "CFUSER", passwordVariable: "CFPASS"]
+              file(credentialsId: "${POSTMAN_SECRET_FILE}", variable: "POSTMAN_FILE")
             ]) {
-                sh """
-                  cf api ${env.PCF_API_ENDPOINT}
-                  cf auth ${CFUSER} ${CFPASS}
-                  cf target -o ${env.PCF_ORG} -s ${env.PHASE_TWO_PCF_SPACE}
-                  cf push ${appName} -f manifest.jenkins.yml --hostname ${appName} -d ${env.PHASE_TWO_PCF_DOMAIN} --no-start
-                  cf set-env ${appName} SPACE ${env.PHASE_TWO_PCF_SPACE}
-                  cf set-env ${appName} DOMAIN ${env.PHASE_TWO_PCF_SPACE}
-                  cf start ${appName}
-                """
+                withEnv([
+                  "PATH+=${nodejs}/bin",
+                  "NPM_CONFIG_CACHE=${root}/.npmcache",
+                  "HOME=${WORKSPACE}"
+                ]) {
+                    dir ("integration-tests") {
+                        if(env.GITLAB_CREDS) {
+                            git url: "${env.INTEGRATION_GIT_URL}", branch: "${env.INTEGRATION_GIT_BRANCH}", credentialsId: "${env.GITLAB_CREDS}"
+                        } else {
+                            git url: "${env.INTEGRATION_GIT_URL}", branch: "${env.INTEGRATION_GIT_BRANCH}"
+                        }
+                        sh """
+                          mkdir -p ${root}/.npmcache
+                          npm install newman@2
+                        """
+                        sh "sh ci/beachfront_integration_tests.sh"
+                    }
+                }
             }
         }
-        withCredentials([
-          [$class: 'StringBinding', credentialsId: "${env.THREADFIX_API_KEY}", variable: "THREADFIX_KEY"]
-        ]) {
-            sh """
-              mkdir -p ${root}/zap-out
-              ${zapHome}/zap.sh -cmd -quickout ${root}/zap-out/zap.xml -quickurl https://${appName}.${env.PHASE_TWO_PCF_SPACE}
-              cat ${root}/zap-out/zap.xml
-              /bin/curl -v --insecure -H 'Accept: application/json' -X POST --form file=@${root}/zap-out/zap.xml ${env.THREADFIX_URL}/rest/applications/${THREADFIX_ID}/upload?apiKey=${THREADFIX_KEY}
-            """
-        }
-        withEnv([
-          "CF_HOME=.cf"
-        ]) {
+    }
+    if(params.DEPLOY_PHASE_TWO) {
+        stage("Phase Two Deploy") {
+            if(!fileExists('.cf')) {
+                sh "mkdir -p .cf"
+            }
+            withEnv([
+              "CF_HOME=.cf"
+            ]) {
+                withCredentials([
+                  [$class: 'UsernamePasswordMultiBinding', credentialsId: "${env.PCF_CREDS}", usernameVariable: "CFUSER", passwordVariable: "CFPASS"]
+                ]) {
+                    sh """
+                      cf api ${env.PCF_API_ENDPOINT}
+                      cf auth ${CFUSER} ${CFPASS}
+                      cf target -o ${env.PCF_ORG} -s ${env.PHASE_TWO_PCF_SPACE}
+                      cf push ${appName} -f manifest.jenkins.yml --hostname ${appName} -d ${env.PHASE_TWO_PCF_DOMAIN} --no-start
+                      cf set-env ${appName} SPACE ${env.PHASE_TWO_PCF_SPACE}
+                      cf set-env ${appName} DOMAIN ${env.PHASE_TWO_PCF_SPACE}
+                      cf start ${appName}
+                    """
+                }
+            }
             withCredentials([
-              [$class: 'UsernamePasswordMultiBinding', credentialsId: "${env.PCF_CREDS}", usernameVariable: "CFUSER", passwordVariable: "CFPASS"]
+              [$class: 'StringBinding', credentialsId: "${env.THREADFIX_API_KEY}", variable: "THREADFIX_KEY"]
             ]) {
                 sh """
-                  cf api ${env.PCF_API_ENDPOINT}
-                  cf auth ${CFUSER} ${CFPASS}
-                  cf target -o ${env.PCF_ORG} -s ${env.PHASE_TWO_PCF_SPACE}
+                  mkdir -p ${root}/zap-out
+                  ${zapHome}/zap.sh -cmd -quickout ${root}/zap-out/zap.xml -quickurl https://${appName}.${env.PHASE_TWO_PCF_SPACE}
+                  cat ${root}/zap-out/zap.xml
+                  /bin/curl -v --insecure -H 'Accept: application/json' -X POST --form file=@${root}/zap-out/zap.xml ${env.THREADFIX_URL}/rest/applications/${THREADFIX_ID}/upload?apiKey=${THREADFIX_KEY}
                 """
-                def legacyAppNames = sh(script: """cf routes | grep \"beachfront \" | awk '{print \$4}'""", returnStdout: true)
-                sh "cf map-route ${appName} ${env.PHASE_TWO_PCF_DOMAIN} --hostname beachfront"
-                // Remove legacy applications
-                for (Object legacyApp : legacyAppNames.trim().tokenize(',')) {
-                    def legacyAppName = legacyApp.toString().trim()
-                    if(legacyAppName != appName) {
-                        sh "cf unmap-route ${legacyAppName} ${env.PHASE_TWO_PCF_DOMAIN} --hostname ${legacyAppName}"
-                        sh "cf delete -f ${legacyAppName}"
+            }
+            withEnv([
+              "CF_HOME=.cf"
+            ]) {
+                withCredentials([
+                  [$class: 'UsernamePasswordMultiBinding', credentialsId: "${env.PCF_CREDS}", usernameVariable: "CFUSER", passwordVariable: "CFPASS"]
+                ]) {
+                    sh """
+                      cf api ${env.PCF_API_ENDPOINT}
+                      cf auth ${CFUSER} ${CFPASS}
+                      cf target -o ${env.PCF_ORG} -s ${env.PHASE_TWO_PCF_SPACE}
+                    """
+                    def legacyAppNames = sh(script: """cf routes | grep \"beachfront \" | awk '{print \$4}'""", returnStdout: true)
+                    sh "cf map-route ${appName} ${env.PHASE_TWO_PCF_DOMAIN} --hostname beachfront"
+                    // Remove legacy applications
+                    for (Object legacyApp : legacyAppNames.trim().tokenize(',')) {
+                        def legacyAppName = legacyApp.toString().trim()
+                        if(legacyAppName != appName) {
+                            sh "cf unmap-route ${legacyAppName} ${env.PHASE_TWO_PCF_DOMAIN} --hostname ${legacyAppName}"
+                            sh "cf delete -f ${legacyAppName}"
+                        }
+                    }
+                }
+            }
+        }
+    }
+    if(params.DEPLOY_PHASE_TWO && !params.SKIP_INTEGRATION_TESTS) {
+        stage("Phase Two Integration Tests") {
+            withCredentials([
+              file(credentialsId: "${POSTMAN_SECRET_FILE}", variable: "POSTMAN_FILE")
+            ]) {
+                withEnv([
+                  "PATH+=${root}/integration-tests/node_modules/newman/bin:${nodejs}/bin",
+                  "PCF_SPACE=${env.PHASE_TWO_PCF_SPACE}",
+                  "HOME=${WORKSPACE}"
+                ]) {
+                    dir ("integration-tests") {
+                        sh "sh ci/beachfront_integration_tests_stage.sh"
                     }
                 }
             }
