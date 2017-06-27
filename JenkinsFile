@@ -264,8 +264,6 @@ node ('sl62') {
                 //  "HOME=${WORKSPACE}"
                 //]) {
                     dir ("integration-tests") {
-                        sh "echo ${bf_username}"
-                        sh "echo ${bf_password}"
                         sh "sh ci/beachfront_ua_tests_stage.sh"
                     }
                 //}
