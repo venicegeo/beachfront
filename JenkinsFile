@@ -167,7 +167,7 @@ node ('sl62') {
     }
     if(!params.SKIP_INTEGRATION_TESTS) {
         stage("Phase One Integration Tests") {
-                        if(!fileExists("integration-tests")) {
+            if(!fileExists("integration-tests")) {
                 sh "mkdir -p integration-tests"
             }
             withCredentials([
@@ -179,20 +179,19 @@ node ('sl62') {
                 //  "PCF_SPACE=${env.PHASE_TWO_PCF_SPACE}",
                 //  "HOME=${WORKSPACE}"
                 //]) {
-                    dir ("integration-tests") {
-                        if(env.GITLAB_CREDS) {
-                            git url: "${env.INTEGRATION_GIT_URL}", branch: "${env.INTEGRATION_GIT_BRANCH}", credentialsId: "${env.GITLAB_CREDS}"
-                        } else {
-                            git url: "${env.INTEGRATION_GIT_URL}", branch: "${env.INTEGRATION_GIT_BRANCH}"
-                        }
-                        sh """
-                          mkdir -p ${root}/.npmcache
-                          npm install newman@2
-                        """
-                        sh "sh ci/beachfront_ua_tests_int.sh"
-                    }
+				dir ("integration-tests") {
+					if(env.GITLAB_CREDS) {
+						git url: "${env.INTEGRATION_GIT_URL}", branch: "${env.INTEGRATION_GIT_BRANCH}", credentialsId: "${env.GITLAB_CREDS}"
+					} else {
+						git url: "${env.INTEGRATION_GIT_URL}", branch: "${env.INTEGRATION_GIT_BRANCH}"
+					}
+					sh """
+					  mkdir -p ${root}/.npmcache
+					  npm install newman@2
+					"""
+					sh "sh ci/beachfront_ua_tests_int.sh"
+				}
                     //}
-                }
             }
         }
     }
