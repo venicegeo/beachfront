@@ -189,7 +189,7 @@ node ('sl62') {
 						//  mkdir -p ${root}/.npmcache
 						//  npm install newman@2
 						//"""
-						sh "ci/beachfront_ua_tests_int.sh"
+						sh "/bin/bash ci/beachfront_ua_tests_int.sh"
 					}
                 }
             }
@@ -263,7 +263,7 @@ node ('sl62') {
 				//  "HOME=${WORKSPACE}"
 				]) {
 					dir ("integration-tests") {
-						sh "ci/beachfront_ua_tests_stage.sh"
+						sh "/bin/bash ci/beachfront_ua_tests_stage.sh"
 					}
 				}
 		    }
