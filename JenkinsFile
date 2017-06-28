@@ -174,24 +174,24 @@ node ('sl62') {
                 [$class: 'StringBinding', credentialsId: "${env.BF_USERNAME}", variable: "bf_username"],
                 [$class: 'StringBinding', credentialsId: "${env.BF_PASSWORD}", variable: "bf_password"]
             ]) {
-                //withEnv([
+                withEnv([
                 //  "PATH+=${root}/integration-tests/node_modules/newman/bin:${nodejs}/bin",
-                //  "PCF_SPACE=${env.PHASE_TWO_PCF_SPACE}",
+                  "PCF_SPACE=${env.PHASE_ONE_PCF_SPACE}",
                 //  "HOME=${WORKSPACE}"
-                //]) {
-				dir ("integration-tests") {
-					if(env.GITLAB_CREDS) {
-						git url: "${env.INTEGRATION_GIT_URL}", branch: "${env.INTEGRATION_GIT_BRANCH}", credentialsId: "${env.GITLAB_CREDS}"
-					} else {
-						git url: "${env.INTEGRATION_GIT_URL}", branch: "${env.INTEGRATION_GIT_BRANCH}"
+                ]) {
+					dir ("integration-tests") {
+						if(env.GITLAB_CREDS) {
+							git url: "${env.INTEGRATION_GIT_URL}", branch: "${env.INTEGRATION_GIT_BRANCH}", credentialsId: "${env.GITLAB_CREDS}"
+						} else {
+							git url: "${env.INTEGRATION_GIT_URL}", branch: "${env.INTEGRATION_GIT_BRANCH}"
+						}
+						//sh """
+						//  mkdir -p ${root}/.npmcache
+						//  npm install newman@2
+						//"""
+						sh "ci/beachfront_ua_tests_int.sh"
 					}
-					//sh """
-					//  mkdir -p ${root}/.npmcache
-					//  npm install newman@2
-					//"""
-					sh "ci/beachfront_ua_tests_int.sh"
-				}
-                    //}
+                }
             }
         }
     }
@@ -257,15 +257,15 @@ node ('sl62') {
 			[$class: 'StringBinding', credentialsId: "${env.BF_USERNAME}", variable: "bf_username"],
 			[$class: 'StringBinding', credentialsId: "${env.BF_PASSWORD}", variable: "bf_password"]
 		    ]) {
-			//withEnv([
-			//  "PATH+=${root}/integration-tests/node_modules/newman/bin:${nodejs}/bin",
-			//  "PCF_SPACE=${env.PHASE_TWO_PCF_SPACE}",
-			//  "HOME=${WORKSPACE}"
-			//]) {
-			    dir ("integration-tests") {
-				sh "ci/beachfront_ua_tests_stage.sh"
-			    }
-			//}
+				withEnv([
+				//  "PATH+=${root}/integration-tests/node_modules/newman/bin:${nodejs}/bin",
+				  "PCF_SPACE=${env.PHASE_TWO_PCF_SPACE}"
+				//  "HOME=${WORKSPACE}"
+				]) {
+					dir ("integration-tests") {
+						sh "ci/beachfront_ua_tests_stage.sh"
+					}
+				}
 		    }
 		}
     	}
