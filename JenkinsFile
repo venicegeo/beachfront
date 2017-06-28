@@ -185,10 +185,10 @@ node ('sl62') {
 					} else {
 						git url: "${env.INTEGRATION_GIT_URL}", branch: "${env.INTEGRATION_GIT_BRANCH}"
 					}
-					sh """
-					  mkdir -p ${root}/.npmcache
-					  npm install newman@2
-					"""
+					//sh """
+					//  mkdir -p ${root}/.npmcache
+					//  npm install newman@2
+					//"""
 					sh "sh ci/beachfront_ua_tests_int.sh"
 				}
                     //}
