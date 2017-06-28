@@ -251,23 +251,23 @@ node ('sl62') {
                 }
             }
         }
-    }
-    if(params.DEPLOY_PHASE_TWO && !params.SKIP_INTEGRATION_TESTS) {
-        stage("Phase Two Integration Tests") {
-            withCredentials([
-                [$class: 'StringBinding', credentialsId: "${env.BF_USERNAME}", variable: "bf_username"],
-                [$class: 'StringBinding', credentialsId: "${env.BF_PASSWORD}", variable: "bf_password"]
-            ]) {
-                //withEnv([
-                //  "PATH+=${root}/integration-tests/node_modules/newman/bin:${nodejs}/bin",
-                //  "PCF_SPACE=${env.PHASE_TWO_PCF_SPACE}",
-                //  "HOME=${WORKSPACE}"
-                //]) {
-                    dir ("integration-tests") {
-                        sh "sh ci/beachfront_ua_tests_stage.sh"
-                    }
-                //}
-            }
-        }
+	if(!params.SKIP_INTEGRATION_TESTS) {
+		stage("Phase Two Integration Tests") {
+		    withCredentials([
+			[$class: 'StringBinding', credentialsId: "${env.BF_USERNAME}", variable: "bf_username"],
+			[$class: 'StringBinding', credentialsId: "${env.BF_PASSWORD}", variable: "bf_password"]
+		    ]) {
+			//withEnv([
+			//  "PATH+=${root}/integration-tests/node_modules/newman/bin:${nodejs}/bin",
+			//  "PCF_SPACE=${env.PHASE_TWO_PCF_SPACE}",
+			//  "HOME=${WORKSPACE}"
+			//]) {
+			    dir ("integration-tests") {
+				sh "sh ci/beachfront_ua_tests_stage.sh"
+			    }
+			//}
+		    }
+		}
+    	}
     }
 }
