@@ -171,12 +171,18 @@ node ('sl62') {
                 sh "mkdir -p integration-tests"
             }
             withCredentials([
-                [$class: 'StringBinding', credentialsId: "${env.BF_USERNAME}", variable: "bf_username"],
-                [$class: 'StringBinding', credentialsId: "${env.BF_PASSWORD}", variable: "bf_password"]
+                [$class: 'StringBinding', credentialsId: "${env.BF_USERNAME}", variable: "BFUSER"],
+                [$class: 'StringBinding', credentialsId: "${env.BF_PASSWORD}", variable: "BFPASS"],
+                [$class: 'UsernamePasswordMultiBinding', credentialsId: "${env.SAUCELAB_ACCESS}", usernameVariable: "SUSER", passwordVariable: "SPASS"]
+
             ]) {
                 withEnv([
                 //  "PATH+=${root}/integration-tests/node_modules/newman/bin:${nodejs}/bin",
                   "PCF_SPACE=${env.PHASE_ONE_PCF_SPACE}",
+                  "bf_username=${BFUSER}",
+                  "bf_password=${BFPASS}",
+                  "sauce_user=${SUSER}",
+                  "sauce_key=${SPASS}"
                 //  "HOME=${WORKSPACE}"
                 ]) {
 					dir ("integration-tests") {
@@ -254,14 +260,20 @@ node ('sl62') {
 	if(!params.SKIP_INTEGRATION_TESTS) {
 		stage("Phase Two Integration Tests") {
 		    withCredentials([
-			[$class: 'StringBinding', credentialsId: "${env.BF_USERNAME}", variable: "bf_username"],
-			[$class: 'StringBinding', credentialsId: "${env.BF_PASSWORD}", variable: "bf_password"]
-		    ]) {
-				withEnv([
-				//  "PATH+=${root}/integration-tests/node_modules/newman/bin:${nodejs}/bin",
-				  "PCF_SPACE=${env.PHASE_TWO_PCF_SPACE}"
-				//  "HOME=${WORKSPACE}"
-				]) {
+                [$class: 'StringBinding', credentialsId: "${env.BF_USERNAME}", variable: "BFUSER"],
+                [$class: 'StringBinding', credentialsId: "${env.BF_PASSWORD}", variable: "BFPASS"],
+                [$class: 'UsernamePasswordMultiBinding', credentialsId: "${env.SAUCELAB_ACCESS}", usernameVariable: "SUSER", passwordVariable: "SPASS"]
+
+            ]) {
+                withEnv([
+                //  "PATH+=${root}/integration-tests/node_modules/newman/bin:${nodejs}/bin",
+                  "PCF_SPACE=${env.PHASE_ONE_PCF_SPACE}",
+                  "bf_username=${BFUSER}",
+                  "bf_password=${BFPASS}",
+                  "sauce_user=${SUSER}",
+                  "sauce_key=${SPASS}"
+                //  "HOME=${WORKSPACE}"
+                ]) {
 					dir ("integration-tests") {
 						sh "/bin/bash ci/beachfront_ua_tests_stage.sh"
 					}
