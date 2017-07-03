@@ -127,8 +127,14 @@ node ('sl62') {
                   cf push ${appName} -f manifest.jenkins.yml --hostname ${appName} -d ${env.PHASE_ONE_PCF_DOMAIN} --no-start
                   cf set-env ${appName} SPACE ${env.PHASE_ONE_PCF_SPACE}
                   cf set-env ${appName} DOMAIN ${env.PHASE_ONE_PCF_DOMAIN}
-                  cf start ${appName}
                 """
+                try {
+                  sh "cf start ${appName}"
+                } catch (Exception e) {
+                  //sh "cf logs --recent ${appName}"
+                  sh "cf delete ${appName} -f"
+                  error("Error during application start. Deleting ${appName} and failing the build.")
+                }
             }
         }
         withCredentials([
@@ -209,8 +215,14 @@ node ('sl62') {
                       cf push ${appName} -f manifest.jenkins.yml --hostname ${appName} -d ${env.PHASE_TWO_PCF_DOMAIN} --no-start
                       cf set-env ${appName} SPACE ${env.PHASE_TWO_PCF_SPACE}
                       cf set-env ${appName} DOMAIN ${env.PHASE_TWO_PCF_SPACE}
-                      cf start ${appName}
                     """
+                    try {
+                      sh "cf start ${appName}"
+                    } catch (Exception e) {
+                      //sh "cf logs --recent ${appName}"
+                      sh "cf delete ${appName} -f"
+                      error("Error during application start. Deleting ${appName} and failing the build.")
+                    }
                 }
             }
             withCredentials([
