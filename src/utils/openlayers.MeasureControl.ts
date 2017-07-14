@@ -17,7 +17,8 @@
 import * as ol from 'openlayers'
 
 const WGS84_SPHERE = new ol.Sphere(6378137)
-const PRECISION = 1000
+const PRECISION_KM = 10000
+const PRECISION_M = 10
 const KEY_ESCAPE = 27
 
 export class MeasureControl extends ol.control.Control {
@@ -102,6 +103,7 @@ export class MeasureControl extends ol.control.Control {
 
   private _recalculate() {
     const isKilometers = this._dialog.querySelector('select').value === 'kilometers'
+    const PRECISION = isKilometers ? PRECISION_KM : PRECISION_M
     const distance = isKilometers ? this._distanceInMeters / 1000 : this._distanceInMeters
     this._dialog.querySelector('.measureControl__distance').textContent = (Math.round(distance * PRECISION) / PRECISION).toString()
   }
