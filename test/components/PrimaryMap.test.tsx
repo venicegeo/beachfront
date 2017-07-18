@@ -51,6 +51,7 @@ describe('<PrimaryMap/>', () => {
       onSearchPageChange:  sinon.stub(),
       onSelectFeature:     sinon.stub(),
       onViewChange:        sinon.stub(),
+      logout:              sinon.stub(),
     }
   })
 
@@ -73,6 +74,7 @@ describe('<PrimaryMap/>', () => {
         onSearchPageChange={_props.onSearchPageChange}
         onSelectFeature={_props.onSelectFeature}
         onViewChange={_props.onViewChange}
+        logout={_props.logout}
       />,
     )
     assert.equal(wrapper.find('.PrimaryMap-root').length, 1)
@@ -98,6 +100,7 @@ describe('<PrimaryMap/>', () => {
         onSearchPageChange={_props.onSearchPageChange}
         onSelectFeature={_props.onSelectFeature}
         onViewChange={_props.onViewChange}
+        logout={_props.logout}
       />,
     )
     assert.instanceOf((wrapper.instance() as any as Internals).map, ol.Map)
@@ -123,6 +126,7 @@ describe('<PrimaryMap/>', () => {
         onSearchPageChange={_props.onSearchPageChange}
         onSelectFeature={_props.onSelectFeature}
         onViewChange={_props.onViewChange}
+        logout={_props.logout}
       />,
     )
 
@@ -203,6 +207,7 @@ describe('<PrimaryMap/>', () => {
         onSearchPageChange={_props.onSearchPageChange}
         onSelectFeature={_props.onSelectFeature}
         onViewChange={_props.onViewChange}
+        logout={_props.logout}
       />,
     )
 
@@ -257,6 +262,7 @@ describe('<PrimaryMap/>', () => {
         onSearchPageChange={_props.onSearchPageChange}
         onSelectFeature={_props.onSelectFeature}
         onViewChange={_props.onViewChange}
+        logout={_props.logout}
       />,
     )
 
@@ -287,6 +293,7 @@ describe('<PrimaryMap/>', () => {
         onSearchPageChange={_props.onSearchPageChange}
         onSelectFeature={_props.onSelectFeature}
         onViewChange={_props.onViewChange}
+        logout={_props.logout}
       />,
     )
 
