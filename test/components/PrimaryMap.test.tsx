@@ -134,7 +134,7 @@ describe('<PrimaryMap/>', () => {
       const wrapper = getComponent({ basemapIndex: 0, center: [0, 0], zoom: 5.5 })
       return awaitMap(() => {
         const view = (wrapper.instance() as any as Internals).map.getView()
-        assert.deepEqual(ol.proj.toLonLat(view.getCenter()), [0, 0])
+        assert.deepEqual(ol.proj.toLonLat(view.getCenter(), view.getProjection().getCode()), [0, 0])
       })
     })
 
