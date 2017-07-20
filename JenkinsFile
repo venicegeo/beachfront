@@ -1,6 +1,6 @@
 #!/usr/bin/groovy
 
-node ('xvfb') {
+node ('sl62') {
     def root = pwd()
     def mvn = tool 'M3'
     def zapHome = tool 'ZAProxy_v2_5_0'
