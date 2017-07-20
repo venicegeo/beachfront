@@ -23,7 +23,7 @@ node ('xvfb') {
     def appvers = sh(script: """git describe --long --tags --always | sed 's/\\./-/'g""", returnStdout: true)
     appvers = appvers.trim()
     def appName = "beachfront-${appvers}"
-    if(false){
+    if(true){
     stage("Karma Tests") {
         withEnv(["PATH+=${nodejs}/bin", "NPM_CONFIG_CACHE=${root}/.npmcache", "HOME=${WORKSPACE}"]) {
           withCredentials([[$class: 'UsernamePasswordBinding', credentialsId: "${env.ARTIFACT_STORAGE_CREDS}", variable: 'NPM_AUTH']]) {
