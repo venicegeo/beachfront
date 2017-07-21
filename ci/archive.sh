@@ -1,5 +1,7 @@
 #!/bin/bash -ex
 
+exit 1
+
 pushd `dirname $0`/.. > /dev/null
 root=$(pwd -P)
 popd > /dev/null
