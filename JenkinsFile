@@ -12,7 +12,12 @@ node {
         } else {
             git url: "${env.GIT_URL}", branch: "${env.GIT_BRANCH}"
         }
-        withEnv(["PATH+=${nodejs}/bin", "NPM_CONFIG_CACHE=${root}/.npmcache", "HOME=${WORKSPACE}"]) {
+	withCredentials([[$class: 'UsernamePasswordBinding', credentialsId: "${env.ARTIFACT_STORAGE_CREDS}", variable: 'NPM_AUTH']]) {
+            def base64encoded = sh(script: "echo -n ${NPM_AUTH} | base64", returnStdout: true).trim()
+	    sh 'sed -i "s*SED_AUTH*$base64encoded*g" .npmrc'
+	    sh "cat .npmrc"
+	}
+		withEnv(["PATH+=${nodejs}/bin", "NPM_CONFIG_CACHE=${root}/.npmcache", "HOME=${WORKSPACE}"]) {
             sh """
               npm install
               ./node_modules/.bin/typings install
@@ -26,13 +31,13 @@ node {
     if(true){
     stage("Karma Tests") {
         withEnv(["PATH+=${nodejs}/bin", "NPM_CONFIG_CACHE=${root}/.npmcache", "HOME=${WORKSPACE}"]) {
-          withCredentials([[$class: 'UsernamePasswordBinding', credentialsId: "${env.ARTIFACT_STORAGE_CREDS}", variable: 'NPM_AUTH']]) {
-            def base64encoded = sh(script: "echo -n ${NPM_AUTH} | base64", returnStdout: true).trim()
-            if (fileExists('/jslave/.npmrc')) {
-                sh "cp /jslave/.npmrc ."
-            }
+          //withCredentials([[$class: 'UsernamePasswordBinding', credentialsId: "${env.ARTIFACT_STORAGE_CREDS}", variable: 'NPM_AUTH']]) {
+           // def base64encoded = sh(script: "echo -n ${NPM_AUTH} | base64", returnStdout: true).trim()
+           // if (fileExists('/jslave/.npmrc')) {
+           //     sh "cp /jslave/.npmrc ."
+           // }
             sh 'xvfb-run npm run test:ci'
-          }
+          //}
         }
     }}
     if(params.SIDECAR_CONFIG_REPO) {
