@@ -13,8 +13,10 @@ node {
             git url: "${env.GIT_URL}", branch: "${env.GIT_BRANCH}"
         }
 	withCredentials([[$class: 'UsernamePasswordBinding', credentialsId: "${env.ARTIFACT_STORAGE_CREDS}", variable: 'NPM_AUTH']]) {
-            def base64encoded = sh(script: "echo -n ${NPM_AUTH} | base64", returnStdout: true).trim()
-		sh 'echo ${base64encoded}'
+            //def npm_base = sh(script: "echo -n ${NPM_AUTH} | base64", returnStdout: true).trim()
+		def npm_base = sh(script: "echo 123456 | base64", returnStdout: true).trim()
+		sh 'echo ${npm_base}'
+		sh "echo ${npm_base}"
 	    sh 'sed -i "s*SED_AUTH*${base64encoded}*g" .npmrc'
 	}
 		withEnv(["PATH+=${nodejs}/bin", "NPM_CONFIG_CACHE=${root}/.npmcache", "HOME=${WORKSPACE}"]) {
