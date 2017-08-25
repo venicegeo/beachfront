@@ -14,7 +14,10 @@ node {
         }
 	withCredentials([[$class: 'UsernamePasswordBinding', credentialsId: "${env.ARTIFACT_READ_ONLY_CREDS}", variable: 'NPM_AUTH']]) {
             def base64encoded = sh(script: "echo -n ${NPM_AUTH} | base64", returnStdout: true).trim()
-	    sh """sed -i "s*SED_AUTH*${base64encoded}*g" .npmrc"""
+	    sh """
+	      sed -i "s*SED_AUTH*${base64encoded}*g" .npmrc
+	      sed -i "s*SED_NPM_LOC*${NPM_REPOSITORY_URL}*g" .npmrc  
+	    """
 	}
 		withEnv(["PATH+=${nodejs}/bin", "NPM_CONFIG_CACHE=${root}/.npmcache", "HOME=${WORKSPACE}"]) {
             sh """
