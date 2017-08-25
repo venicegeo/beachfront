@@ -21,7 +21,7 @@ node {
 	}
 		withEnv(["PATH+=${nodejs}/bin", "NPM_CONFIG_CACHE=${root}/.npmcache", "HOME=${WORKSPACE}"]) {
             sh """
-	      npm config
+	      npm config list
               npm install
               ./node_modules/.bin/typings install
             """
