@@ -12,8 +12,16 @@ node {
         } else {
             git url: "${env.GIT_URL}", branch: "${env.GIT_BRANCH}"
         }
-        withEnv(["PATH+=${nodejs}/bin", "NPM_CONFIG_CACHE=${root}/.npmcache", "HOME=${WORKSPACE}"]) {
+	withCredentials([[$class: 'UsernamePasswordBinding', credentialsId: "${env.ARTIFACT_READ_ONLY_CREDS}", variable: 'NPM_AUTH']]) {
+            def base64encoded = sh(script: "echo -n ${NPM_AUTH} | base64", returnStdout: true).trim()
+	    sh """
+	      sed -i "s*SED_AUTH*${base64encoded}*g" .npmrc
+	      sed -i "s*SED_NPM_LOC*${NPM_REPOSITORY_URL}*g" .npmrc  
+	    """
+	}
+		withEnv(["PATH+=${nodejs}/bin", "NPM_CONFIG_CACHE=${root}/.npmcache", "HOME=${WORKSPACE}"]) {
             sh """
+	      npm config list
               npm install
               ./node_modules/.bin/typings install
             """
@@ -45,7 +53,7 @@ node {
             }
         }
     }
-    /*stage("Sonar") {
+    stage("Sonar") {
         withEnv([
           "PATH+=${nodejs}/bin",
           "NODE_ENV=production",
@@ -66,7 +74,7 @@ node {
             def projectId = "venicegeo:beachfront:bf-ui"
             sh "${sonar}/bin/sonar-scanner -Dsonar.javascript.lcov.reportPath=report/coverage/lcov.info -Dsonar.host.url=${env.SONAR_URL} -Dsonar.projectKey=${projectId} -Dsonar.projectName=${projectId} -Dsonar.language=js -Dsonar.sources=src -Dsonar.tests=test -Dsonar.projectBaseDir=${root} -Dsonar.projectVersion=${appvers} -Dsonar.login=${USERNAME}"
         }
-    }*/
+    }
     stage("Dependency Check") {
         withCredentials([
           [$class: 'StringBinding', credentialsId: "${env.THREADFIX_API_KEY}", variable: "THREADFIX_KEY"]
