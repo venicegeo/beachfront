@@ -23,18 +23,19 @@ node {
     def appvers = sh(script: """git describe --long --tags --always | sed 's/\\./-/'g""", returnStdout: true)
     appvers = appvers.trim()
     def appName = "beachfront-${appvers}"
-    if(true){
-    stage("Karma Tests") {
-        withEnv(["PATH+=${nodejs}/bin", "NPM_CONFIG_CACHE=${root}/.npmcache", "HOME=${WORKSPACE}"]) {
-          withCredentials([[$class: 'UsernamePasswordBinding', credentialsId: "${env.ARTIFACT_STORAGE_CREDS}", variable: 'NPM_AUTH']]) {
-            def base64encoded = sh(script: "echo -n ${NPM_AUTH} | base64", returnStdout: true).trim()
-            if (fileExists('/jslave/.npmrc')) {
-                sh "cp /jslave/.npmrc ."
+    if(!env.SKIP_XVFB){
+      stage("Karma Tests") {
+          withEnv(["PATH+=${nodejs}/bin", "NPM_CONFIG_CACHE=${root}/.npmcache", "HOME=${WORKSPACE}"]) {
+            withCredentials([[$class: 'UsernamePasswordBinding', credentialsId: "${env.ARTIFACT_STORAGE_CREDS}", variable: 'NPM_AUTH']]) {
+              def base64encoded = sh(script: "echo -n ${NPM_AUTH} | base64", returnStdout: true).trim()
+              if (fileExists('/jslave/.npmrc')) {
+                  sh "cp /jslave/.npmrc ."
+              }
+              sh 'xvfb-run npm run test:ci'
             }
-            sh 'xvfb-run npm run test:ci'
           }
-        }
-    }}
+      }
+    }
     if(params.SIDECAR_CONFIG_REPO) {
         stage("Security Env Extra Configs") {
             sh "mkdir -p .sec-configs"
