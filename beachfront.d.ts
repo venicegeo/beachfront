@@ -95,6 +95,8 @@ interface BuildEnvironment {
   CLASSIFICATION_BANNER_FOREGROUND: string
   CLASSIFICATION_BANNER_TEXT: string
   CONSENT_BANNER_TEXT: string
+  OSM_BASE_URL: string
+  PLANET_BASE_URL: string
 }
 
 declare const process: {
