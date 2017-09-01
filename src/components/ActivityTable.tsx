@@ -134,7 +134,7 @@ function getCapturedOn({ properties }: beachfront.Job) {
 }
 
 function getSceneId({ properties }: beachfront.Job) {
-  return properties.scene_id.replace(/^(planetscope|rapideye|landsat):/, '')
+  return properties.scene_id.replace(/^(planetscope|rapideye|landsat|sentinel):/, '')
 }
 
 function getImageSensor({ properties }: beachfront.Job) {
