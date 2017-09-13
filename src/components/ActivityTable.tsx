@@ -88,6 +88,8 @@ export const ActivityTable = ({
                   className={styles.downloadButton}
                   filename={job.properties.name + '.geojson'}
                   jobId={job.id}
+                  apiUrl={'/v0/job/' + job.id + '.geojson'}
+                  displayText="Download GeoJSON"
                   onComplete={() => console.log('onComplete')}
                   onError={() => console.log('onError')}
                   onProgress={() => console.log('onProgress')}

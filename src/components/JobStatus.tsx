@@ -125,12 +125,26 @@ export class JobStatus extends React.Component<Props, State> {
               jobId={id}
               filename={properties.name + '.geojson'}
               className={styles.download}
+              apiUrl={'/v0/job/' + id + '.geojson'}
+              displayText="Download GeoJSON"
               onProgress={this.handleDownloadProgress}
               onStart={this.handleDownloadStart}
               onComplete={this.handleDownloadComplete}
               onError={this.handleDownloadError}
-            />
-          )}
+            />)}
+          {properties.status === STATUS_SUCCESS && (
+            <FileDownloadLink
+              jobId={id}
+              filename={properties.name + '.gpkg'}
+              className={styles.download}
+              apiUrl={'/v0/job/' + id + '.gpkg'}
+              displayText="Download GPKG"
+              onProgress={this.handleDownloadProgress}
+              onStart={this.handleDownloadStart}
+              onComplete={this.handleDownloadComplete}
+              onError={this.handleDownloadError}
+              />)
+          }
         </div>
       </li>
     )
