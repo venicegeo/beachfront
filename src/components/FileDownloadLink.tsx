@@ -25,6 +25,8 @@ interface Props {
   className?:   string
   filename:     string
   jobId:        string
+  apiUrl:       string
+  displayText:  string
   onComplete()
   onError(err: any)
   onProgress(loaded: number, total: number)
@@ -77,7 +79,7 @@ export class FileDownloadLink extends React.Component<Props, State> {
         href={this.state.blobUrl}
         download={this.props.filename}
         className={this.props.className}
-        title={isDownloading ? `Retrieving ${totalMegabytes} MB of GeoJSON...` : 'Download'}
+        title={isDownloading ? `Retrieving ${totalMegabytes} MB...` : this.props.displayText}
         onClick={this.handleClick}
       >
         {this.state.isDownloading ? percentage : <i className="fa fa-cloud-download"/>}
@@ -96,7 +98,7 @@ export class FileDownloadLink extends React.Component<Props, State> {
     this.props.onStart()
 
     const client = getClient()
-    client.get(`/v0/job/${this.props.jobId}.geojson`, {
+    client.get(this.props.apiUrl, {
       cancelToken: new axios.CancelToken(cancel => this.cancel = cancel),
       onDownloadProgress: this.handleProgress,
       responseType: 'blob',
