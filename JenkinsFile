@@ -54,7 +54,7 @@ node {
         }
     }
     if(!params.SKIP_SCANS) {
-		stage("Sonar") {
+		/*stage("Sonar") {
 			withEnv([
 			  "PATH+=${nodejs}/bin",
 			  "NODE_ENV=production",
@@ -75,7 +75,7 @@ node {
 				def projectId = "venicegeo:beachfront:bf-ui"
 				sh "${sonar}/bin/sonar-scanner -Dsonar.javascript.lcov.reportPath=report/coverage/lcov.info -Dsonar.host.url=${env.SONAR_URL} -Dsonar.projectKey=${projectId} -Dsonar.projectName=${projectId} -Dsonar.language=js -Dsonar.sources=src -Dsonar.tests=test -Dsonar.projectBaseDir=${root} -Dsonar.projectVersion=${appvers} -Dsonar.login=${USERNAME}"
 			}
-		}
+		}*/
 		stage("Dependency Check") {
 			withCredentials([
 			  [$class: 'StringBinding', credentialsId: "${env.THREADFIX_API_KEY}", variable: "THREADFIX_KEY"]
