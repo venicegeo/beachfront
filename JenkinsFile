@@ -207,8 +207,8 @@ node {
                   "PCF_SPACE=${env.PHASE_ONE_PCF_SPACE}"
                 ]) {
 					dir ("integration-tests") {
-						if(env.GITLAB_CREDS) {
-							git url: "${env.INTEGRATION_GIT_URL}", branch: "${env.INTEGRATION_GIT_BRANCH}", credentialsId: "${env.GITLAB_CREDS}"
+						if(env.INTEGRATION_GITLAB_CREDS) {
+							git url: "${env.INTEGRATION_GIT_URL}", branch: "${env.INTEGRATION_GIT_BRANCH}", credentialsId: "${env.INTEGRATION_GITLAB_CREDS}"
 						} else {
 							git url: "${env.INTEGRATION_GIT_URL}", branch: "${env.INTEGRATION_GIT_BRANCH}"
 						}
