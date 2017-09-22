@@ -237,6 +237,8 @@ node {
                       cf push ${appName} -f manifest.jenkins.yml --hostname ${appName} -d ${env.PHASE_TWO_PCF_DOMAIN} --no-start
                       cf set-env ${appName} SPACE ${env.PHASE_TWO_PCF_SPACE}
                       cf set-env ${appName} DOMAIN ${env.PHASE_TWO_PCF_SPACE}
+                      cf set-env ${appName} OSM_BASE_URL ${env.OSM_BASE_URL}
+                      cf set-env ${appName} PLANET_BASE_URL ${env.PLANET_BASE_URL}
                     """
                     try {
                       sh "cf start ${appName}"
