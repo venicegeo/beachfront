@@ -291,7 +291,7 @@ node {
                     [$class: 'StringBinding', credentialsId: "${env.PL_API_KEY}", variable: "PL_API_KEY"]
                 ]) {
                     withEnv([
-                      "PCF_SPACE=${env.PHASE_ONE_PCF_SPACE}"
+                      "PCF_SPACE=${env.PHASE_TWO_PCF_SPACE}"
                     ]) {
     					dir ("integration-tests") {
     					    sh "chmod 700 ci/beachfront_ua_tests_stage.sh"
