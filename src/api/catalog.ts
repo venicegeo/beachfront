@@ -40,6 +40,7 @@ export function initialize(): Promise<void> {
     })
 }
 
+
 export function search({
   bbox,
   catalogApiKey,
@@ -93,3 +94,57 @@ export function search({
       throw err
     })
 }
+
+
+export function searchViaBFAPI({
+  bbox,
+  catalogApiKey,
+  cloudCover,
+  dateFrom,
+  dateTo,
+  source,
+  startIndex,
+  count,
+}): Promise<beachfront.ImageryCatalogPage> {
+  console.warn('(catalog:search): Discarding parameters `count` (%s) and `startIndex` (%s)', count, startIndex)
+  let itemType
+  switch (source) {
+    case SOURCE_RAPIDEYE:
+    case SOURCE_PLANETSCOPE:
+    case SOURCE_LANDSAT:
+      itemType = source
+      break
+    case SOURCE_SENTINEL:
+      itemType = 'sentinel'
+      break
+    default:
+      return Promise.reject(new Error(`Unknown data source prefix: '${source}'`))
+  }
+  return _client.post(`/v0/imagery/discover/${itemType}`, {
+	  cloudCover:      cloudCover + .05,
+	  PL_API_KEY:      catalogApiKey,
+	  bbox:            bbox.join(','),
+	  acquiredDate:    new Date(dateFrom).toISOString(),
+	  maxAcquiredDate: new Date(dateTo).toISOString(),
+  })
+    .then(response => response.data)
+    // HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK
+    .then(images => {
+      console.warn('(catalog:search) Normalizing bf-ia-broker response')
+      images.features.forEach(f => {
+        f.id = source + ':' + f.id
+      })
+      return {
+        images,
+        count:      images.features.length,
+        startIndex: 0,
+        totalCount: images.features.length,
+      }
+    })
+    // HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK
+    .catch(err => {
+      console.error('(catalog:search) failed:', err)
+      throw err
+    })
+}
+
