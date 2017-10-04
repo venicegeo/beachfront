@@ -24,7 +24,7 @@ node {
 		withEnv(["PATH+=${nodejs}/bin", "NPM_CONFIG_CACHE=${root}/.npmcache", "HOME=${WORKSPACE}"]) {
 		
 			if (env.CA_CERT_BUNDLE_PATH) {
-				sh "npm config set cafile = \"${env.CA_CERT_BUNDLE_PATH}\""
+				sh "npm config set cafile \"${env.CA_CERT_BUNDLE_PATH}\""
 			}
 			
 			
