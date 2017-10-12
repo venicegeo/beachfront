@@ -5,6 +5,7 @@ node {
     def mvn = tool 'M3'
     def zapHome = tool 'ZAProxy_v2_5_0'
     def nodejs = tool 'NodeJS_6'
+	
     stage("Setup") {
         deleteDir()
         if(env.GITLAB_CREDS) {
@@ -12,6 +13,7 @@ node {
         } else {
             git url: "${env.GIT_URL}", branch: "${env.GIT_BRANCH}"
         }
+
 	withCredentials([[$class: 'UsernamePasswordBinding', credentialsId: "${env.ARTIFACT_READ_ONLY_CREDS}", variable: 'NPM_AUTH']]) {
             def base64encoded = sh(script: "echo -n ${NPM_AUTH} | base64", returnStdout: true).trim()
 	    sh """
@@ -20,6 +22,12 @@ node {
 	    """
 	}
 		withEnv(["PATH+=${nodejs}/bin", "NPM_CONFIG_CACHE=${root}/.npmcache", "HOME=${WORKSPACE}"]) {
+		
+			if (env.CA_CERT_BUNDLE_PATH) {
+				sh "npm config set cafile \"${env.CA_CERT_BUNDLE_PATH}\""
+			}
+			
+			
             sh """
 	      npm config list
               npm install
@@ -143,13 +151,15 @@ node {
                   cf auth ${CFUSER} ${CFPASS}
                   cf target -o ${env.PCF_ORG} -s ${env.PHASE_ONE_PCF_SPACE}
                   cf push ${appName} -f manifest.jenkins.yml --hostname ${appName} -d ${env.PHASE_ONE_PCF_DOMAIN} --no-start
-                  cf set-env ${appName} SPACE ${env.PHASE_ONE_PCF_SPACE}
-                  cf set-env ${appName} DOMAIN ${env.PHASE_ONE_PCF_DOMAIN}
-                  cf set-env ${appName} OSM_BASE_URL ${env.OSM_BASE_URL}
-                  cf set-env ${appName} PLANET_BASE_URL ${env.PLANET_BASE_URL}
-                """
-                try {
-                  sh "cf start ${appName}"
+				"""
+				try {
+					sh """
+					  cf set-env ${appName} SPACE ${env.PHASE_ONE_PCF_SPACE}
+					  cf set-env ${appName} DOMAIN ${env.PHASE_ONE_PCF_DOMAIN}
+					  cf set-env ${appName} OSM_BASE_URL ${env.OSM_BASE_URL}
+					  cf set-env ${appName} PLANET_BASE_URL ${env.PLANET_BASE_URL}
+					"""
+					sh "cf start ${appName}"
                 } catch (Exception e) {
                   //sh "cf logs --recent ${appName}"
                   sh "cf delete ${appName} -f -r"
@@ -235,13 +245,15 @@ node {
                       cf auth ${CFUSER} ${CFPASS}
                       cf target -o ${env.PCF_ORG} -s ${env.PHASE_TWO_PCF_SPACE}
                       cf push ${appName} -f manifest.jenkins.yml --hostname ${appName} -d ${env.PHASE_TWO_PCF_DOMAIN} --no-start
-                      cf set-env ${appName} SPACE ${env.PHASE_TWO_PCF_SPACE}
-                      cf set-env ${appName} DOMAIN ${env.PHASE_TWO_PCF_SPACE}
-                      cf set-env ${appName} OSM_BASE_URL ${env.OSM_BASE_URL}
-                      cf set-env ${appName} PLANET_BASE_URL ${env.PLANET_BASE_URL}
-                    """
-                    try {
-                      sh "cf start ${appName}"
+					"""
+					try {					
+						sh """					
+						  cf set-env ${appName} SPACE ${env.PHASE_TWO_PCF_SPACE}
+						  cf set-env ${appName} DOMAIN ${env.PHASE_TWO_PCF_SPACE}
+						  cf set-env ${appName} OSM_BASE_URL ${env.OSM_BASE_URL}
+						  cf set-env ${appName} PLANET_BASE_URL ${env.PLANET_BASE_URL}
+						"""
+						sh "cf start ${appName}"
                     } catch (Exception e) {
                       //sh "cf logs --recent ${appName}"
                       sh "cf delete ${appName} -f -r"
