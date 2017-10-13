@@ -40,6 +40,7 @@ export function initialize(): Promise<void> {
     })
 }
 
+
 export function search({
   bbox,
   catalogApiKey,
@@ -50,6 +51,9 @@ export function search({
   startIndex,
   count,
 }): Promise<beachfront.ImageryCatalogPage> {
+
+  const session = getClient()
+  
   console.warn('(catalog:search): Discarding parameters `count` (%s) and `startIndex` (%s)', count, startIndex)
   let itemType
   switch (source) {
@@ -64,14 +68,14 @@ export function search({
     default:
       return Promise.reject(new Error(`Unknown data source prefix: '${source}'`))
   }
-  return _client.get(`/planet/discover/${itemType}`, {
-    params: {
+  return session.get(`/v0/imagery/discover/${itemType}`, {
+  params: {
       cloudCover:      cloudCover + .05,
       PL_API_KEY:      catalogApiKey,
       bbox:            bbox.join(','),
       acquiredDate:    new Date(dateFrom).toISOString(),
       maxAcquiredDate: new Date(dateTo).toISOString(),
-    },
+    },  
   })
     .then(response => response.data)
     // HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK
@@ -93,3 +97,4 @@ export function search({
       throw err
     })
 }
+
