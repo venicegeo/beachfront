@@ -57,7 +57,7 @@
     "font-awesome": "4.6.3",
     "lodash": "4.17.2",
     "moment": "2.17.0",
-    "openlayers": "3.19.1",
+    "ol": "4.1.1",
     "react": "15.2.1",
     "react-dom": "15.2.1"
   }
