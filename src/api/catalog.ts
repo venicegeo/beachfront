@@ -40,7 +40,6 @@ export function initialize(): Promise<void> {
     })
 }
 
-
 export function search({
   bbox,
   catalogApiKey,
@@ -53,7 +52,7 @@ export function search({
 }): Promise<beachfront.ImageryCatalogPage> {
 
   const session = getClient()
-  
+
   console.warn('(catalog:search): Discarding parameters `count` (%s) and `startIndex` (%s)', count, startIndex)
   let itemType
   switch (source) {
@@ -75,7 +74,7 @@ export function search({
       bbox:            bbox.join(','),
       acquiredDate:    new Date(dateFrom).toISOString(),
       maxAcquiredDate: new Date(dateTo).toISOString(),
-    },  
+    },
   })
     .then(response => response.data)
     // HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK
@@ -97,4 +96,3 @@ export function search({
       throw err
     })
 }
-
