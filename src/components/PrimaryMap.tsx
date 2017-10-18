@@ -395,7 +395,7 @@ export class PrimaryMap extends React.Component<Props, State> {
           foundFeature = true
           return true
       }
-    }, null, layerFilter)
+    }, layerFilter)
     if (foundFeature) {
       this.refs.container.classList.add(styles.isHoveringFeature)
     }
