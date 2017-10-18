@@ -13989,3 +13989,120 @@ declare module olx {
 declare module "openlayers" {
     export = ol;
 }
+declare module "ol/control/control" {
+    export default ol.control.Control
+}
+declare module "ol/geom/linestring" {
+    export default ol.geom.LineString
+}
+declare module "ol/interaction/draw" {
+    export default ol.interaction.Draw
+}
+declare module "ol/layer/vector" {
+    export default ol.layer.Vector
+}
+declare module "ol/proj" {
+    export default ol.proj
+}
+declare module "ol/source/vector" {
+    export default ol.source.Vector
+}
+declare module "ol/sphere" {
+    export default ol.Sphere
+}
+declare module "ol/style/regularshape" {
+    export default ol.style.RegularShape
+}
+declare module "ol/style/stroke" {
+    export default ol.style.Stroke
+}
+declare module "ol/style/style" {
+    export default ol.style.Style
+}
+declare module "ol/control/defaults" {
+    export default ol.control.defaults
+}
+declare module "ol/control/fullscreen" {
+    export default ol.control.FullScreen
+}
+declare module "ol/control/mouseposition" {
+    export default ol.control.MousePosition
+}
+declare module "ol/control/scaleline" {
+    export default ol.control.ScaleLine
+}
+declare module "ol/control/zoomslider" {
+    export default ol.control.ZoomSlider
+}
+declare module "ol/coordinate/tostringhdms" {
+    export default ol.coordinate.toStringHDMS
+}
+declare module "ol/events/condition/altkeyonly" {
+    export default ol.events.condition.altKeyOnly
+}
+declare module "ol/events/condition/click" {
+    export default ol.events.condition.click
+}
+declare module "ol/extent/getcenter" {
+    export default ol.extent.getCenter
+}
+declare module "ol/extent/gettopright" {
+    export default ol.extent.getTopRight
+}
+declare module "ol/extent/buffer" {
+    export default ol.extent.buffer
+}
+declare module "ol/feature" {
+    export default ol.Feature
+}
+declare module "ol/format/geojson" {
+    export default ol.format.GeoJSON
+}
+declare module "ol/geom/geometry" {
+    export default ol.geom.Geometry
+}
+declare module "ol/geom/multipolygon" {
+    export default ol.geom.MultiPolygon
+}
+declare module "ol/geom/point" {
+    export default ol.geom.Point
+}
+declare module "ol/geom/polygon" {
+    export default ol.geom.Polygon
+}
+declare module "ol/interaction/defaults" {
+    export default ol.interaction.defaults
+}
+declare module "ol/interaction/dragrotate" {
+    export default ol.interaction.DragRotate
+}
+declare module "ol/interaction/select" {
+    export default ol.interaction.Select
+}
+declare module "ol/layer/tile" {
+    export default ol.layer.Tile
+}
+declare module "ol/map" {
+    export default ol.Map
+}
+declare module "ol/overlay" {
+    export default ol.Overlay
+}
+declare module "ol/source/tilewms" {
+    export default ol.source.TileWMS
+}
+declare module "ol/source/xyz" {
+    export default ol.source.XYZ
+}
+declare module "ol/style/fill" {
+    export default ol.style.Fill
+}
+declare module "ol/style/text" {
+    export default ol.style.Text
+}
+declare module "ol/view" {
+    export default ol.View
+}
+declare module "ol/projectionlike" {
+    export default ol.ProjectionLike
+}

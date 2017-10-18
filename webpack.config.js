@@ -104,10 +104,12 @@ module.exports = {
   },
 
   plugins: [
+/*
     new CopyWebpackPlugin([{
-      from: require.resolve('openlayers/dist/ol-debug.js'),
+      from: require.resolve('ol/dist/ol-debug.js'),
       to: 'ol.js',
     }]),
+*/
     new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify(__environment__),

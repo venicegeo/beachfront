@@ -14,17 +14,28 @@
  * limitations under the License.
  **/
 
-import * as ol from 'openlayers'
+import Control from 'ol/control/control'
+import LineString from 'ol/geom/linestring'
+import Draw from 'ol/interaction/draw'
+import VectorLayer from 'ol/layer/vector'
+import proj from 'ol/proj'
+import VectorSource from 'ol/source/vector'
+import Sphere from 'ol/sphere'
+import RegularShape from 'ol/style/regularshape'
+import Stroke from 'ol/style/stroke'
+import Style from 'ol/style/style'
 
-const WGS84_SPHERE = new ol.Sphere(6378137)
+debugger
+
+const WGS84_SPHERE = new Sphere(6378137)
 const PRECISION_KM = 10000
 const PRECISION_M = 10
 const KEY_ESCAPE = 27
 
-export class MeasureControl extends ol.control.Control {
+export class MeasureControl extends Control {
   private _dialog: HTMLFormElement
-  private _interaction: ol.interaction.Draw
-  private _layer: ol.layer.Vector
+  private _interaction: Draw
+  private _layer: VectorLayer
   private _isOpen: boolean
   private _distanceInMeters: number
 
@@ -50,10 +61,10 @@ export class MeasureControl extends ol.control.Control {
       this._layer.getSource().clear()
     })
 
-    this._interaction.on('drawend', (event: ol.interaction.DrawEvent) => {
-      const geometry = event.feature.getGeometry() as ol.geom.LineString
-      const c1 = ol.proj.transform(geometry.getFirstCoordinate(), 'EPSG:3857', 'EPSG:4326')
-      const c2 = ol.proj.transform(geometry.getLastCoordinate(), 'EPSG:3857', 'EPSG:4326')
+    this._interaction.on('drawend', (event: Draw.Event) => {
+      const geometry = event.feature.getGeometry() as LineString
+      const c1 = proj.transform(geometry.getFirstCoordinate(), 'EPSG:3857', 'EPSG:4326')
+      const c2 = proj.transform(geometry.getLastCoordinate(), 'EPSG:3857', 'EPSG:4326')
 
       this._distanceInMeters = WGS84_SPHERE.haversineDistance(c1, c2)
       this._recalculate()
@@ -154,21 +165,21 @@ function generateDialog() {
 }
 
 function generateInteraction(drawLayer) {
-  return new ol.interaction.Draw({
+  return new Draw({
     source: drawLayer.getSource(),
     maxPoints: 2,
     type: 'LineString',
-    geometryFunction(coordinates: any, geometry: ol.geom.LineString) {
+    geometryFunction(coordinates: any, geometry: LineString) {
       if (!geometry) {
-        geometry = new ol.geom.LineString(null)
+        geometry = new LineString(null)
       }
       const [[x1, y1], [x2, y2]] = coordinates
       geometry.setCoordinates([[x1, y1], [x2, y2]])
       return geometry
     },
-    style: new ol.style.Style({
-      image: new ol.style.RegularShape({
-        stroke: new ol.style.Stroke({
+    style: new Style({
+      image: new RegularShape({
+        stroke: new Stroke({
           color: 'black',
           width: 1,
         }),
@@ -177,7 +188,7 @@ function generateInteraction(drawLayer) {
         radius2: 0,
         angle: 0.785398,  // In radians
       }),
-      stroke: new ol.style.Stroke({
+      stroke: new Stroke({
         color: '#f04',
         lineDash: [5, 10],
         width: 2,
@@ -187,12 +198,12 @@ function generateInteraction(drawLayer) {
 }
 
 function generateLayer() {
-  return new ol.layer.Vector({
-    source: new ol.source.Vector({
+  return new VectorLayer({
+    source: new VectorSource({
       wrapX: false,
     }),
-    style: new ol.style.Style({
-      stroke: new ol.style.Stroke({
+    style: new Style({
+      stroke: new Stroke({
         color: '#c03',
         lineDash: [10, 5],
         width: 3,
