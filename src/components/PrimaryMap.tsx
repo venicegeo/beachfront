@@ -548,7 +548,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     const source = this.frameLayer.getSource()
     const reader = new GeoJSON()
     this.props.frames.forEach(raw => {
-      const frame = reader.readFeature(raw, {featureProjection: WEB_MERCATOR})
+      const frame = reader.readFeature(raw, {dataProjection: WGS84, featureProjection: WEB_MERCATOR})
       source.addFeature(frame)
 
       const frameExtent = calculateExtent(frame.getGeometry())
@@ -611,7 +611,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     }
 
     const reader = new GeoJSON()
-    const feature = reader.readFeature(geojson, {featureProjection: 'EPSG:3857'})
+    const feature = reader.readFeature(geojson, {dataProjection: WGS84, featureProjection: 'EPSG:3857'})
 
     source.addFeature(feature)
   }
@@ -623,7 +623,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     source.setAttributions(undefined)
     source.clear()
     if (imagery) {
-      const features = reader.readFeatures(imagery.images, {featureProjection: WEB_MERCATOR})
+      const features = reader.readFeatures(imagery.images, {dataProjection: WGS84, featureProjection: WEB_MERCATOR})
       if (features.length) {
         features.forEach(feature => {
           feature.set(KEY_TYPE, TYPE_SCENE)
@@ -860,6 +860,7 @@ function generateDetectionsSource(wmsUrl, feature: beachfront.Job|beachfront.Pro
     tileLoadFunction,
     crossOrigin: 'anonymous',
     url: wmsUrl,
+    projection: WEB_MERCATOR,
     params: {
       [KEY_LAYERS]: IDENTIFIER_DETECTIONS,
       [KEY_STYLES]: IDENTIFIER_DETECTIONS,
