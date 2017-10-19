@@ -55,24 +55,17 @@ module.exports = (config) => {
       context: __dirname,
       resolve: webpackConfig.resolve,
       module: {
-        preLoaders: webpackConfig.module.preLoaders,
-        loaders: webpackConfig.module.loaders,
-        postLoaders: isCoverageRequested ? [
-          {
-            test: /\.tsx?$/,
-            loader: 'istanbul-instrumenter',
-            include: path.resolve('./src/'),
-            query: {
-              esModules: true,
-            },
-          },
-        ] : []
-      },
-      postcss: webpackConfig.postcss,
-      ts: {
-        compilerOptions: {
-          target: __environment__ === 'development' ? 'es6' : 'es5',
-        },
+        rules: isCoverageRequested
+          ? webpackConfig.module.rules
+          : webpackConfig.module.rules.concat([{
+              test: /\.tsx?$/,
+              loader: 'istanbul-instrumenter-loader',
+              include: path.resolve('./src/'),
+              enforce: 'post',
+              options: {
+                esModules: true,
+              },
+            }]),
       },
       plugins: [
         new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
