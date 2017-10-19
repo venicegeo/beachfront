@@ -24,7 +24,6 @@ import LineString from 'ol/geom/linestring'
 import Draw from 'ol/interaction/draw'
 import VectorLayer from 'ol/layer/vector'
 import proj from 'ol/proj'
-import ProjectionLike from 'ol/projectionlike'
 import VectorSource from 'ol/source/vector'
 import RegularShape from 'ol/style/regularshape'
 import Stroke from 'ol/style/stroke'
@@ -102,8 +101,8 @@ const TYPE_DIVOT_OUTBOARD = 'DIVOT_OUTBOARD'
 const TYPE_LABEL_MAJOR = 'LABEL_MAJOR'
 const TYPE_LABEL_MINOR = 'LABEL_MINOR'
 const TYPE_STEM = 'STEM'
-const WGS84: ProjectionLike = 'EPSG:4326'
-const WEB_MERCATOR: ProjectionLike = 'EPSG:3857'
+const WGS84 = 'EPSG:4326'
+const WEB_MERCATOR = 'EPSG:3857'
 export const MODE_DRAW_BBOX = 'MODE_DRAW_BBOX'
 export const MODE_NORMAL = 'MODE_NORMAL'
 export const MODE_PRODUCT_LINES = 'MODE_PRODUCT_LINES'
@@ -395,7 +394,7 @@ export class PrimaryMap extends React.Component<Props, State> {
           foundFeature = true
           return true
       }
-    }, layerFilter)
+    }, {layerFilter})
     if (foundFeature) {
       this.refs.container.classList.add(styles.isHoveringFeature)
     }

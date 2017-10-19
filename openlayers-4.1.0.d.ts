@@ -417,6 +417,7 @@ declare module ol {
          * @api stable
          */
         class Control extends ol.Object {
+            protected element: Element;
             /**
              * @classdesc
              * A control is a visible widget with a DOM element in a fixed position on the
@@ -2082,9 +2083,21 @@ declare module ol {
 
         }
 
-        type GeoJSONFeature = JSON;
+        interface GeoJSONGeometry {
+            type: string;
+            coordinates: any[];
+        }
+        interface GeoJSONFeature {
+            type: string;
+            geometry: GeoJSONGeometry;
+            properties: {[key: string]: any};
+            id?: string;
+            [key: string]: any;
+        }
+
+        // type GeoJSONFeature = JSON;
         type GeoJSONFeatureCollection = JSON;
-        type GeoJSONGeometry = JSON;
+        //type GeoJSONGeometry = JSON;
         type GeoJSONGeometryCollection = JSON;
 
         /**
@@ -10578,7 +10591,7 @@ declare module ol {
              * @api
              */
             clone(): ol.style.Style;
-            
+
             /**
              * Get the geometry to be rendered.
              * @return {string|ol.geom.Geometry|ol.StyleGeometryFunction}
@@ -14103,6 +14116,6 @@ declare module "ol/style/text" {
 declare module "ol/view" {
     export default ol.View
 }
-declare module "ol/projectionlike" {
-    export default ol.ProjectionLike
+declare module "ol/layer/base" {
+    export default ol.layer.Base
 }

@@ -34,9 +34,9 @@ module.exports = {
   context: __dirname,
   entry: './src/index.ts',
 
-  externals: {
+  /*externals: {
     'openlayers': 'ol'
-  },
+  },*/
 
   resolve: {
     extensions: ['', '.tsx', '.ts', '.js'],

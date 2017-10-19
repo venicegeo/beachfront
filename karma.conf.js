@@ -39,8 +39,6 @@ module.exports = (config) => {
 
     files: [
       // Isolate "fat" libraries that might slow down each rebuild
-      require.resolve('openlayers/dist/ol.js'),
-
       'test/index.ts'
     ],
 
@@ -84,7 +82,7 @@ module.exports = (config) => {
         })
       ],
       externals: {
-        'openlayers': 'ol',
+        //'openlayers': 'ol',
 
         /*
          * The following is needed for enzyme to function properly

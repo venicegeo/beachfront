@@ -25,8 +25,6 @@ import RegularShape from 'ol/style/regularshape'
 import Stroke from 'ol/style/stroke'
 import Style from 'ol/style/style'
 
-debugger
-
 const WGS84_SPHERE = new Sphere(6378137)
 const PRECISION_KM = 10000
 const PRECISION_M = 10
