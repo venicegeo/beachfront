@@ -55,6 +55,7 @@ import {
   SESSION_IDLE_STORE,
   SESSION_IDLE_UNITS,
 } from '../config'
+import {UserTour} from './Tour'
 
 import {
   STATUS_SUCCESS,
@@ -166,6 +167,10 @@ export class Application extends React.Component<Props, State> {
   componentDidMount() {
     document.addEventListener('mousemove', this.resetTimer)
     document.addEventListener('keyup', this.resetTimer)
+
+    setTimeout(() => {
+      this.panTo([-104.366523, 19.119182])
+    }, 5000)
   }
 
   render() {
@@ -302,6 +307,10 @@ export class Application extends React.Component<Props, State> {
             onJobDeselect={this.handleProductLineJobDeselect}
             onPanTo={this.handlePanToProductLine}
           />
+        )
+      case '/tour':
+        return (
+          <UserTour/>
         )
       default:
         return (
@@ -464,6 +473,7 @@ export class Application extends React.Component<Props, State> {
   }
 
   private handleNavigateToJob(loc) {
+    console.log('loc:', loc)
     this.navigateTo(loc)
     this.panTo(getFeatureCenter(this.state.jobs.records.find(j => loc.search.includes(j.id))))
   }
@@ -554,6 +564,7 @@ export class Application extends React.Component<Props, State> {
   }
 
   private panTo(point, zoom = 10) {
+    console.log('point:', point)
     this.setState({
       mapView: Object.assign({}, this.state.mapView, {
         center: point,

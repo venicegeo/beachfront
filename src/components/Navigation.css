@@ -89,8 +89,19 @@
 .linkHelp,
 .linkHome,
 .linkJobs,
+.linkTour,
 .linkProductLines {
   composes: link;
+}
+
+.linkTour.link .icon {
+  margin: 9px 9px -9px;
+  width: 100%;
+}
+
+.linkTour.link:hover .icon {
+  margin: 7px 7px -15px;
+  width: 115%;
 }
 
 /* Link: Icon

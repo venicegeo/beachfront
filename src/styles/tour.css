@@ -1,0 +1,10 @@
+.react-user-tour-container {
+  background-color: whitesmoke;
+  border-radius: 0.5em;
+}
+
+.react-user-tour-close {
+  font-size: 16px;
+  padding-right: 9px;
+  padding-top: 3px;
+}

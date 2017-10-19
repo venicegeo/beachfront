@@ -59,6 +59,7 @@
     "moment": "2.17.0",
     "openlayers": "3.19.1",
     "react": "15.2.1",
-    "react-dom": "15.2.1"
+    "react-dom": "15.2.1",
+    "react-user-tour": "3.0.0"
   }
 }
