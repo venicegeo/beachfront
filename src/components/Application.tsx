@@ -134,6 +134,7 @@ export class Application extends React.Component<Props, State> {
     this.logout = this.logout.bind(this)
     this.startIdleTimer = this.startIdleTimer.bind(this)
     this.stopIdleTimer = this.stopIdleTimer.bind(this)
+    this.startTour = this.startTour.bind(this)
     this.timerIncrement = this.timerIncrement.bind(this)
     this.resetTimer = this.resetTimer.bind(this)
   }
@@ -167,10 +168,6 @@ export class Application extends React.Component<Props, State> {
   componentDidMount() {
     document.addEventListener('mousemove', this.resetTimer)
     document.addEventListener('keyup', this.resetTimer)
-
-    setTimeout(() => {
-      this.panTo([-104.366523, 19.119182])
-    }, 5000)
   }
 
   render() {
@@ -180,6 +177,7 @@ export class Application extends React.Component<Props, State> {
         <Navigation
           activeRoute={this.state.route}
           onClick={this.navigateTo}
+          startTour={this.startTour}
         />
         <PrimaryMap
           bbox={this.state.bbox}
@@ -248,6 +246,7 @@ export class Application extends React.Component<Props, State> {
         <Login/>
       )
     }
+
     switch (this.state.route.pathname) {
       case '/about':
         return (
@@ -307,10 +306,6 @@ export class Application extends React.Component<Props, State> {
             onJobDeselect={this.handleProductLineJobDeselect}
             onPanTo={this.handlePanToProductLine}
           />
-        )
-      case '/tour':
-        return (
-          <UserTour/>
         )
       default:
         return (
@@ -473,7 +468,6 @@ export class Application extends React.Component<Props, State> {
   }
 
   private handleNavigateToJob(loc) {
-    console.log('loc:', loc)
     this.navigateTo(loc)
     this.panTo(getFeatureCenter(this.state.jobs.records.find(j => loc.search.includes(j.id))))
   }
@@ -564,7 +558,6 @@ export class Application extends React.Component<Props, State> {
   }
 
   private panTo(point, zoom = 10) {
-    console.log('point:', point)
     this.setState({
       mapView: Object.assign({}, this.state.mapView, {
         center: point,
@@ -605,6 +598,21 @@ export class Application extends React.Component<Props, State> {
 
   private stopIdleTimer() {
     clearInterval(this.idleInterval)
+  }
+
+  private startTour() {
+    const id = 'UserTour'
+    let root = document.getElementById(id)
+
+    if (root) {
+      // Do nothing.
+    } else {
+      root = document.createElement('div')
+      root.id = id
+      document.body.appendChild(root)
+    }
+
+    render(<UserTour application={this}/>, root)
   }
 
   private resetTimer() {
