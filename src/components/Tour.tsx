@@ -21,9 +21,12 @@ const styles: any = require('./Tour.css')
 
 export class UserTour extends React.Component<any, any> {
   private steps: any[]
+  private bbox: number[]
 
   constructor(props: any) {
     super(props)
+
+    this.bbox = [41.95, 11.12, 43.69, 12.22]
 
     this.steps = [
       {
@@ -54,7 +57,10 @@ export class UserTour extends React.Component<any, any> {
         step: 3,
         selector: '.Navigation-linkCreateJob',
         before() {
-          this.props.application.panTo([42.82, 11.67], 8)
+          this.props.application.panTo([
+            (this.bbox[0] + this.bbox[2]) / 2,
+            (this.bbox[1] + this.bbox[3]) / 2,
+          ], 8)
         },
         title: <div className={styles.title}>Create a Job</div>,
         body: <div className={styles.body}>
@@ -80,7 +86,33 @@ export class UserTour extends React.Component<any, any> {
         selector: '.CatalogSearchCriteria-source select',
         verticalOffset: -13,
         before() {
-          this.props.application.state.bbox = [41.95, 11.12, 43.69, 12.22]
+          let bbox = this.props.application.state.bbox
+
+          if (!bbox || this.bbox.some((x, i) => x !== bbox[i])) {
+            let nTotal = 20
+            let n = 0
+
+            let interval = setInterval(() => {
+              ++n
+
+              this.props.application.setState({
+                bbox: [
+                  this.bbox[0],
+                  this.bbox[1],
+                  this.bbox[0] + n / nTotal * (this.bbox[2] - this.bbox[0]),
+                  this.bbox[1] + n / nTotal * (this.bbox[3] - this.bbox[1]),
+                ],
+              })
+
+              if (n >= nTotal) {
+                clearInterval(interval)
+
+                this.props.application.setState({ bbox: this.bbox })
+              }
+            }, 50)
+          }
+
+          this.props.application.state.bbox = this.bbox
           this.props.application.navigateTo({ pathname: '/create-job' })
         },
         title: <div className={styles.title}>Select the Imagery Source</div>,
@@ -93,11 +125,11 @@ export class UserTour extends React.Component<any, any> {
         selector: '.CatalogSearchCriteria-apiKey input',
         verticalOffset: -13,
         before() {
-          let select: any = document.querySelector('.CatalogSearchCriteria-source select')
-
-          if (select.value !== 'sentinel') {
-            select.value = 'sentinel'
-          }
+          this.props.application.setState({
+            searchCriteria: Object.assign({}, this.props.application.state.searchCriteria, {
+              source: 'sentinel',
+            }),
+          })
         },
         title: <div className={styles.title}>Enter the API Key</div>,
         body: <div className={styles.body}>
@@ -120,12 +152,15 @@ export class UserTour extends React.Component<any, any> {
       {
         step: 8,
         selector: '.CatalogSearchCriteria-cloudCover input',
+        horizontalOffset: 40,
         verticalOffset: -13,
         before() {
-          let fromDate: any = document.querySelector('.CatalogSearchCriteria-captureDateFrom input')
-          let toDate: any = document.querySelector('.CatalogSearchCriteria-captureDateTo input')
-          fromDate.value = '2017-09-01'
-          toDate.value = '2017-09-30'
+          this.props.application.setState({
+            searchCriteria: Object.assign({}, this.props.application.state.searchCriteria, {
+              dateFrom: '2017-09-01',
+              dateTo: '2017-09-30',
+            }),
+          })
         },
         title: <div className={styles.title}>Select the Acceptable Cloud Cover</div>,
         body: <div className={styles.body}>
@@ -137,8 +172,12 @@ export class UserTour extends React.Component<any, any> {
         selector: '.ImagerySearch-controls button',
         verticalOffset: -13,
         before() {
-          let input: any = document.querySelector('.CatalogSearchCriteria-cloudCover input')
-          input.value = 8
+          this.props.application.setState({
+            searchCriteria: Object.assign({}, this.props.application.state.searchCriteria, {
+              cloudCover: 8,
+            }),
+          })
+          this.props.application.navigateTo({ pathname: '/create-job' })
         },
         title: <div className={styles.title}>Search for Imagery</div>,
         body: <div className={styles.body}>
@@ -147,7 +186,7 @@ export class UserTour extends React.Component<any, any> {
       },
       {
         step: 10,
-        selector: '.LoadingAnimation-root',
+        selector: '.ImagerySearch-loadingAnimation .LoadingAnimation-root',
         hideArrow: true,
         before() {
           let button: any = document.querySelector('.ImagerySearch-controls button')
@@ -156,17 +195,12 @@ export class UserTour extends React.Component<any, any> {
           let buttons: any = document.querySelector('.react-user-tour-button-container')
           buttons.style.visibility = 'hidden'
 
-          /*
           let interval = setInterval(() => {
-            if (!document.querySelector('.LoadingAnimation-root')) {
+            if (!document.querySelector('.ImagerySearch-loadingAnimation .LoadingAnimation-root')) {
               clearInterval(interval)
               buttons.style.visibility = 'visible'
-              this.setState({
-                tourStep: this.state.tourStep + 1,
-              })
             }
-          }, 300)
-          */
+          }, 1000)
         },
         title: <div className={styles.title}>Waiting for Imagery</div>,
         body: <div className={styles.body}>
@@ -176,9 +210,6 @@ export class UserTour extends React.Component<any, any> {
       {
         step: 11,
         selector: '.CatalogSearchCriteria-root',
-        before() {
-          console.debug('>>> Hello, World! <<<')
-        },
         title: <div className={styles.title}>Display Imagery</div>,
         body: <div className={styles.body}>
           Click in one of the polygons to load the image.
@@ -197,12 +228,21 @@ export class UserTour extends React.Component<any, any> {
   }
 
   componentDidMount() {
-    console.debug('>>> componentDidMount() <<<')
     this.start()
   }
 
   componentDidUpdate() {
-    console.debug('>>> componentDidUpdate() <<<')
+    // Do nothing.
+  }
+
+  componentWillUpdate(_: any, nextState: any) {
+    if (this.state.isTourActive && nextState.isTourActive) {
+      let step = this.steps.find(i => i.step === this.state.tourStep)
+
+      if (step.after) {
+        step.after.apply(this)
+      }
+    }
   }
 
   start() {
@@ -235,7 +275,7 @@ export class UserTour extends React.Component<any, any> {
   }
 
   private showArrow(show: boolean) {
-    let arrow: any = document.querySelector('#UserTour .react-user-tour-arrow')
+    let arrow: any = document.querySelector('.react-user-tour-arrow')
 
     if (arrow) {
       arrow.style.visibility = show ? 'visible' : 'hidden'

@@ -108,6 +108,7 @@ export class Application extends React.Component<Props, State> {
   private initializationPromise: Promise<any>
   private pollingInstance: number
   private idleInterval: any
+  private tour: any
 
   constructor(props) {
     super(props)
@@ -602,18 +603,15 @@ export class Application extends React.Component<Props, State> {
   }
 
   private startTour() {
-    const id = 'UserTour'
-    let root = document.getElementById(id)
-
-    if (root) {
-      // Do nothing.
+    if (this.tour) {
+      if (!this.tour.state.isTourActive) {
+        this.tour.start()
+      }
     } else {
-      root = document.createElement('div')
-      root.id = id
+      let root = document.createElement('div')
       document.body.appendChild(root)
+      this.tour = render(<UserTour application={this}/>, root)
     }
-
-    render(<UserTour application={this}/>, root)
   }
 
   private resetTimer() {

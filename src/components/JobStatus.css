@@ -86,7 +86,7 @@
 
 .details {
   flex: 1;
-  cursor: default;
+  cursor: pointer;
 }
 
 .title {
@@ -147,6 +147,7 @@
 
 .metadata {
   composes: buffered-container;
+  cursor: default;
   overflow: hidden;
   max-height: 0;
   background-color: rgba(0, 0, 0, .04);
