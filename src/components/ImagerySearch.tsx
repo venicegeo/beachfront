@@ -67,7 +67,7 @@ export class ImagerySearch extends React.Component<Props, {}> {
         />
 
         <div className={styles.controls}>
-          <button type="submit" disabled={!this.canSubmit}>Search for imagery</button>
+          <button type="submit" disabled={!this.canSubmit}>Search for Imagery</button>
         </div>
 
         {this.props.isSearching && (

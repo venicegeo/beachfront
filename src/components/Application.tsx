@@ -509,15 +509,21 @@ export class Application extends React.Component<Props, State> {
       isSearching: true,
       selectedFeature: null,
     })
+
     catalogService.search({
       count,
       startIndex,
       bbox: this.state.bbox,
       catalogApiKey: this.state.catalogApiKey,
       ...this.state.searchCriteria,
-    })
-      .then(searchResults => this.setState({ searchResults, searchError: null, isSearching: false }))
-      .catch(searchError => this.setState({ searchError, isSearching: false }))
+    }).then(searchResults => this.setState({
+      searchResults,
+      searchError: null,
+      isSearching: false,
+    })).catch(searchError => this.setState({
+      searchError,
+      isSearching: false,
+    }))
   }
 
   private handleSelectFeature(feature) {
