@@ -15,7 +15,8 @@
  **/
 
 import axios, {AxiosInstance, Promise} from 'axios'
-import {getClient} from './session'
+import {getClient, DEFAULT_TIMEOUT} from './session'
+import {API_ROOT} from '../config'
 
 import {
   SOURCE_PLANETSCOPE,
@@ -29,9 +30,14 @@ let _client: AxiosInstance
 export function initialize(): Promise<void> {
   const session = getClient()
   return session.get('/v0/user')
-    .then(response => {
+    .then(_ => {
       _client = axios.create({
-        baseURL: response.data.services.catalog,
+        baseURL: API_ROOT,
+        timeout: DEFAULT_TIMEOUT,
+        withCredentials: true,
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+        },
       })
     })
     .catch(err => {
@@ -39,7 +45,6 @@ export function initialize(): Promise<void> {
       throw err
     })
 }
-
 
 export function search({
   bbox,
@@ -52,8 +57,6 @@ export function search({
   count,
 }): Promise<beachfront.ImageryCatalogPage> {
 
-  const session = getClient()
-  
   console.warn('(catalog:search): Discarding parameters `count` (%s) and `startIndex` (%s)', count, startIndex)
   let itemType
   switch (source) {
@@ -68,14 +71,14 @@ export function search({
     default:
       return Promise.reject(new Error(`Unknown data source prefix: '${source}'`))
   }
-  return session.get(`/v0/imagery/discover/${itemType}`, {
+  return _client.get(`/v0/imagery/discover/${itemType}`, {
   params: {
       cloudCover:      cloudCover + .05,
       PL_API_KEY:      catalogApiKey,
       bbox:            bbox.join(','),
       acquiredDate:    new Date(dateFrom).toISOString(),
       maxAcquiredDate: new Date(dateTo).toISOString(),
-    },  
+    },
   })
     .then(response => response.data)
     // HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK
@@ -97,4 +100,3 @@ export function search({
       throw err
     })
 }
-
