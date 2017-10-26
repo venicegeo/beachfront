@@ -15,6 +15,10 @@
  **/
 
 import * as React from 'react'
+import {TYPE_SCENE} from '../constants'
+/*
+import * as ol from 'openlayers'
+*/
 import Tour from 'react-user-tour'
 
 const styles: any = require('./Tour.css')
@@ -287,30 +291,23 @@ export class UserTour extends React.Component<any, any> {
           let app = this.props.application
           let count = app.state.searchResults && app.state.searchResults.count
           let text = count === 1 ? 'one image' : `${count} images`
-          console.log('>>> Tour: 11:A <<<', app.state.searchResults)
 
           setTimeout(() => {
-            console.log('>>> Tour: 11:B <<<')
             let elem: any = document.querySelector('.Tour-body .count')
             elem.innerText = ` ${text} `
           })
 
           if (count) {
-            console.log('>>> Tour: 11:C <<<')
             setTimeout(() => {
               let features = app.state.searchResults.images.features
               let feature = features[features.length - 1]
-
-              console.log('>>> Tour: 11:D <<<', feature)
-              app.setState({
-                selectedFeature: feature,
-              })
-              app.navigateTo({
-                pathname: app.state.route.pathname,
-                search: feature // && feature.properties.type === TYPE_JOB
-                  ? `?jobId=${feature.id}`
-                  : '',
-              })
+              /*
+              Manually setting this 'type' here is a hack to force the
+              FeatureDetails to render.  I'm not sure how this gets set to
+              the correct value in the normal course of events.
+              */
+              feature.properties.type = TYPE_SCENE
+              app.handleSelectFeature(feature)
             }, 1000)
           }
         },
@@ -410,3 +407,12 @@ export class UserTour extends React.Component<any, any> {
     })
   }
 }
+/*
+function toGeoJSON(feature) {
+  const io = new ol.format.GeoJSON()
+  return io.writeFeatureObject(feature, {
+    dataProjection: 'EPSG:4326',
+    featureProjection: 'EPSG:3857',
+  })
+}
+*/

@@ -372,7 +372,6 @@ export class PrimaryMap extends React.Component<Props, State> {
   }
 
   private handleSelect(event) {
-    console.debug('>>> PrimaryMap.handleSelect(A) <<<', event)
     if (event.selected.length === 0 && event.deselected.length === 0) {
       return  // Disregard spurious select event
     }
@@ -393,7 +392,6 @@ export class PrimaryMap extends React.Component<Props, State> {
         break
       case TYPE_JOB:
       case TYPE_SCENE:
-        console.debug('>>> PrimaryMap.handleSelect(B) <<<', feature)
         this.props.onSelectFeature(toGeoJSON(feature) as beachfront.Scene)
         break
       default:
@@ -1028,7 +1026,6 @@ function generateImageSearchResultsOverlay(componentRef) {
 }
 
 function generateScenePreviewSource(provider, imageId, apiKey) {
-  console.debug('>>> PrimaryMap.generateScenePreviewSource() <<<', imageId)
   return new ol.source.XYZ(Object.assign({}, provider, {
     crossOrigin: 'anonymous',
     tileLoadFunction,
@@ -1039,7 +1036,6 @@ function generateScenePreviewSource(provider, imageId, apiKey) {
 }
 
 function generateSelectInteraction(...layers) {
-  console.debug('>>> PrimaryMap.generateSelectInteraction() <<<', layers)
   return new ol.interaction.Select({
     layers,
     condition: ol.events.condition.click,

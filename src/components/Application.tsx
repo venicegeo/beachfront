@@ -505,7 +505,6 @@ export class Application extends React.Component<Props, State> {
   }
 
   private handleSearchSubmit({startIndex = 0, count = 100} = {}) {
-    console.debug('>>> Application.handleSearchSubmit(A) <<<')
     this.setState({
       isSearching: true,
       selectedFeature: null,
@@ -528,21 +527,16 @@ export class Application extends React.Component<Props, State> {
   }
 
   private handleSelectFeature(feature) {
-    console.debug('>>> Application.handleSelectedFeature(A) <<<', feature)
     if (this.state.selectedFeature === feature) {
-      console.debug('>>> Application.handleSelectedFeature(B) <<<')
       return  // Nothing to do
     }
-    console.debug('>>> Application.handleSelectedFeature(C) <<<')
     this.setState({
       selectedFeature: feature || null,
     })
-    console.debug('>>> Application.handleSelectedFeature(D) <<<')
     this.navigateTo({
       pathname: this.state.route.pathname,
       search:   (feature && feature.properties.type === TYPE_JOB) ? `?jobId=${feature.id}` : '',
     })
-    console.debug('>>> Application.handleSelectedFeature(E) <<<')
   }
 
   private navigateTo(loc) {
