@@ -229,7 +229,9 @@ export class UserTour extends React.Component<any, any> {
               }
             }
 
-            fn(gen(app.state.searchCriteria.cloudCover, this.searchCriteria.cloudCover))
+            setTimeout(() => {
+              fn(gen(app.state.searchCriteria.cloudCover, this.searchCriteria.cloudCover))
+            }, 1000)
           }
         },
       },
@@ -257,22 +259,61 @@ export class UserTour extends React.Component<any, any> {
           let buttons: any = document.querySelector('.react-user-tour-button-container')
           buttons.style.visibility = 'hidden'
 
-          let n = 0
           let interval = setInterval(() => {
-            if (!document.querySelector('.ImagerySearch-loadingAnimation .LoadingAnimation-root')) {
+            if (document.querySelector('.ImagerySearchResults-pager')) {
               clearInterval(interval)
               buttons.style.visibility = 'visible'
+
+              setTimeout(() => {
+                this.gotoStep(11)
+              }, 1000)
             }
           }, 100)
         },
       },
       {
         step: 11,
-        selector: '.CatalogSearchCriteria-root',
-        title: <div className={styles.title}>Display Imagery</div>,
+        selector: '.ImagerySearchResults-pager',
+        hideArrow: true,
+        title: <div className={styles.title}>Imagery Results</div>,
         body: <div className={styles.body}>
-          Click in one of the polygons to load the image.
+          Here are the outlines of the
+          <span className="count"> images </span>
+          matching the search criteria.
+          Click on one to load the image itself&hellip;
+          We&apos;ll select one for you for now.
         </div>,
+        before() {
+          let app = this.props.application
+          let count = app.state.searchResults && app.state.searchResults.count
+          let text = count === 1 ? 'one image' : `${count} images`
+          console.log('>>> Tour: 11:A <<<', app.state.searchResults)
+
+          setTimeout(() => {
+            console.log('>>> Tour: 11:B <<<')
+            let elem: any = document.querySelector('.Tour-body .count')
+            elem.innerText = ` ${text} `
+          })
+
+          if (count) {
+            console.log('>>> Tour: 11:C <<<')
+            setTimeout(() => {
+              let features = app.state.searchResults.images.features
+              let feature = features[features.length - 1]
+
+              console.log('>>> Tour: 11:D <<<', feature)
+              app.setState({
+                selectedFeature: feature,
+              })
+              app.navigateTo({
+                pathname: app.state.route.pathname,
+                search: feature // && feature.properties.type === TYPE_JOB
+                  ? `?jobId=${feature.id}`
+                  : '',
+              })
+            }, 1000)
+          }
+        },
       },
     ]
 
