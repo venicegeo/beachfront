@@ -16,12 +16,22 @@
 
 import * as React from 'react'
 import {TYPE_SCENE} from '../constants'
-/*
-import * as ol from 'openlayers'
-*/
 import Tour from 'react-user-tour'
 
 const styles: any = require('./Tour.css')
+
+const Arrow = ({ position}) => {
+  const classnames = {
+    bottom: 'arrow-up',
+    bottomLeft: 'arrow-up',
+    left: 'arrow-right',
+    right: 'arrow-left',
+    top: 'arrow-down',
+    topLeft: 'arrow-down',
+  }
+
+  return <div className={`${styles.arrow} ${styles[classnames[position]]}`}/>
+}
 
 export class UserTour extends React.Component<any, any> {
   private steps: any[]
@@ -159,7 +169,7 @@ export class UserTour extends React.Component<any, any> {
 
               if (!i.done) {
                 let [key, value] = i.value[1]
-                let elem: any = document.querySelector(`.CatalogSearchCriteria-capture${
+                let elem = this.query(`.CatalogSearchCriteria-capture${
                   key.charAt(0).toUpperCase()
                 }${
                   key.slice(1)
@@ -250,29 +260,40 @@ export class UserTour extends React.Component<any, any> {
       },
       {
         step: 10,
-        selector: '.ImagerySearch-loadingAnimation .LoadingAnimation-root',
+        selector: '.CatalogSearchCriteria-apiKey',
+        horizontalOffset: 0,
+        verticalOffset: 0,
         hideArrow: true,
         title: <div className={styles.title}>Waiting for Imagery</div>,
         body: <div className={styles.body}>
-          Waiting for imagery&hellip;
+          Waiting for imagery&hellip;&nbsp;&nbsp;
         </div>,
         before() {
-          let button: any = document.querySelector('.ImagerySearch-controls button')
-          button.click()
+          let app = this.props.application
 
-          let buttons: any = document.querySelector('.react-user-tour-button-container')
-          buttons.style.visibility = 'hidden'
+          if (app.state.searchResults) {
+            // Do nothing.
+          } else {
+            this.query('.ImagerySearch-controls button').click()
+            let next = this.query('.react-user-tour-next-button')
+            next.style.visibility = 'hidden'
 
-          let interval = setInterval(() => {
-            if (document.querySelector('.ImagerySearchResults-pager')) {
-              clearInterval(interval)
-              buttons.style.visibility = 'visible'
+            let interval = setInterval(() => {
+              if (app.state.searchResults) {
+                clearInterval(interval)
+                let count = app.state.searchResults.count
+                let text = (count === 1) ? 'one image' : `${count} images`
+                let body = this.query(`.${styles.body}`)
 
-              setTimeout(() => {
-                this.gotoStep(11)
-              }, 1000)
-            }
-          }, 100)
+                if (count) {
+                  next.style.visibility = 'visible'
+                  body.innerText += `Look at that, we found ${text}!`
+                } else {
+                  body.innerText += "Oops!  We couldn't find any images."
+                }
+              }
+            }, 100)
+          }
         },
       },
       {
@@ -281,36 +302,82 @@ export class UserTour extends React.Component<any, any> {
         hideArrow: true,
         title: <div className={styles.title}>Imagery Results</div>,
         body: <div className={styles.body}>
-          Here are the outlines of the
-          <span className="count"> images </span>
-          matching the search criteria.
-          Click on one to load the image itself&hellip;
-          We&apos;ll select one for you for now.
+          Here are outlines of the <span className="count"> images </span>
+          matching the search criteria.  Click on one to load the image
+          itself&hellip; We&apos;ll select one for you for now.
         </div>,
         before() {
           let app = this.props.application
           let count = app.state.searchResults && app.state.searchResults.count
-          let text = count === 1 ? 'one image' : `${count} images`
+          let text = (count === 1) ? 'one image' : `${count} images`
+
+          let fn = () => {
+            let elem = this.query(`.${styles.body} .count`)
+
+            if (elem) {
+              elem.innerText = ` ${text} `
+            } else {
+              setTimeout(fn, 100)
+            }
+          }
+
+          fn()
+        },
+      },
+      {
+        step: 12,
+        selector: '.FeatureDetails-root',
+        title: <div className={styles.title}>Image Details</div>,
+        body: <div className={styles.body}>
+          Here are the details for the selected image.
+        </div>,
+        before() {
+          let app = this.props.application
+          let features = app.state.searchResults.images.features
+          let feature = features[Math.floor(features.length / 2)]
+
+          /*
+          Manually setting this 'type' here is a hack to force the
+          FeatureDetails to render.  I'm not sure how this gets set to
+          the correct value in the normal course of events.
+          */
+          feature.properties.type = TYPE_SCENE
+          app.handleSelectFeature(feature)
 
           setTimeout(() => {
-            let elem: any = document.querySelector('.Tour-body .count')
-            elem.innerText = ` ${text} `
-          })
-
-          if (count) {
-            setTimeout(() => {
-              let features = app.state.searchResults.images.features
-              let feature = features[features.length - 1]
-              /*
-              Manually setting this 'type' here is a hack to force the
-              FeatureDetails to render.  I'm not sure how this gets set to
-              the correct value in the normal course of events.
-              */
-              feature.properties.type = TYPE_SCENE
-              app.handleSelectFeature(feature)
-            }, 1000)
-          }
+            this.query('.AlgorithmList-root').scrollIntoView({
+              behavior: 'smooth',
+            })
+          }, 1000)
         },
+      },
+      {
+        step: 13,
+        selector: '.AlgorithmList-root',
+        position: 'right',
+        title: <div className={styles.title}>Compatible Algorithms</div>,
+        body: <div className={styles.body}>
+          Here is a list of algorithms that are compatible with the selected image.
+        </div>,
+      },
+      {
+        step: 14,
+        selector: '.AlgorithmList-root li:last-child .Algorithm-startButton',
+        title: <div className={styles.title}>Select an Algorithm</div>,
+        body: <div className={styles.body}>
+          We&apos;ll use this one.
+        </div>,
+        after() {
+          this.query('.AlgorithmList-root li:last-child .Algorithm-startButton').click()
+        },
+      },
+      {
+        step: 15,
+        selector: '.JobStatus-root:last-child',
+        title: <div className={styles.title}>Job Pending</div>,
+        body: <div className={styles.body}>
+          Hello, World!
+        </div>,
       },
     ]
 
@@ -323,24 +390,11 @@ export class UserTour extends React.Component<any, any> {
     this.pace = this.pace.bind(this)
     this.showArrow = this.showArrow.bind(this)
     this.start = this.start.bind(this)
+    this.query = this.query.bind(this)
   }
 
   componentDidMount() {
     this.start()
-  }
-
-  componentDidUpdate() {
-    // Do nothing.
-  }
-
-  componentWillUpdate(_: any, nextState: any) {
-    if (this.state.isTourActive && nextState.isTourActive) {
-      let step = this.steps.find(i => i.step === this.state.tourStep)
-
-      if (step.after) {
-        step.after.apply(this)
-      }
-    }
   }
 
   start() {
@@ -358,14 +412,14 @@ export class UserTour extends React.Component<any, any> {
     return (
       <Tour
         active={this.state.isTourActive}
-        arrowColor="whitesmoke"
-        arrowSize="12"
+        arrow={Arrow}
         buttonStyle={{}}
         className={styles.root}
         closeButtonText="&#10799;"
         onBack={step => this.gotoStep(step)}
         onCancel={() => this.setState({isTourActive: false})}
         onNext={step => this.gotoStep(step)}
+        ref="tour"
         step={this.state.tourStep}
         steps={this.steps}
       />
@@ -373,7 +427,7 @@ export class UserTour extends React.Component<any, any> {
   }
 
   private showArrow(show: boolean) {
-    let arrow: any = document.querySelector('.react-user-tour-arrow')
+    let arrow: any = document.querySelector('.Tour-arrow')
 
     if (arrow) {
       arrow.style.visibility = show ? 'visible' : 'hidden'
@@ -381,20 +435,28 @@ export class UserTour extends React.Component<any, any> {
   }
 
   private gotoStep(n) {
-    let step = this.steps.find(i => i.step === n)
+    let lastStep = this.steps.find(i => i.step === this.state.tourStep)
 
-    this.showArrow(!step.hideArrow)
-
-    if (step.before) {
-      step.before.apply(this)
+    if (lastStep && lastStep.after) {
+      lastStep.after.apply(this)
     }
 
-    this.setState({
-      tourStep: n,
+    setTimeout(() => {
+      let nextStep = this.steps.find(i => i.step === n)
+      if (nextStep.before) {
+        nextStep.before.apply(this)
+      }
+
+      setTimeout(() => {
+        this.showArrow(!nextStep.hideArrow)
+        this.setState({
+          tourStep: n,
+        })
+      })
     })
   }
 
-  private pace(text, cb, delay = 100) {
+  private pace(text, cb, delay = 100): Promise<string> {
     return new Promise(resolve => {
       let i = 0, interval = setInterval(() => {
         if (i < text.length) {
@@ -406,13 +468,8 @@ export class UserTour extends React.Component<any, any> {
       }, delay)
     })
   }
+
+  private query(selector: string): any {
+    return document.querySelector(selector)
+  }
 }
-/*
-function toGeoJSON(feature) {
-  const io = new ol.format.GeoJSON()
-  return io.writeFeatureObject(feature, {
-    dataProjection: 'EPSG:4326',
-    featureProjection: 'EPSG:3857',
-  })
-}
-*/

@@ -22,9 +22,43 @@
   top: 0;
 }
 
-:global(.react-user-tour-arrow) {
+.arrow {
+  height: 0;
+  position: absolute;
   visibility: hidden;
+  width: 0;
+}
+
+.arrow.arrow-left {
+  border-bottom: 12px solid transparent;
+  border-right: 12px solid whitesmoke;
+  border-top: 12px solid transparent;
+  left: -12px;
   top: 12px;
+}
+
+.arrow.arrow-down {
+  border-left: 12px solid transparent;
+  border-right: 12px solid transparent;
+  border-top: 12px solid whitesmoke;
+  bottom: -12px;
+  left: 12px;
+}
+
+.arrow.arrow-right {
+  border-bottom: 12px solid transparent;
+  border-left: 12px solid whitesmoke;
+  border-top: 12px solid transparent;
+  top: 12px;
+  right: -12px;
+}
+
+.arrow.arrow-up {
+  border-bottom: 12px solid whitesmoke;
+  border-left: 12px solid transparent;
+  border-right: 12px solid transparent;
+  left: 12px;
+  top: -12px;
 }
 
 :global(.react-user-tour-container) > div {
