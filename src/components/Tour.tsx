@@ -363,17 +363,20 @@ export class UserTour extends React.Component<any, any> {
       {
         step: 14,
         selector: '.AlgorithmList-root li:last-child .Algorithm-startButton',
+        position: 'top',
         title: <div className={styles.title}>Select an Algorithm</div>,
         body: <div className={styles.body}>
           We&apos;ll use this one.
         </div>,
-        after() {
-          this.query('.AlgorithmList-root li:last-child .Algorithm-startButton').click()
+        before() {
+          setTimeout(() => {
+            this.query('.AlgorithmList-root li:last-child .Algorithm-startButton').click()
+          }, 2000)
         },
       },
       {
         step: 15,
-        selector: '.JobStatus-root:last-child',
+        selector: '.JobStatus-root ul',
         title: <div className={styles.title}>Job Pending</div>,
         body: <div className={styles.body}>
           Hello, World!
@@ -427,7 +430,7 @@ export class UserTour extends React.Component<any, any> {
   }
 
   private showArrow(show: boolean) {
-    let arrow: any = document.querySelector('.Tour-arrow')
+    let arrow = this.query(`.${styles.arrow}`)
 
     if (arrow) {
       arrow.style.visibility = show ? 'visible' : 'hidden'
