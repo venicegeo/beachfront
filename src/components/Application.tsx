@@ -157,8 +157,15 @@ export class Application extends React.Component<Props, State> {
     if (this.state.isLoggedIn && !this.state.isSessionExpired) {
       this.initializeServices()
       this.startBackgroundTasks()
-      this.refreshRecords()
-          .then(this.importJobsIfNeeded.bind(this))
+      this.refreshRecords().then(() => {
+        let [jobId] = this.state.route.jobIds
+
+        if (jobId && !this.state.selectedFeature) {
+          this.setState({
+            selectedFeature: this.state.jobs.records.find(job => job.id === jobId),
+          })
+        }
+      }).then(this.importJobsIfNeeded.bind(this))
       this.startIdleTimer()
     }
   }
