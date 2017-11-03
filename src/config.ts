@@ -68,3 +68,16 @@ export const SCENE_TILE_PROVIDERS = [
     attributions: '&copy; <a href="https://www.planet.com" target="_blank" rel="noopener">Planet Labs (Copernicus Sentinel-2)</a>',
   },
 ]
+
+export const TOUR = {
+  basemap: 'OSM',
+  bboxName: 'Cuba',
+  bbox: [-85, 19.7, -74, 23.4],
+  zoom: 6,
+  searchCriteria: {
+    dateFrom: '2017-07-01',
+    dateTo: '2017-10-31',
+    cloudCover: 8,
+    source: 'landsat',
+  },
+}

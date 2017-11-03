@@ -113,3 +113,8 @@
   margin: 0 5px;
   padding: 5px 10px;
 }
+
+.status {
+  font-weight: bold;
+  text-transform: uppercase;
+}

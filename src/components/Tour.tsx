@@ -18,10 +18,11 @@ import * as React from 'react'
 import {TYPE_SCENE} from '../constants'
 import Tour from 'react-user-tour'
 import {createSearchCriteria} from './CreateJob'
+import {TOUR} from '../config'
 
 const styles: any = require('./Tour.css')
 
-const Arrow = ({ position}) => {
+const Arrow = ({ position }) => {
   const classnames = {
     bottom: 'arrow-up',
     bottomLeft: 'arrow-up',
@@ -34,20 +35,72 @@ const Arrow = ({ position}) => {
   return <div className={`${styles.arrow} ${styles[classnames[position]]}`}/>
 }
 
-export class UserTour extends React.Component<any, any> {
-  private steps: any[]
-  private bbox: number[]
-  private searchCriteria: any
+const ImageCount = (props: any) => {
+  return <strong> {props.tour.imageCount} </strong>
+}
+
+const SourceName = (props: any) => {
+  return <q>{props.tour.sourceName}</q>
+}
+
+class JobStatus extends React.Component<any, any> {
+  private interval: number
+  private app: any
 
   constructor(props: any) {
     super(props)
 
-    this.bbox = [41.95, 11.12, 43.69, 12.22]
-    this.searchCriteria = {
-      dateFrom: '2017-10-01',
-      dateTo: '2017-10-31',
-      cloudCover: 8,
-      source: 'sentinel',
+    this.app = this.props.tour.props.application
+    this.state = { status: null }
+  }
+
+  componentDidMount() {
+    this.interval = setInterval(() => {
+      let jobs = this.app.state.jobs.records
+      let job = jobs[jobs.length - 1]
+
+      if (job && this.state.status !== job.properties.status) {
+        this.setState({ status: job.properties.status })
+      }
+
+      if (/success/i.test(this.state.status)) {
+        clearInterval(this.interval)
+      }
+    }, 250)
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.interval)
+  }
+
+  render() {
+    return (
+      <span className={styles.status}>{this.state.status}</span>
+    )
+  }
+}
+
+export class UserTour extends React.Component<any, any> {
+  private basemap: string
+  private bbox: [number, number, number, number]
+  private bboxName: string
+  private searchCriteria: any
+  private steps: any[]
+  private zoom: number
+
+  constructor(props: any) {
+    super(props)
+
+    this.basemap = TOUR.basemap
+    this.bbox = TOUR.bbox as [number, number, number, number]
+    this.bboxName = TOUR.bboxName
+    this.searchCriteria = TOUR.searchCriteria
+    this.zoom = TOUR.zoom
+
+    this.state = {
+      changing: false,
+      isTourActive: false,
+      tourStep: 1,
     }
 
     this.steps = [
@@ -66,7 +119,7 @@ export class UserTour extends React.Component<any, any> {
         position: 'left',
         title: <div className={styles.title}>Select a Basemap</div>,
         body: <div className={styles.body}>
-          You may choose a basemap here.  We&apos;ll use OSM.
+          You may choose a basemap here.  We&apos;ll use {this.basemap}.
         </div>,
         async before() {
           if (!this.query('.BasemapSelect-root.BasemapSelect-isOpen')) {
@@ -74,7 +127,13 @@ export class UserTour extends React.Component<any, any> {
           }
         },
         async after() {
-          this.query('.BasemapSelect-options li').click()
+          let basemaps: any = document.querySelectorAll('.BasemapSelect-options li')
+
+          basemaps.forEach(basemap => {
+            if (basemap.textContent === this.basemap) {
+              basemap.click()
+            }
+          })
         },
       },
       {
@@ -86,10 +145,25 @@ export class UserTour extends React.Component<any, any> {
         title: <div className={styles.title}>View Area of Interest</div>,
         body: <div className={styles.body}>
           Then we need to pan to an area of interest.
-          We&apos;ll use a section of Djibouti.
+          We&apos;ll look at {this.bboxName}.
         </div>,
         before() {
           return this.navigateTo('/')
+        },
+        after() {
+          let app = this.props.application
+          let searchCriteria = createSearchCriteria()
+
+          app.setState({ searchCriteria })
+          sessionStorage.setItem('searchCriteria', JSON.stringify(searchCriteria))
+
+          return this.navigateTo('/').then(() => {
+            // Pan to the center of the bound box that we will highlight later.
+            app.panTo([
+              (this.bbox[0] + this.bbox[2]) / 2,
+              (this.bbox[1] + this.bbox[3]) / 2,
+            ], this.zoom)
+          })
         },
       },
       {
@@ -100,19 +174,6 @@ export class UserTour extends React.Component<any, any> {
         body: <div className={styles.body}>
           Now we need to create a job.
         </div>,
-        before() {
-          let searchCriteria = createSearchCriteria()
-
-          this.props.application.setState({ searchCriteria })
-          sessionStorage.setItem('searchCriteria', JSON.stringify(searchCriteria))
-
-          return this.navigateTo('/').then(() => {
-            this.props.application.panTo([
-              (this.bbox[0] + this.bbox[2]) / 2,
-              (this.bbox[1] + this.bbox[3]) / 2,
-            ], 8)
-          })
-        },
       },
       {
         step: 5,
@@ -125,6 +186,7 @@ export class UserTour extends React.Component<any, any> {
           But we&apos;ll do it for you this time.
         </div>,
         before() {
+          this.props.application.handleClearBbox()
           return this.navigateTo('/create-job')
         },
         after() {
@@ -165,7 +227,7 @@ export class UserTour extends React.Component<any, any> {
         verticalOffset: -13,
         title: <div className={styles.title}>Select the Imagery Source</div>,
         body: <div className={styles.body}>
-          Select the imagery source.  We&apos;ll use Sentinel-2 for now.
+          Select the imagery source.  We&apos;ll use <SourceName tour={this}/> for now.
         </div>,
         async after() {
           let app = this.props.application
@@ -288,18 +350,11 @@ export class UserTour extends React.Component<any, any> {
         body: <div className={styles.body}>
           Just click the button to submit the job.
         </div>,
-        after() {
-          return new Promise(resolve => {
-            let app = this.props.application
+        async after() {
+          if (!this.props.application.state.searchResults) {
             this.query('.ImagerySearch-controls button').click()
             this.showArrow(false)
-            let interval = setInterval(() => {
-              if (app.state.searchResults) {
-                clearInterval(interval)
-                resolve()
-              }
-            }, 100)
-          })
+          }
         },
       },
       {
@@ -308,32 +363,31 @@ export class UserTour extends React.Component<any, any> {
         hideArrow: true,
         title: <div className={styles.title}>Imagery Results</div>,
         body: <div className={styles.body}>
-          Here are outlines of the <span className="count"> images </span>
+          Here are outlines of the <ImageCount tour={this}/>
           matching the search criteria.  Click on one to load the image
           itself&hellip; We&apos;ll select one for you for now.
         </div>,
-        async before() {
-          let app = this.props.application
-          let count = app.state.searchResults && app.state.searchResults.count
-          let text = (count === 1) ? 'one image' : `${count} images`
-
-          let fn = () => {
-            let elem = this.query(`.${styles.body} .count`)
-
-            if (elem) {
-              elem.innerText = ` ${text} `
-            } else {
-              setTimeout(fn, 100)
-            }
-          }
-
-          fn()
+        before() {
+          return new Promise(resolve => {
+            let interval = setInterval(() => {
+              if (this.props.application.state.searchResults) {
+                clearInterval(interval)
+                resolve()
+              }
+            }, 100)
+          })
         },
         after() {
           return new Promise(resolve => {
             let app = this.props.application
-            let features = app.state.searchResults.images.features
-            let feature = features[Math.floor(features.length / 2)]
+
+            // Get the feature with the least amount of cloud cover.
+            let feature = app.state.searchResults.images.features.filter(f => {
+              // Eliminate 0 cloud cover, that may mean a bad image.
+              return f.properties.cloudCover
+            }).sort((a, b) => {
+              return a.properties.cloudCover - b.properties.cloudCover
+            }).shift()
 
             /*
             Manually setting this 'type' here is a hack to force the
@@ -350,6 +404,7 @@ export class UserTour extends React.Component<any, any> {
       {
         step: 12,
         selector: '.FeatureDetails-root',
+        position: 'left',
         horizontalOffset: 15,
         verticalOffset: 50,
         title: <div className={styles.title}>Image Details</div>,
@@ -396,31 +451,20 @@ export class UserTour extends React.Component<any, any> {
         title: <div className={styles.title}>Job Status</div>,
         body: <div className={styles.body}>
           Here is the job you just submitted.
-          Currently the status is <q>unknown</q>.
+          Currently its status is <JobStatus tour={this}/>.
           On the map you will see the job and its status as well.
           Click on the job in the list to see more details.
         </div>,
-        async before() {
-          let interval = setInterval(() => {
-            let app = this.props.application
-            let job = app.state.jobs.records[app.state.jobs.records.length - 1]
-            let elem = this.query(`.${styles.body} q`)
-
-            if (elem && job) {
-              elem.innerText = job.properties.status
-
-              if (job.properties.status === 'Running') {
-                clearInterval(interval)
-              }
-            } else {
-              clearInterval(interval)
-            }
-          }, 500)
-        },
         after() {
           return new Promise(resolve => {
-            this.query('.JobStatusList-root .JobStatus-root:last-child .JobStatus-details').click()
-            setTimeout(resolve, 500)
+            let elem = this.query('.JobStatusList-root .JobStatus-root:last-child')
+
+            if (!elem || Array.from(elem.classList).find(n => n === 'JobStatus-isExpanded')) {
+              resolve()
+            } else {
+              elem.querySelector('.JobStatus-details').click()
+              setTimeout(resolve, 250)
+            }
           })
         },
       },
@@ -471,11 +515,6 @@ export class UserTour extends React.Component<any, any> {
         </div>,
       },
     ]
-
-    this.state = {
-      isTourActive: false,
-      tourStep: 1,
-    }
 
     this.gotoStep = this.gotoStep.bind(this)
     this.isElementInViewport = this.isElementInViewport.bind(this)
@@ -621,11 +660,41 @@ export class UserTour extends React.Component<any, any> {
     })
   }
 
-  private showArrow(show: boolean) {
+  private showArrow(show: boolean): void {
     let arrow = this.query(`.${styles.arrow}`)
 
     if (arrow) {
       arrow.style.visibility = show ? 'visible' : 'hidden'
     }
+  }
+
+  private get imageCount(): string {
+    let results = this.props.application.state.searchResults
+
+    switch (results && results.count) {
+      case null:
+      case undefined:
+        return 'images'
+      case 1:
+        return 'one image'
+      default:
+        return `${results.count} images`
+    }
+  }
+
+  private get jobStatus(): string {
+    let jobs = this.props.application.state.jobs
+    let job = jobs && jobs.records && jobs.records[jobs.records.length - 1]
+
+    return job && job.properties && job.properties.status || 'Unknown'
+  }
+
+  private get sourceName() {
+    let options = document.querySelectorAll('.CatalogSearchCriteria-source select option')
+    let option: any = options && Array.from(options).find((o: any) => {
+      return o.value === this.searchCriteria.source
+    })
+
+    return option && option.text
   }
 }
