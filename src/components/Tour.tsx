@@ -516,6 +516,7 @@ export class UserTour extends React.Component<any, any> {
       },
     ]
 
+    this.cancel = this.cancel.bind(this)
     this.gotoStep = this.gotoStep.bind(this)
     this.isElementInViewport = this.isElementInViewport.bind(this)
     this.navigateTo = this.navigateTo.bind(this)
@@ -524,6 +525,10 @@ export class UserTour extends React.Component<any, any> {
     this.scrollIntoView = this.scrollIntoView.bind(this)
     this.showArrow = this.showArrow.bind(this)
     this.start = this.start.bind(this)
+  }
+
+  cancel() {
+    this.setState({ changing: false, isTourActive: false })
   }
 
   componentDidMount() {
@@ -542,21 +547,33 @@ export class UserTour extends React.Component<any, any> {
     }
   }
 
+  /*
+   * The outer div will act as an application overlay while the tour is active,
+   * preventing the user from interacting with the application.  The next div
+   * will wrap the tour itself, preventing clicks in the tour from propatating
+   * to the overlay.
+   */
   render() {
     return (
-      <Tour
-        active={this.state.isTourActive}
-        arrow={Arrow}
-        buttonStyle={{}}
-        className={styles.root}
-        closeButtonText="&#10799;"
-        onBack={step => this.gotoStep(step)}
-        onCancel={() => this.setState({ changing: false, isTourActive: false })}
-        onNext={step => this.gotoStep(step)}
-        ref="tour"
-        step={this.state.tourStep}
-        steps={this.steps}
-      />
+      <div
+        className={`${styles.root} ${this.state.isTourActive ? styles.overlay : ''}`}
+        onClick={event => event.stopPropagation()}
+      >
+        <div onClick={event => event.stopPropagation()}>
+          <Tour
+            active={this.state.isTourActive}
+            arrow={Arrow}
+            buttonStyle={{}}
+            closeButtonText="&#10799;"
+            onBack={step => this.gotoStep(step)}
+            onCancel={this.cancel}
+            onNext={step => this.gotoStep(step)}
+            ref="tour"
+            step={this.state.tourStep}
+            steps={this.steps}
+          />
+        </div>
+      </div>
     )
   }
 
