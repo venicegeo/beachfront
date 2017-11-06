@@ -125,3 +125,23 @@
   font-weight: bold;
   text-transform: uppercase;
 }
+
+label.apiKey {
+  display: flex;
+  flex-direction: column;
+  margin: 12px 0;
+}
+
+label.apiKey > span {
+  flex: 0 0 auto;
+}
+
+label.apiKey > input {
+  flex: 0 1 100%;
+  margin: 0 6px;
+}
+
+.getApiKey {
+  font-style: italic;
+}
+

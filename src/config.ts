@@ -70,6 +70,10 @@ export const SCENE_TILE_PROVIDERS = [
 ]
 
 export const TOUR = {
+  apiKey: {
+    instructions: 'To get an API key, climb up on top of your desk and call out for someone who knows how to get one.',
+    url: `https://www.${PLANET_BASE_URL}/`,
+  },
   basemap: 'OSM',
   bboxName: 'Cuba',
   bbox: [-85, 19.7, -74, 23.4],

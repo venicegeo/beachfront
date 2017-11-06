@@ -81,6 +81,7 @@ class JobStatus extends React.Component<any, any> {
 }
 
 export class UserTour extends React.Component<any, any> {
+  private apiKey: any
   private basemap: string
   private bbox: [number, number, number, number]
   private bboxName: string
@@ -91,6 +92,7 @@ export class UserTour extends React.Component<any, any> {
   constructor(props: any) {
     super(props)
 
+    this.apiKey = TOUR.apiKey
     this.basemap = TOUR.basemap
     this.bbox = TOUR.bbox as [number, number, number, number]
     this.bboxName = TOUR.bboxName
@@ -247,9 +249,28 @@ export class UserTour extends React.Component<any, any> {
         verticalOffset: -13,
         title: <div className={styles.title}>Enter the API Key</div>,
         body: <div className={styles.body}>
-          Enter the API key.
+          <div className={styles.getApiKey}>
+            If you don&apos;t yet have an API key then you&apos;ll have to
+            close this tour until you&apos;re able to obtain one.
+          </div>
+          <div>
+            <label className={styles.apiKey}>
+              <span>Enter your API key&hellip;</span>
+              <input defaultValue={localStorage.getItem('catalog_apiKey')} type="password"/>
+            </label>
+          </div>
+          <div>{this.apiKey.instructions}</div>
+          {this.apiKey.url ? <div>
+            <a href={this.apiKey.url} target="_blank">{this.apiKey.url}</a>
+          </div> : null}
         </div>,
-        // TODO:  What am I going to do about this?
+        async after() {
+          let input = this.query(`.${styles.apiKey} input`)
+
+          this.props.application.setState({
+            catalogApiKey: input.value,
+          })
+        },
       },
       {
         step: 8,
