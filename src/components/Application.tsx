@@ -640,7 +640,7 @@ export class Application extends React.Component<Props, State> {
   }
 
   private startBackgroundTasks() {
-    // sessionService.onExpired(() => this.setState({ isSessionExpired: true }))
+    sessionService.onExpired(() => this.setState({ isSessionExpired: true }))
     updateService.startWorker({
       onAvailable: () => this.setState({ isUpdateAvailable: true }),
     })
