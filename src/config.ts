@@ -70,10 +70,20 @@ export const SCENE_TILE_PROVIDERS = [
 ]
 
 export const TOUR = {
-  apiKey: {
-    instructions: 'To get an API key, climb up on top of your desk and call out for someone who knows how to get one.',
-    url: `https://www.${PLANET_BASE_URL}/`,
-  },
+  /*
+  apiKeyInstructions: `
+    To get an API key, ask the experts at <a
+      href="https://rocketchat.gs.mil/channel/planetdas_askanexpert"
+      target="_blank"
+    >Rocket.Chat #planetdas_askanexpert</a>.
+  `,
+  */
+  apiKeyInstructions: `
+    To get an API key you must have a Planet account.  For more information see <a
+      href="https://support.planet.com/hc/en-us/articles/212318178-What-is-my-API-key-"
+      target="_blank"
+    >What Is My API Key?</a>
+  `,
   basemap: 'OSM',
   bboxName: 'Cuba',
   bbox: [-85, 19.7, -74, 23.4],

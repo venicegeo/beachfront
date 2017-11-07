@@ -129,7 +129,7 @@
 label.apiKey {
   display: flex;
   flex-direction: column;
-  margin: 12px 0;
+  margin: 12px;
 }
 
 label.apiKey > span {
@@ -137,11 +137,11 @@ label.apiKey > span {
 }
 
 label.apiKey > input {
+  border: 1px solid grey;
   flex: 0 1 100%;
-  margin: 0 6px;
+  padding: 4px 6px 3px;
 }
 
 .getApiKey {
   font-style: italic;
 }
-

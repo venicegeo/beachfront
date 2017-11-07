@@ -22,6 +22,10 @@ import {TOUR} from '../config'
 
 const styles: any = require('./Tour.css')
 
+const ApiKeyInstructions = (props: any) => {
+  return <div dangerouslySetInnerHTML={{ __html: props.text }}/>
+}
+
 const Arrow = ({ position }) => {
   const classnames = {
     bottom: 'arrow-up',
@@ -81,7 +85,7 @@ class JobStatus extends React.Component<any, any> {
 }
 
 export class UserTour extends React.Component<any, any> {
-  private apiKey: any
+  private apiKeyInstructions: any
   private basemap: string
   private bbox: [number, number, number, number]
   private bboxName: string
@@ -92,7 +96,7 @@ export class UserTour extends React.Component<any, any> {
   constructor(props: any) {
     super(props)
 
-    this.apiKey = TOUR.apiKey
+    this.apiKeyInstructions = TOUR.apiKeyInstructions
     this.basemap = TOUR.basemap
     this.bbox = TOUR.bbox as [number, number, number, number]
     this.bboxName = TOUR.bboxName
@@ -259,10 +263,7 @@ export class UserTour extends React.Component<any, any> {
               <input defaultValue={localStorage.getItem('catalog_apiKey')} type="password"/>
             </label>
           </div>
-          <div>{this.apiKey.instructions}</div>
-          {this.apiKey.url ? <div>
-            <a href={this.apiKey.url} target="_blank">{this.apiKey.url}</a>
-          </div> : null}
+          <ApiKeyInstructions text={this.apiKeyInstructions}/>
         </div>,
         async after() {
           let input = this.query(`.${styles.apiKey} input`)
@@ -389,11 +390,16 @@ export class UserTour extends React.Component<any, any> {
           itself&hellip; We&apos;ll select one for you for now.
         </div>,
         before() {
-          return new Promise(resolve => {
+          return new Promise((resolve, reject) => {
+            let timeout = 300000
+            let t0 = Date.now()
             let interval = setInterval(() => {
               if (this.props.application.state.searchResults) {
                 clearInterval(interval)
                 resolve()
+              } else if (Date.now() - t0 > timeout) {
+                clearInterval(interval)
+                reject(`Timed out after ${timeout / 1000} seconds waiting for imagery results.`)
               }
             }, 100)
           })
@@ -455,11 +461,17 @@ export class UserTour extends React.Component<any, any> {
         after() {
           this.query('.AlgorithmList-root li:last-child .Algorithm-startButton').click()
 
-          return new Promise(resolve => {
-            let app = this.props.application, interval = setInterval(() => {
+          return new Promise((resolve, reject) => {
+            let timeout = 30000
+            let t0 = Date.now()
+            let app = this.props.application
+            let interval = setInterval(() => {
               if (app.state.route.pathname === '/jobs') {
                 clearInterval(interval)
                 resolve()
+              } else if (Date.now() - t0 > timeout) {
+                clearInterval(interval)
+                reject(`Timed out after ${timeout / 1000} seconds waiting for /jobs.`)
               }
             }, 250)
           })
@@ -607,6 +619,10 @@ export class UserTour extends React.Component<any, any> {
     return new Promise(resolve => {
       let lastStep = this.steps.find(i => i.step === this.state.tourStep)
       let $after = lastStep && lastStep.after ? lastStep.after.apply(this) : Promise.resolve()
+      let $catch = (msg) => {
+        console.warn(msg)
+        this.setState({ changing: false })
+      }
 
       $after.then(() => {
         let nextStep = this.steps.find(i => i.step === n)
@@ -620,11 +636,9 @@ export class UserTour extends React.Component<any, any> {
               tourStep: n,
             })
             resolve()
-          }).catch(() => {
-            this.setState({ changing: false })
-          })
-        })
-      })
+          }).catch($catch)
+        }).catch($catch)
+      }).catch($catch)
     })
   }
 
@@ -643,13 +657,18 @@ export class UserTour extends React.Component<any, any> {
     if (pathname === app.state.route.pathname) {
       return Promise.resolve(pathname)
     } else {
-      return new Promise(resolve => {
+      return new Promise((resolve, reject) => {
         app.navigateTo({ pathname: pathname })
 
+        let timeout = 30000
+        let t0 = Date.now()
         let interval = setInterval(() => {
           if (pathname === app.state.route.pathname) {
             clearInterval(interval)
             resolve(pathname)
+          } else if (Date.now() - t0 > timeout) {
+            clearInterval(interval)
+            reject(`Timed out after ${timeout / 1000} seconds waiting for ${pathname}.`)
           }
         }, 10)
       })
@@ -669,8 +688,8 @@ export class UserTour extends React.Component<any, any> {
     })
   }
 
-  private query(selector: string): any {
-    return document.querySelector(selector)
+  private query(selector: string): HTMLElement {
+    return document.querySelector(selector) as HTMLElement
   }
 
   private scrollIntoView(selector: any): Promise<any> {
@@ -683,10 +702,15 @@ export class UserTour extends React.Component<any, any> {
         } else {
           elem.scrollIntoView({ behavior: 'smooth' })
 
+          let timeout = 30000
+          let t0 = Date.now()
           let interval = setInterval(() => {
             if (this.isElementInViewport(elem)) {
               clearInterval(interval)
               setTimeout(resolve, 100)
+            } else if (Date.now() - t0 > timeout) {
+              clearInterval(interval)
+              reject(`Timed out after ${timeout / 1000} seconds scrolling ${selector} into view.`)
             }
           }, 100)
         }
