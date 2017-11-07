@@ -22,10 +22,6 @@ import {TOUR} from '../config'
 
 const styles: any = require('./Tour.css')
 
-const ApiKeyInstructions = (props: any) => {
-  return <div dangerouslySetInnerHTML={{ __html: props.text }}/>
-}
-
 const Arrow = ({ position }) => {
   const classnames = {
     bottom: 'arrow-up',
@@ -96,7 +92,7 @@ export class UserTour extends React.Component<any, any> {
   constructor(props: any) {
     super(props)
 
-    this.apiKeyInstructions = TOUR.apiKeyInstructions
+    this.apiKeyInstructions = <div dangerouslySetInnerHTML={{ __html: TOUR.apiKeyInstructions }}/>
     this.basemap = TOUR.basemap
     this.bbox = TOUR.bbox as [number, number, number, number]
     this.bboxName = TOUR.bboxName
@@ -263,7 +259,7 @@ export class UserTour extends React.Component<any, any> {
               <input defaultValue={localStorage.getItem('catalog_apiKey')} type="password"/>
             </label>
           </div>
-          <ApiKeyInstructions text={this.apiKeyInstructions}/>
+          {this.apiKeyInstructions}
         </div>,
         async after() {
           let input = this.query(`.${styles.apiKey} input`)
