@@ -554,6 +554,7 @@ export class UserTour extends React.Component<any, any> {
     this.scrollIntoView = this.scrollIntoView.bind(this)
     this.showArrow = this.showArrow.bind(this)
     this.start = this.start.bind(this)
+    this.syncPromiseExec = this.syncPromiseExec.bind(this)
   }
 
   cancel() {
@@ -608,34 +609,43 @@ export class UserTour extends React.Component<any, any> {
 
   private gotoStep(n) {
     if (this.state.changing) {
-      return Promise.resolve()
+      return Promise.reject('Tour step is in process of changing.')
+    } else {
+      this.state.changing = true
     }
 
-    this.state.changing = true
-    return new Promise(resolve => {
-      let lastStep = this.steps.find(i => i.step === this.state.tourStep)
-      let $after = lastStep && lastStep.after ? lastStep.after.apply(this) : Promise.resolve()
-      let $catch = (msg) => {
-        console.warn(msg)
-        this.setState({ changing: false })
+    let functions = []
+    let lastStep = this.steps.find(i => i.step === this.state.tourStep)
+    let nextStep = this.steps.find(i => i.step === n)
+
+    if (lastStep && lastStep.after) {
+      functions.push(lastStep.after.bind(this))
+    }
+
+    if (nextStep) {
+      if (nextStep.before) {
+        functions.push(nextStep.before.bind(this))
       }
 
-      $after.then(() => {
-        let nextStep = this.steps.find(i => i.step === n)
-        let $before = nextStep && nextStep.before ? nextStep.before.apply(this) : Promise.resolve()
+      functions.push(() => {
+        return new Promise(resolve => {
+          this.showArrow(!nextStep.hideArrow)
+          this.setState({ changing: false, tourStep: n })
+          resolve()
+        })
+      })
+    }
 
-        $before.then(() => {
-          this.scrollIntoView(nextStep.selector).then(() => {
-            this.showArrow(!nextStep.hideArrow)
-            this.setState({
-              changing: false,
-              tourStep: n,
-            })
-            resolve()
-          }).catch($catch)
-        }).catch($catch)
-      }).catch($catch)
+    let rc = this.syncPromiseExec(functions)
+
+    rc.then(() => {
+      this.setState({ changing: false })
+    }).catch(msg => {
+      console.warn(msg)
+      this.setState({ changing: false })
     })
+
+    return rc
   }
 
   private isElementInViewport(elem): boolean {
@@ -724,6 +734,10 @@ export class UserTour extends React.Component<any, any> {
     if (arrow) {
       arrow.style.visibility = show ? 'visible' : 'hidden'
     }
+  }
+
+  private syncPromiseExec(functions: any[]): Promise<any> {
+    return functions.reduce((current, next) => current.then(next), Promise.resolve())
   }
 
   private get imageCount(): string {
