@@ -472,6 +472,8 @@ export class PrimaryMap extends React.Component<Props, State> {
     const {basemapIndex, zoom, center} = this.props.view
     this.setState({basemapIndex})
     const view = this.map.getView()
+    this.map.beforeRender(ol.animation.pan({ duration: 2000, source: view.getCenter() }),
+      ol.animation.zoom({ duration: 2000, resolution: view.getResolution() }))
     view.setCenter(view.constrainCenter(ol.proj.transform(center, 'EPSG:4326', 'EPSG:3857')))
     view.setZoom(zoom)
   }
