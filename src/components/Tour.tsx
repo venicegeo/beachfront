@@ -629,9 +629,11 @@ export class UserTour extends React.Component<any, any> {
 
       functions.push(() => {
         return new Promise(resolve => {
-          this.showArrow(!nextStep.hideArrow)
-          this.setState({ changing: false, tourStep: n })
-          resolve()
+          this.scrollIntoView(nextStep.selector).then(() => {
+            this.showArrow(!nextStep.hideArrow)
+            this.setState({ changing: false, tourStep: n })
+            resolve()
+          })
         })
       })
     }

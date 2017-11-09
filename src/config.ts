@@ -85,13 +85,13 @@ export const TOUR = {
     >What Is My API Key?</a>
   `,
   basemap: 'OSM',
-  bboxName: 'Cuba',
   bbox: [-85, 19.7, -74, 23.4],
-  zoom: 6,
+  bboxName: 'Cuba',
   searchCriteria: {
+    cloudCover: 8,
     dateFrom: '2017-07-01',
     dateTo: '2017-10-31',
-    cloudCover: 8,
     source: 'landsat',
   },
+  zoom: 6,
 }
