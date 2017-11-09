@@ -95,12 +95,16 @@
 }
 
 .linkTour.link .icon {
-  margin: 9px 9px -9px;
+  position: relative;
+  top: 9px;
+  left: 9px;
   width: 100%;
 }
 
 .linkTour.link:hover .icon {
-  margin: 7px 7px -15px;
+  position: relative;
+  top: 11px;
+  left: 7px;
   width: 115%;
 }
 
