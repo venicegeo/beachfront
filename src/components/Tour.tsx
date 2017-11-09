@@ -170,9 +170,8 @@ export class UserTour extends React.Component<any, any> {
       },
       {
         step: 4,
-        selector: '.Navigation-linkCreateJob',
+        selector: '.Navigation-linkCreateJob svg',
         title: <div className={styles.title}>Create a Job</div>,
-        verticalOffset: 50,
         body: <div className={styles.body}>
           Now we need to create a job.
         </div>,
