@@ -102,10 +102,9 @@
 }
 
 .linkTour.link:hover .icon {
-  position: relative;
-  top: 11px;
-  left: 7px;
-  width: 115%;
+  top: 13px;
+  left: 5px;
+  width: 129%;
 }
 
 /* Link: Icon
