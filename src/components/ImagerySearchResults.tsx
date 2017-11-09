@@ -43,17 +43,30 @@ export class ImagerySearchResults extends React.Component<Props, void> {
 
   private renderContent(imagery) {
     if (this.props.isSearching) {
-      return <div className={styles.searching}><span>Searching for Imagery...</span></div>
+      return <div className={styles.searching}>
+        <span>Searching for Imagery&hellip;</span>
+      </div>
     }
+
     if (!imagery.totalCount) {
       return <div className={styles.noResults}>No imagery found</div>
     }
+
     const {page, pages} = paginate(imagery)
+
+    if (page === 1 && pages === 1) {
+      return null
+    }
+
     return (
       <div className={styles.pager}>
-        <button disabled={page <= 1} onClick={this.emitPageBack}><i className="fa fa-chevron-left"/></button>
+        <button disabled={page <= 1} onClick={this.emitPageBack}>
+          <i className="fa fa-chevron-left"/>
+        </button>
         <span>Page {page} of {pages}</span>
-        <button disabled={page >= pages} onClick={this.emitPageForward}><i className="fa fa-chevron-right"/></button>
+        <button disabled={page >= pages} onClick={this.emitPageForward}>
+          <i className="fa fa-chevron-right"/>
+        </button>
       </div>
     )
   }
