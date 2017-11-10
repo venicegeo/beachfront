@@ -46,12 +46,17 @@
    ========================================================================= */
 
 .root ul {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
 .root li {
+  display: flex;
+  flex: 1 1 auto;
   margin: 0;
   padding: 0;
   background-image: linear-gradient(#54b4eb, #2fa4e7);
@@ -65,19 +70,12 @@
    ========================================================================= */
 
 .link {
+  display: flex;
+  justify-content: center;
   position: relative;
-  display: block;
-  padding: 0;
-  width: 50px;
-  line-height: 50px;
-  text-align: center;
   text-decoration: none;
-  transition: .1s ease-in;
+  transition: 0.1s ease-in;
   transition-property: height, line-height, background-color, color;
-}
-
-.atHome .link {
-  line-height: 150px;
 }
 
 .link:hover {
@@ -94,27 +92,12 @@
   composes: link;
 }
 
-.linkTour.link .icon {
-  position: relative;
-  top: 9px;
-  left: 9px;
-  width: 100%;
-}
-
-.linkTour.link:hover .icon {
-  top: 13px;
-  left: 5px;
-  width: 129%;
-}
-
 /* Link: Icon
    ========================================================================= */
 
 .link .icon {
-  display: inline-block;
   fill: #9BDBFF;
   width: 70%;
-  vertical-align: middle;
 }
 
 .iconShadow {
@@ -206,6 +189,7 @@
 li.home {
   background-color: transparent;
   box-shadow: none;
+  flex: 0 0 auto;
   transition: .1s ease-in-out;
   transition-property: height;
 }
@@ -213,6 +197,7 @@ li.home {
 .home .link {
   position: relative;
   height: 60px;
+  width: 100%;
 }
 
 .atHome .home .link {
