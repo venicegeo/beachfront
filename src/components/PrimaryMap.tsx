@@ -26,6 +26,7 @@ import * as throttle from 'lodash/throttle'
 import {ExportControl} from '../utils/openlayers.ExportControl'
 import {SearchControl} from '../utils/openlayers.SearchControl'
 import {MeasureControl} from '../utils/openlayers.MeasureControl'
+import {ScaleControl} from '../utils/openlayers.ScaleControl'
 import {BasemapSelect} from './BasemapSelect'
 import {FeatureDetails} from './FeatureDetails'
 import {LoadingAnimation} from './LoadingAnimation'
@@ -821,6 +822,7 @@ function generateControls() {
     new ExportControl(styles.export),
     new SearchControl(styles.search),
     new MeasureControl(styles.measure),
+    new ScaleControl(styles.scale),
   ])
 }
 

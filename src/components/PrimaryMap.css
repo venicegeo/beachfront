@@ -162,6 +162,26 @@
   right: 70px;
 }
 
+/* OpenLayers Controls: Scale Tool
+   ========================================================================= */
+
+.scale {
+  background-color: rgba(255, 255, 255, 0.85);
+  /*
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3);
+  */
+  padding: 1px 5px 0;
+  right: 40px;
+  top: 40px;
+}
+
+.scale:hover {
+  background-color: white;
+  /*
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3), 0 5px 0 1px rgba(0, 0, 0, 0.1);
+  */
+}
+
 /* OpenLayers Controls: Zoom
    ========================================================================= */
 
