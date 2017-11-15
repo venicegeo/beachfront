@@ -60,6 +60,13 @@ export class ScaleControl extends ol.control.Control {
     resolution = resolution < view.getMaxResolution() ? resolution : view.getMaxResolution()
     resolution = resolution > view.getMinResolution() ? resolution : view.getMinResolution()
 
+    /*
+    // This commented-out code should replace the following code after switching to OpenLayers 4.
+    this.map.getView().animate({
+      duration: 1618 * Math.abs(Math.log10(resolution / oldResolution)),
+      resolution: resolution,
+    })
+    */
     map.beforeRender(ol.animation.zoom({
       duration: 1618 * Math.abs(Math.log10(resolution / oldResolution)),
       resolution: oldResolution,

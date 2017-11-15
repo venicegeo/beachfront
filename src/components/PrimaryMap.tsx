@@ -473,6 +473,15 @@ export class PrimaryMap extends React.Component<Props, State> {
     const {basemapIndex, zoom, center} = this.props.view
     this.setState({basemapIndex})
     const view = this.map.getView()
+
+    /*
+    // This commented-out code should replace the following code after switching to OpenLayers 4.
+    view.animate({
+      center: view.constrainCenter(ol.proj.transform(center, 'EPSG:4326', 'EPSG:3857')),
+      duration: 2000,
+      zoom: zoom,
+    })
+    */
     this.map.beforeRender(ol.animation.pan({ duration: 2000, source: view.getCenter() }),
       ol.animation.zoom({ duration: 2000, resolution: view.getResolution() }))
     view.setCenter(view.constrainCenter(ol.proj.transform(center, 'EPSG:4326', 'EPSG:3857')))
