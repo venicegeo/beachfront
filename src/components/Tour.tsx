@@ -377,13 +377,13 @@ export class UserTour extends React.Component<any, any> {
       },
       {
         step: 11,
-        selector: '.ImagerySearchResults-pager',
+        selector: '.ImagerySearchResults-root',
         hideArrow: true,
         title: <div className={styles.title}>Imagery Results</div>,
         body: <div className={styles.body}>
           Here are outlines of the <ImageCount tour={this}/>
           matching the search criteria.  Click on one to load the image
-          itself&hellip; We&apos;ll select one for you for now.
+          itself&hellip; For now, we&apos;ll select one for you for now.
         </div>,
         before() {
           return new Promise((resolve, reject) => {
