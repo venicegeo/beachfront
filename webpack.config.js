@@ -27,6 +27,7 @@ const cssimport = require('postcss-import')
 const pkg = require('./package')
 
 const __environment__ = process.env.NODE_ENV || 'development'
+const COMPILER_TARGET = process.env.COMPILER_TARGET || (__environment__ === 'development' ? 'es6' : 'es5')
 
 module.exports = {
   devtool: '#cheap-module-eval-source-map',
@@ -34,13 +35,12 @@ module.exports = {
   context: __dirname,
   entry: './src/index.ts',
 
-  externals: {
+  /*externals: {
     'openlayers': 'ol'
-  },
+  },*/
 
   resolve: {
-    extensions: ['', '.tsx', '.ts', '.js'],
-    root: __dirname,
+    extensions: ['.tsx', '.ts', '.js'],
   },
 
   output: {
@@ -49,65 +49,70 @@ module.exports = {
   },
 
   module: {
-    preLoaders: [
+    rules: [
       {
-        test: /\.js$/,
-        loader: 'source-map',
+        test: /\.tsx?$/,
+        loader: 'tslint-loader',
+        enforce: 'pre',
         exclude: /node_modules/
       },
       {
         test: /\.tsx?$/,
-        loader: 'tslint',
-        exclude: /node_modules/
-      },
-    ],
-    loaders: [
-      {
-        test: /\.tsx?$/,
-        loader: 'ts',
-        exclude: /node_modules/
+        loader: 'ts-loader',
+        exclude: /node_modules/,
+        options: {
+          'compilerOptions': {
+            target: COMPILER_TARGET,
+          },
+         },
       },
       {
         test: /\.css$/,
-        loader: 'style!css',
+        loaders: ['style-loader', 'css-loader'],
         include: /node_modules/
       },
       {
         test: /\.css$/,
-        loader: 'style!css?module&localIdentName=[name]-[local]&importLoaders=1!postcss',
+        loaders: [
+          'style-loader',
+          {
+            loader: 'css-loader',
+            options: {
+              'module': true,
+              'localIdentName': '[name]-[local]',
+              'importLoaders': 1,
+            },
+          },
+          {
+            loader: 'postcss-loader',
+            options: {
+              'plugins': (webpack_) => ([
+                cssimport({ addDependencyTo: webpack_ }),
+                cssnext({ browsers: 'Firefox >= 38, Chrome >= 40' }),
+              ]),
+            },
+          },
+        ],
         exclude: /node_modules/
       },
       {
         test: /\.(png|jpg|gif)$/,
-        loader: 'file'
+        loader: 'file-loader'
       },
       {
         test: /\.(otf|eot|svg|ttf|woff)[^/]*$/,
-        loader: 'file'
+        loader: 'file-loader'
       },
     ]
   },
 
-  postcss: (webpack_) => ([
-    cssimport({ addDependencyTo: webpack_ }),
-    cssnext({ browsers: 'Firefox >= 38, Chrome >= 40' }),
-  ]),
-
-  ts: {
-    compilerOptions: {
-      target: __environment__ === 'development' ? 'es6' : 'es5',
-    },
-  },
-
-  devServer: {
-    stats: 'error-only',
-  },
-
   plugins: [
+/*
     new CopyWebpackPlugin([{
-      from: require.resolve('openlayers/dist/ol-debug.js'),
+      from: require.resolve('ol/dist/ol-debug.js'),
       to: 'ol.js',
     }]),
+*/
     new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify(__environment__),

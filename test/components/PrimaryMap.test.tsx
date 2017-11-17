@@ -15,7 +15,15 @@
  **/
 
 import * as React from 'react'
-import * as ol from 'openlayers'
+import proj from 'ol/proj'
+import Map from 'ol/map'
+import Polygon from 'ol/geom/polygon'
+import Tile from 'ol/layer/tile'
+import VectorLayer from 'ol/layer/vector'
+import Feature from 'ol/feature'
+import Base from 'ol/layer/base'
+import TileWMS from 'ol/source/tilewms'
+
 import {mount} from 'enzyme'
 import {assert} from 'chai'
 import * as sinon from 'sinon'
@@ -25,10 +33,10 @@ import {
 } from '../../src/components/PrimaryMap'
 
 interface Internals {
-  detectionsLayers: {[key: string]: ol.layer.Tile}
-  drawLayer: ol.layer.Vector
-  map: ol.Map
-  previewLayers: {[key: string]: ol.layer.Tile}
+  detectionsLayers: {[key: string]: Tile}
+  drawLayer: VectorLayer
+  map: Map
+  previewLayers: {[key: string]: Tile}
 }
 
 describe('<PrimaryMap/>', () => {
@@ -103,7 +111,7 @@ describe('<PrimaryMap/>', () => {
         logout={_props.logout}
       />,
     )
-    assert.instanceOf((wrapper.instance() as any as Internals).map, ol.Map)
+    assert.instanceOf((wrapper.instance() as any as Internals).map, Map)
     assert.instanceOf((wrapper.ref('container') as any).node.querySelector('canvas'), HTMLCanvasElement)
   })
 
@@ -134,7 +142,7 @@ describe('<PrimaryMap/>', () => {
       const wrapper = getComponent({ basemapIndex: 0, center: [0, 0], zoom: 5.5 })
       return awaitMap(() => {
         const view = (wrapper.instance() as any as Internals).map.getView()
-        assert.deepEqual(ol.proj.toLonLat(view.getCenter()), [0, 0])
+        assert.deepEqual(proj.toLonLat(view.getCenter()), [0, 0])
       })
     })
 
@@ -158,7 +166,7 @@ describe('<PrimaryMap/>', () => {
       wrapper.setProps({ view: { basemapIndex: 0, center: [30, 30], zoom: 5.5 } })
       return awaitMap(() => {
         const view = (wrapper.instance() as any as Internals).map.getView()
-        assert.deepEqual(ol.proj.toLonLat(view.getCenter()).map(Math.round), [30, 30])
+        assert.deepEqual(proj.toLonLat(view.getCenter()).map(Math.round), [30, 30])
       })
     })
 
@@ -216,7 +224,7 @@ describe('<PrimaryMap/>', () => {
       return awaitMap(() => {
         const layerSource = (wrapper.instance() as any as Internals).drawLayer.getSource()
         const features = layerSource.getFeatures()
-        const points = (features[0].getGeometry() as ol.geom.Polygon).getCoordinates()[0].map(p => ol.proj.toLonLat(p).map(Math.round))
+        const points = (features[0].getGeometry() as Polygon).getCoordinates()[0].map(p => proj.toLonLat(p).map(Math.round))
         assert.equal(features.length, 1)
         assert.deepEqual(points, [[0, 0], [0, 30], [30, 30], [30, 0], [0, 0]])
       })
@@ -228,7 +236,7 @@ describe('<PrimaryMap/>', () => {
       return awaitMap(() => {
         const layerSource = (wrapper.instance() as any as Internals).drawLayer.getSource()
         const features = layerSource.getFeatures()
-        const points = (features[0].getGeometry() as ol.geom.Polygon).getCoordinates()[0].map(p => ol.proj.toLonLat(p).map(Math.round))
+        const points = (features[0].getGeometry() as Polygon).getCoordinates()[0].map(p => proj.toLonLat(p).map(Math.round))
         assert.equal(features.length, 1)
         assert.deepEqual(points, [[-30, -30], [-30, 0], [0, 0], [0, -30], [-30, -30]])
       })
@@ -269,7 +277,7 @@ describe('<PrimaryMap/>', () => {
     it('sends correct catalog API key via XYZ', () => {
       const wrapper = getComponent('test-catalog-api-key')
       const sceneId = wrapper.prop('selectedFeature').id
-      const urls = ((wrapper.instance() as any as Internals).previewLayers[sceneId].getSource() as ol.source.TileWMS).getUrls()
+      const urls = ((wrapper.instance() as any as Internals).previewLayers[sceneId].getSource() as TileWMS).getUrls()
       assert.isTrue(urls.every(s => s.includes('test-catalog-api-key')))
     })
   })
@@ -317,19 +325,19 @@ describe('<PrimaryMap/>', () => {
 
     it('sends correct layer ID to WMS server', () => {
       const wrapper = getComponent([generateCompletedJob()])
-      const source = (wrapper.instance() as any as Internals).detectionsLayers['test-job-id'].getSource() as ol.source.TileWMS
+      const source = (wrapper.instance() as any as Internals).detectionsLayers['test-job-id'].getSource() as TileWMS
       assert.equal(source.getParams().LAYERS, 'bfdetections')
     })
 
     it('sends correct style ID to WMS server', () => {
       const wrapper = getComponent([generateCompletedJob()])
-      const source = (wrapper.instance() as any as Internals).detectionsLayers['test-job-id'].getSource() as ol.source.TileWMS
+      const source = (wrapper.instance() as any as Internals).detectionsLayers['test-job-id'].getSource() as TileWMS
       assert.equal(source.getParams().STYLES, 'bfdetections')
     })
 
     it('sends correct view parameters to WMS server', () => {
       const wrapper = getComponent([generateCompletedJob()])
-      const source = (wrapper.instance() as any as Internals).detectionsLayers['test-job-id'].getSource() as ol.source.TileWMS
+      const source = (wrapper.instance() as any as Internals).detectionsLayers['test-job-id'].getSource() as TileWMS
       assert.deepEqual(source.getParams().VIEWPARAMS, 'jobid:test-job-id')
     })
 
@@ -408,7 +416,7 @@ function awaitMap(func, delay = 150) {
 }
 
 function layerExtent(layer) {
-  return ol.proj.transformExtent(layer.getExtent(), 'EPSG:3857', 'EPSG:4326').map(Math.round)
+  return proj.transformExtent(layer.getExtent(), 'EPSG:3857', 'EPSG:4326').map(Math.round)
 }
 
 function generateCompletedJob(jobId?: string) {
@@ -512,6 +520,6 @@ function generateScene(): beachfront.Scene {
   /* tslint:enable */
 }
 
-function getLayers(wrapper): ol.layer.Base[] {
+function getLayers(wrapper): Base[] {
   return (wrapper.instance() as any as Internals).map.getLayers().getArray()
 }
