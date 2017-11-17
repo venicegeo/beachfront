@@ -14,30 +14,32 @@
  * limitations under the License.
  **/
 
-import * as ol from 'openlayers'
+import proj from 'ol/proj'
+import GeoJSON from 'ol/format/geojson'
+import extent from 'ol/extent'
 
 const WGS84 = 'EPSG:4326'
 const WEB_MERCATOR = 'EPSG:3857'
 
 export function getFeatureCenter(feature, featureProjection = WGS84) {
-  return ol.extent.getCenter(featureToBbox(feature, featureProjection))
+  return extent.getCenter(featureToBbox(feature, featureProjection))
 }
 
-export function featureToBbox(feature, featureProjection = WEB_MERCATOR) {
-  const reader = new ol.format.GeoJSON()
-  const geometry = reader.readGeometry(feature.geometry, {featureProjection})
+export function featureToBbox(feature, featureProjection = WEB_MERCATOR, dataProjection = WGS84) {
+  const reader = new GeoJSON()
+  const geometry = reader.readGeometry(feature.geometry, {featureProjection, dataProjection})
   return geometry.getExtent()
 }
 
 export function deserializeBbox(serialized) {
   if (serialized && serialized.length === 4) {
-    return ol.proj.transformExtent(serialized, WGS84, WEB_MERCATOR)
+    return proj.transformExtent(serialized, WGS84, WEB_MERCATOR)
   }
   return null
 }
 
 export function serializeBbox(extent) {
-  const bbox = ol.proj.transformExtent(extent, WEB_MERCATOR, WGS84)
+  const bbox = proj.transformExtent(extent, WEB_MERCATOR, WGS84)
   const p1 = unwrapPoint(bbox.slice(0, 2))
   const p2 = unwrapPoint(bbox.slice(2, 4))
   return p1.concat(p2).map(truncate)
