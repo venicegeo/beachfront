@@ -14,13 +14,13 @@
  * limitations under the License.
  **/
 
-import * as ol from 'openlayers'
+import Control from 'ol/control/control'
 
 // I don't konw how to get the actual dpi of the monitor, thus the hard-coded value.
 const DPI = 100
 const MULTIPLIER = DPI / 0.0254
 
-export class ScaleControl extends ol.control.Control {
+export class ScaleControl extends Control {
   $value: any
 
   constructor(className: string) {
@@ -60,19 +60,10 @@ export class ScaleControl extends ol.control.Control {
     resolution = resolution < view.getMaxResolution() ? resolution : view.getMaxResolution()
     resolution = resolution > view.getMinResolution() ? resolution : view.getMinResolution()
 
-    /*
-    // This commented-out code should replace the following code after switching to OpenLayers 4.
-    this.map.getView().animate({
+    view.animate({
       duration: 1618 * Math.abs(Math.log10(resolution / oldResolution)),
       resolution: resolution,
     })
-    */
-    map.beforeRender(ol.animation.zoom({
-      duration: 1618 * Math.abs(Math.log10(resolution / oldResolution)),
-      resolution: oldResolution,
-    }))
-
-    view.setResolution(resolution)
   }
 
   private keydown(event) {

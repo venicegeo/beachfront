@@ -14,13 +14,45 @@
  * limitations under the License.
  **/
 
-require('openlayers/dist/ol.css')
+require('ol/ol.css')
 const styles: any = require('./PrimaryMap.css')
 const tileErrorPlaceholder: string = require('../images/tile-error.png')
 
 import * as React from 'react'
 import {findDOMNode} from 'react-dom'
-import * as ol from 'openlayers'
+import LineString from 'ol/geom/linestring'
+import Draw from 'ol/interaction/draw'
+import VectorLayer from 'ol/layer/vector'
+import proj from 'ol/proj'
+import VectorSource from 'ol/source/vector'
+import RegularShape from 'ol/style/regularshape'
+import Stroke from 'ol/style/stroke'
+import Style from 'ol/style/style'
+import control from 'ol/control'
+import FullScreen from 'ol/control/fullscreen'
+import MousePosition from 'ol/control/mouseposition'
+import ScaleLine from 'ol/control/scaleline'
+import ZoomSlider from 'ol/control/zoomslider'
+import coordinate from 'ol/coordinate'
+import condition from 'ol/events/condition'
+import extent from 'ol/extent'
+import Feature from 'ol/feature'
+import GeoJSON from 'ol/format/geojson'
+import Geometry from 'ol/geom/geometry'
+import MultiPolygon from 'ol/geom/multipolygon'
+import Point from 'ol/geom/point'
+import Polygon from 'ol/geom/polygon'
+import interaction from 'ol/interaction'
+import DragRotate from 'ol/interaction/dragrotate'
+import Select from 'ol/interaction/select'
+import Tile from 'ol/layer/tile'
+import Map from 'ol/map'
+import Overlay from 'ol/overlay'
+import TileWMS from 'ol/source/tilewms'
+import XYZ from 'ol/source/xyz'
+import Fill from 'ol/style/fill'
+import Text from 'ol/style/text'
+import View from 'ol/view'
 import * as debounce from 'lodash/debounce'
 import * as throttle from 'lodash/throttle'
 import {ExportControl} from '../utils/openlayers.ExportControl'
@@ -50,11 +82,11 @@ import {
   TYPE_JOB,
 } from '../constants'
 
-const DEFAULT_CENTER = [-10, 0]
+const DEFAULT_CENTER: [number, number] = [-10, 0]
 const MIN_ZOOM = 2.5
 const MAX_ZOOM = 22
 const RESOLUTION_CLOSE = 850
-const VIEW_BOUNDS = [-170, -75, 170, 75]
+const VIEW_BOUNDS: [number, number, number, number] = [-170, -75, 170, 75]
 const STEM_OFFSET = 10000
 const IDENTIFIER_DETECTIONS = 'bfdetections'
 const KEY_SCENE_ID = 'SCENE_ID'
@@ -70,8 +102,8 @@ const TYPE_DIVOT_OUTBOARD = 'DIVOT_OUTBOARD'
 const TYPE_LABEL_MAJOR = 'LABEL_MAJOR'
 const TYPE_LABEL_MINOR = 'LABEL_MINOR'
 const TYPE_STEM = 'STEM'
-const WGS84: ol.proj.ProjectionLike = 'EPSG:4326'
-const WEB_MERCATOR: ol.proj.ProjectionLike = 'EPSG:3857'
+const WGS84 = 'EPSG:4326'
+const WEB_MERCATOR = 'EPSG:3857'
 export const MODE_DRAW_BBOX = 'MODE_DRAW_BBOX'
 export const MODE_NORMAL = 'MODE_NORMAL'
 export const MODE_PRODUCT_LINES = 'MODE_PRODUCT_LINES'
@@ -106,25 +138,25 @@ interface State {
 
 export interface MapView {
   basemapIndex: number
-  center: number[]
+  center: [number, number]
   zoom: number
 }
 
 export class PrimaryMap extends React.Component<Props, State> {
   refs: any
 
-  private basemapLayers: ol.layer.Tile[]
-  private detectionsLayers: {[key: string]: ol.layer.Tile}
-  private drawLayer: ol.layer.Vector
-  private bboxDrawInteraction: ol.interaction.Draw
-  private featureDetailsOverlay: ol.Overlay
-  private frameLayer: ol.layer.Vector
-  private highlightLayer: ol.layer.Vector
-  private imageSearchResultsOverlay: ol.Overlay
-  private imageryLayer: ol.layer.Vector
-  private map: ol.Map
-  private previewLayers: {[key: string]: ol.layer.Tile}
-  private selectInteraction: ol.interaction.Select
+  private basemapLayers: Tile[]
+  private detectionsLayers: {[key: string]: Tile}
+  private drawLayer: VectorLayer
+  private bboxDrawInteraction: Draw
+  private featureDetailsOverlay: Overlay
+  private frameLayer: VectorLayer
+  private highlightLayer: VectorLayer
+  private imageSearchResultsOverlay: Overlay
+  private imageryLayer: VectorLayer
+  private map: Map
+  private previewLayers: {[key: string]: Tile}
+  private selectInteraction: Select
   private skipNextViewUpdate: boolean
 
   constructor() {
@@ -279,7 +311,7 @@ export class PrimaryMap extends React.Component<Props, State> {
   private emitViewChange() {
     const view = this.map.getView()
     const {basemapIndex} = this.state
-    const center = ol.proj.transform(view.getCenter(), 'EPSG:3857', 'EPSG:4326')
+    const center = proj.transform(view.getCenter(), 'EPSG:3857', 'EPSG:4326')
     const zoom = view.getZoom() || MIN_ZOOM  // HACK -- sometimes getZoom returns undefined...
     // Don't emit false positives
     if (!this.props.view
@@ -363,7 +395,7 @@ export class PrimaryMap extends React.Component<Props, State> {
           foundFeature = true
           return true
       }
-    }, null, layerFilter)
+    }, {layerFilter})
     if (foundFeature) {
       this.refs.container.classList.add(styles.isHoveringFeature)
     }
@@ -377,7 +409,7 @@ export class PrimaryMap extends React.Component<Props, State> {
       return  // Disregard spurious select event
     }
 
-    const [feature]: ol.Feature[] = event.selected
+    const [feature]: Feature[] = event.selected
     const type = feature ? feature.get(KEY_TYPE) : null
 
     switch (type) {
@@ -422,7 +454,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.featureDetailsOverlay = generateFeatureDetailsOverlay(this.refs.featureDetails)
     this.imageSearchResultsOverlay = generateImageSearchResultsOverlay(this.refs.imageSearchResults)
 
-    this.map = new ol.Map({
+    this.map = new Map({
       controls: generateControls(),
       interactions: generateBaseInteractions().extend([this.bboxDrawInteraction, this.selectInteraction]),
       layers: [
@@ -434,9 +466,9 @@ export class PrimaryMap extends React.Component<Props, State> {
         this.highlightLayer,
       ],
       target: this.refs.container,
-      view: new ol.View({
-        center: ol.proj.fromLonLat(DEFAULT_CENTER),
-        extent: ol.proj.transformExtent(VIEW_BOUNDS, WGS84, WEB_MERCATOR),
+      view: new View({
+        center: proj.fromLonLat(DEFAULT_CENTER, 'EPSG:3857'),
+        extent: proj.transformExtent(VIEW_BOUNDS, WGS84, WEB_MERCATOR),
         minZoom: MIN_ZOOM,
         maxZoom: MAX_ZOOM,
         zoom: MIN_ZOOM,
@@ -474,18 +506,11 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.setState({basemapIndex})
     const view = this.map.getView()
 
-    /*
-    // This commented-out code should replace the following code after switching to OpenLayers 4.
     view.animate({
-      center: view.constrainCenter(ol.proj.transform(center, 'EPSG:4326', 'EPSG:3857')),
+      center: view.constrainCenter(proj.transform(center, 'EPSG:4326', 'EPSG:3857')),
       duration: 2000,
       zoom: zoom,
     })
-    */
-    this.map.beforeRender(ol.animation.pan({ duration: 2000, source: view.getCenter() }),
-      ol.animation.zoom({ duration: 2000, resolution: view.getResolution() }))
-    view.setCenter(view.constrainCenter(ol.proj.transform(center, 'EPSG:4326', 'EPSG:3857')))
-    view.setZoom(zoom)
   }
 
   private renderDetections() {
@@ -510,7 +535,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     // Additions/Updates
     const insertionIndex = this.map.getLayers().getArray().indexOf(this.frameLayer)
     detections.filter(d => shouldRender[d.id] && !alreadyRendered[d.id]).forEach(detection => {
-      const layer = new ol.layer.Tile({
+      const layer = new Tile({
         extent: featureToBbox(detection),
         source: generateDetectionsSource(wmsUrl, detection),
       })
@@ -525,18 +550,18 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.clearFrames()
 
     const source = this.frameLayer.getSource()
-    const reader = new ol.format.GeoJSON()
+    const reader = new GeoJSON()
     this.props.frames.forEach(raw => {
-      const frame = reader.readFeature(raw, {featureProjection: WEB_MERCATOR})
+      const frame = reader.readFeature(raw, {dataProjection: WGS84, featureProjection: WEB_MERCATOR})
       source.addFeature(frame)
 
       const frameExtent = calculateExtent(frame.getGeometry())
-      const topRight = ol.extent.getTopRight(ol.extent.buffer(frameExtent, STEM_OFFSET))
-      const center = ol.extent.getCenter(frameExtent)
+      const topRight = extent.getTopRight(extent.buffer(frameExtent, STEM_OFFSET))
+      const center = extent.getCenter(frameExtent)
       const id = frame.getId()
 
-      const stem = new ol.Feature({
-        geometry: new ol.geom.LineString([
+      const stem = new Feature({
+        geometry: new LineString([
           center,
           topRight,
         ]),
@@ -545,31 +570,31 @@ export class PrimaryMap extends React.Component<Props, State> {
       stem.set(KEY_OWNER_ID, id)
       source.addFeature(stem)
 
-      const divotInboard = new ol.Feature({
-        geometry: new ol.geom.Point(center),
+      const divotInboard = new Feature({
+        geometry: new Point(center),
       })
       divotInboard.set(KEY_TYPE, TYPE_DIVOT_INBOARD)
       divotInboard.set(KEY_OWNER_ID, id)
       source.addFeature(divotInboard)
 
-      const divotOutboard = new ol.Feature({
-        geometry: new ol.geom.Point(topRight),
+      const divotOutboard = new Feature({
+        geometry: new Point(topRight),
       })
       divotOutboard.set(KEY_TYPE, TYPE_DIVOT_OUTBOARD)
       divotOutboard.set(KEY_OWNER_ID, id)
       divotOutboard.set(KEY_STATUS, raw.properties.status)
       source.addFeature(divotOutboard)
 
-      const name = new ol.Feature({
-        geometry: new ol.geom.Point(topRight),
+      const name = new Feature({
+        geometry: new Point(topRight),
       })
       name.set(KEY_TYPE, TYPE_LABEL_MAJOR)
       name.set(KEY_OWNER_ID, id)
       name.set(KEY_NAME, raw.properties.name.toUpperCase())
       source.addFeature(name)
 
-      const status = new ol.Feature({
-        geometry: new ol.geom.Point(topRight),
+      const status = new Feature({
+        geometry: new Point(topRight),
       })
       status.set(KEY_TYPE, TYPE_LABEL_MINOR)
       status.set(KEY_OWNER_ID, id)
@@ -589,20 +614,20 @@ export class PrimaryMap extends React.Component<Props, State> {
       return
     }
 
-    const reader = new ol.format.GeoJSON()
-    const feature = reader.readFeature(geojson, {featureProjection: 'EPSG:3857'})
+    const reader = new GeoJSON()
+    const feature = reader.readFeature(geojson, {dataProjection: WGS84, featureProjection: 'EPSG:3857'})
 
     source.addFeature(feature)
   }
 
   private renderImagery() {
     const {imagery} = this.props
-    const reader = new ol.format.GeoJSON()
+    const reader = new GeoJSON()
     const source = this.imageryLayer.getSource()
     source.setAttributions(undefined)
     source.clear()
     if (imagery) {
-      const features = reader.readFeatures(imagery.images, {featureProjection: WEB_MERCATOR})
+      const features = reader.readFeatures(imagery.images, {dataProjection: WGS84, featureProjection: WEB_MERCATOR})
       if (features.length) {
         features.forEach(feature => {
           feature.set(KEY_TYPE, TYPE_SCENE)
@@ -625,12 +650,12 @@ export class PrimaryMap extends React.Component<Props, State> {
 
     if (this.props.imagery.count) {
       // Pager
-      this.imageSearchResultsOverlay.setPosition(ol.extent.getBottomRight(bbox))
+      this.imageSearchResultsOverlay.setPosition(extent.getBottomRight(bbox))
       this.imageSearchResultsOverlay.setPositioning('top-right')
     }
     else {
       // No results
-      this.imageSearchResultsOverlay.setPosition(ol.extent.getCenter(bbox))
+      this.imageSearchResultsOverlay.setPosition(extent.getCenter(bbox))
       this.imageSearchResultsOverlay.setPositioning('center-center')
     }
     // HACK HACK HACK HACK HACK HACK HACK HACK
@@ -642,8 +667,8 @@ export class PrimaryMap extends React.Component<Props, State> {
     if (!bbox) {
       return
     }
-    const feature = new ol.Feature({
-      geometry: ol.geom.Polygon.fromExtent(bbox),
+    const feature = new Feature({
+      geometry: Polygon.fromExtent(bbox),
     })
     this.drawLayer.getSource().addFeature(feature)
   }
@@ -686,7 +711,7 @@ export class PrimaryMap extends React.Component<Props, State> {
         }
 
         const {catalogApiKey} = this.props
-        const layer = new ol.layer.Tile({
+        const layer = new Tile({
           extent: f.extent,
           source: generateScenePreviewSource(provider, externalId, catalogApiKey),
         })
@@ -748,9 +773,9 @@ export class PrimaryMap extends React.Component<Props, State> {
     if (!selectedFeature) {
       return  // Nothing to do
     }
-    const reader = new ol.format.GeoJSON()
+    const reader = new GeoJSON()
     const feature = reader.readFeature(selectedFeature, {dataProjection: WGS84, featureProjection: WEB_MERCATOR})
-    const center = ol.extent.getCenter(calculateExtent(feature.getGeometry()))
+    const center = extent.getCenter(calculateExtent(feature.getGeometry()))
     features.push(feature)
     this.featureDetailsOverlay.setPosition(center)
   }
@@ -773,10 +798,10 @@ function animateLayerExit(layer) {
   })
 }
 
-function calculateExtent(geometry: ol.geom.Geometry) {
-  if (geometry instanceof ol.geom.MultiPolygon && crossesDateline(geometry)) {
-    const extents = geometry.getPolygons().map(g => ol.proj.transformExtent(g.getExtent(), WEB_MERCATOR, WGS84))
-    let [, minY, , maxY] = ol.proj.transformExtent(geometry.getExtent(), WEB_MERCATOR, WGS84)
+function calculateExtent(geometry: Geometry) {
+  if (geometry instanceof MultiPolygon && crossesDateline(geometry)) {
+    const extents = geometry.getPolygons().map(g => proj.transformExtent(g.getExtent(), WEB_MERCATOR, WGS84))
+    let [, minY, , maxY] = proj.transformExtent(geometry.getExtent(), WEB_MERCATOR, WGS84)
     let width = 0
     let minX = 180
     for (const [polygonMinX, , polygonMaxX] of extents) {
@@ -785,49 +810,49 @@ function calculateExtent(geometry: ol.geom.Geometry) {
         minX -= polygonMaxX - polygonMinX
       }
     }
-    return ol.proj.transformExtent([minX, minY, minX + width, maxY], WGS84, WEB_MERCATOR)
+    return proj.transformExtent([minX, minY, minX + width, maxY], WGS84, WEB_MERCATOR)
   }
   return geometry.getExtent()  // Use as-is
 }
 
-function crossesDateline(geometry: ol.geom.Geometry) {
-  const [minX, , maxX] = ol.proj.transformExtent(geometry.getExtent(), WEB_MERCATOR, WGS84)
+function crossesDateline(geometry: Geometry) {
+  const [minX, , maxX] = proj.transformExtent(geometry.getExtent(), WEB_MERCATOR, WGS84)
   return minX === -180 && maxX === 180
 }
 
 function generateBasemapLayers(providers) {
   return providers.map((provider, index) => {
-    const source = new ol.source.XYZ(Object.assign({}, provider, {crossOrigin: 'anonymous', tileLoadFunction}))
-    const layer = new ol.layer.Tile({source})
+    const source = new XYZ(Object.assign({}, provider, {crossOrigin: 'anonymous', tileLoadFunction}))
+    const layer = new Tile({source})
     layer.setProperties({name: provider.name, visible: index === 0})
     return layer
   })
 }
 
 function generateBaseInteractions() {
-  return ol.interaction.defaults().extend([
-    new ol.interaction.DragRotate({
-      condition: ol.events.condition.altKeyOnly,
+  return interaction.defaults().extend([
+    new DragRotate({
+      condition: condition.altKeyOnly,
     }),
   ])
 }
 
 function generateControls() {
-  return ol.control.defaults({
+  return control.defaults({
     attributionOptions: {
       collapsible: false,
     },
   }).extend([
-    new ol.control.ScaleLine({
+    new ScaleLine({
       minWidth: 250,
       units: 'nautical',
     }),
-    new ol.control.ZoomSlider(),
-    new ol.control.MousePosition({
-      coordinateFormat: ol.coordinate.toStringHDMS,
+    new ZoomSlider(),
+    new MousePosition({
+      coordinateFormat: coordinate.toStringHDMS,
       projection: WGS84,
     }),
-    new ol.control.FullScreen(),
+    new FullScreen(),
     new ExportControl(styles.export),
     new SearchControl(styles.search),
     new MeasureControl(styles.measure),
@@ -836,10 +861,11 @@ function generateControls() {
 }
 
 function generateDetectionsSource(wmsUrl, feature: beachfront.Job|beachfront.ProductLine) {
-  return new ol.source.TileWMS({
+  return new TileWMS({
     tileLoadFunction,
     crossOrigin: 'anonymous',
     url: wmsUrl,
+    projection: WEB_MERCATOR,
     params: {
       [KEY_LAYERS]: IDENTIFIER_DETECTIONS,
       [KEY_STYLES]: IDENTIFIER_DETECTIONS,
@@ -849,15 +875,15 @@ function generateDetectionsSource(wmsUrl, feature: beachfront.Job|beachfront.Pro
 }
 
 function generateDrawLayer() {
-  return new ol.layer.Vector({
-    source: new ol.source.Vector({
+  return new VectorLayer({
+    source: new VectorSource({
       wrapX: false,
     }),
-    style: new ol.style.Style({
-      fill: new ol.style.Fill({
+    style: new Style({
+      fill: new Fill({
         color: 'hsla(202, 70%, 50%, .35)',
       }),
-      stroke: new ol.style.Stroke({
+      stroke: new Stroke({
         color: 'hsla(202, 70%, 50%, .7)',
         width: 1,
         lineDash: [5, 5],
@@ -867,21 +893,21 @@ function generateDrawLayer() {
 }
 
 function generateBboxDrawInteraction(drawLayer) {
-  const draw = new ol.interaction.Draw({
+  const draw = new Draw({
     source: drawLayer.getSource(),
     maxPoints: 2,
     type: 'LineString',
-    geometryFunction(coordinates: any, geometry: ol.geom.Polygon) {
+    geometryFunction(coordinates: any, geometry: Polygon) {
       if (!geometry) {
-        geometry = new ol.geom.Polygon(null)
+        geometry = new Polygon(null)
       }
       const [[x1, y1], [x2, y2]] = coordinates
       geometry.setCoordinates([[[x1, y1], [x1, y2], [x2, y2], [x2, y1], [x1, y1]]])
       return geometry
     },
-    style: new ol.style.Style({
-      image: new ol.style.RegularShape({
-        stroke: new ol.style.Stroke({
+    style: new Style({
+      image: new RegularShape({
+        stroke: new Stroke({
           color: 'black',
           width: 1,
         }),
@@ -890,10 +916,10 @@ function generateBboxDrawInteraction(drawLayer) {
         radius2: 0,
         angle: 0,
       }),
-      fill: new ol.style.Fill({
+      fill: new Fill({
         color: 'hsla(202, 70%, 50%, .6)',
       }),
-      stroke: new ol.style.Stroke({
+      stroke: new Stroke({
         color: 'hsl(202, 70%, 50%)',
         width: 1,
         lineDash: [5, 5],
@@ -905,48 +931,48 @@ function generateBboxDrawInteraction(drawLayer) {
 }
 
 function generateFrameLayer() {
-  return new ol.layer.Vector({
-    source: new ol.source.Vector(),
-    style(feature: ol.Feature, resolution: number) {
+  return new VectorLayer({
+    source: new VectorSource(),
+    style(feature: Feature, resolution: number) {
       const isClose = resolution < RESOLUTION_CLOSE
       switch (feature.get(KEY_TYPE)) {
         case TYPE_DIVOT_INBOARD:
-          return new ol.style.Style({
-            image: new ol.style.RegularShape({
+          return new Style({
+            image: new RegularShape({
               angle: Math.PI / 4,
               points: 4,
               radius: 5,
-              fill: new ol.style.Fill({
+              fill: new Fill({
                 color: 'black',
               }),
             }),
           })
         case TYPE_DIVOT_OUTBOARD:
-          return new ol.style.Style({
-            image: new ol.style.RegularShape({
+          return new Style({
+            image: new RegularShape({
               angle: Math.PI / 4,
               points: 4,
               radius: 10,
-              stroke: new ol.style.Stroke({
+              stroke: new Stroke({
                 color: 'black',
                 width: 1,
               }),
-              fill: new ol.style.Fill({
+              fill: new Fill({
                 color: getColorForStatus(feature.get(KEY_STATUS)),
               }),
             }),
           })
         case TYPE_STEM:
-          return new ol.style.Style({
-            stroke: new ol.style.Stroke({
+          return new Style({
+            stroke: new Stroke({
               color: 'black',
               width: 1,
             }),
           })
         case TYPE_LABEL_MAJOR:
-          return new ol.style.Style({
-            text: new ol.style.Text({
-              fill: new ol.style.Fill({
+          return new Style({
+            text: new Text({
+              fill: new Fill({
                 color: isClose ? 'black' : 'transparent',
               }),
               offsetX: 13,
@@ -960,9 +986,9 @@ function generateFrameLayer() {
         case TYPE_LABEL_MINOR:
           const name = feature.get(KEY_NAME)
           const sceneId = normalizeSceneId(feature.get(KEY_SCENE_ID))
-          return new ol.style.Style({
-            text: new ol.style.Text({
-              fill: new ol.style.Fill({
+          return new Style({
+            text: new Text({
+              fill: new Fill({
                 color: isClose ? 'rgba(0,0,0,.6)' : 'transparent',
               }),
               offsetX: 13,
@@ -977,12 +1003,12 @@ function generateFrameLayer() {
             }),
           })
         default:
-          return new ol.style.Style({
-            stroke: new ol.style.Stroke({
+          return new Style({
+            stroke: new Stroke({
               color: 'rgba(0, 0, 0, .4)',
               lineDash: [10, 10],
             }),
-            fill: new ol.style.Fill({
+            fill: new Fill({
               color: isClose ? 'transparent' : 'hsla(202, 100%, 85%, 0.5)',
             }),
           })
@@ -992,13 +1018,13 @@ function generateFrameLayer() {
 }
 
 function generateHighlightLayer() {
-  return new ol.layer.Vector({
-    source: new ol.source.Vector(),
-    style: new ol.style.Style({
-      fill: new ol.style.Fill({
+  return new VectorLayer({
+    source: new VectorSource(),
+    style: new Style({
+      fill: new Fill({
         color: 'hsla(90, 100%, 30%, .5)',
       }),
-      stroke: new ol.style.Stroke({
+      stroke: new Stroke({
         color: 'hsla(90, 100%, 30%, .6)',
       }),
     }),
@@ -1006,13 +1032,13 @@ function generateHighlightLayer() {
 }
 
 function generateImageryLayer() {
-  return new ol.layer.Vector({
-    source: new ol.source.Vector(),
-    style: new ol.style.Style({
-      fill: new ol.style.Fill({
+  return new VectorLayer({
+    source: new VectorSource(),
+    style: new Style({
+      fill: new Fill({
         color: 'rgba(0,0,0, .15)',
       }),
-      stroke: new ol.style.Stroke({
+      stroke: new Stroke({
         color: 'rgba(0,0,0, .5)',
         width: 1,
       }),
@@ -1021,7 +1047,7 @@ function generateImageryLayer() {
 }
 
 function generateFeatureDetailsOverlay(componentRef) {
-  return new ol.Overlay({
+  return new Overlay({
     autoPan:     true,
     element:     findDOMNode(componentRef),
     id:          'featureDetails',
@@ -1030,7 +1056,7 @@ function generateFeatureDetailsOverlay(componentRef) {
 }
 
 function generateImageSearchResultsOverlay(componentRef) {
-  return new ol.Overlay({
+  return new Overlay({
     autoPan:   true,
     element:   findDOMNode(componentRef),
     id:        'imageSearchResults',
@@ -1039,7 +1065,7 @@ function generateImageSearchResultsOverlay(componentRef) {
 }
 
 function generateScenePreviewSource(provider, imageId, apiKey) {
-  return new ol.source.XYZ(Object.assign({}, provider, {
+  return new XYZ(Object.assign({}, provider, {
     crossOrigin: 'anonymous',
     tileLoadFunction,
     url: provider.url
@@ -1049,11 +1075,11 @@ function generateScenePreviewSource(provider, imageId, apiKey) {
 }
 
 function generateSelectInteraction(...layers) {
-  return new ol.interaction.Select({
+  return new Select({
     layers,
-    condition: ol.events.condition.click,
-    style: new ol.style.Style({
-      stroke: new ol.style.Stroke({
+    condition: condition.click,
+    style: new Style({
+      stroke: new Stroke({
         color: 'black',
         width: 3,
       }),
@@ -1098,6 +1124,6 @@ function tileLoadFunction(imageTile, src) {
 }
 
 function toGeoJSON(feature) {
-  const io = new ol.format.GeoJSON()
+  const io = new GeoJSON()
   return io.writeFeatureObject(feature, {dataProjection: 'EPSG:4326', featureProjection: 'EPSG:3857'})
 }
