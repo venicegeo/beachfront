@@ -33,23 +33,22 @@
     "karma-mocha": "1.1.1",
     "karma-mocha-reporter": "2.0.5",
     "karma-sourcemap-loader": "0.3.7",
-    "karma-webpack": "1.7.0",
+    "karma-webpack": "2.0.5",
     "mocha": "3.2.0",
     "postcss-cssnext": "2.9.0",
-    "postcss-import": "8.1.2",
+    "postcss-import": "8.0.2",
     "postcss-loader": "0.9.1",
     "react-addons-test-utils": "15.2.1",
     "rimraf": "2.5.4",
     "sinon": "2.0.0-pre",
-    "source-map-loader": "0.1.5",
     "style-loader": "0.13.1",
     "ts-loader": "0.8.2",
     "tslint": "3.14.0",
     "tslint-loader": "2.1.5",
     "typescript": "2.1.4",
     "typings": "2.0.0",
-    "webpack": "1.13.0",
-    "webpack-dev-server": "1.14.1"
+    "webpack": "3.8.1",
+    "webpack-dev-server": "2.9.2"
   },
   "dependencies": {
     "axios": "0.15.3",
@@ -58,7 +57,7 @@
     "font-awesome": "4.6.3",
     "lodash": "4.17.4",
     "moment": "2.17.0",
-    "openlayers": "3.19.1",
+    "ol": "4.1.1",
     "react": "15.2.1",
     "react-dom": "15.2.1"
   }
