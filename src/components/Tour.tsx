@@ -35,6 +35,10 @@ const Arrow = ({ position }) => {
   return <div className={`${styles.arrow} ${styles[classnames[position]]}`}/>
 }
 
+const ErrorMessage = (props: any) => {
+  return <div>{props.tour.errorMessage}</div>
+}
+
 const ImageCount = (props: any) => {
   return <strong> {props.tour.imageCount} </strong>
 }
@@ -85,6 +89,7 @@ export class UserTour extends React.Component<any, any> {
   private basemap: string
   private bbox: [number, number, number, number]
   private bboxName: string
+  private errorMessage: string
   private searchCriteria: any
   private steps: any[]
   private zoom: number
@@ -314,8 +319,7 @@ export class UserTour extends React.Component<any, any> {
       {
         step: 9,
         selector: '.CatalogSearchCriteria-cloudCover input',
-        horizontalOffset: 40,
-        verticalOffset: -13,
+        position: 'top',
         title: <div className={styles.title}>Select the Acceptable Cloud Cover</div>,
         body: <div className={styles.body}>
           Adjust the amount of cloud cover that you are willing to tolerate.
@@ -363,7 +367,8 @@ export class UserTour extends React.Component<any, any> {
       {
         step: 10,
         selector: '.ImagerySearch-controls button',
-        verticalOffset: -13,
+        position: 'top',
+        verticalOffset: 16,
         title: <div className={styles.title}>Search for Imagery</div>,
         body: <div className={styles.body}>
           Just click the button to submit the job.
@@ -450,24 +455,35 @@ export class UserTour extends React.Component<any, any> {
         step: 14,
         selector: '.AlgorithmList-root li:last-child .Algorithm-startButton',
         position: 'top',
+        verticalOffset: 16,
         title: <div className={styles.title}>Select an Algorithm</div>,
         body: <div className={styles.body}>
           We&apos;ll use this one.
         </div>,
         after() {
-          this.query('.AlgorithmList-root li:last-child .Algorithm-startButton').click()
+          const algorithm = this.query('.AlgorithmList-root li:last-child')
+          algorithm.querySelector('.Algorithm-startButton').click()
 
           return new Promise((resolve, reject) => {
-            let timeout = 30000
-            let t0 = Date.now()
-            let app = this.props.application
-            let interval = setInterval(() => {
+            const timeout = 30000
+            const t0 = Date.now()
+            const app = this.props.application
+            const interval = setInterval(() => {
               if (app.state.route.pathname === '/jobs') {
                 clearInterval(interval)
                 resolve()
               } else if (Date.now() - t0 > timeout) {
                 clearInterval(interval)
                 reject(`Timed out after ${timeout / 1000} seconds waiting for /jobs.`)
+              } else {
+                const elem = algorithm.querySelector('.AlgorithmList-errorMessage')
+
+                if (elem) {
+                  let m = elem.querySelector('h4')
+
+                  clearInterval(interval)
+                  reject(m && m.textContent || 'Oops!')
+                }
               }
             }, 250)
           })
@@ -540,6 +556,17 @@ export class UserTour extends React.Component<any, any> {
         hideArrow: true,
         title: <div className={styles.title}>That&apos;s All Folks</div>,
         body: <div className={styles.body}>
+          Go home.
+        </div>,
+      },
+      {
+        step: 99,
+        selector: '.ol-scale-line',
+        horizontalOffset: 120,
+        verticalOffset: -200,
+        title: <div className={styles.title}>Oops!</div>,
+        body: <div className={styles.body}>
+          <ErrorMessage tour={this}/>
           Go home.
         </div>,
       },
@@ -644,18 +671,23 @@ export class UserTour extends React.Component<any, any> {
       this.setState({ changing: false })
     }).catch(msg => {
       console.warn(msg)
-      this.setState({ changing: false })
+      this.errorMessage = msg
+      this.setState({
+        changing: false,
+        tourStep: 99,
+      })
     })
 
     return rc
   }
 
   private isElementInViewport(elem): boolean {
-    let box = elem.getBoundingClientRect()
+    const box = elem.getBoundingClientRect()
+    const bannerHeight = 25
 
-    return box.top >= 0
+    return box.top >= bannerHeight
       && box.left >= 0
-      && box.bottom <= (window.innerHeight || document.documentElement.clientHeight)
+      && box.bottom <= (window.innerHeight || document.documentElement.clientHeight) - bannerHeight
       && box.right <= (window.innerWidth || document.documentElement.clientWidth)
   }
 
