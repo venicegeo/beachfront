@@ -36,7 +36,7 @@ export const SESSION_IDLE_STORE = 'lastActivity'
 export const BASEMAP_TILE_PROVIDERS = [
   {
     name: 'OSM',
-    url: `https://${OSM_BASE_URL}/osm_tiles/{z}/{x}/{y}.png64`,
+    url: `http://{a-c}.${OSM_BASE_URL}/{z}/{x}/{y}.png`,
     attributions: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
     maxZoom: 20,
   },
