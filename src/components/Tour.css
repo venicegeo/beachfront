@@ -81,6 +81,11 @@
   padding-top: 3px !important;
 }
 
+:global(.react-user-tour-close):hover {
+  color: black;
+  text-shadow: 0 0 4px grey;
+}
+
 :global(.react-user-tour-button-container) {
   display: flex;
   flex-direction: row-reverse;
@@ -144,4 +149,49 @@ label.apiKey > input {
 
 .getApiKey {
   font-style: italic;
+}
+
+.error {
+  background-color: indianred;
+  border: solid 3px whitesmoke;
+  border-radius: 8px;
+  box-shadow: rgba(0, 0, 0, 0.48) 0 0 96px 32px;
+  color: white;
+  font-size: 16px;
+  font-weight: normal;
+  left: 20%;
+  max-width: 50%;
+  min-width: 300px;
+  padding: 10px;
+  position: absolute;
+  top: 30%;
+  z-index: var(--CLASSIFICATION_BANNER_Z);
+}
+
+.error .close {
+  color: whitesmoke;
+  cursor: pointer;
+  display: inline-block;
+  font-size: 20px;
+  font-weight: bold;
+  padding: 0 5px;
+  position: absolute;
+  right: 2px;
+  top: 0;
+}
+
+.error .close:hover {
+  color: white;
+  text-shadow: 0 0 4px white;
+}
+
+.error .header {
+  border-bottom: solid 1px whitesmoke;
+  font-weight: bold;
+  margin-bottom: 10px;
+  padding: 0 25px 5px 5px;
+}
+
+.error .message {
+  padding: 5px;
 }

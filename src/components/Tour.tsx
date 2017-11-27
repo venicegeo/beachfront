@@ -35,10 +35,6 @@ const Arrow = ({ position }) => {
   return <div className={`${styles.arrow} ${styles[classnames[position]]}`}/>
 }
 
-const ErrorMessage = (props: any) => {
-  return <div>{props.tour.errorMessage}</div>
-}
-
 const ImageCount = (props: any) => {
   return <strong> {props.tour.imageCount} </strong>
 }
@@ -84,12 +80,19 @@ class JobStatus extends React.Component<any, any> {
   }
 }
 
+const UserTourErrorMessage = (props: any) => {
+  return props.message ? <div className={styles.error}>
+    <div className={styles.close} title="Dismiss" onClick={props.tour.cancel}>&times;</div>
+    <div className={styles.header}>Oops!</div>
+    <div className={styles.message}>{props.message}</div>
+  </div> : null
+}
+
 export class UserTour extends React.Component<any, any> {
   private apiKeyInstructions: any
   private basemap: string
   private bbox: [number, number, number, number]
   private bboxName: string
-  private errorMessage: string
   private searchCriteria: any
   private steps: any[]
   private zoom: number
@@ -231,7 +234,7 @@ export class UserTour extends React.Component<any, any> {
       {
         step: 6,
         selector: '.CatalogSearchCriteria-source select',
-        verticalOffset: -13,
+        verticalOffset: -14,
         title: <div className={styles.title}>Select the Imagery Source</div>,
         body: <div className={styles.body}>
           Select the imagery source.  We&apos;ll use <SourceName tour={this}/> for now.
@@ -411,7 +414,7 @@ export class UserTour extends React.Component<any, any> {
 
             // Get the feature with the least amount of cloud cover.
             let feature = app.state.searchResults.images.features.filter(f => {
-              // Eliminate 0 cloud cover, that may mean a bad image.
+              // Eliminate images w/ zero cloud cover; that may mean a bad image.
               return f.properties.cloudCover
             }).sort((a, b) => {
               return a.properties.cloudCover - b.properties.cloudCover
@@ -500,7 +503,16 @@ export class UserTour extends React.Component<any, any> {
           On the map you will see the job and its status as well.
           Click on the job in the list to see more details.
         </div>,
-        after() {
+      },
+      {
+        step: 16,
+        selector: '.JobStatusList-root .JobStatus-root:last-child .JobStatus-metadata',
+        position: 'right',
+        title: <div className={styles.title}>Job Details</div>,
+        body: <div className={styles.body}>
+          The details will give you information about the job and its imagery.
+        </div>,
+        before() {
           return new Promise(resolve => {
             let elem = this.query('.JobStatusList-root .JobStatus-root:last-child')
 
@@ -514,25 +526,18 @@ export class UserTour extends React.Component<any, any> {
         },
       },
       {
-        step: 16,
-        selector: '.JobStatusList-root .JobStatus-root:last-child .JobStatus-metadata',
-        position: 'right',
-        title: <div className={styles.title}>Job Details</div>,
-        body: <div className={styles.body}>
-          The details will give you information about the job and its imagery.
-        </div>,
-      },
-      {
         step: 17,
-        selector: '.JobStatusList-root .JobStatus-root:last-child .JobStatus-controls a',
+        selector: '.JobStatusList-root .JobStatus-root:last-child .JobStatus-controls a i',
         position: 'right',
-        verticalOffset: 18,
+        verticalOffset: -13,
         title: <div className={styles.title}>View Job on Map</div>,
         body: <div className={styles.body}>
           Click on the globe link to display this job on the map.
         </div>,
-        async after() {
-          this.query('.JobStatusList-root .JobStatus-root:last-child .JobStatus-controls a').click()
+        before() {
+          return this.props.application.state.route.pathname === '/jobs'
+            ? Promise.resolve()
+            : this.navigateTo('/jobs')
         },
       },
       {
@@ -547,6 +552,12 @@ export class UserTour extends React.Component<any, any> {
           Once the job has run successfully then you can use other links in the
           job list to download it as GeoJSON or GPKG.
         </div>,
+        async before() {
+          if (this.props.application.state.route.pathname === '/jobs') {
+            this.query('.JobStatusList-root .JobStatus-root:last-child .JobStatus-controls a')
+              .click()
+          }
+        },
       },
       {
         step: 19,
@@ -556,17 +567,6 @@ export class UserTour extends React.Component<any, any> {
         hideArrow: true,
         title: <div className={styles.title}>That&apos;s All Folks</div>,
         body: <div className={styles.body}>
-          Go home.
-        </div>,
-      },
-      {
-        step: 99,
-        selector: '.ol-scale-line',
-        horizontalOffset: 120,
-        verticalOffset: -200,
-        title: <div className={styles.title}>Oops!</div>,
-        body: <div className={styles.body}>
-          <ErrorMessage tour={this}/>
           Go home.
         </div>,
       },
@@ -585,7 +585,11 @@ export class UserTour extends React.Component<any, any> {
   }
 
   cancel() {
-    this.setState({ changing: false, isTourActive: false })
+    this.setState({
+      changing: false,
+      errorMessage: null,
+      isTourActive: false,
+    })
   }
 
   componentDidMount() {
@@ -598,6 +602,7 @@ export class UserTour extends React.Component<any, any> {
     if (!this.state.isTourActive) {
       this.setState({
         changing: false,
+        errorMessage: null,
         isTourActive: true,
         tourStep: 1,
       })
@@ -616,7 +621,10 @@ export class UserTour extends React.Component<any, any> {
         className={`${styles.root} ${this.state.isTourActive ? styles.overlay : ''}`}
         onClick={event => event.stopPropagation()}
       >
-        <div onClick={event => event.stopPropagation()}>
+        <div
+          onClick={event => event.stopPropagation()}
+          style={{ display: this.state.errorMessage ? 'none' : 'block' }}
+        >
           <Tour
             active={this.state.isTourActive}
             arrow={Arrow}
@@ -630,6 +638,7 @@ export class UserTour extends React.Component<any, any> {
             steps={this.steps}
           />
         </div>
+        <UserTourErrorMessage message={this.state.errorMessage} tour={this}/>
       </div>
     )
   }
@@ -670,11 +679,9 @@ export class UserTour extends React.Component<any, any> {
     rc.then(() => {
       this.setState({ changing: false })
     }).catch(msg => {
-      console.warn(msg)
-      this.errorMessage = msg
       this.setState({
         changing: false,
-        tourStep: 99,
+        errorMessage: msg,
       })
     })
 
