@@ -18,7 +18,8 @@
   --detailOverlay-heading-color: white;
   --detailOverlay-table-color: #1675aa;
   --detailOverlay-table-dl-color: rgba(22, 117, 170, 0.92);
-  --detailOverlay-shadow-color: color(black alpha(20%));
+  /* --detailOverlay-shadow-color: color(black alpha(20%)); */
+  --detailOverlay-shadow-color: rgba(0, 0, 0, 0.2);
 }
 
 /* =========================================================================

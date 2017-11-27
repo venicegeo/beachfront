@@ -104,7 +104,8 @@
 }
 
 .iconShadow {
-  fill: color(black alpha(7%));
+  /* fill: color(black alpha(7%)); */
+  fill: rgba(0, 0, 0, 0.07);
 }
 
 .atHome .link .icon {

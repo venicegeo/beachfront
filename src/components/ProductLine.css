@@ -31,7 +31,8 @@
 
 .caret {
   width: 1em;
-  color: color(black alpha(30%));
+  /* color: color(black alpha(30%)); */
+  color: rgba(0, 0, 0, 0.3);
   transform: rotate(0deg);
   transform-origin: .4em .5em;
   transition: transform .15s ease-in-out;
