@@ -47,7 +47,8 @@
   align-items: center;
   justify-content: space-between;
   padding: var(--paddingSize);
-  background-color: color(var(--bgcolor-normal) lightness(+2%));
+  /* background-color: color(var(--bgcolor-normal) lightness(+2%)); */
+  background-color: #f2f2f2;
   transition: var(--transition-bgcolor);
 }
 
@@ -57,8 +58,10 @@
 
 .isSelectable .header:hover,
 .isSelected .header {
-  background-color: color(var(--bgcolor-selected) lightness(+2%));
-  color: color(var(--fgcolor-selected) lightness(-15%));
+  /* background-color: color(var(--bgcolor-selected) lightness(+2%)); */
+  background-color: #3f6982;
+  /* color: color(var(--fgcolor-selected) lightness(-15%)); */
+  color: #296485;
 }
 
 .selectionIndicator {
@@ -95,7 +98,8 @@
 }
 
 .description {
-  color: color(var(--fgcolor-normal) lightness(+20%));
+  /* color: color(var(--fgcolor-normal) lightness(+20%)); */
+  color: #949494;
 }
 
 .isSelected .description {
@@ -116,7 +120,8 @@
 .isCompatible {}
 
 .isNotCompatible .controls {
-  background-color: color(var(--COLOR_YELLOW) alpha(80%));
+  /* background-color: color(var(--COLOR_YELLOW) alpha(80%)); */
+  background-color: rgba(255, 221, 0, 0.8);
   padding: 1.5em;
   border-left: 4px solid #fa0;
 }
@@ -199,13 +204,15 @@
 .requirements th,
 .requirements td {
   padding: .3em;
-  background-color: color(var(--fgcolor-normal) alpha(10%));
+  /* background-color: color(var(--fgcolor-normal) alpha(10%)); */
+  background-color: rgba(85, 85, 85, 0.1);
   transition: var(--transition-bgcolor);
 }
 
 .isSelected .requirements th,
 .isSelected .requirements td {
-  background-color: color(var(--fgcolor-selected) alpha(10%));
+  /* background-color: color(var(--fgcolor-selected) alpha(10%)); */
+  background-color: rgba(61, 148, 197, 0.1);
 }
 
 .requirements .unmet td {
