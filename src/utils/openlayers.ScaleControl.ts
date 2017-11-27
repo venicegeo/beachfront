@@ -63,7 +63,7 @@ export class ScaleControl extends Control {
     view.animate({
       duration: 1618 * Math.abs(Math.log10(resolution / oldResolution)),
       resolution: resolution,
-    }))
+    })
   }
 
   private keydown(event) {
