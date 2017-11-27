@@ -101,7 +101,8 @@
 }
 
 .iconShadow {
-  fill: color(black alpha(7%));
+  /* fill: color(black alpha(7%)); */
+  fill: rgba(0, 0, 0, 0.07);
 }
 
 .atHome .link .icon {
@@ -128,7 +129,7 @@
 .label {
   display: none;
   position: absolute;
-  left: calc(100% + 40px);
+  left: calc(100% + 40px); /* Not working, but not harming? */
   top: 50%;
   transform: translateY(-50%);
   line-height: 40px;
