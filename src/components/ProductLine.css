@@ -20,7 +20,8 @@
   --padding-size: 15px;
   --control-bgcolor: var(--COLOR_CONTROL);
   --control-bgcolor-hover: var(--COLOR_BRAND_DARK);
-  --header-bgcolor-hover: color(var(--COLOR_CONTROL_LIGHT) alpha(4%));
+  /* --header-bgcolor-hover: color(var(--COLOR_CONTROL_LIGHT) alpha(4%)); */
+  --header-bgcolor-hover: rgba(179, 227, 255, 0.04);
 }
 
 .root {

@@ -21,9 +21,12 @@
   --shadowHeight: 4px;
 
   --bgcolor: hsl(203, 40%, 25%);
-  --row-bgcolor-active: color(var(--bgcolor) lightness(+25%));
-  --row-bgcolor-hover: color(var(--bgcolor) lightness(+40%) alpha(10%));
-  --filter-bgcolor: color(var(--bgcolor) lightness(+10%));
+  /* --row-bgcolor-active: color(var(--bgcolor) lightness(+25%)); */
+  --row-bgcolor-active: hsl(203, 40%, 50%);
+  /* --row-bgcolor-hover: color(var(--bgcolor) lightness(+40%) alpha(10%)); */
+  --row-bgcolor-hover: hsl(203, 80%, 35%);
+  /* --filter-bgcolor: color(var(--bgcolor) lightness(+10%)); */
+  --filter-bgcolor: hsl(203, 40%, 35%);
   --loadingMask-bgcolor: var(--COLOR_BRAND);
 }
 

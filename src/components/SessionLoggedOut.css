@@ -21,5 +21,6 @@
 .instructions {
   composes: heading from '../styles/typography.css';
   margin-top: 5em;
-  color: color(var(--COLOR_TEXT) lightness(+15%));
+  /* color: color(var(--COLOR_TEXT) lightness(+15%)); */
+  color: #666;
 }

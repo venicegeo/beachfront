@@ -17,6 +17,7 @@
 :root {
   --detailOverlay-heading-color: white;
   --detailOverlay-table-color: #1675aa;
+  --detailOverlay-table-dl-color: rgba(22, 117, 170, 0.92);
   --detailOverlay-shadow-color: color(black alpha(20%));
 }
 
@@ -73,7 +74,8 @@
   box-shadow:
     inset 0 3px var(--detailOverlay-shadow-color),
     0 6px var(--detailOverlay-shadow-color);
-  background-color: color(var(--detailOverlay-table-color) alpha(92%));
+  /* background-color: color(var(--detailOverlay-table-color) alpha(92%)); */
+  background-color: var(--detailOverlay-table-dl-color);
   color: white;
 }
 
