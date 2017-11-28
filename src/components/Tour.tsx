@@ -513,33 +513,18 @@ export class UserTour extends React.Component<any, any> {
         body: <div className={styles.body}>
           The details will give you information about the job and its imagery.
         </div>,
-        before() {
-          return new Promise(resolve => {
-            let elem = this.query('.JobStatusList-root .JobStatus-root:last-child')
-
-            if (!elem || Array.from(elem.classList).find(n => n === 'JobStatus-isExpanded')) {
-              resolve()
-            } else {
-              elem.querySelector('.JobStatus-details').click()
-              setTimeout(resolve, 250)
-            }
-          })
-        },
+        before: this.expandJobStatus,
       },
       {
         step: 17,
         selector: '.JobStatusList-root .JobStatus-root:last-child .JobStatus-controls a i',
         position: 'right',
-        verticalOffset: -13,
+        verticalOffset: -15,
         title: <div className={styles.title}>View Job on Map</div>,
         body: <div className={styles.body}>
           Click on the globe link to display this job on the map.
         </div>,
-        before() {
-          return this.props.application.state.route.pathname === '/jobs'
-            ? Promise.resolve()
-            : this.navigateTo('/jobs')
-        },
+        before: this.expandJobStatus,
       },
       {
         step: 18,
@@ -568,11 +553,7 @@ export class UserTour extends React.Component<any, any> {
           For example, once the job has sucessfully completed there will be
           icons here to download the job, either as GeoJSON or GPKG.
         </div>,
-        before() {
-          return this.props.application.state.route.pathname === '/jobs'
-            ? Promise.resolve()
-            : this.navigateTo('/jobs')
-        },
+        before: this.expandJobStatus,
       },
       {
         step: 20,
@@ -582,18 +563,7 @@ export class UserTour extends React.Component<any, any> {
         body: <div className={styles.body}>
           If you expand the job details, then you can click here to delete the job.
         </div>,
-        before() {
-          return new Promise(resolve => {
-            let elem = this.query('.JobStatusList-root .JobStatus-root:last-child')
-
-            if (!elem || Array.from(elem.classList).find(n => n === 'JobStatus-isExpanded')) {
-              resolve()
-            } else {
-              elem.querySelector('.JobStatus-details').click()
-              setTimeout(resolve, 250)
-            }
-          })
-        },
+        before: this.expandJobStatus,
       },
       {
         step: 21,
@@ -612,6 +582,7 @@ export class UserTour extends React.Component<any, any> {
     ]
 
     this.cancel = this.cancel.bind(this)
+    this.expandJobStatus = this.expandJobStatus.bind(this)
     this.gotoStep = this.gotoStep.bind(this)
     this.isElementInViewport = this.isElementInViewport.bind(this)
     this.navigateTo = this.navigateTo.bind(this)
@@ -686,6 +657,25 @@ export class UserTour extends React.Component<any, any> {
     )
   }
 
+  private expandJobStatus() {
+    return new Promise((resolve, reject) => {
+      const promise = this.props.application.state.route.pathname === '/jobs'
+        ? Promise.resolve()
+        : this.navigateTo('/jobs')
+
+      promise.then(() => {
+        const elem = this.query('.JobStatusList-root .JobStatus-root:last-child')
+
+        if (!elem || Array.from(elem.classList).find(n => n === 'JobStatus-isExpanded')) {
+          resolve()
+        } else {
+          (elem.querySelector('.JobStatus-details') as any).click()
+          setTimeout(resolve, 250)
+        }
+      }).catch(msg => reject(msg))
+    })
+  }
+
   private gotoStep(n) {
     if (this.state.changing) {
       return Promise.reject('Tour step is in process of changing.')
@@ -742,11 +732,15 @@ export class UserTour extends React.Component<any, any> {
   private isElementInViewport(elem): boolean {
     const box = elem.getBoundingClientRect()
     const bannerHeight = 25
+    const client = {
+      height: (window.innerHeight || document.documentElement.clientHeight),
+      width: (window.innerWidth || document.documentElement.clientWidth),
+    }
 
     return box.top >= bannerHeight
       && box.left >= 0
-      && box.bottom <= (window.innerHeight || document.documentElement.clientHeight) - bannerHeight
-      && box.right <= (window.innerWidth || document.documentElement.clientWidth)
+      && parseInt(box.bottom) <= client.height - bannerHeight
+      && parseInt(box.right) <= client.width
   }
 
   private navigateTo(pathname): Promise<any> {
@@ -811,6 +805,23 @@ export class UserTour extends React.Component<any, any> {
     return document.querySelector(selector) as HTMLElement
   }
 
+  private setTabIndices() {
+    const buttons: any[] = [
+      this.query('.react-user-tour-button-container .react-user-tour-done-button'),
+      this.query('.react-user-tour-button-container .react-user-tour-next-button'),
+      this.query('.react-user-tour-button-container .react-user-tour-back-button'),
+    ].filter(b => b).map((button, i) => {
+      button.setAttribute('tabindex', (i + 1).toString())
+      return button
+    })
+
+    if (buttons.length) {
+      buttons[0].focus()
+    }
+
+    return buttons[0]
+  }
+
   private scrollIntoView(selector: any): Promise<any> {
     return new Promise((resolve, reject) => {
       let elem = typeof selector === 'string' ? this.query(selector) : selector
@@ -821,7 +832,7 @@ export class UserTour extends React.Component<any, any> {
         } else {
           elem.scrollIntoView({ behavior: 'smooth' })
 
-          let timeout = 30000
+          let timeout = 10000
           let t0 = Date.now()
           let interval = setInterval(() => {
             if (this.isElementInViewport(elem)) {
@@ -872,23 +883,6 @@ export class UserTour extends React.Component<any, any> {
     let job = jobs && jobs.records && jobs.records[jobs.records.length - 1]
 
     return job && job.properties && job.properties.status || 'Unknown'
-  }
-
-  private setTabIndices() {
-    const buttons: any[] = [
-      this.query('.react-user-tour-button-container .react-user-tour-done-button'),
-      this.query('.react-user-tour-button-container .react-user-tour-next-button'),
-      this.query('.react-user-tour-button-container .react-user-tour-back-button'),
-    ].filter(b => b).map((button, i) => {
-      button.setAttribute('tabindex', (i + 1).toString())
-      return button
-    })
-
-    if (buttons.length) {
-      buttons[0].focus()
-    }
-
-    return buttons[0]
   }
 
   private get sourceName() {
