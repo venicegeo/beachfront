@@ -117,6 +117,7 @@ export class UserTour extends React.Component<any, any> {
       {
         step: 1,
         selector: '.Navigation-linkTour',
+        position: 'right',
         hideArrow: true,
         title: <div className={styles.title}>Welcome</div>,
         body: <div className={styles.body}>
