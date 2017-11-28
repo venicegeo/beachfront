@@ -39,15 +39,16 @@ export class ScaleControl extends Control {
     this.$value = element.querySelector('.value') as any
     this.$value.onblur = this.blur.bind(this)
     this.$value.onkeydown = this.keydown.bind(this)
+    this.setResolution = this.setResolution.bind(this)
 
     setTimeout(() => {
-      this.getMap().getView().on('change:resolution', event => {
-        let res = event.target.getResolution()
-        let scale = toSignificantDigits(toScale(res))
-
-        this.$value.innerText = scale
-      }, this)
+      this.setResolution()
+      this.getMap().getView().on('change:resolution', this.setResolution)
     })
+  }
+
+  private setResolution() {
+    this.$value.innerText = toSignificantDigits(toScale(this.getMap().getView().getResolution()))
   }
 
   private blur() {
