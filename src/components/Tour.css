@@ -114,7 +114,7 @@
 }
 
 :global(.react-user-tour-button-container) > div:hover {
-  text-shadow: 0 0 4px white;
+  text-shadow: 0 0 2px lightgrey;
 }
 
 .body {

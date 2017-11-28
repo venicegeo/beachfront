@@ -550,8 +550,6 @@ export class UserTour extends React.Component<any, any> {
         title: <div className={styles.title}>Job on Map</div>,
         body: <div className={styles.body}>
           Here we are zoomed in on the job.
-          Once the job has run successfully then you can use other links in the
-          job list to download it as GeoJSON or GPKG.
         </div>,
         async before() {
           if (this.props.application.state.route.pathname === '/jobs') {
@@ -562,13 +560,53 @@ export class UserTour extends React.Component<any, any> {
       },
       {
         step: 19,
+        selector: '.JobStatusList-root .JobStatus-root:last-child',
+        position: 'right',
+        title: <div className={styles.title}>Other Job Actions</div>,
+        body: <div className={styles.body}>
+          There are other actions that you can take on the job from here.
+          For example, once the job has sucessfully completed there will be
+          icons here to download the job, either as GeoJSON or GPKG.
+        </div>,
+        before() {
+          return this.props.application.state.route.pathname === '/jobs'
+            ? Promise.resolve()
+            : this.navigateTo('/jobs')
+        },
+      },
+      {
+        step: 20,
+        selector: '.JobStatusList-root .JobStatus-root:last-child .JobStatus-removeToggle',
+        position: 'top',
+        title: <div className={styles.title}>Delete Job</div>,
+        body: <div className={styles.body}>
+          If you expand the job details, then you can click here to delete the job.
+        </div>,
+        before() {
+          return new Promise(resolve => {
+            let elem = this.query('.JobStatusList-root .JobStatus-root:last-child')
+
+            if (!elem || Array.from(elem.classList).find(n => n === 'JobStatus-isExpanded')) {
+              resolve()
+            } else {
+              elem.querySelector('.JobStatus-details').click()
+              setTimeout(resolve, 250)
+            }
+          })
+        },
+      },
+      {
+        step: 21,
         selector: '.ol-scale-line',
         horizontalOffset: 120,
         verticalOffset: -200,
         hideArrow: true,
         title: <div className={styles.title}>That&apos;s All Folks</div>,
         body: <div className={styles.body}>
-          Go home.
+          That&apos;s all for now.  If the job has not yet completed, then you
+          may want to wait a few more minutes to see how it goes.  Or you can
+          just delete the job now and start you&apos;re own.  It&apos;s now up
+          to you.
         </div>,
       },
     ]
