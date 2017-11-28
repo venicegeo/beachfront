@@ -372,7 +372,7 @@ export class UserTour extends React.Component<any, any> {
         step: 10,
         selector: '.ImagerySearch-controls button',
         position: 'top',
-        verticalOffset: 16,
+        verticalOffset: 21,
         title: <div className={styles.title}>Search for Imagery</div>,
         body: <div className={styles.body}>
           Just click the button to submit the job.
@@ -577,9 +577,11 @@ export class UserTour extends React.Component<any, any> {
     this.gotoStep = this.gotoStep.bind(this)
     this.isElementInViewport = this.isElementInViewport.bind(this)
     this.navigateTo = this.navigateTo.bind(this)
+    this.onKeyPress = this.onKeyPress.bind(this)
     this.pace = this.pace.bind(this)
     this.query = this.query.bind(this)
     this.scrollIntoView = this.scrollIntoView.bind(this)
+    this.setTabIndices = this.setTabIndices.bind(this)
     this.showArrow = this.showArrow.bind(this)
     this.start = this.start.bind(this)
     this.syncPromiseExec = this.syncPromiseExec.bind(this)
@@ -601,6 +603,7 @@ export class UserTour extends React.Component<any, any> {
     this.showArrow(false)
 
     if (!this.state.isTourActive) {
+      setTimeout(this.setTabIndices)
       this.setState({
         changing: false,
         errorMessage: null,
@@ -624,6 +627,7 @@ export class UserTour extends React.Component<any, any> {
       >
         <div
           onClick={event => event.stopPropagation()}
+          onKeyPress={this.onKeyPress}
           style={{ display: this.state.errorMessage ? 'none' : 'block' }}
         >
           <Tour
@@ -665,11 +669,18 @@ export class UserTour extends React.Component<any, any> {
       }
 
       functions.push(() => {
-        return new Promise(resolve => {
+        return new Promise((resolve, reject) => {
           this.scrollIntoView(nextStep.selector).then(() => {
             this.showArrow(!nextStep.hideArrow)
             this.setState({ changing: false, tourStep: n })
             resolve()
+          }).catch(msg => {
+            if (lastStep.step > nextStep.step) {
+              alert('Sorry.  It seems you cannot go back from here.')
+              resolve()
+            } else {
+              reject(msg)
+            }
           })
         })
       })
@@ -679,6 +690,7 @@ export class UserTour extends React.Component<any, any> {
 
     rc.then(() => {
       this.setState({ changing: false })
+      this.setTabIndices()
     }).catch(msg => {
       this.setState({
         changing: false,
@@ -723,6 +735,27 @@ export class UserTour extends React.Component<any, any> {
     }
   }
 
+  private onKeyPress(event) {
+    event.stopPropagation()
+
+    switch (event.key) {
+      case 'Enter': {
+        const button = this.query('.react-user-tour-button-container div:focus')
+
+        if (button) {
+          button.click()
+        }
+
+        break
+      }
+      case 'Escape': {
+        this.cancel()
+
+        break
+      }
+    }
+  }
+
   private pace(text, cb, delay = 100): Promise<string> {
     return new Promise(resolve => {
       let i = 0, interval = setInterval(() => {
@@ -764,7 +797,7 @@ export class UserTour extends React.Component<any, any> {
         }
       } else {
         let message = `The DOM element, "${selector}", is not available.`
-        console.log(message)
+        console.warn(message)
         reject(message)
       }
     })
@@ -801,6 +834,23 @@ export class UserTour extends React.Component<any, any> {
     let job = jobs && jobs.records && jobs.records[jobs.records.length - 1]
 
     return job && job.properties && job.properties.status || 'Unknown'
+  }
+
+  private setTabIndices() {
+    const buttons: any[] = [
+      this.query('.react-user-tour-button-container .react-user-tour-done-button'),
+      this.query('.react-user-tour-button-container .react-user-tour-next-button'),
+      this.query('.react-user-tour-button-container .react-user-tour-back-button'),
+    ].filter(b => b).map((button, i) => {
+      button.setAttribute('tabindex', (i + 1).toString())
+      return button
+    })
+
+    if (buttons.length) {
+      buttons[0].focus()
+    }
+
+    return buttons[0]
   }
 
   private get sourceName() {
