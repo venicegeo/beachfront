@@ -69,7 +69,8 @@
   margin: 15px 10%;
   border-radius: 4px;
   background-color: var(--COLOR_GREEN);
-  box-shadow: inset 0 -3px rgba(0,0,0,.1), 0 3px color(black alpha(10%));
+  /* box-shadow: inset 0 -3px rgba(0, 0, 0, 0.1), 0 3px color(black alpha(10%)); */
+  box-shadow: inset 0 -3px rgba(0, 0, 0, 0.1), 0 3px rgba(0, 0, 0, 0.1);
   color: white;
   font-size: 14px;
   cursor: pointer;

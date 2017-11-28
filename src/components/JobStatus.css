@@ -26,8 +26,10 @@
   --bordercolor-failed: hsla(344, 100%, 34%, 0.46);
   --control-bgcolor: var(--COLOR_CONTROL);
   --control-bgcolor-hover: var(--COLOR_BRAND_DARK);
-  --header-bgcolor-hover: color(var(--COLOR_CONTROL_LIGHT) alpha(4%));
-  --removalWarning-bgcolor: color(var(--COLOR_YELLOW) alpha(90%));
+  /* --header-bgcolor-hover: color(var(--COLOR_CONTROL_LIGHT) alpha(4%)); */
+  --header-bgcolor-hover: rgba(179, 227, 255, 0.04);
+  /* --removalWarning-bgcolor: color(var(--COLOR_YELLOW) alpha(90%)); */
+  --removalWarning-bgcolor: rgba(225, 221, 0, 0.9);
   --progressbar-bgcolor: #eee;
   --progressbarPuck-bgcolor: var(--COLOR_BRAND_LIGHT);
 }
@@ -174,7 +176,7 @@
 }
 
 .metadata dd {
-  flex: 1 calc(70% - 14px);
+  flex: 1 calc(70% - 14px); /* Not working, but not harming? */
   word-break: break-all;
 }
 
