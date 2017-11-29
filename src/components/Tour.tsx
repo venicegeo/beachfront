@@ -377,10 +377,36 @@ export class UserTour extends React.Component<any, any> {
         body: <div className={styles.body}>
           Just click the button to submit the job.
         </div>,
-        async after() {
-          if (!this.props.application.state.searchResults) {
+        after() {
+          if (this.props.application.state.searchResults) {
+            return Promise.resolve()
+          } else {
             this.query('.ImagerySearch-controls button').click()
             this.showArrow(false)
+
+            return new Promise((resolve, reject) => {
+              const timeout = 30000
+              const t0 = Date.now()
+              const app = this.props.application
+              const interval = setInterval(() => {
+                if (app.state.searchResults) {
+                  clearInterval(interval)
+                  resolve()
+                } else if (Date.now() - t0 > timeout) {
+                  clearInterval(interval)
+                  reject(`Timed out after ${timeout / 1000} seconds waiting for imagery results.`)
+                } else {
+                  const elem = this.query('.ImagerySearch-errorMessage')
+
+                  if (elem) {
+                    const m = elem.querySelector('h4')
+
+                    clearInterval(interval)
+                    reject(m && m.textContent || 'Oops!')
+                  }
+                }
+              }, 250)
+            })
           }
         },
       },
@@ -394,21 +420,6 @@ export class UserTour extends React.Component<any, any> {
           matching the search criteria.  Click on one to load the image
           itself&hellip; For now, we&apos;ll select one for you for now.
         </div>,
-        before() {
-          return new Promise((resolve, reject) => {
-            let timeout = 300000
-            let t0 = Date.now()
-            let interval = setInterval(() => {
-              if (this.props.application.state.searchResults) {
-                clearInterval(interval)
-                resolve()
-              } else if (Date.now() - t0 > timeout) {
-                clearInterval(interval)
-                reject(`Timed out after ${timeout / 1000} seconds waiting for imagery results.`)
-              }
-            }, 100)
-          })
-        },
         after() {
           return new Promise(resolve => {
             let app = this.props.application
