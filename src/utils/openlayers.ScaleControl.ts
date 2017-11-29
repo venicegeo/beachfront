@@ -27,7 +27,7 @@ export class ScaleControl extends Control {
     const element: any = document.createElement('div')
     super({ element })
 
-    element.className = [className, 'ol-unselectable', 'ol-control'].filter(s => s).join(' ')
+    element.className = [className, 'ol-control'].filter(s => s).join(' ')
     element.title = 'Map Scale (click to edit)'
     element.innerHTML = `<div>
       1&#8197;:&#8197;<span
@@ -39,15 +39,16 @@ export class ScaleControl extends Control {
     this.$value = element.querySelector('.value') as any
     this.$value.onblur = this.blur.bind(this)
     this.$value.onkeydown = this.keydown.bind(this)
+    this.setResolution = this.setResolution.bind(this)
 
     setTimeout(() => {
-      this.getMap().getView().on('change:resolution', event => {
-        let res = event.target.getResolution()
-        let scale = toSignificantDigits(toScale(res))
-
-        this.$value.innerText = scale
-      }, this)
+      this.setResolution()
+      this.getMap().getView().on('change:resolution', this.setResolution)
     })
+  }
+
+  private setResolution() {
+    this.$value.innerText = toSignificantDigits(toScale(this.getMap().getView().getResolution()))
   }
 
   private blur() {
