@@ -19,6 +19,7 @@ export const CLASSIFICATION_BANNER_FOREGROUND = process.env.CLASSIFICATION_BANNE
 export const CLASSIFICATION_BANNER_TEXT       = process.env.CLASSIFICATION_BANNER_TEXT
 export const OSM_BASE_URL                     = process.env.OSM_BASE_URL
 export const PLANET_BASE_URL                  = process.env.PLANET_BASE_URL
+export const USER_GUIDE_URL                   = process.env.USER_GUIDE_URL
 
 export const API_ROOT = process.env.API_ROOT
 export const CONSENT_BANNER_TEXT = {__html: process.env.CONSENT_BANNER_TEXT}
@@ -36,7 +37,7 @@ export const SESSION_IDLE_STORE = 'lastActivity'
 export const BASEMAP_TILE_PROVIDERS = [
   {
     name: 'OSM',
-    url: `https://${OSM_BASE_URL}/osm_tiles/{z}/{x}/{y}.png64`,
+    url: `http://{a-c}.${OSM_BASE_URL}/{z}/{x}/{y}.png`,
     attributions: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
     maxZoom: 20,
   },

@@ -14,10 +14,11 @@
  * limitations under the License.
  **/
 
-import * as ol from 'openlayers'
+import Control from 'ol/control/control'
+import proj from 'ol/proj'
 import * as moment from 'moment'
 
-export class ExportControl extends ol.control.Control {
+export class ExportControl extends Control {
   constructor(className) {
     const element = document.createElement('div')
     super({element})
@@ -45,7 +46,7 @@ export class ExportControl extends ol.control.Control {
       context.putImageData(imageData, 0, 0)
 
       const extent = map.getView().calculateExtent(map.getSize())
-      const transformedExtent = ol.proj.transformExtent(extent, 'EPSG:3857', 'EPSG:4326')
+      const transformedExtent = proj.transformExtent(extent, 'EPSG:3857', 'EPSG:4326')
       const truncatedExtent = transformedExtent.map(n => n.toFixed(2))
 
       context.fillStyle = 'white'

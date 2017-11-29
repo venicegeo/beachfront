@@ -14,7 +14,8 @@
  * limitations under the License.
  **/
 
-import * as ol from 'openlayers'
+import Control from 'ol/control/control'
+import proj from 'ol/proj'
 
 const DMS_PREFIX = /^([NS]|[+-])(\d{2})(\d{2})(\d{2})\s*([EW]|[+-])(\d{2,3})(\d{2})(\d{2})$/i
 const DMS_POSTFIX = /^(\d{2})(\d{2})(\d{2})([NS])\s*(\d{2,3})(\d{2})(\d{2})([EW])$/i
@@ -46,7 +47,7 @@ const TEMPLATE_DIALOG = `
   </dl>
 </div>`
 
-export class SearchControl extends ol.control.Control {
+export class SearchControl extends Control {
   private _dialog: any
 
   constructor(className) {
@@ -93,7 +94,7 @@ export class SearchControl extends ol.control.Control {
     try {
       const {longitude, latitude} = Coordinate.parseAny(input.value.trim())
       const view = this.getMap().getView()
-      view.setCenter(ol.proj.transform([longitude, latitude], 'EPSG:4326', 'EPSG:3857'))
+      view.setCenter(proj.transform([longitude, latitude], 'EPSG:4326', 'EPSG:3857'))
       view.setZoom(8)
       this._closeDialog()
     }

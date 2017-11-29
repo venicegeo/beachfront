@@ -157,8 +157,14 @@ export class Application extends React.Component<Props, State> {
     if (this.state.isLoggedIn && !this.state.isSessionExpired) {
       this.initializeServices()
       this.startBackgroundTasks()
-      this.refreshRecords()
-          .then(this.importJobsIfNeeded.bind(this))
+      this.refreshRecords().then(() => {
+        // Load selected feature if it isn't already (e.g., page refresh w/ jobId).
+        let [jobId] = this.state.route.jobIds
+
+        if (jobId && !this.state.selectedFeature) {
+          this.state.selectedFeature = this.state.jobs.records.find(job => job.id === jobId)
+        }
+      }).then(this.importJobsIfNeeded.bind(this))
       this.startIdleTimer()
     }
   }
@@ -686,6 +692,7 @@ function generateInitialState(): State {
 
   const [jobId] = state.route.jobIds
   if (jobId) {
+    // This code should never find a selected feature since no jobs have been loaded.
     state.selectedFeature = state.jobs.records.find(j => j.id === jobId) || null
   }
 
