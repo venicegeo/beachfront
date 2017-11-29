@@ -27,7 +27,7 @@ export class ScaleControl extends Control {
     const element: any = document.createElement('div')
     super({ element })
 
-    element.className = [className, 'ol-unselectable', 'ol-control'].filter(s => s).join(' ')
+    element.className = [className, 'ol-control'].filter(s => s).join(' ')
     element.title = 'Map Scale (click to edit)'
     element.innerHTML = `<div>
       1&#8197;:&#8197;<span

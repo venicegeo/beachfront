@@ -176,7 +176,10 @@
   padding: 1px 5px 0;
   right: 40px;
   top: 40px;
-  transition: font-size 0.3s ease 0.5s, padding 0.3s ease 0.5s;
+  transition-delay: 0.5s;
+  transition-duration: 0.3s;
+  transition-property: font-size, padding;
+  transition-timing-function: ease;
 }
 
 .scale:hover {
@@ -190,8 +193,13 @@
 }
 
 .scale :global(.value):focus {
+  background-color: white;
+  font-size: 16px;
   font-weight: normal;
   padding: 0 0.75em;
+  transition-duration: 0.3s;
+  transition-property: font-size, font-weight, margin, padding;
+  transition-timing-function: ease;
 }
 
 /* OpenLayers Controls: Zoom
