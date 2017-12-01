@@ -89,6 +89,7 @@ const UserTourErrorMessage = (props: any) => {
 }
 
 export class UserTour extends React.Component<any, any> {
+  private algorithm: string
   private apiKeyInstructions: any
   private basemap: string
   private bbox: [number, number, number, number]
@@ -100,6 +101,7 @@ export class UserTour extends React.Component<any, any> {
   constructor(props: any) {
     super(props)
 
+    this.algorithm = TOUR.algorithm
     this.apiKeyInstructions = <div dangerouslySetInnerHTML={{ __html: TOUR.apiKeyInstructions }}/>
     this.basemap = TOUR.basemap
     this.bbox = TOUR.bbox as [number, number, number, number]
@@ -468,7 +470,7 @@ export class UserTour extends React.Component<any, any> {
       },
       {
         step: 14,
-        selector: '.AlgorithmList-root li:last-child .Algorithm-startButton',
+        selector: `.AlgorithmList-root li${this.algorithm} .Algorithm-startButton`,
         position: 'top',
         verticalOffset: 16,
         title: <div className={styles.title}>Select an Algorithm</div>,
@@ -476,7 +478,7 @@ export class UserTour extends React.Component<any, any> {
           We&apos;ll use this one.
         </div>,
         after() {
-          const algorithm = this.query('.AlgorithmList-root li:last-child')
+          const algorithm = this.query(`.AlgorithmList-root li${this.algorithm}`)
           algorithm.querySelector('.Algorithm-startButton').click()
 
           return new Promise((resolve, reject) => {

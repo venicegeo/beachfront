@@ -71,6 +71,7 @@ export const SCENE_TILE_PROVIDERS = [
 ]
 
 export const TOUR = {
+  algorithm: ':first-child',
   /*
   apiKeyInstructions: `
     To get an API key, ask the experts at <a
