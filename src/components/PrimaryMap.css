@@ -1,5 +1,5 @@
 /**
- * Copyright 2016, RadiantBlue Technologies, Inc.
+ * Copyright 2017, Radiant Solutions
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -166,6 +166,40 @@
 .measure {
   top: 10px;
   right: 70px;
+}
+
+/* OpenLayers Controls: Scale Tool
+   ========================================================================= */
+
+.scale {
+  background-color: rgba(255, 255, 255, 0.85);
+  padding: 1px 5px 0;
+  right: 40px;
+  top: 40px;
+  transition-delay: 0.5s;
+  transition-duration: 0.3s;
+  transition-property: font-size, padding;
+  transition-timing-function: ease;
+}
+
+.scale:hover {
+  background-color: white;
+  font-size: 16px;
+  padding: 3px 12px 3px;
+}
+
+.scale :global(.value) {
+  font-weight: bold;
+}
+
+.scale :global(.value):focus {
+  background-color: white;
+  font-size: 16px;
+  font-weight: normal;
+  padding: 0 0.75em;
+  transition-duration: 0.3s;
+  transition-property: font-size, font-weight, margin, padding;
+  transition-timing-function: ease;
 }
 
 /* OpenLayers Controls: Zoom
