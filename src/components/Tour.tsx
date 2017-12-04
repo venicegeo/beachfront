@@ -564,7 +564,8 @@ export class UserTour extends React.Component<any, any> {
         body: <div className={styles.body}>
           There are other actions that you can take on the job from here.
           For example, once the job has sucessfully completed there will be
-          icons here to download the job, either as GeoJSON or GPKG.
+          icons here to download the job, either in GeoJSON or GeoPackage
+          format.
         </div>,
         before: this.expandJobStatus,
       },
