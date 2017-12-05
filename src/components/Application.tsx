@@ -584,7 +584,10 @@ export class Application extends React.Component<Props, State> {
     console.debug('(application:refreshRecords) fetching latest jobs and product lines')
     return Promise.all([
       this.fetchJobs(),
+      /*
+       * No need to fetch product lines till we get them working.
       this.fetchProductLines(),
+      */
     ])
   }
 
