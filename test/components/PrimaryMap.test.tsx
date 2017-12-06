@@ -20,7 +20,6 @@ import Map from 'ol/map'
 import Polygon from 'ol/geom/polygon'
 import Tile from 'ol/layer/tile'
 import VectorLayer from 'ol/layer/vector'
-import Feature from 'ol/feature'
 import Base from 'ol/layer/base'
 import TileWMS from 'ol/source/tilewms'
 
@@ -326,19 +325,19 @@ describe('<PrimaryMap/>', () => {
     it('sends correct layer ID to WMS server', () => {
       const wrapper = getComponent([generateCompletedJob()])
       const source = (wrapper.instance() as any as Internals).detectionsLayers['test-job-id'].getSource() as TileWMS
-      assert.equal(source.getParams().LAYERS, 'bfdetections')
+      assert.equal((source.getParams() as any).LAYERS, 'bfdetections')
     })
 
     it('sends correct style ID to WMS server', () => {
       const wrapper = getComponent([generateCompletedJob()])
       const source = (wrapper.instance() as any as Internals).detectionsLayers['test-job-id'].getSource() as TileWMS
-      assert.equal(source.getParams().STYLES, 'bfdetections')
+      assert.equal((source.getParams() as any).STYLES, 'bfdetections')
     })
 
     it('sends correct view parameters to WMS server', () => {
       const wrapper = getComponent([generateCompletedJob()])
       const source = (wrapper.instance() as any as Internals).detectionsLayers['test-job-id'].getSource() as TileWMS
-      assert.deepEqual(source.getParams().VIEWPARAMS, 'jobid:test-job-id')
+      assert.deepEqual((source.getParams() as any).VIEWPARAMS, 'jobid:test-job-id')
     })
 
     it('set appropriate bbox for layer', () => {
