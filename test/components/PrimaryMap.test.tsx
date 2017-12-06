@@ -137,20 +137,29 @@ describe('<PrimaryMap/>', () => {
       />,
     )
 
-    it('has correct center on init', () => {
+    /*
+     * Some tests now require additional time to run due to adding animation to
+     * openlayers view transitions.  This in turn requires us to exceed the
+     * default Mocha 2000ms timeout for a test.  To do that we need to execute
+     * this.timeout(), which is not possible in an arrow function.
+     */
+
+    it('has correct center on init', function() {
+      this.timeout(3000)
       const wrapper = getComponent({ basemapIndex: 0, center: [0, 0], zoom: 5.5 })
       return awaitMap(() => {
         const view = (wrapper.instance() as any as Internals).map.getView()
         assert.deepEqual(proj.toLonLat(view.getCenter()), [0, 0])
-      })
+      }, 2150)
     })
 
-    it('has correct zoom on init', () => {
+    it('has correct zoom on init', function() {
+      this.timeout(3000)
       const wrapper = getComponent({ basemapIndex: 0, center: [0, 0], zoom: 5.5 })
       return awaitMap(() => {
         const view = (wrapper.instance() as any as Internals).map.getView()
         assert.equal(view.getZoom(), 5.5)
-      })
+      }, 2150)
     })
 
     it('has correct basemap on init', () => {
@@ -160,22 +169,24 @@ describe('<PrimaryMap/>', () => {
       })
     })
 
-    it('recenters map when `view` prop changes', () => {
+    it('recenters map when `view` prop changes', function() {
+      this.timeout(3000)
       const wrapper = getComponent({ basemapIndex: 0, center: [0, 0], zoom: 5.5 })
       wrapper.setProps({ view: { basemapIndex: 0, center: [30, 30], zoom: 5.5 } })
       return awaitMap(() => {
         const view = (wrapper.instance() as any as Internals).map.getView()
         assert.deepEqual(proj.toLonLat(view.getCenter()).map(Math.round), [30, 30])
-      })
+      }, 2150)
     })
 
-    it('changes zoom when `view` prop changes', () => {
+    it('changes zoom when `view` prop changes', function() {
+      this.timeout(3000)
       const wrapper = getComponent({ basemapIndex: 0, center: [0, 0], zoom: 5.5 })
       wrapper.setProps({ view: { basemapIndex: 0, center: [0, 0], zoom: 10.5 } })
       return awaitMap(() => {
         const view = (wrapper.instance() as any as Internals).map.getView()
         assert.equal(view.getZoom(), 10.5)
-      })
+      }, 2150)
     })
 
     it('changes basemap when `view` prop changes', () => {
