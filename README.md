@@ -32,7 +32,7 @@ npm run build
 | `CLASSIFICATION_BANNER_FOREGROUND` | A color value (e.g., `red`, `green`, `blue`) for the classification banner foreground. |
 | `CLASSIFICATION_BANNER_TEXT`       | A text value for the classification banner. |
 | `CONSENT_BANNER_TEXT`              | A text value for the consent message shown at the login prompt. |
-
+| `USER_GUIDE_URL`                   | A URL pointing to the Beachfront user guide.  The menu guide icon will only display if this is set. |
 
 ## Testing
 
