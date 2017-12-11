@@ -68,3 +68,9 @@ export const SCENE_TILE_PROVIDERS = [
     attributions: '&copy; <a href="https://www.planet.com" target="_blank" rel="noopener">Planet Labs (Copernicus Sentinel-2)</a>',
   },
 ]
+
+// Minimum versions of supported browsers.
+export const SUPPORTED_BROWSERS = {
+  chrome: 55,
+  firefox: 45,
+}
