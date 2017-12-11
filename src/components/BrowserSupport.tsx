@@ -1,5 +1,5 @@
 /**
- * Copyright 2016, RadiantBlue Technologies, Inc.
+ * Copyright 2017, RadiantBlue Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,30 +14,60 @@
  * limitations under the License.
  **/
 
+/*
+ * Some or all of the commented-out code that follows should be enabled once we
+ * get permission to use the NPM module, detect-browser.  It has been initially
+ * denied due to FOCI concerns (Australian authorship).  Once approved, add the
+ * dependency in package.json and uncomment the required code.
+ *
+ *     "detect-browser": "2.0.0",
+ */
+
 import * as React from 'react'
 import * as MAP from 'lodash/map'
 import {SUPPORTED_BROWSERS} from '../config'
 
 const styles: any = require('./BrowserSupport.css')
+/*
 const {detect} = require('detect-browser')
+*/
 
 function getState() {
   let rc: any = {
+    /*
     browser: detect(),
+    */
     supported: false,
     hide: JSON.parse(sessionStorage.getItem('dismissBrowserSupport')),
   }
 
+  /*
   if (rc.browser) {
     let version = SUPPORTED_BROWSERS[rc.browser.name]
     rc.supported = version && parseInt(rc.browser.version) >= version
   }
+  */
 
   return rc
 }
 
 function nameAndVersion(name, version) {
   return `${name.charAt(0).toUpperCase()}${name.substring(1)} ${version}`
+}
+
+export function BrowsersSupported() {
+  return (
+    <div className={styles.supported}>
+      <div>Supported browsers include:</div>
+      <ul>
+        {
+          MAP(SUPPORTED_BROWSERS, (version, name) => (
+            <li key={name}>{nameAndVersion(name, version)} and higher</li>
+          ))
+        }
+      </ul>
+    </div>
+  )
 }
 
 export class BrowserSupport extends React.Component<any, any> {
@@ -63,19 +93,13 @@ export class BrowserSupport extends React.Component<any, any> {
         >&times;</div>
 
         <div className={styles.message}>
+          {/*
           Your browser, {this.browserVersion()}, is not supported at this time.
+          */}
+          Beachfront will work best when used with a supported browser.
         </div>
 
-        <div className={styles.supported}>
-          <div>Supported browsers include:</div>
-          <ul>
-            {
-              MAP(SUPPORTED_BROWSERS, (version, name) => (
-                <li key={name}>{nameAndVersion(name, version)} and higher</li>
-              ))
-            }
-          </ul>
-        </div>
+        <BrowsersSupported/>
       </div>
     )
   }
