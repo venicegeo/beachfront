@@ -32,7 +32,8 @@
 }
 
 .button:hover {
-  background-color: color(white alpha(30%));
+  /* background-color: color(white alpha(30%)); */
+  background-color: rgba(255, 255, 255, 0.3);
 }
 
 /* =========================================================================
@@ -49,7 +50,8 @@
   padding: 0;
   background-color: #fff;
   color: var(--COLOR_TEXT);
-  box-shadow: 0 3px 0 1px color(black alpha(15%));
+  /* box-shadow: 0 3px 0 1px color(black alpha(15%)); */
+  box-shadow: 0 3px 0 1px rgba(0, 0, 0, 0.15);
   text-align: right;
   white-space: nowrap;
 }
