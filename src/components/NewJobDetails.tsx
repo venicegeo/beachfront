@@ -19,16 +19,34 @@ const styles: any = require('./NewJobDetails.css')
 import * as React from 'react'
 
 interface Props {
+  computeMask: boolean
   name: string
+  onComputeMaskChange(value: boolean)
   onNameChange(value: string)
 }
 
-export const NewJobDetails = ({ name, onNameChange }: Props) => (
+export const NewJobDetails = (props: Props) => (
   <div className={styles.root}>
     <h2>Job Details</h2>
+
     <label className={styles.field}>
       <span>Name</span>
-      <input value={name} onChange={event => onNameChange((event.target as HTMLInputElement).value)}/>
+      <input
+        onChange={event => props.onNameChange((event.target as HTMLInputElement).value)}
+        value={props.name}
+      />
+    </label>
+
+    <label className={styles.field}>
+      <span>Compute Mask</span>
+      <input
+        checked={props.computeMask}
+        onChange={event => {
+          props.onComputeMaskChange((event.target as HTMLInputElement).checked)
+        }}
+        type="checkbox"
+      />
+      <span className={styles.hint}>Limit to known coastal areas</span>
     </label>
   </div>
 )
