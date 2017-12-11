@@ -37,7 +37,7 @@ export const SESSION_IDLE_STORE = 'lastActivity'
 export const BASEMAP_TILE_PROVIDERS = [
   {
     name: 'OSM',
-    url: `http://{a-c}.${OSM_BASE_URL}/{z}/{x}/{y}.png`,
+    url: `https://${OSM_BASE_URL}/osm_tiles/{z}/{x}/{y}.png64`,
     attributions: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
     maxZoom: 20,
   },
@@ -69,3 +69,9 @@ export const SCENE_TILE_PROVIDERS = [
     attributions: '&copy; <a href="https://www.planet.com" target="_blank" rel="noopener">Planet Labs (Copernicus Sentinel-2)</a>',
   },
 ]
+
+// Minimum versions of supported browsers.
+export const SUPPORTED_BROWSERS = {
+  chrome: 55,
+  firefox: 45,
+}
