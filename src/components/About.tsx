@@ -19,6 +19,7 @@ const brand: string = require('../images/brand-small-square.svg')
 
 import * as React from 'react'
 import {Modal} from './Modal'
+import {BrowsersSupported} from './BrowserSupport'
 
 interface Props {
   onDismiss()
@@ -39,6 +40,10 @@ export const About = ({ onDismiss }: Props) => (
           leverages computer vision algorithm services, the Piazza Platform,
           and incoming satellite imagery to provide this capability.
         </p>
+      </section>
+      <section className={styles.browserSupport}>
+        <p>Beachfront will work best when used with a supported browser.</p>
+        <BrowsersSupported/>
       </section>
     </div>
   </Modal>
