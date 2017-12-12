@@ -97,6 +97,7 @@ interface BuildEnvironment {
   CONSENT_BANNER_TEXT: string
   OSM_BASE_URL: string
   PLANET_BASE_URL: string
+  USER_GUIDE_URL: string
 }
 
 declare const process: {
