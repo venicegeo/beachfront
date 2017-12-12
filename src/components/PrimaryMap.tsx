@@ -410,8 +410,8 @@ export class PrimaryMap extends React.Component<Props, State> {
       return  // Disregard spurious select event.
     }
 
-    const index = event.selected.findIndex(f => f.getId() === this.featureId) + 1
-    const feature: Feature = event.selected[index % event.selected.length]
+    const index = event.selected.findIndex(f => f.ol_uid === this.featureId) + 1
+    const feature: any = event.selected[index % event.selected.length]
     const type = feature ? feature.get(KEY_TYPE) : null
 
     switch (type) {
@@ -419,7 +419,7 @@ export class PrimaryMap extends React.Component<Props, State> {
       case TYPE_DIVOT_OUTBOARD:
       case TYPE_STEM:
         // Proxy clicks on "inner" decorations out to the job frame itself
-        this.featureId = feature.getId()
+        this.featureId = feature.ol_uid
         const jobId = feature.get(KEY_OWNER_ID)
         const jobFeature = this.frameLayer.getSource().getFeatureById(jobId)
         const selections = this.selectInteraction.getFeatures()
@@ -429,7 +429,7 @@ export class PrimaryMap extends React.Component<Props, State> {
         break
       case TYPE_JOB:
       case TYPE_SCENE:
-        this.featureId = feature.getId()
+        this.featureId = feature.ol_uid
         this.props.onSelectFeature(toGeoJSON(feature) as beachfront.Scene)
         break
       default:
