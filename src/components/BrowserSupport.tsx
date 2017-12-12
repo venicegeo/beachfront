@@ -33,7 +33,6 @@ const {detect} = require('detect-browser')
 */
 
 function getState() {
-  console.debug('>>> dismissBrowserSupport:', localStorage.getItem('dismissBrowserSupport'), '<<<')
   let rc: any = {
     /*
     browser: detect(),
@@ -41,7 +40,6 @@ function getState() {
     supported: false,
     hide: JSON.parse(localStorage.getItem('dismissBrowserSupport')),
   }
-  console.debug('>>> rc:', JSON.stringify(rc), '<<<')
 
   /*
   if (rc.browser) {
