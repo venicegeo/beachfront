@@ -19,6 +19,7 @@ import {getClient} from './session'
 
 interface ParamsCreateJob {
   algorithmId: string
+  computeMask: boolean
   name: string
   catalogApiKey: string
   sceneId: string
@@ -26,12 +27,14 @@ interface ParamsCreateJob {
 
 export function createJob({
   algorithmId,
+  computeMask,
   name,
   catalogApiKey,
   sceneId,
 }: ParamsCreateJob): Promise<beachfront.Job> {
   return getClient().post('/v0/job', {
     algorithm_id:   algorithmId,
+    compute_mask:   computeMask,
     name:           name,
     planet_api_key: catalogApiKey,
     scene_id:       sceneId,

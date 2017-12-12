@@ -33,13 +33,15 @@ const {detect} = require('detect-browser')
 */
 
 function getState() {
+  console.debug('>>> dismissBrowserSupport:', localStorage.getItem('dismissBrowserSupport'), '<<<')
   let rc: any = {
     /*
     browser: detect(),
     */
     supported: false,
-    hide: JSON.parse(sessionStorage.getItem('dismissBrowserSupport')),
+    hide: JSON.parse(localStorage.getItem('dismissBrowserSupport')),
   }
+  console.debug('>>> rc:', JSON.stringify(rc), '<<<')
 
   /*
   if (rc.browser) {
@@ -112,6 +114,6 @@ export class BrowserSupport extends React.Component<any, any> {
 
   private dismiss() {
     this.setState({ hide: true })
-    sessionStorage.setItem('dismissBrowserSupport', 'true')
+    localStorage.setItem('dismissBrowserSupport', 'true')
   }
 }
