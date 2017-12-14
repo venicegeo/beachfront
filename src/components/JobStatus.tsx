@@ -19,8 +19,8 @@ const styles: any = require('./JobStatus.css')
 import * as React from 'react'
 import * as moment from 'moment'
 import {Link} from './Link'
-import {FileDownloadLink} from './FileDownloadLink'
 import {Timestamp} from './Timestamp'
+import {JobDownload} from './JobDownload'
 
 import {
   STATUS_SUCCESS,
@@ -35,11 +35,11 @@ interface Props {
   isActive: boolean
   job: beachfront.Job
   onForgetJob(jobId: string)
-  onNavigate(loc: {pathname: string, search: string, hash: string })
+  onNavigate(loc: { pathname: string, search: string, hash: string })
 }
 
 interface State {
-  downloadProgress?: number,
+  downloadProgress?: number
   isDownloading?: boolean
   isExpanded?: boolean
   isRemoving?: boolean
@@ -48,12 +48,14 @@ interface State {
 export class JobStatus extends React.Component<Props, State> {
   constructor() {
     super()
+
     this.state = {
       downloadProgress: 0,
       isDownloading: false,
       isExpanded: false,
       isRemoving: false,
     }
+
     this.emitOnForgetJob        = this.emitOnForgetJob.bind(this)
     this.handleDownloadComplete = this.handleDownloadComplete.bind(this)
     this.handleDownloadError    = this.handleDownloadError.bind(this)
@@ -64,8 +66,9 @@ export class JobStatus extends React.Component<Props, State> {
   }
 
   render() {
-    const {id, properties} = this.props.job
+    const { id, properties } = this.props.job
     const downloadPercentage = `${this.state.downloadProgress || 0}%`
+
     return (
       <li className={`${styles.root} ${this.aggregatedClassNames}`}>
         <div className={styles.details} onClick={this.handleExpansionToggle}>
@@ -115,36 +118,22 @@ export class JobStatus extends React.Component<Props, State> {
         <div className={styles.controls}>
           <Link
             pathname="/"
-            search={'?jobId=' + id}
+            search={`?jobId=${id}`}
             title="View on Map"
             onClick={this.props.onNavigate}>
             <i className="fa fa-globe"/>
           </Link>
           {properties.status === STATUS_SUCCESS && (
-            <FileDownloadLink
-              jobId={id}
-              filename={properties.name + '.geojson'}
+            <JobDownload
+              basename={properties.name}
               className={styles.download}
-              apiUrl={'/v0/job/' + id + '.geojson'}
-              displayText="Download GeoJSON"
-              onProgress={this.handleDownloadProgress}
-              onStart={this.handleDownloadStart}
+              jobId={id}
               onComplete={this.handleDownloadComplete}
               onError={this.handleDownloadError}
-            />)}
-          {properties.status === STATUS_SUCCESS && (
-            <FileDownloadLink
-              jobId={id}
-              filename={properties.name + '.gpkg'}
-              className={styles.download}
-              apiUrl={'/v0/job/' + id + '.gpkg'}
-              displayText="Download GPKG"
               onProgress={this.handleDownloadProgress}
               onStart={this.handleDownloadStart}
-              onComplete={this.handleDownloadComplete}
-              onError={this.handleDownloadError}
-              />)
-          }
+            />
+          )}
         </div>
       </li>
     )
@@ -178,7 +167,7 @@ export class JobStatus extends React.Component<Props, State> {
   }
 
   private get classForLoading() {
-    return (this.state.isDownloading) ? styles.isLoading : ''
+    return this.state.isDownloading ? styles.isLoading : ''
   }
 
   private get classForRemoving() {
@@ -201,9 +190,7 @@ export class JobStatus extends React.Component<Props, State> {
   }
 
   private handleDownloadProgress(loadedBytes, totalBytes) {
-    this.setState({
-      downloadProgress: Math.floor((loadedBytes / totalBytes) * 100),
-    })
+    this.setState({ downloadProgress: Math.floor(100 * loadedBytes / totalBytes) })
   }
 
   private handleDownloadStart() {
@@ -216,7 +203,7 @@ export class JobStatus extends React.Component<Props, State> {
 
   private handleDownloadError(err) {
     this.setState({ isDownloading: false })
-    console.error('Download failed: ' + err.stack)
+    console.error(`Download failed: ${err.stack}`)
   }
 
   private handleExpansionToggle() {

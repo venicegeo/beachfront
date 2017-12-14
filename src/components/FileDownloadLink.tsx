@@ -18,15 +18,16 @@ import * as React from 'react'
 import axios, {AxiosResponse} from 'axios'
 import {getClient} from '../api/session'
 
-const MB = 1024000
+const MB = 1024 * 1024
 const TIMEOUT = 600000
 
 interface Props {
-  className?:   string
-  filename:     string
-  jobId:        string
-  apiUrl:       string
-  displayText:  string
+  apiUrl: string
+  className?: string
+  displayText: string
+  filename: string
+  jobId: string
+  mimetype?: string
   onComplete()
   onError(err: any)
   onProgress(loaded: number, total: number)
@@ -34,19 +35,26 @@ interface Props {
 }
 
 interface State {
-  blobUrl?:       string
+  blobUrl?: string
   isDownloading?: boolean
-  loaded?:        number
-  total?:         number
+  loaded?: number
+  total?: number
 }
 
 export class FileDownloadLink extends React.Component<Props, State> {
   refs: any
   private cancel: any
 
-  constructor() {
-    super()
-    this.state = {blobUrl: undefined, isDownloading: false, loaded: null, total: null}
+  constructor(props) {
+    super(props)
+
+    this.state = {
+      blobUrl: undefined,
+      isDownloading: false,
+      loaded: null,
+      total: null,
+    }
+
     this.handleClick = this.handleClick.bind(this)
     this.handleComplete = this.handleComplete.bind(this)
     this.handleError = this.handleError.bind(this)
@@ -56,6 +64,7 @@ export class FileDownloadLink extends React.Component<Props, State> {
   componentDidUpdate(_: Props, prevState: State) {
     const downloadFinished = prevState.isDownloading && !this.state.isDownloading
     const receivedBlobUrl = !prevState.blobUrl && this.state.blobUrl
+
     if (downloadFinished && receivedBlobUrl) {
       this.triggerDownload()
     }
@@ -70,20 +79,21 @@ export class FileDownloadLink extends React.Component<Props, State> {
   }
 
   render() {
-    const {isDownloading} = this.state
-    const totalMegabytes = Math.round((this.state.total / MB) * 10) / 10
-    const percentage = (Math.floor((this.state.loaded / this.state.total) * 100) || 0) + '%'
     return (
       <a
         ref="hyperlink"
         href={this.state.blobUrl}
         download={this.props.filename}
         className={this.props.className}
-        title={isDownloading ? `Retrieving ${totalMegabytes} MB...` : this.props.displayText}
+        title={this.state.isDownloading
+          ? `Retrieving ${Math.round(10 * this.state.total / MB) / 10} MB…`
+          : this.props.displayText
+        }
         onClick={this.handleClick}
-      >
-        {this.state.isDownloading ? percentage : <i className="fa fa-cloud-download"/>}
-      </a>
+      >{this.state.isDownloading
+        ? `${Math.floor(100 * this.state.loaded / this.state.total) || 0}%`
+        : (this.props.children || <i className="fa fa-cloud-download"/>)
+      }</a>
     )
   }
 
@@ -92,46 +102,38 @@ export class FileDownloadLink extends React.Component<Props, State> {
       return  // Nothing to do
     }
 
-    this.setState({
-      isDownloading: true,
-    })
+    this.setState({ isDownloading: true })
     this.props.onStart()
 
-    const client = getClient()
-    client.get(this.props.apiUrl, {
+    getClient().get(this.props.apiUrl, {
       cancelToken: new axios.CancelToken(cancel => this.cancel = cancel),
       onDownloadProgress: this.handleProgress,
       responseType: 'blob',
       timeout: TIMEOUT,
-    })
-      .then(this.handleComplete)
-      .catch(this.handleError)
+    }).then(this.handleComplete).catch(this.handleError)
   }
 
   private handleComplete(response: AxiosResponse) {
-    const file = new File([response.data], this.props.filename, {type: 'application/json'})
     this.setState({
-      blobUrl: URL.createObjectURL(file),
+      blobUrl: URL.createObjectURL(new File([response.data], this.props.filename, {
+        type: this.props.mimetype || 'application/json',
+      })),
       isDownloading: false,
     })
+
     this.props.onComplete()
   }
 
   private handleError(err) {
-    this.setState({
-      isDownloading: false,
-    })
-    if (axios.isCancel(err)) {
-      return
+    this.setState({ isDownloading: false })
+
+    if (!axios.isCancel(err)) {
+      this.props.onError(err)
     }
-    this.props.onError(err)
   }
 
   private handleProgress({ loaded, total }) {
-    this.setState({
-      loaded,
-      total,
-    })
+    this.setState({ loaded, total })
     this.props.onProgress(loaded, total)
   }
 

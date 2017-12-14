@@ -47,7 +47,5 @@ export const Link = ({
       event.preventDefault()
       return onClick({ pathname, search, hash })
     }}
-    >
-    {children}
-  </a>
+  >{children}</a>
 )

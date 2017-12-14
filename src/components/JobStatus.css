@@ -284,6 +284,11 @@
 }
 
 .controls a {
+  color: white;
+  text-decoration: none;
+}
+
+.controls > * {
   position: relative;
   display: flex;
   flex-direction: row;
@@ -293,26 +298,27 @@
   flex: 1;
   padding: 0 15px;
   background-color: var(--control-bgcolor);
-  color: white;
-  text-decoration: none;
 }
 
-.controls a + a {
-  box-shadow: inset 0 1px rgba(255,255,255, .1);
+.controls > * + * {
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.1);
 }
 
-.controls a:hover,
-.controls a:hover:before {
+.controls > .download:hover,
+.controls > .download:hover > a:before,
+.controls > a:hover,
+.controls > a:hover:before {
   background-color: var(--control-bgcolor-hover);
 }
 
-.controls a:before {
+.controls > .download > a:before,
+.controls > a:before {
   content: attr(title);
   display: flex;
   align-items: center;
   justify-content: flex-end;
   position: absolute;
-  right: 43px;
+  right: 45px;
   top: 0;
   bottom: 0;
   width: 0;
@@ -322,12 +328,50 @@
   background-color: var(--control-bgcolor);
 }
 
-.controls:hover a:before {
+.controls:hover > .download > a:before,
+.controls:hover > a:before {
+  border-left: 1px solid rgb(222, 232, 238);
   width: 130px;
 }
 
-.controls a:hover:before {
-  background-color: var(--control-bgcolor-hover);
+.controls .download > ul {
+  background-color: indianred;
+  border: 2px solid #ddd;
+  border-radius: 3px;
+  bottom: 60%;
+  font-size: 13px;
+  list-style: none;
+  padding: 0;
+  position: absolute;
+  right: 32px;
+}
+
+.controls .download > ul > li {
+  border-bottom: 1px solid #ddd;
+  cursor: pointer;
+  min-width: 128px;
+  padding: 0.25em 0.75em;
+  white-space: nowrap;
+}
+
+.controls .download > ul > li:first-child {
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
+}
+
+.controls .download > ul > li:last-child {
+  border-bottom-left-radius: 3px;
+  border-bottom-right-radius: 3px;
+  border-bottom: none;
+}
+
+.controls .download > ul > li:hover {
+  background-color: darkred;
+}
+
+.controls .download > ul > li > i:global(.fa) {
+  padding-right: 0.5em;
+  width: 17px;
 }
 
 .isDownloading .download {
@@ -335,8 +379,10 @@
   cursor: wait;
 }
 
-.isDownloading .controls a:hover,
-.isDownloading .controls a:hover:before {
+.isDownloading .controls > .download > a:hover,
+.isDownloading .controls > .download > a:hover:before,
+.isDownloading .controls > a:hover,
+.isDownloading .controls > a:hover:before {
   background-color: var(--control-bgcolor);
 }
 
