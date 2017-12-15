@@ -14,7 +14,10 @@
  * limitations under the License.
  **/
 
+const styles: any = require('./JobDownload.css')
+
 import * as React from 'react'
+import Dropdown from 'react-dropdown'
 import {FileDownloadLink} from './FileDownloadLink'
 
 interface Props {
@@ -61,6 +64,7 @@ export class JobDownload extends React.Component<Props, State> {
       isOpen: false,
     }
 
+    this.download = this.download.bind(this)
     this.handleClick = this.handleClick.bind(this)
   }
 
@@ -81,14 +85,25 @@ export class JobDownload extends React.Component<Props, State> {
       </li>
     )
 
+    const options = this.downloadtypes.map(i => ({ value: i.extension, label: i.name }))
+
     return (
-      <div className={this.props.className}>
+      <div className={[this.props.className, styles.root].filter(Boolean).join(' ')}>
         <a onClick={this.handleClick} title="Download"><i className="fa fa-cloud-download"/></a>
-        <ul style={{ display: this.state.isOpen ? 'block' : 'none' }}>
+        {this.state.isOpen && <Dropdown
+          options={options}
+          placeholder="Download Format"
+          onChange={this.download}
+        />}
+        <ul style={{ display: this.state.isOpen ? 'none' : 'none' }}>
           {DownloadTypesList}
         </ul>
       </div>
     )
+  }
+
+  private download(option) {
+    console.debug('>>> option:', option, '<<<')
   }
 
   private handleClick() {
