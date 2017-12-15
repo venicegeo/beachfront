@@ -50,7 +50,7 @@ export class JobDownload extends React.Component<Props, State> {
       extension: 'gpkg',
       icon: 'database',
       mimetype: 'application/x-sqlite3',
-      name: 'GPKG',
+      name: 'GeoPackage',
     },
   ]
 

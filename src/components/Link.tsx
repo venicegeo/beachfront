@@ -32,10 +32,10 @@ export const Link = ({
   activeClassName,
   children,
   className,
+  hash = '',
   isActive,
   pathname,
   search = '',
-  hash = '',
   title,
   onClick,
 }: Props) => (

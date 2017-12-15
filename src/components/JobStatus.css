@@ -348,10 +348,8 @@
 
 .controls .download > ul > li {
   border-bottom: 1px solid #ddd;
-  cursor: pointer;
+  display: flex;
   min-width: 128px;
-  padding: 0.25em 0.75em;
-  white-space: nowrap;
 }
 
 .controls .download > ul > li:first-child {
@@ -369,8 +367,14 @@
   background-color: darkred;
 }
 
-.controls .download > ul > li > i:global(.fa) {
-  padding-right: 0.5em;
+.controls .download > ul > li > a {
+  flex: 1 0 auto;
+  padding: 0.25em 0.75em;
+  white-space: nowrap;
+}
+
+.controls .download > ul > li > a > i:global(.fa) {
+  padding-right: 0.25em;
   width: 17px;
 }
 
