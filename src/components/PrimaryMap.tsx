@@ -158,6 +158,7 @@ export class PrimaryMap extends React.Component<Props, State> {
   private previewLayers: {[key: string]: Tile}
   private selectInteraction: Select
   private skipNextViewUpdate: boolean
+  private featureId?: (number | string)
 
   constructor() {
     super()
@@ -406,16 +407,19 @@ export class PrimaryMap extends React.Component<Props, State> {
 
   private handleSelect(event) {
     if (event.selected.length === 0 && event.deselected.length === 0) {
-      return  // Disregard spurious select event
+      return  // Disregard spurious select event.
     }
 
-    const [feature]: Feature[] = event.selected
+    const index = event.selected.findIndex(f => f.ol_uid === this.featureId) + 1
+    const feature: any = event.selected[index % event.selected.length]
     const type = feature ? feature.get(KEY_TYPE) : null
 
     switch (type) {
       case TYPE_DIVOT_INBOARD:
+      case TYPE_DIVOT_OUTBOARD:
       case TYPE_STEM:
         // Proxy clicks on "inner" decorations out to the job frame itself
+        this.featureId = feature.ol_uid
         const jobId = feature.get(KEY_OWNER_ID)
         const jobFeature = this.frameLayer.getSource().getFeatureById(jobId)
         const selections = this.selectInteraction.getFeatures()
@@ -425,10 +429,12 @@ export class PrimaryMap extends React.Component<Props, State> {
         break
       case TYPE_JOB:
       case TYPE_SCENE:
+        this.featureId = feature.ol_uid
         this.props.onSelectFeature(toGeoJSON(feature) as beachfront.Scene)
         break
       default:
         // Not a valid "selectable" feature
+        this.featureId = null
         this.clearSelection()
         this.emitDeselectAll()
         break
@@ -1073,6 +1079,7 @@ function generateScenePreviewSource(provider, imageId, apiKey) {
 function generateSelectInteraction(...layers) {
   return new Select({
     layers,
+    multi: true,
     condition: condition.click,
     style: new Style({
       stroke: new Stroke({
