@@ -22,6 +22,7 @@ import {FileDownloadLink} from './FileDownloadLink'
 interface Props {
   basename: string
   className?: string
+  isHover: boolean
   jobId: string
   onComplete()
   onError(err: any)
@@ -30,7 +31,8 @@ interface Props {
 }
 
 interface State {
-  isOpen: boolean
+  isActive?: boolean
+  isOpen?: boolean
 }
 
 interface DownloadType {
@@ -60,11 +62,26 @@ export class JobDownload extends React.Component<Props, State> {
     super(props)
 
     this.state = {
+      isActive: false,
       isOpen: false,
     }
 
     this.download = this.download.bind(this)
     this.handleClick = this.handleClick.bind(this)
+  }
+
+  componentWillReceiveProps(nextProps: Props) {
+    if (this.props.isHover !== nextProps.isHover) {
+      const isActive = nextProps.isHover && this.state.isOpen
+
+      if (this.state.isActive !== isActive) {
+        if (isActive) {
+          this.setState({ isActive })
+        } else {
+          this.setState({ isActive, isOpen: false })
+        }
+      }
+    }
   }
 
   render() {
@@ -85,9 +102,11 @@ export class JobDownload extends React.Component<Props, State> {
     )
 
     return (
-      <div className={[this.props.className, styles.root].filter(Boolean).join(' ')}>
+      <div
+        className={[this.props.className, styles.root].filter(Boolean).join(' ')}
+      >
         <a onClick={this.handleClick} title="Download"><i className="fa fa-cloud-download"/></a>
-        {this.state.isOpen && <ul>{DownloadTypesList}</ul>}
+        {this.state.isActive && <ul>{DownloadTypesList}</ul>}
       </div>
     )
   }
@@ -97,6 +116,9 @@ export class JobDownload extends React.Component<Props, State> {
   }
 
   private handleClick() {
-    this.setState({ isOpen: !this.state.isOpen })
+    this.setState({
+      isActive: !this.state.isOpen,
+      isOpen: !this.state.isOpen,
+    })
   }
 }

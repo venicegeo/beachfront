@@ -40,6 +40,7 @@ interface Props {
 
 interface State {
   downloadProgress?: number
+  isControlHover?: boolean
   isDownloading?: boolean
   isExpanded?: boolean
   isRemoving?: boolean
@@ -51,6 +52,7 @@ export class JobStatus extends React.Component<Props, State> {
 
     this.state = {
       downloadProgress: 0,
+      isControlHover: false,
       isDownloading: false,
       isExpanded: false,
       isRemoving: false,
@@ -115,7 +117,11 @@ export class JobStatus extends React.Component<Props, State> {
           </div>
         </div>
 
-        <div className={styles.controls}>
+        <div
+          className={styles.controls}
+          onMouseEnter={() => this.setState({ isControlHover: true })}
+          onMouseLeave={() => this.setState({ isControlHover: false })}
+        >
           <Link
             pathname="/"
             search={`?jobId=${id}`}
@@ -127,6 +133,7 @@ export class JobStatus extends React.Component<Props, State> {
             <JobDownload
               basename={properties.name}
               className={styles.download}
+              isHover={this.state.isControlHover}
               jobId={id}
               onComplete={this.handleDownloadComplete}
               onError={this.handleDownloadError}
