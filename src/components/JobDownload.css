@@ -14,41 +14,46 @@
  * limitations under the License.
  **/
 
+@import '../styles/constants.css';
+
 :root {
-  --border-radius: 3px;
 }
 
 .root > ul {
-  background-color: indianred;
-  border: 2px solid #ddd;
-  border-radius: var(--border-radius);
-  bottom: 60%;
+  background-color: var(--COLOR_CONTROL);
+  bottom: 0;
+  display: flex;
   font-size: 13px;
+  flex-direction: column;
+  left: -130px;
   list-style: none;
+  min-height: 100%;
   padding: 0;
   position: absolute;
-  right: 32px;
+  right: 45px;
+  z-index: 9;
+}
+
+.root:hover > ul {
+  background-color: var(--COLOR_BRAND_DARK);
 }
 
 .root > ul > li {
-  border-bottom: 1px solid #ddd;
+  align-items: center;
+  box-shadow: inset -1px 0 rgba(255, 255, 255, 0.2), inset 0 1px rgba(255, 255, 255, 0.2);
   display: flex;
-  min-width: 128px;
+  flex: 1 0 auto;
+  min-height: 28px;
 }
 
 .root > ul > li:first-child {
-  border-top-left-radius: var(--border-radius);
-  border-top-right-radius: var(--border-radius);
 }
 
 .root > ul > li:last-child {
-  border-bottom-left-radius: var(--border-radius);
-  border-bottom-right-radius: var(--border-radius);
-  border-bottom: none;
 }
 
 .root > ul > li:hover {
-  background-color: darkred;
+  background-color: hsl(202, 80%, 20%);
 }
 
 .root > ul > li > a {
