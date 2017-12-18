@@ -14,10 +14,50 @@
  * limitations under the License.
  **/
 
-:global(.Dropdown-root) {
+:root {
+  --border-radius: 3px;
+}
+
+.root > ul {
   background-color: indianred;
+  border: 2px solid #ddd;
+  border-radius: var(--border-radius);
+  bottom: 60%;
+  font-size: 13px;
+  list-style: none;
+  padding: 0;
   position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 130px;
+  right: 32px;
+}
+
+.root > ul > li {
+  border-bottom: 1px solid #ddd;
+  display: flex;
+  min-width: 128px;
+}
+
+.root > ul > li:first-child {
+  border-top-left-radius: var(--border-radius);
+  border-top-right-radius: var(--border-radius);
+}
+
+.root > ul > li:last-child {
+  border-bottom-left-radius: var(--border-radius);
+  border-bottom-right-radius: var(--border-radius);
+  border-bottom: none;
+}
+
+.root > ul > li:hover {
+  background-color: darkred;
+}
+
+.root > ul > li > a {
+  flex: 1 0 auto;
+  padding: 0.25em 0.75em;
+  white-space: nowrap;
+}
+
+.root > ul > li > a > i:global(.fa) {
+  padding-right: 0.25em;
+  width: 17px;
 }

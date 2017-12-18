@@ -341,50 +341,6 @@
   width: 130px;
 }
 
-.controls .download > ul {
-  background-color: indianred;
-  border: 2px solid #ddd;
-  border-radius: 3px;
-  bottom: 60%;
-  font-size: 13px;
-  list-style: none;
-  padding: 0;
-  position: absolute;
-  right: 32px;
-}
-
-.controls .download > ul > li {
-  border-bottom: 1px solid #ddd;
-  display: flex;
-  min-width: 128px;
-}
-
-.controls .download > ul > li:first-child {
-  border-top-left-radius: 3px;
-  border-top-right-radius: 3px;
-}
-
-.controls .download > ul > li:last-child {
-  border-bottom-left-radius: 3px;
-  border-bottom-right-radius: 3px;
-  border-bottom: none;
-}
-
-.controls .download > ul > li:hover {
-  background-color: darkred;
-}
-
-.controls .download > ul > li > a {
-  flex: 1 0 auto;
-  padding: 0.25em 0.75em;
-  white-space: nowrap;
-}
-
-.controls .download > ul > li > a > i:global(.fa) {
-  padding-right: 0.25em;
-  width: 17px;
-}
-
 .isDownloading .download {
   font-size: 13px;
   cursor: wait;

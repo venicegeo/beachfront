@@ -41,7 +41,10 @@ export const Link = ({
 }: Props) => (
   <a
     href={pathname + search + hash}
-    className={`${className} ${isActive === true || (typeof isActive === 'undefined' && location.pathname === pathname) ? activeClassName : ''}`}
+    className={[
+      className,
+      isActive || (isActive == null && location.pathname === pathname) ? activeClassName : '',
+    ].filter(Boolean).join(' ')}
     title={title}
     onClick={event => {
       event.preventDefault()
