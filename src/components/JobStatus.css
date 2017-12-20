@@ -40,10 +40,16 @@
 
 .root {
   display: flex;
+  flex-direction: column;
   background-color: #fff;
   margin-bottom: 1px;
   font-size: 14px;
   position: relative;
+}
+
+.wrapper {
+  display: flex;
+  flex-direction: row;
 }
 
 /* Container: Statuses
@@ -345,11 +351,4 @@
 .isDownloading .download {
   font-size: 13px;
   cursor: wait;
-}
-
-.isDownloading .controls > .download > a:hover,
-.isDownloading .controls > .download > a:hover:before,
-.isDownloading .controls > a:hover,
-.isDownloading .controls > a:hover:before {
-  background-color: var(--control-bgcolor);
 }

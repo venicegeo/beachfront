@@ -66,6 +66,7 @@ export class FileDownloadLink extends React.Component<Props, State> {
     const receivedBlobUrl = !prevState.blobUrl && this.state.blobUrl
 
     if (downloadFinished && receivedBlobUrl) {
+      this.cancel = null
       this.triggerDownload()
     }
   }
@@ -106,7 +107,7 @@ export class FileDownloadLink extends React.Component<Props, State> {
     this.props.onStart()
 
     getClient().get(this.props.apiUrl, {
-      cancelToken: new axios.CancelToken(cancel => this.cancel = cancel),
+      cancelToken: new axios.CancelToken(cancel => this.cancel = cancel.bind(this)),
       onDownloadProgress: this.handleProgress,
       responseType: 'blob',
       timeout: TIMEOUT,

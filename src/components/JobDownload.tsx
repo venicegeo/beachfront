@@ -32,6 +32,7 @@ interface Props {
 
 interface State {
   isActive?: boolean
+  isDownloading?: boolean
   isOpen?: boolean
 }
 
@@ -63,16 +64,18 @@ export class JobDownload extends React.Component<Props, State> {
 
     this.state = {
       isActive: false,
+      isDownloading: false,
       isOpen: false,
     }
 
-    this.download = this.download.bind(this)
     this.handleClick = this.handleClick.bind(this)
+    this.onComplete = this.onComplete.bind(this)
+    this.onStart = this.onStart.bind(this)
   }
 
   componentWillReceiveProps(nextProps: Props) {
     if (this.props.isHover !== nextProps.isHover) {
-      const isActive = nextProps.isHover && this.state.isOpen
+      const isActive = this.state.isDownloading || nextProps.isHover && this.state.isOpen
 
       if (this.state.isActive !== isActive) {
         if (isActive) {
@@ -93,10 +96,10 @@ export class JobDownload extends React.Component<Props, State> {
           filename={`${this.props.basename}.${i.extension}`}
           jobId={this.props.jobId}
           mimetype={i.mimetype}
-          onComplete={this.props.onComplete}
+          onComplete={this.onComplete}
           onError={this.props.onError}
           onProgress={this.props.onProgress}
-          onStart={this.props.onStart}
+          onStart={this.onStart}
         ><i className={`fa fa-${i.icon}`}/> {i.name}</FileDownloadLink>
       </li>
     )
@@ -111,14 +114,23 @@ export class JobDownload extends React.Component<Props, State> {
     )
   }
 
-  private download(option) {
-    console.debug('>>> option:', option, '<<<')
-  }
-
   private handleClick() {
     this.setState({
-      isActive: !this.state.isOpen,
+      isActive: this.state.isDownloading || !this.state.isOpen,
       isOpen: !this.state.isOpen,
     })
+  }
+
+  private onComplete() {
+    this.setState({
+      isActive: this.props.isHover && this.state.isOpen,
+      isDownloading: false,
+    })
+    this.props.onComplete()
+  }
+
+  private onStart() {
+    this.setState({ isActive: true, isDownloading: true })
+    this.props.onStart()
   }
 }

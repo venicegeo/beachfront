@@ -16,9 +16,6 @@
 
 @import '../styles/constants.css';
 
-:root {
-}
-
 .root > ul {
   background-color: var(--COLOR_CONTROL);
   bottom: 0;
@@ -44,12 +41,6 @@
   display: flex;
   flex: 1 0 auto;
   min-height: 28px;
-}
-
-.root > ul > li:first-child {
-}
-
-.root > ul > li:last-child {
 }
 
 .root > ul > li:hover {
