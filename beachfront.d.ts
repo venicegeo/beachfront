@@ -91,6 +91,7 @@ declare namespace beachfront {
 interface BuildEnvironment {
   NODE_ENV: string
   API_ROOT: string
+  IDAM_ROOT: string
   CLASSIFICATION_BANNER_BACKGROUND: string
   CLASSIFICATION_BANNER_FOREGROUND: string
   CLASSIFICATION_BANNER_TEXT: string

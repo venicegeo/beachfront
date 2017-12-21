@@ -22,6 +22,7 @@ export const PLANET_BASE_URL                  = process.env.PLANET_BASE_URL
 export const USER_GUIDE_URL                   = process.env.USER_GUIDE_URL
 
 export const API_ROOT = process.env.API_ROOT
+export const IDAM_ROOT = process.env.IDAM_ROOT
 export const CONSENT_BANNER_TEXT = {__html: process.env.CONSENT_BANNER_TEXT}
 
 const time = {millisecond: 1, second: 1000, minute: 60000}
