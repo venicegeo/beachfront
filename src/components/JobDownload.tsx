@@ -32,7 +32,7 @@ interface Props {
 }
 
 interface State {
-  errors?: any[]
+  errors?: any
   isActive?: boolean
   isDownloading?: boolean
   isOpen?: boolean
@@ -47,14 +47,16 @@ interface DownloadType {
 }
 
 const JobDownloadErrors = (props: any) => {
-  return props.errors.length ? <div className={styles.error}>
+  return Object.keys(props.errors).length ? <div className={styles.error}>
     <div className={styles.close} title="Dismiss" onClick={props.dismiss}>&times;</div>
-    <div className={styles.header}>Job Download Error</div>
+    <div className={styles.header}>
+      Job Download Error [{Object.keys(props.errors).join(', ')}]
+    </div>
     <div className={styles.messages}>
-      {props.errors.map((e, i) => {
-        return <div className={styles.message} key={i}>
-          <div className={styles.short}>{e.message}</div>
-          <div className={styles.stack}>{e.stack}</div>
+      {Object.keys(props.errors).map(key => {
+        return <div className={styles.message} key={key}>
+          <div className={styles.short}>{props.errors[key].message}</div>
+          <div className={styles.stack}>{props.errors[key].stack}</div>
         </div>
       })}
     </div>
@@ -113,7 +115,7 @@ export class JobDownload extends React.Component<Props, State> {
 
   render() {
     const DownloadTypesList = this.downloadtypes.map(i =>
-      <li key={i.extension}>
+      <li className={i.extension in this.state.errors ? styles.error : ''} key={i.extension}>
         <FileDownloadLink
           apiUrl={`/v0/job/${this.props.jobId}.${i.extension}`}
           displayText={`Download ${i.name}`}
@@ -133,7 +135,7 @@ export class JobDownload extends React.Component<Props, State> {
         className={[
           this.props.className,
           styles.root,
-          this.state.errors.length ? styles.errors : null,
+          Object.keys(this.state.errors).length ? styles.errors : null,
         ].filter(Boolean).join(' ')}
       >
         <a onClick={this.handleClick} title="Download">
@@ -192,7 +194,7 @@ export class JobDownload extends React.Component<Props, State> {
     console.warn(`Downloading ${key} failed: ${error.message}`)
     delete this.downloads[key]
     this.setState({
-      errors: this.state.errors.concat([error]),
+      errors: Object.assign({}, this.state.errors, { [key]: error }),
       isActive: this.isDownloading || this.props.isHover && this.state.isOpen,
       isDownloading: this.isDownloading,
       percentage: this.percentage,

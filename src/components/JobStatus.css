@@ -305,6 +305,14 @@
   background-color: var(--control-bgcolor);
 }
 
+.controls > a,
+.controls > a:before,
+.controls > .download,
+.controls > .download > a,
+.controls > .download > a:before {
+  transition: background-color 150ms ease-in-out;
+}
+
 .controls > * + * {
   box-shadow: inset 0 1px rgba(255, 255, 255, 0.2);
 }
@@ -347,7 +355,7 @@
   bottom: 0;
   width: 0;
   overflow: hidden;
-  transition: width 175ms ease-in-out;
+  transition: background-color 150ms ease-in-out, width 150ms ease-in-out;
   white-space: nowrap;
   background-color: var(--control-bgcolor);
 }

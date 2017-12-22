@@ -20,6 +20,14 @@
   --border-radius: 8px;
 }
 
+.root,
+.root > a,
+.root > a:before,
+.root > ul,
+.root > ul > li {
+  transition: background-color 150ms ease-in-out;
+}
+
 .root > ul {
   background-color: var(--COLOR_CONTROL);
   bottom: 0;
@@ -74,19 +82,24 @@
 }
 
 .root.errors,
-:global(.JobStatus-controls):hover .root.errors > a:before,
-:global(.JobStatus-controls):hover .root.errors > ul {
+.root.errors > ul > li.error,
+:global(.JobStatus-controls):hover .root.errors > ul > li.error,
+:global(.JobStatus-controls):hover .root.errors > a:before {
   background-color: indianred;
 }
 
-.root.errors > ul > li:hover,
+.root.errors > ul > li.error:hover,
 .root.errors:hover,
-:global(.JobStatus-controls):hover .root.errors > ul > li:hover,
-:global(.JobStatus-controls):hover .root.errors:hover > a:before {
+:global(.JobStatus-controls):hover .root.errors:hover > a:before,
+:global(.JobStatus-controls):hover .root.errors:hover > ul > li.error {
   background-color: hsl(0, 53%, 48%);
 }
 
-.error {
+:global(.JobStatus-controls):hover .root.errors > ul > li.error:hover {
+  background-color: hsl(0, 53%, 38%);
+}
+
+.root.errors > .error {
   background-color: indianred;
   border: solid 3px whitesmoke;
   border-radius: 8px;
@@ -101,7 +114,7 @@
   position: fixed;
 }
 
-.error .close {
+.root.errors > .error .close {
   color: whitesmoke;
   cursor: pointer;
   display: inline-block;
@@ -113,22 +126,22 @@
   top: 0;
 }
 
-.error .close:hover {
+.root.errors > .error .close:hover {
   color: white;
   text-shadow: 0 0 4px white;
 }
 
-.error .header {
+.root.errors > .error .header {
   border-bottom: solid 1px whitesmoke;
   font-weight: bold;
   padding: 0 25px 0 5px;
 }
 
-.error .message {
+.root.errors > .error .message {
   padding: 5px;
 }
 
-.error .message .stack {
+.root.errors > .error .message .stack {
   font-family: monospace;
   font-size: 11px;
   white-space: pre-wrap;
