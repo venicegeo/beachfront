@@ -120,13 +120,14 @@ export class JobDownload extends React.Component<Props, State> {
           apiUrl={`/v0/job/${this.props.jobId}.${i.extension}`}
           displayText={`Download ${i.name}`}
           filename={`${this.props.basename}.${i.extension}`}
+          icon={i.icon}
           jobId={this.props.jobId}
           mimetype={i.mimetype}
           onComplete={wrap(i.extension, this.onComplete)}
           onError={wrap(i.extension, this.onError)}
           onProgress={wrap(i.extension, this.onProgress)}
           onStart={wrap(i.extension, this.onStart)}
-        ><i className={`fa fa-${i.icon}`}/> {i.name}</FileDownloadLink>
+        >{i.name}</FileDownloadLink>
       </li>
     )
 

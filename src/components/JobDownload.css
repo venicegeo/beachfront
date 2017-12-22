@@ -142,6 +142,7 @@
 }
 
 .root.errors > .error .message .stack {
+  display: none;
   font-family: monospace;
   font-size: 11px;
   white-space: pre-wrap;

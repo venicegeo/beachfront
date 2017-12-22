@@ -26,6 +26,7 @@ interface Props {
   className?: string
   displayText: string
   filename: string
+  icon?: string
   jobId: string
   mimetype?: string
   onComplete()
@@ -91,10 +92,13 @@ export class FileDownloadLink extends React.Component<Props, State> {
           : this.props.displayText
         }
         onClick={this.handleClick}
-      >{this.state.isDownloading
-        ? `${this.state.total ? Math.floor(100 * this.state.loaded / this.state.total) : '—'}%`
-        : (this.props.children || <i className="fa fa-cloud-download"/>)
-      }</a>
+      >
+        <i className={`fa fa-${this.props.icon || 'cloud-download'}`}/>
+        {this.state.isDownloading
+          ? `${this.state.total ? Math.floor(100 * this.state.loaded / this.state.total) : '—'}%`
+          : this.props.children
+        }
+      </a>
     )
   }
 
@@ -127,6 +131,7 @@ export class FileDownloadLink extends React.Component<Props, State> {
 
   private handleError(error) {
     this.setState({ isDownloading: false })
+    this.cancel = null
 
     if (!axios.isCancel(error)) {
       this.props.onError(error)
