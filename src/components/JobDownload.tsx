@@ -18,6 +18,7 @@ const styles: any = require('./JobDownload.css')
 
 import * as React from 'react'
 import {FileDownloadLink} from './FileDownloadLink'
+import * as wrap from 'lodash/wrap'
 
 interface Props {
   basename: string
@@ -31,9 +32,11 @@ interface Props {
 }
 
 interface State {
+  errors?: any[]
   isActive?: boolean
   isDownloading?: boolean
   isOpen?: boolean
+  percentage?: number
 }
 
 interface DownloadType {
@@ -41,6 +44,21 @@ interface DownloadType {
   icon: string
   mimetype: string
   name: string
+}
+
+const JobDownloadErrors = (props: any) => {
+  return props.errors.length ? <div className={styles.error}>
+    <div className={styles.close} title="Dismiss" onClick={props.dismiss}>&times;</div>
+    <div className={styles.header}>Job Download Error</div>
+    <div className={styles.messages}>
+      {props.errors.map((e, i) => {
+        return <div className={styles.message} key={i}>
+          <div className={styles.short}>{e.message}</div>
+          <div className={styles.stack}>{e.stack}</div>
+        </div>
+      })}
+    </div>
+  </div> : null
 }
 
 export class JobDownload extends React.Component<Props, State> {
@@ -59,23 +77,29 @@ export class JobDownload extends React.Component<Props, State> {
     },
   ]
 
+  downloads = {}
+
   constructor(props) {
     super(props)
 
     this.state = {
+      errors: [],
       isActive: false,
       isDownloading: false,
       isOpen: false,
     }
 
+    this.dismissErrors = this.dismissErrors.bind(this)
     this.handleClick = this.handleClick.bind(this)
     this.onComplete = this.onComplete.bind(this)
+    this.onError = this.onError.bind(this)
+    this.onProgress = this.onProgress.bind(this)
     this.onStart = this.onStart.bind(this)
   }
 
   componentWillReceiveProps(nextProps: Props) {
     if (this.props.isHover !== nextProps.isHover) {
-      const isActive = this.state.isDownloading || nextProps.isHover && this.state.isOpen
+      const isActive = this.isDownloading || nextProps.isHover && this.state.isOpen
 
       if (this.state.isActive !== isActive) {
         if (isActive) {
@@ -96,22 +120,48 @@ export class JobDownload extends React.Component<Props, State> {
           filename={`${this.props.basename}.${i.extension}`}
           jobId={this.props.jobId}
           mimetype={i.mimetype}
-          onComplete={this.onComplete}
-          onError={this.props.onError}
-          onProgress={this.props.onProgress}
-          onStart={this.onStart}
+          onComplete={wrap(i.extension, this.onComplete)}
+          onError={wrap(i.extension, this.onError)}
+          onProgress={wrap(i.extension, this.onProgress)}
+          onStart={wrap(i.extension, this.onStart)}
         ><i className={`fa fa-${i.icon}`}/> {i.name}</FileDownloadLink>
       </li>
     )
 
     return (
       <div
-        className={[this.props.className, styles.root].filter(Boolean).join(' ')}
+        className={[
+          this.props.className,
+          styles.root,
+          this.state.errors.length ? styles.errors : null,
+        ].filter(Boolean).join(' ')}
       >
-        <a onClick={this.handleClick} title="Download"><i className="fa fa-cloud-download"/></a>
+        <a onClick={this.handleClick} title="Download">
+          {this.state.isDownloading
+            ? `${isNaN(this.state.percentage) ? '—' : this.state.percentage}%`
+            : <i className="fa fa-cloud-download"/>
+          }
+        </a>
         {this.state.isActive && <ul>{DownloadTypesList}</ul>}
+        <JobDownloadErrors errors={this.state.errors} dismiss={this.dismissErrors}/>
       </div>
     )
+  }
+
+  private get isDownloading() {
+    return !!Object.keys(this.downloads).length
+  }
+
+  private get loaded() {
+    return Object.keys(this.downloads).reduce((a, k) => a + (this.downloads[k].loaded || 0), 0)
+  }
+
+  private get total() {
+    return Object.keys(this.downloads).reduce((a, k) => a + (this.downloads[k].total || 0), 0)
+  }
+
+  private get percentage() {
+    return this.total ? Math.floor(100 * this.loaded / this.total) : NaN
   }
 
   private handleClick() {
@@ -121,16 +171,51 @@ export class JobDownload extends React.Component<Props, State> {
     })
   }
 
-  private onComplete() {
-    this.setState({
-      isActive: this.props.isHover && this.state.isOpen,
-      isDownloading: false,
-    })
-    this.props.onComplete()
+  private dismissErrors() {
+    this.setState({ errors: [] })
   }
 
-  private onStart() {
-    this.setState({ isActive: true, isDownloading: true })
+  private onComplete(key) {
+    delete this.downloads[key]
+    this.setState({
+      isActive: this.isDownloading || this.props.isHover && this.state.isOpen,
+      isDownloading: this.isDownloading,
+      percentage: this.percentage,
+    })
+
+    if (!this.isDownloading) {
+      this.props.onComplete()
+    }
+  }
+
+  private onError(key, error) {
+    console.warn(`Downloading ${key} failed: ${error.message}`)
+    delete this.downloads[key]
+    this.setState({
+      errors: this.state.errors.concat([error]),
+      isActive: this.isDownloading || this.props.isHover && this.state.isOpen,
+      isDownloading: this.isDownloading,
+      percentage: this.percentage,
+    })
+
+    if (!this.isDownloading) {
+      this.props.onError(error)
+    }
+  }
+
+  private onProgress(key, loaded, total) {
+    this.downloads[key] = { loaded, total }
+    this.setState({ percentage: this.percentage })
+    this.props.onProgress(this.loaded, this.total)
+  }
+
+  private onStart(key) {
+    this.downloads[key] = {}
+    this.setState({
+      isActive: true,
+      isDownloading: this.isDownloading,
+      percentage: this.percentage,
+    })
     this.props.onStart()
   }
 }

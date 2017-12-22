@@ -29,7 +29,7 @@ interface Props {
   jobId: string
   mimetype?: string
   onComplete()
-  onError(err: any)
+  onError(error: any)
   onProgress(loaded: number, total: number)
   onStart()
 }
@@ -92,7 +92,7 @@ export class FileDownloadLink extends React.Component<Props, State> {
         }
         onClick={this.handleClick}
       >{this.state.isDownloading
-        ? `${Math.floor(100 * this.state.loaded / this.state.total) || 0}%`
+        ? `${this.state.total ? Math.floor(100 * this.state.loaded / this.state.total) : '—'}%`
         : (this.props.children || <i className="fa fa-cloud-download"/>)
       }</a>
     )
@@ -125,11 +125,11 @@ export class FileDownloadLink extends React.Component<Props, State> {
     this.props.onComplete()
   }
 
-  private handleError(err) {
+  private handleError(error) {
     this.setState({ isDownloading: false })
 
-    if (!axios.isCancel(err)) {
-      this.props.onError(err)
+    if (!axios.isCancel(error)) {
+      this.props.onError(error)
     }
   }
 

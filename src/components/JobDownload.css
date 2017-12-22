@@ -16,6 +16,10 @@
 
 @import '../styles/constants.css';
 
+:root {
+  --border-radius: 8px;
+}
+
 .root > ul {
   background-color: var(--COLOR_CONTROL);
   bottom: 0;
@@ -33,6 +37,7 @@
 
 .root:hover > ul {
   background-color: var(--COLOR_BRAND_DARK);
+  border-radius: 4px;
 }
 
 .root > ul > li {
@@ -41,6 +46,16 @@
   display: flex;
   flex: 1 0 auto;
   min-height: 28px;
+}
+
+.root > ul > li:first-child {
+  border-top-left-radius: var(--border-radius);
+  border-top-right-radius: var(--border-radius);
+}
+
+.root > ul > li:last-child {
+  border-bottom-left-radius: var(--border-radius);
+  border-bottom-right-radius: var(--border-radius);
 }
 
 .root > ul > li:hover {
@@ -56,4 +71,65 @@
 .root > ul > li > a > i:global(.fa) {
   padding-right: 0.25em;
   width: 17px;
+}
+
+.root.errors,
+:global(.JobStatus-controls):hover .root.errors > a:before,
+:global(.JobStatus-controls):hover .root.errors > ul {
+  background-color: indianred;
+}
+
+.root.errors > ul > li:hover,
+.root.errors:hover,
+:global(.JobStatus-controls):hover .root.errors > ul > li:hover,
+:global(.JobStatus-controls):hover .root.errors:hover > a:before {
+  background-color: hsl(0, 53%, 48%);
+}
+
+.error {
+  background-color: indianred;
+  border: solid 3px whitesmoke;
+  border-radius: 8px;
+  box-shadow: rgba(0, 0, 0, 0.48) 0 0 96px 16px;
+  color: white;
+  font-size: 16px;
+  font-weight: normal;
+  left: 500px;
+  max-width: 50%;
+  min-width: 300px;
+  padding: 10px;
+  position: fixed;
+}
+
+.error .close {
+  color: whitesmoke;
+  cursor: pointer;
+  display: inline-block;
+  font-size: 20px;
+  font-weight: bold;
+  padding: 0 5px;
+  position: absolute;
+  right: 2px;
+  top: 0;
+}
+
+.error .close:hover {
+  color: white;
+  text-shadow: 0 0 4px white;
+}
+
+.error .header {
+  border-bottom: solid 1px whitesmoke;
+  font-weight: bold;
+  padding: 0 25px 0 5px;
+}
+
+.error .message {
+  padding: 5px;
+}
+
+.error .message .stack {
+  font-family: monospace;
+  font-size: 11px;
+  white-space: pre-wrap;
 }

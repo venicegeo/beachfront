@@ -51,7 +51,7 @@ export class JobStatus extends React.Component<Props, State> {
     super()
 
     this.state = {
-      downloadProgress: 0,
+      downloadProgress: NaN,
       isControlHover: false,
       isDownloading: false,
       isExpanded: false,
@@ -69,12 +69,17 @@ export class JobStatus extends React.Component<Props, State> {
 
   render() {
     const { id, properties } = this.props.job
-    const downloadPercentage = `${this.state.downloadProgress || 0}%`
 
     return (
       <li className={`${styles.root} ${this.aggregatedClassNames}`}>
-        <div className={styles.progressBar} title={downloadPercentage}>
-          <div className={styles.puck} style={{width: downloadPercentage}}/>
+        <div
+          className={styles.progressBar}
+          title={`${isNaN(this.state.downloadProgress) ? '—' : this.state.downloadProgress}%`}
+        >
+          <div
+            className={styles.puck}
+            style={{ width: `${this.state.downloadProgress || 0}%` }}
+          />
         </div>
 
         <div className={styles.wrapper}>
@@ -198,8 +203,8 @@ export class JobStatus extends React.Component<Props, State> {
     this.props.onForgetJob(this.props.job.id)
   }
 
-  private handleDownloadProgress(loadedBytes, totalBytes) {
-    this.setState({ downloadProgress: Math.floor(100 * loadedBytes / totalBytes) })
+  private handleDownloadProgress(loaded, total) {
+    this.setState({ downloadProgress: total ? Math.floor(100 * loaded / total) : NaN })
   }
 
   private handleDownloadStart() {
@@ -210,9 +215,8 @@ export class JobStatus extends React.Component<Props, State> {
     this.setState({ isDownloading: false })
   }
 
-  private handleDownloadError(err) {
+  private handleDownloadError(_) {
     this.setState({ isDownloading: false })
-    console.error(`Download failed: ${err.stack}`)
   }
 
   private handleExpansionToggle() {
