@@ -21,6 +21,7 @@ import {render} from 'react-dom'
 import * as debounce from 'lodash/debounce'
 import * as moment from 'moment'
 import {About} from './About'
+import {BrowserSupport} from './BrowserSupport'
 import {ClassificationBanner} from './ClassificationBanner'
 import {CreateJob, SearchCriteria, createSearchCriteria} from './CreateJob'
 import {CreateProductLine} from './CreateProductLine'
@@ -181,6 +182,7 @@ export class Application extends React.Component<Props, State> {
     return (
       <div className={styles.root}>
         <ClassificationBanner anchor="top"/>
+        <BrowserSupport/>
         <Navigation
           activeRoute={this.state.route}
           onClick={this.navigateTo}
