@@ -108,31 +108,37 @@ node {
 		}
     }
     stage("Archive") {
+        // Zip the application distribution
         def archiveName = "beachfront.zip"
-	withCredentials([
-          [$class: 'StringBinding', credentialsId: "${env.CONSENT_BANNER_TEXT}", variable: "CONSENT_BANNER_TEXT"]
-        ]) {
-            withEnv([
-              "PATH+=${nodejs}/bin",
-              "NPM_CONFIG_CACHE=${root}/.npmcache",
-              "NODE_ENV=production",
-	          "CONSENT_BANNER_TEXT=${CONSENT_BANNER_TEXT}"
-            ]) {
-                sh """
-                  npm run build
-                  cp nginx.conf dist/
-                """
-                dir ('dist') {
-                  sh "zip -r ../${archiveName} ."
-                }
-            }
-	}
-        def getDependencyStatus = sh(script: """mvn --quiet --settings ~/.m2/settings.xml dependency:get -Dmaven.repo.local="${root}/.m2/repository" -DrepositoryId=nexus -DartifactId=beachfront -Dversion=${appvers} -DgroupId="org.venice.beachfront" -Dpackaging=zip -DremoteRepositories="nexus::default::${env.ARTIFACT_STORAGE_DEPLOY_URL}" >> /dev/null 2>&1""", returnStatus: true)
+        withCredentials([[$class: 'StringBinding', credentialsId: "${env.CONSENT_BANNER_TEXT}", variable: "CONSENT_BANNER_TEXT"]]) {
+          withEnv([
+            "PATH+=${nodejs}/bin",
+            "NPM_CONFIG_CACHE=${root}/.npmcache",
+            "NODE_ENV=production",
+            "CONSENT_BANNER_TEXT=${CONSENT_BANNER_TEXT}"
+          ]) {
+              sh """
+                npm run build
+                cp nginx.conf dist/
+              """
+              dir ('dist') {
+                sh "zip -r ../${archiveName} ."
+              }
+          }
+        }
+        // Tarball the distribution with the Manifest
+        def tarball = "bf-ui.tar.gz"
+        def targetFiles = "${archiveName} manifest.jenkins.yml"
+        sh """
+          tar cvvzf ${tarball} ${target_files}
+        """
+        
+        def getDependencyStatus = sh(script: """mvn --quiet --settings ~/.m2/settings.xml dependency:get -Dmaven.repo.local="${root}/.m2/repository" -DrepositoryId=nexus -DartifactId=beachfront -Dversion=${appvers} -DgroupId="org.venice.beachfront" -Dpackaging=tar.gz -DremoteRepositories="nexus::default::${env.ARTIFACT_STORAGE_DEPLOY_URL}" >> /dev/null 2>&1""", returnStatus: true)
         if(getDependencyStatus == 0) {
             echo "Artifact version ${appvers} exists in Nexus, nothing to do"
         } else {
             sh """
-              mvn -X --settings ~/.m2/settings.xml deploy:deploy-file -Dfile=${archiveName} -DrepositoryId=nexus  -Durl="${env.ARTIFACT_STORAGE_DEPLOY_URL}" -DgroupId="org.venice.beachfront" -DgeneratePom=false -Dpackaging=zip -Dmaven.repo.local="${root}/.m2/repository" -DartifactId=beachfront -Dversion=${appvers}
+              mvn -X --settings ~/.m2/settings.xml deploy:deploy-file -Dfile=${tarball} -DrepositoryId=nexus  -Durl="${env.ARTIFACT_STORAGE_DEPLOY_URL}" -DgroupId="org.venice.beachfront" -DgeneratePom=false -Dpackaging=tar.gz -Dmaven.repo.local="${root}/.m2/repository" -DartifactId=beachfront -Dversion=${appvers}
             """
         }
     }
