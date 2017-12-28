@@ -4,7 +4,7 @@ node {
   def root = pwd()
   def mvn = tool 'M3'
   def appvers = "${env.PROMOTE_VERSION}"
-  def appBaseName = "bf-ui"
+  def appBaseName = "beachfront"
   def appName
 
   if(!fileExists('.cf')) {
@@ -97,14 +97,12 @@ node {
       }
       // Assign Routes
       def legacyAppNames = sh(script: "cf routes | grep \"${appBaseName} \" | awk '{print \$4}'", returnStdout: true)
-      sh "cf map-route ${appName} ${env.PROMOTE_DOMAIN} --hostname ${appBaseName}"
       sh "cf map-route ${appName} ${env.PROMOTE_DOMAIN} --hostname beachfront"
       
       // Delete old Routes
       for (Object legacyApp : legacyAppNames.trim().tokenize(',')) {
         def legacyAppName = legacyApp.toString().trim()
         if (legacyAppName != appName) {
-          sh "cf unmap-route ${legacyAppName} ${env.PROMOTE_DOMAIN} --hostname ${appBaseName}"
           sh "cf unmap-route ${legacyAppName} ${env.PROMOTE_DOMAIN} --hostname beachfront"
           sh "cf delete -f ${legacyAppName} -r"
         }
