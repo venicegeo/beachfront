@@ -130,7 +130,7 @@ node {
         def tarball = "bf-ui.tar.gz"
         def targetFiles = "${archiveName} manifest.jenkins.yml"
         sh """
-          tar cvvzf ${tarball} ${target_files}
+          tar cvvzf ${tarball} ${targetFiles}
         """
         
         def getDependencyStatus = sh(script: """mvn --quiet --settings ~/.m2/settings.xml dependency:get -Dmaven.repo.local="${root}/.m2/repository" -DrepositoryId=nexus -DartifactId=beachfront -Dversion=${appvers} -DgroupId="org.venice.beachfront" -Dpackaging=tar.gz -DremoteRepositories="nexus::default::${env.ARTIFACT_STORAGE_DEPLOY_URL}" >> /dev/null 2>&1""", returnStatus: true)

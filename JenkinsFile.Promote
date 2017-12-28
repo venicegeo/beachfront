@@ -60,21 +60,6 @@ node {
     authenticatePcf()
     sh "cf target -o ${env.PCF_ORG} -s ${env.PROMOTE_SPACE}"
 
-    //generate PZ API Key
-    withCredentials([[$class: 'StringBinding', credentialsId: "${params.BEACHFRONT_PIAZZA_AUTH_TEXT}", variable: 'TOKEN']]) {
-      def keyCurl = sh(script: """curl -s ${piazza_url}/v2/key -u \"${TOKEN}:\"""", returnStdout: true)
-      if (keyCurl.contains('Please request a new API')) {
-        keyCurl = sh(script: """curl -X POST -s ${piazza_url}/v2/key -u \"${TOKEN}:\"""", returnStdout: true)
-      }
-      piazza_api_key = sh(script: """echo \"${keyCurl}\"|grep -oE '\\w{8}-\\w{4}-\\w{4}-\\w{4}-\\w{12}'""", returnStdout: true).trim()
-      sh """
-        if [ -z $piazza_api_key ]; then
-        echo "No Piazza API key found"
-        exit 1
-        fi
-      """
-    }
-
     // Push the app
     sh "cf push ${appName} -f manifest.jenkins.yml --hostname ${appName} -d ${env.PROMOTE_DOMAIN} --no-start"
     try {
