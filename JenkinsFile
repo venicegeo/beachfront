@@ -309,23 +309,6 @@ node {
                 }
             }
         }
-    	if(!params.SKIP_INTEGRATION_TESTS) {
-    		stage("Phase Two Integration Tests") {
-    		    withCredentials([
-                    [$class: 'UsernamePasswordMultiBinding', credentialsId: "${env.GX_TEST_USER}", usernameVariable: "bf_username", passwordVariable: "bf_password"],
-                    [$class: 'UsernamePasswordMultiBinding', credentialsId: "${env.SAUCELAB_ACCESS}", usernameVariable: "sauce_user", passwordVariable: "sauce_key"],
-                    [$class: 'StringBinding', credentialsId: "${env.PL_API_KEY}", variable: "PL_API_KEY"]
-                ]) {
-                    withEnv([
-                      "PCF_SPACE=${env.PHASE_TWO_PCF_SPACE}"
-                    ]) {
-    					dir ("integration-tests") {
-    					    sh "chmod 700 ci/beachfront_ua_tests_stage.sh"
-    						sh "/bin/bash ci/beachfront_ua_tests_stage.sh"
-    					}
-    				}
-    		    }
-    		}
-    	}
+
     }
 }
