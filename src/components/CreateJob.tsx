@@ -35,6 +35,7 @@ interface Props {
   algorithms: beachfront.Algorithm[]
   bbox: number[]
   catalogApiKey: string
+  imagery: beachfront.ImageryCatalogPage
   isSearching: boolean
   searchError: any
   searchCriteria: SearchCriteria
@@ -73,6 +74,8 @@ export class CreateJob extends React.Component<Props, State> {
     }
     this.handleCreateJob = this.handleCreateJob.bind(this)
     this.handleComputeMaskChange = this.handleComputeMaskChange.bind(this)
+    this.handleListMouseEnter = this.handleListMouseEnter.bind(this)
+    this.handleListMouseLeave = this.handleListMouseLeave.bind(this)
     this.handleNameChange = this.handleNameChange.bind(this)
     this.handleSearchCloudCoverChange = this.handleSearchCloudCoverChange.bind(this)
     this.handleSearchDateChange = this.handleSearchDateChange.bind(this)
@@ -112,6 +115,41 @@ export class CreateJob extends React.Component<Props, State> {
               />
             </li>
           )}
+
+          {this.props.bbox && this.props.imagery && (
+            <li className={styles.results}>
+              <h2>
+                {`${
+                  this.props.imagery.count
+                } ${
+                  this.props.imagery.count === 1 ? 'Image' : 'Images'
+                }`} Found
+              </h2>
+              <table>
+                <thead>
+                  <tr>
+                    <td>ID</td>
+                    <td>Date Captured (UTC)</td>
+                    <td>Cloud Cover</td>
+                  </tr>
+                </thead>
+                <tbody>
+                  {this.props.imagery.images.features.map(f => (
+                    <tr
+                      key={f.id}
+                      onMouseEnter={() => this.handleListMouseEnter(f)}
+                      onMouseLeave={() => this.handleListMouseLeave(f)}
+                    >
+                      <td>{f.id.split(/:/)[1]}</td>
+                      <td>{moment.utc(f.properties.acquiredDate).format('YYYY-MM-DD HH:mm')}</td>
+                      <td>{f.properties.cloudCover.toFixed(1)}%</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </li>
+          )}
+
           {this.props.bbox && this.props.selectedScene && (
             <li className={styles.details}>
               <NewJobDetails
@@ -122,6 +160,7 @@ export class CreateJob extends React.Component<Props, State> {
               />
             </li>
           )}
+
           {this.props.bbox && this.props.selectedScene && (
             <li className={styles.algorithms}>
               <AlgorithmList
@@ -142,6 +181,14 @@ export class CreateJob extends React.Component<Props, State> {
         </ul>
       </div>
     )
+  }
+
+  private handleListMouseEnter(_) {
+    // Do nothing.
+  }
+
+  private handleListMouseLeave(_) {
+    // Do nothing.
   }
 
   private handleCreateJob(algorithm) {

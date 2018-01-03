@@ -14,6 +14,8 @@
  * limitations under the License.
  **/
 
+@import '../styles/constants.css';
+
 .root {
   composes: submenu from '../styles/menus.css';
 }
@@ -31,6 +33,76 @@
 .search {}
 
 .details,
-.algorithms {
-  margin-top: 30px;
+.algorithms,
+.results {
+  margin-top: 20px;
+}
+
+.results {
+}
+
+.results table {
+  border-collapse: collapse;
+  margin: 10px;
+  width: calc(100% - 20px);
+}
+
+.results td,
+.results th {
+  font-size: 14px;
+  line-height: 1.1;
+  padding: 2px 5px;
+}
+
+.results thead td,
+.results thead th {
+  background-color: white;
+  box-shadow:
+    0 2px rgba(23, 91, 130, 0.4),
+    0 3px rgba(23, 91, 130, 0.2),
+    0 4px rgba(23, 91, 130, 0.1);
+  color: var(--COLOR_HEADINGS);
+  font-weight: bold;
+  text-align: center;
+  vertical-align: bottom;
+  position: sticky;
+  top: 0;
+}
+
+.results tbody tr:first-child td,
+.results tbody tr:first-child th {
+  padding-top: 8px;
+}
+
+.results tbody tr:hover {
+  background-color: lightgray;
+  cursor: pointer;
+}
+
+.results tbody tr:nth-child(2n) {
+  background-color: linen;
+}
+
+.results tbody tr:nth-child(2n):hover {
+  background-color: hsl(30, 33%, 78%);
+}
+
+.results tbody td,
+.results tbody th {
+  color: var(--COLOR_TEXT);
+  vertical-align: top;
+}
+
+.results tbody td:nth-child(2) {
+  font-family: Inconsolata, monospace;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.results tbody td:last-child {
+  font-family: Inconsolata, monospace;
+}
+
+.results tr td:last-child {
+  text-align: right;
 }

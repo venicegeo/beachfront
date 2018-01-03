@@ -264,6 +264,7 @@ export class Application extends React.Component<Props, State> {
             algorithms={this.state.algorithms.records}
             bbox={this.state.bbox}
             catalogApiKey={this.state.catalogApiKey}
+            imagery={this.state.searchResults}
             isSearching={this.state.isSearching}
             searchError={this.state.searchError}
             searchCriteria={this.state.searchCriteria}
@@ -346,10 +347,14 @@ export class Application extends React.Component<Props, State> {
 
   private get mapMode() {
     switch (this.state.route.pathname) {
-      case '/create-job': return (this.state.bbox && this.state.searchResults) ? MODE_SELECT_IMAGERY : MODE_DRAW_BBOX
-      case '/create-product-line': return MODE_DRAW_BBOX
-      case '/product-lines': return MODE_PRODUCT_LINES
-      default: return MODE_NORMAL
+      case '/create-job':
+        return this.state.bbox && this.state.searchResults ? MODE_SELECT_IMAGERY : MODE_DRAW_BBOX
+      case '/create-product-line':
+        return MODE_DRAW_BBOX
+      case '/product-lines':
+        return MODE_PRODUCT_LINES
+      default:
+        return MODE_NORMAL
     }
   }
 
@@ -512,27 +517,32 @@ export class Application extends React.Component<Props, State> {
       isSearching: true,
       selectedFeature: null,
     })
+
     catalogService.search({
       count,
       startIndex,
       bbox: this.state.bbox,
       catalogApiKey: this.state.catalogApiKey,
       ...this.state.searchCriteria,
-    })
-      .then(searchResults => this.setState({ searchResults, searchError: null, isSearching: false }))
-      .catch(searchError => this.setState({ searchError, isSearching: false }))
+    }).then(searchResults => this.setState({
+      searchResults,
+      searchError: null,
+      isSearching: false,
+    })).catch(searchError => this.setState({
+      searchError,
+      isSearching: false,
+    }))
   }
 
   private handleSelectFeature(feature) {
     if (this.state.selectedFeature === feature) {
       return  // Nothing to do
     }
-    this.setState({
-      selectedFeature: feature || null,
-    })
+
+    this.setState({ selectedFeature: feature || null })
     this.navigateTo({
       pathname: this.state.route.pathname,
-      search:   (feature && feature.properties.type === TYPE_JOB) ? `?jobId=${feature.id}` : '',
+      search: feature && feature.properties.type === TYPE_JOB ? `?jobId=${feature.id}` : '',
     })
   }
 
@@ -703,7 +713,7 @@ function generateInitialState(): State {
 
 function deserialize(): State {
   return {
-    algorithms:       createCollection(JSON.parse(sessionStorage.getItem('algorithms_records')) || []),
+    algorithms: createCollection(JSON.parse(sessionStorage.getItem('algorithms_records')) || []),
     bbox:             JSON.parse(sessionStorage.getItem('bbox')),
     geoserver:        JSON.parse(sessionStorage.getItem('geoserver')),
     isSessionExpired: JSON.parse(sessionStorage.getItem('isSessionExpired')),

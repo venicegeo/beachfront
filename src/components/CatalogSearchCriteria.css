@@ -60,6 +60,11 @@
   composes: field-error from '../styles/forms.css';
 }
 
+.cloudCover input {
+  margin-left: 0;
+  margin-right: 0;
+}
+
 .cloudCover .value {
   margin: 0 0 0 .5em;
   width: 3.1em;
