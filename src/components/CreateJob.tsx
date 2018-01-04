@@ -128,23 +128,35 @@ export class CreateJob extends React.Component<Props, State> {
               <table>
                 <thead>
                   <tr>
-                    <td>ID</td>
+                    <td>Location</td>
                     <td>Date Captured (UTC)</td>
                     <td>Cloud Cover</td>
                   </tr>
                 </thead>
                 <tbody>
-                  {this.props.imagery.images.features.map(f => (
-                    <tr
-                      key={f.id}
-                      onMouseEnter={() => this.handleListMouseEnter(f)}
-                      onMouseLeave={() => this.handleListMouseLeave(f)}
-                    >
-                      <td>{f.id.split(/:/)[1]}</td>
-                      <td>{moment.utc(f.properties.acquiredDate).format('YYYY-MM-DD HH:mm')}</td>
-                      <td>{f.properties.cloudCover.toFixed(1)}%</td>
-                    </tr>
-                  ))}
+                  {this.props.imagery.images.features.map(f => {
+                    const loc = [
+                      f.bbox[0],
+                      f.bbox[f.bbox.length - 1],
+                    ].map(n => n.toFixed(6)) // TODO: .map((s, i) => s.padStart(11 - i))
+
+                    return (
+                      <tr
+                        className={
+                          (this.props.selectedScene && this.props.selectedScene.id === f.id)
+                            ? styles.selected
+                            : styles.unselected
+                        }
+                        key={f.id}
+                        onMouseEnter={() => this.handleListMouseEnter(f)}
+                        onMouseLeave={() => this.handleListMouseLeave(f)}
+                      >
+                        <td>{loc.join(', ')}</td>
+                        <td>{moment.utc(f.properties.acquiredDate).format('YYYY-MM-DD HH:mm')}</td>
+                        <td>{f.properties.cloudCover.toFixed(1)}%</td>
+                      </tr>
+                    )
+                  })}
                 </tbody>
               </table>
             </li>

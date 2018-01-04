@@ -552,21 +552,26 @@ export class Application extends React.Component<Props, State> {
 
     // Update selected feature if needed
     let {selectedFeature} = this.state
+
     if (route.jobIds.length) {
       selectedFeature = this.state.jobs.records.find(j => route.jobIds.includes(j.id))
     }
+
     if (!route.jobIds.length && selectedFeature && selectedFeature.properties.type === TYPE_JOB) {
       selectedFeature = null
-    }
-    else if (route.pathname !== this.state.route.pathname && selectedFeature && selectedFeature.properties.type === TYPE_SCENE) {
+    } else if (route.pathname !== this.state.route.pathname && selectedFeature && selectedFeature.properties.type === TYPE_SCENE) {
       selectedFeature = null
     }
 
     this.setState({
       route,
       selectedFeature,
+      bbox: this.state.bbox || null,
+      searchResults: this.state.searchResults || null,
+      /*
       bbox: this.state.route.pathname === route.pathname ? this.state.bbox : null,
       searchResults: this.state.route.pathname === route.pathname ? this.state.searchResults : null,
+      */
       searchError: this.state.route.pathname === route.pathname ? this.state.searchError : null,
     })
   }

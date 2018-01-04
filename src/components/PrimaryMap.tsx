@@ -186,6 +186,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.renderImagery()
     this.renderImagerySearchResultsOverlay()
     this.updateView()
+    console.debug('>>> componentDidMount(): %s <<<', JSON.stringify(this.props.bbox))
     if (this.props.bbox) {
       this.renderImagerySearchBbox()
     }
@@ -414,6 +415,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     const feature: any = event.selected[index % event.selected.length]
     const type = feature ? feature.get(KEY_TYPE) : null
 
+    console.debug('>>> handleSelect(%s) <<<', type, feature)
     switch (type) {
       case TYPE_DIVOT_INBOARD:
       case TYPE_DIVOT_OUTBOARD:
