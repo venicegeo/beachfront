@@ -15,6 +15,7 @@
  **/
 
 const styles: any = require('./ImagerySearch.css')
+const DATE_FORMAT = 'YYYY-MM-DD'
 
 import * as React from 'react'
 import * as moment from 'moment'
@@ -133,13 +134,14 @@ export class ImagerySearch extends React.Component<Props, {}> {
   //
 
   private dateValidation() {
-      return moment(this.props.dateFrom).isSameOrBefore(this.props.dateTo)
+      const from = moment.utc(this.props.dateFrom, DATE_FORMAT, true)
+      const to = moment.utc(this.props.dateTo, DATE_FORMAT, true)
+
+      return from.isValid() && to.isValid() && from.isSameOrBefore(to)
   }
 
   private get canSubmit() {
-    return this.props.isSearching === false
-        && this.props.catalogApiKey
-        && this.dateValidation()
+    return !this.props.isSearching && this.props.catalogApiKey && this.dateValidation()
   }
 
   private handleSubmit(event) {

@@ -35,9 +35,9 @@ select {
    ========================================================================= */
 
 .field-normal {
-  display: flex;
   align-items: center;
-  margin: .5em 0;
+  display: flex;
+  margin: 0.5em 0 0.25em;
 }
 
 .field-normal span {
@@ -48,7 +48,8 @@ select {
 }
 
 .field-error {
-  color: red;
-  width: 100%;
+  color: darkred;
+  font-size: 14px;
   text-align: center;
+  width: 100%;
 }
