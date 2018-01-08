@@ -105,6 +105,7 @@ export const createApplication = (element) => render(
   />, element)
 
 export class Application extends React.Component<Props, State> {
+  refs: any
   private initializationPromise: Promise<any>
   private pollingInstance: number
   private idleInterval: any
@@ -185,6 +186,7 @@ export class Application extends React.Component<Props, State> {
           onClick={this.navigateTo}
         />
         <PrimaryMap
+          ref="map"
           bbox={this.state.bbox}
           catalogApiKey={this.state.catalogApiKey}
           detections={this.detectionsForCurrentMode}
@@ -266,6 +268,7 @@ export class Application extends React.Component<Props, State> {
             catalogApiKey={this.state.catalogApiKey}
             imagery={this.state.searchResults}
             isSearching={this.state.isSearching}
+            map={this.refs.map}
             searchError={this.state.searchError}
             searchCriteria={this.state.searchCriteria}
             selectedScene={this.state.selectedFeature && this.state.selectedFeature.properties.type === TYPE_SCENE ? this.state.selectedFeature as beachfront.Scene : null}
@@ -274,6 +277,7 @@ export class Application extends React.Component<Props, State> {
             onJobCreated={this.handleJobCreated}
             onSearchCriteriaChange={this.handleSearchCriteriaChange}
             onSearchSubmit={this.handleSearchSubmit}
+            onSelectFeature={this.handleSelectFeature}
           />
         )
       case '/create-product-line':
@@ -539,10 +543,10 @@ export class Application extends React.Component<Props, State> {
       return  // Nothing to do
     }
 
-    this.setState({ selectedFeature: feature || null })
     this.navigateTo({
       pathname: this.state.route.pathname,
       search: feature && feature.properties.type === TYPE_JOB ? `?jobId=${feature.id}` : '',
+      selectedFeature: feature,
     })
   }
 
@@ -550,8 +554,8 @@ export class Application extends React.Component<Props, State> {
     const route = generateRoute(loc)
     history.pushState(null, null, route.href)
 
-    // Update selected feature if needed
-    let {selectedFeature} = this.state
+    // Update selected feature if needed.
+    let selectedFeature = loc.selectedFeature || this.state.selectedFeature
 
     if (route.jobIds.length) {
       selectedFeature = this.state.jobs.records.find(j => route.jobIds.includes(j.id))
@@ -566,7 +570,9 @@ export class Application extends React.Component<Props, State> {
     this.setState({
       route,
       selectedFeature,
+      /*
       bbox: this.state.bbox || null,
+      */
       searchResults: this.state.searchResults || null,
       /*
       bbox: this.state.route.pathname === route.pathname ? this.state.bbox : null,

@@ -30,10 +30,10 @@ export const SceneFeatureDetails = ({className, feature}: Props) => (
 
     <dl>
       <dt>Date Captured</dt>
-      <dd>{moment(feature.properties.acquiredDate).utc().format('MM/DD/YYYY HH:mm z')}</dd>
+      <dd>{moment.utc(feature.properties.acquiredDate).format('MM/DD/YYYY HH:mm z')}</dd>
 
       <dt>Cloud Cover</dt>
-      <dd>{Math.round(feature.properties.cloudCover)}%</dd>
+      <dd>{feature.properties.cloudCover.toFixed(0)}%</dd>
 
       <dt>Sensor Name</dt>
       <dd>{feature.properties.sensorName}</dd>

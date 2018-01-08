@@ -43,15 +43,15 @@
 
 .results table {
   border-collapse: collapse;
-  margin: 10px;
+  margin: 10px 5px;
   width: calc(100% - 20px);
 }
 
 .results td,
 .results th {
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1.1;
-  padding: 2px 5px;
+  padding: 2px 4px;
 }
 
 .results thead td,
@@ -65,6 +65,7 @@
   font-weight: bold;
   text-align: center;
   vertical-align: bottom;
+  padding: 1px;
   position: sticky;
   top: 0;
 }
@@ -97,10 +98,6 @@
   font-family: Inconsolata, monospace;
   text-align: center;
   white-space: nowrap;
-}
-
-.results tbody td:last-child {
-  font-family: Inconsolata, monospace;
 }
 
 .results tr td:last-child {

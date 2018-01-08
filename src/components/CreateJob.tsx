@@ -15,12 +15,14 @@
  **/
 
 const styles: any = require('./CreateJob.css')
+const DATE_FORMAT = 'YYYY-MM-DD'
 
 import * as React from 'react'
 import * as moment from 'moment'
 import {AlgorithmList} from './AlgorithmList'
 import {ImagerySearch} from './ImagerySearch'
 import {NewJobDetails} from './NewJobDetails'
+import {PrimaryMap} from './PrimaryMap'
 import {createJob} from '../api/jobs'
 import {SOURCE_RAPIDEYE} from '../constants'
 
@@ -37,6 +39,7 @@ interface Props {
   catalogApiKey: string
   imagery: beachfront.ImageryCatalogPage
   isSearching: boolean
+  map: PrimaryMap
   searchError: any
   searchCriteria: SearchCriteria
   selectedScene: beachfront.Scene
@@ -45,6 +48,7 @@ interface Props {
   onJobCreated(job: beachfront.Job)
   onSearchCriteriaChange(criteria: SearchCriteria)
   onSearchSubmit()
+  onSelectFeature(feature: any) // (feature: beachfront.Job | beachfront.Scene)
 }
 
 interface State {
@@ -57,8 +61,8 @@ interface State {
 
 export const createSearchCriteria = (): SearchCriteria => ({
   cloudCover: 10,
-  dateFrom:   moment().subtract(30, 'days').format('YYYY-MM-DD'),
-  dateTo:     moment().format('YYYY-MM-DD'),
+  dateFrom:   moment.utc().subtract(30, 'days').format(DATE_FORMAT),
+  dateTo:     moment.utc().format(DATE_FORMAT),
   source:     SOURCE_RAPIDEYE,
 })
 
@@ -74,6 +78,7 @@ export class CreateJob extends React.Component<Props, State> {
     }
     this.handleCreateJob = this.handleCreateJob.bind(this)
     this.handleComputeMaskChange = this.handleComputeMaskChange.bind(this)
+    this.handleListClick = this.handleListClick.bind(this)
     this.handleListMouseEnter = this.handleListMouseEnter.bind(this)
     this.handleListMouseLeave = this.handleListMouseLeave.bind(this)
     this.handleNameChange = this.handleNameChange.bind(this)
@@ -128,6 +133,7 @@ export class CreateJob extends React.Component<Props, State> {
               <table>
                 <thead>
                   <tr>
+                    <td>Sensor</td>
                     <td>Location</td>
                     <td>Date Captured (UTC)</td>
                     <td>Cloud Cover</td>
@@ -139,20 +145,19 @@ export class CreateJob extends React.Component<Props, State> {
                       f.bbox[0],
                       f.bbox[f.bbox.length - 1],
                     ].map(n => n.toFixed(6)) // TODO: .map((s, i) => s.padStart(11 - i))
+                    const selectedId = this.props.selectedScene && this.props.selectedScene.id
 
                     return (
                       <tr
-                        className={
-                          (this.props.selectedScene && this.props.selectedScene.id === f.id)
-                            ? styles.selected
-                            : styles.unselected
-                        }
+                        className={selectedId === f.id ? styles.selected : styles.unselected}
                         key={f.id}
+                        onClick={() => this.handleListClick(f)}
                         onMouseEnter={() => this.handleListMouseEnter(f)}
                         onMouseLeave={() => this.handleListMouseLeave(f)}
                       >
-                        <td>{loc.join(', ')}</td>
-                        <td>{moment.utc(f.properties.acquiredDate).format('YYYY-MM-DD HH:mm')}</td>
+                        <td>{f.properties.sensorName}</td>
+                        <td>{loc.join(', ')}</td>
+                        <td>{moment.utc(f.properties.acquiredDate).format(`${DATE_FORMAT} HH:mm`)}</td>
                         <td>{f.properties.cloudCover.toFixed(1)}%</td>
                       </tr>
                     )
@@ -193,6 +198,12 @@ export class CreateJob extends React.Component<Props, State> {
         </ul>
       </div>
     )
+  }
+
+  private handleListClick(feature) {
+    if (this.props.map) {
+      this.props.map.handleSelectFeature(feature.id)
+    }
   }
 
   private handleListMouseEnter(_) {

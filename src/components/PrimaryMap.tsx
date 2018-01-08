@@ -63,7 +63,7 @@ import {BasemapSelect} from './BasemapSelect'
 import {FeatureDetails} from './FeatureDetails'
 import {LoadingAnimation} from './LoadingAnimation'
 import {ImagerySearchResults} from './ImagerySearchResults'
-import {featureToBbox, deserializeBbox, serializeBbox} from '../utils/geometries'
+import {featureToBbox, deserializeBbox, serializeBbox, toGeoJSON} from '../utils/geometries'
 import {
   BASEMAP_TILE_PROVIDERS,
   SCENE_TILE_PROVIDERS,
@@ -174,6 +174,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.handleLoadStop = this.handleLoadStop.bind(this)
     this.handleMouseMove = throttle(this.handleMouseMove.bind(this), 15)
     this.handleSelect = this.handleSelect.bind(this)
+    this.handleSelectFeature = this.handleSelectFeature.bind(this)
     this.updateView = debounce(this.updateView.bind(this), 100)
     this.renderImagerySearchBbox = debounce(this.renderImagerySearchBbox.bind(this))
   }
@@ -186,7 +187,6 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.renderImagery()
     this.renderImagerySearchResultsOverlay()
     this.updateView()
-    console.debug('>>> componentDidMount(): %s <<<', JSON.stringify(this.props.bbox))
     if (this.props.bbox) {
       this.renderImagerySearchBbox()
     }
@@ -268,6 +268,38 @@ export class PrimaryMap extends React.Component<Props, State> {
         />
       </main>
     )
+  }
+
+  handleSelectFeature(feature_or_id) {
+    const feature: any = typeof feature_or_id === 'string'
+      ? this.imageryLayer.getSource().getFeatureById(feature_or_id)
+      : this.imageryLayer.getSource().getFeatureById(feature_or_id.getId())
+
+    switch (feature ? feature.get(KEY_TYPE) : null) {
+      case TYPE_DIVOT_INBOARD:
+      case TYPE_DIVOT_OUTBOARD:
+      case TYPE_STEM:
+        // Proxy clicks on "inner" decorations out to the job frame itself
+        this.featureId = feature.ol_uid
+        const jobId = feature.get(KEY_OWNER_ID)
+        const jobFeature = this.frameLayer.getSource().getFeatureById(jobId)
+        const selections = this.selectInteraction.getFeatures()
+        selections.clear()
+        selections.push(jobFeature)
+        this.props.onSelectFeature(toGeoJSON(jobFeature) as beachfront.Job)
+        break
+      case TYPE_JOB:
+      case TYPE_SCENE:
+        this.featureId = feature.ol_uid
+        this.props.onSelectFeature(toGeoJSON(feature) as beachfront.Scene)
+        break
+      default:
+        // Not a valid "selectable" feature
+        this.featureId = null
+        this.clearSelection()
+        this.emitDeselectAll()
+        break
+    }
   }
 
   //
@@ -412,35 +444,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     }
 
     const index = event.selected.findIndex(f => f.ol_uid === this.featureId) + 1
-    const feature: any = event.selected[index % event.selected.length]
-    const type = feature ? feature.get(KEY_TYPE) : null
-
-    console.debug('>>> handleSelect(%s) <<<', type, feature)
-    switch (type) {
-      case TYPE_DIVOT_INBOARD:
-      case TYPE_DIVOT_OUTBOARD:
-      case TYPE_STEM:
-        // Proxy clicks on "inner" decorations out to the job frame itself
-        this.featureId = feature.ol_uid
-        const jobId = feature.get(KEY_OWNER_ID)
-        const jobFeature = this.frameLayer.getSource().getFeatureById(jobId)
-        const selections = this.selectInteraction.getFeatures()
-        selections.clear()
-        selections.push(jobFeature)
-        this.props.onSelectFeature(toGeoJSON(jobFeature) as beachfront.Job)
-        break
-      case TYPE_JOB:
-      case TYPE_SCENE:
-        this.featureId = feature.ol_uid
-        this.props.onSelectFeature(toGeoJSON(feature) as beachfront.Scene)
-        break
-      default:
-        // Not a valid "selectable" feature
-        this.featureId = null
-        this.clearSelection()
-        this.emitDeselectAll()
-        break
-    }
+    this.handleSelectFeature(event.selected[index % event.selected.length])
   }
 
   private initializeOpenLayers() {
@@ -1040,10 +1044,10 @@ function generateImageryLayer() {
     source: new VectorSource(),
     style: new Style({
       fill: new Fill({
-        color: 'rgba(0,0,0, .15)',
+        color: 'rgba(0, 0, 0, 0.12)',
       }),
       stroke: new Stroke({
-        color: 'rgba(0,0,0, .5)',
+        color: 'rgba(0, 0, 0, 0.4)',
         width: 1,
       }),
     }),
@@ -1126,9 +1130,4 @@ function tileLoadFunction(imageTile, src) {
   else {
     imageTile.getImage().src = src
   }
-}
-
-function toGeoJSON(feature) {
-  const io = new GeoJSON()
-  return io.writeFeatureObject(feature, {dataProjection: 'EPSG:4326', featureProjection: 'EPSG:3857'})
 }
