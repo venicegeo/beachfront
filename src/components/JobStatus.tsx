@@ -19,8 +19,8 @@ const styles: any = require('./JobStatus.css')
 import * as React from 'react'
 import * as moment from 'moment'
 import {Link} from './Link'
-import {FileDownloadLink} from './FileDownloadLink'
 import {Timestamp} from './Timestamp'
+import {JobDownload} from './JobDownload'
 
 import {
   STATUS_SUCCESS,
@@ -35,11 +35,12 @@ interface Props {
   isActive: boolean
   job: beachfront.Job
   onForgetJob(jobId: string)
-  onNavigate(loc: {pathname: string, search: string, hash: string })
+  onNavigate(loc: { pathname: string, search: string, hash: string })
 }
 
 interface State {
-  downloadProgress?: number,
+  downloadProgress?: number
+  isControlHover?: boolean
   isDownloading?: boolean
   isExpanded?: boolean
   isRemoving?: boolean
@@ -48,12 +49,15 @@ interface State {
 export class JobStatus extends React.Component<Props, State> {
   constructor() {
     super()
+
     this.state = {
-      downloadProgress: 0,
+      downloadProgress: NaN,
+      isControlHover: false,
       isDownloading: false,
       isExpanded: false,
       isRemoving: false,
     }
+
     this.emitOnForgetJob        = this.emitOnForgetJob.bind(this)
     this.handleDownloadComplete = this.handleDownloadComplete.bind(this)
     this.handleDownloadError    = this.handleDownloadError.bind(this)
@@ -64,87 +68,86 @@ export class JobStatus extends React.Component<Props, State> {
   }
 
   render() {
-    const {id, properties} = this.props.job
-    const downloadPercentage = `${this.state.downloadProgress || 0}%`
+    const { id, properties } = this.props.job
+
     return (
       <li className={`${styles.root} ${this.aggregatedClassNames}`}>
-        <div className={styles.details} onClick={this.handleExpansionToggle}>
-          <h3 className={styles.title}>
-            <i className={`fa fa-chevron-right ${styles.caret}`}/>
-            <span>{segmentIfNeeded(properties.name)}</span>
-          </h3>
-
-          <div className={styles.summary}>
-            <span className={styles.status}>{properties.status}</span>
-            <Timestamp
-              className={styles.timer}
-              timestamp={properties.created_on}
-            />
-          </div>
-
-          <div className={styles.progressBar} title={downloadPercentage}>
-            <div className={styles.puck} style={{width: downloadPercentage}}/>
-          </div>
-
-          <div className={styles.metadata} onClick={e => e.stopPropagation()}>
-            <dl>
-              <dt>Algorithm</dt>
-              <dd>{properties.algorithm_name}</dd>
-              <dt>Scene ID</dt>
-              <dd>{normalizeSceneId(properties.scene_id)}</dd>
-              <dt>Captured On</dt>
-              <dd>{moment(properties.scene_time_of_collect).utc().format('MM/DD/YYYY HH:mm z')}</dd>
-              <dt>Sensor</dt>
-              <dd>{properties.scene_sensor_name}</dd>
-            </dl>
-            <div className={styles.removeToggle}>
-              <button onClick={this.handleForgetToggle}>
-                Remove this Job
-              </button>
-            </div>
-            <div className={styles.removeWarning}>
-              <h4>
-                <i className="fa fa-warning"/> Are you sure you want to remove this job from your list?
-              </h4>
-              <button onClick={this.emitOnForgetJob}>Remove this Job</button>
-              <button onClick={this.handleForgetToggle}>Cancel</button>
-            </div>
-          </div>
+        <div
+          className={styles.progressBar}
+          title={`${isNaN(this.state.downloadProgress) ? '—' : this.state.downloadProgress}%`}
+        >
+          <div
+            className={styles.puck}
+            style={{ width: `${this.state.downloadProgress || 0}%` }}
+          />
         </div>
 
-        <div className={styles.controls}>
-          <Link
-            pathname="/"
-            search={'?jobId=' + id}
-            title="View on Map"
-            onClick={this.props.onNavigate}>
-            <i className="fa fa-globe"/>
-          </Link>
-          {properties.status === STATUS_SUCCESS && (
-            <FileDownloadLink
-              jobId={id}
-              filename={properties.name + '.geojson'}
-              className={styles.download}
-              apiUrl={'/v0/job/' + id + '.geojson'}
-              displayText="Download GeoJSON"
-              onProgress={this.handleDownloadProgress}
-              onStart={this.handleDownloadStart}
-              onComplete={this.handleDownloadComplete}
-              onError={this.handleDownloadError}
-            />)}
-          {properties.status === STATUS_SUCCESS && (
-            <FileDownloadLink
-              jobId={id}
-              filename={properties.name + '.gpkg'}
-              className={styles.download}
-              apiUrl={'/v0/job/' + id + '.gpkg'}
-              displayText="Download GPKG"
-              onProgress={this.handleDownloadProgress}
-              onStart={this.handleDownloadStart}
-              onComplete={this.handleDownloadComplete}
-              onError={this.handleDownloadError}
-              />)
-          }
+        <div className={styles.wrapper}>
+          <div className={styles.details} onClick={this.handleExpansionToggle}>
+            <h3 className={styles.title}>
+              <i className={`fa fa-chevron-right ${styles.caret}`}/>
+              <span>{segmentIfNeeded(properties.name)}</span>
+            </h3>
+
+            <div className={styles.summary}>
+              <span className={styles.status}>{properties.status}</span>
+              <Timestamp
+                className={styles.timer}
+                timestamp={properties.created_on}
+              />
+            </div>
+
+            <div className={styles.metadata} onClick={e => e.stopPropagation()}>
+              <dl>
+                <dt>Algorithm</dt>
+                <dd>{properties.algorithm_name}</dd>
+                <dt>Scene ID</dt>
+                <dd>{normalizeSceneId(properties.scene_id)}</dd>
+                <dt>Captured On</dt>
+                <dd>{moment(properties.scene_time_of_collect).utc().format('MM/DD/YYYY HH:mm z')}</dd>
+                <dt>Sensor</dt>
+                <dd>{properties.scene_sensor_name}</dd>
+              </dl>
+              <div className={styles.removeToggle}>
+                <button onClick={this.handleForgetToggle}>
+                  Remove this Job
+                </button>
+              </div>
+              <div className={styles.removeWarning}>
+                <h4>
+                  <i className="fa fa-warning"/> Are you sure you want to remove this job from your list?
+                </h4>
+                <button onClick={this.emitOnForgetJob}>Remove this Job</button>
+                <button onClick={this.handleForgetToggle}>Cancel</button>
+              </div>
+            </div>
+          </div>
+
+          <div
+            className={styles.controls}
+            onMouseEnter={() => this.setState({ isControlHover: true })}
+            onMouseLeave={() => this.setState({ isControlHover: false })}
+          >
+            <Link
+              pathname="/"
+              search={`?jobId=${id}`}
+              title="View on Map"
+              onClick={this.props.onNavigate}>
+              <i className="fa fa-globe"/>
+            </Link>
+            {properties.status === STATUS_SUCCESS && (
+              <JobDownload
+                basename={properties.name}
+                className={styles.download}
+                isHover={this.state.isControlHover}
+                jobId={id}
+                onComplete={this.handleDownloadComplete}
+                onError={this.handleDownloadError}
+                onProgress={this.handleDownloadProgress}
+                onStart={this.handleDownloadStart}
+              />
+            )}
+          </div>
         </div>
       </li>
     )
@@ -178,7 +181,7 @@ export class JobStatus extends React.Component<Props, State> {
   }
 
   private get classForLoading() {
-    return (this.state.isDownloading) ? styles.isLoading : ''
+    return this.state.isDownloading ? styles.isLoading : ''
   }
 
   private get classForRemoving() {
@@ -200,10 +203,8 @@ export class JobStatus extends React.Component<Props, State> {
     this.props.onForgetJob(this.props.job.id)
   }
 
-  private handleDownloadProgress(loadedBytes, totalBytes) {
-    this.setState({
-      downloadProgress: Math.floor((loadedBytes / totalBytes) * 100),
-    })
+  private handleDownloadProgress(loaded, total) {
+    this.setState({ downloadProgress: total ? Math.floor(100 * loaded / total) : NaN })
   }
 
   private handleDownloadStart() {
@@ -214,9 +215,8 @@ export class JobStatus extends React.Component<Props, State> {
     this.setState({ isDownloading: false })
   }
 
-  private handleDownloadError(err) {
+  private handleDownloadError(_) {
     this.setState({ isDownloading: false })
-    console.error('Download failed: ' + err.stack)
   }
 
   private handleExpansionToggle() {
