@@ -568,7 +568,9 @@ export class Application extends React.Component<Props, State> {
     history.pushState(null, null, route.href)
 
     // Update selected feature if needed.
-    let selectedFeature = loc.selectedFeature || this.state.selectedFeature
+    let selectedFeature = 'selectedFeature' in loc
+      ? loc.selectedFeature
+      : this.state.selectedFeature
 
     if (route.jobIds.length) {
       selectedFeature = this.state.jobs.records.find(j => route.jobIds.includes(j.id))
