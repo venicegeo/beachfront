@@ -346,7 +346,7 @@ export class PrimaryMap extends React.Component<Props, State> {
   private emitViewChange() {
     const view = this.map.getView()
     const {basemapIndex} = this.state
-    const center = proj.transform(view.getCenter(), 'EPSG:3857', 'EPSG:4326')
+    const center = proj.transform(view.getCenter(), WEB_MERCATOR, WGS84)
     const zoom = view.getZoom() || MIN_ZOOM  // HACK -- sometimes getZoom returns undefined...
     // Don't emit false positives
     if (!this.props.view
@@ -417,7 +417,7 @@ export class PrimaryMap extends React.Component<Props, State> {
 
   private handleMouseMove(event) {
     const scenes = []
-    this.map.forEachFeatureAtPixel(event.pixel, (feature, _) => {
+    this.map.forEachFeatureAtPixel(event.pixel, feature => {
       scenes.push(feature)
     }, { layerFilter: l => l === this.imageryLayer })
     this.props.onHoverScenes(scenes)
@@ -426,7 +426,7 @@ export class PrimaryMap extends React.Component<Props, State> {
       this.refs.container.classList.remove(styles.isHoveringFeature)
       return
     }
-    const layerFilter = l => l === this.frameLayer || l === this.imageryLayer
+
     let foundFeature = false
     this.map.forEachFeatureAtPixel(event.pixel, (feature) => {
       switch (feature.get(KEY_TYPE)) {
@@ -436,7 +436,9 @@ export class PrimaryMap extends React.Component<Props, State> {
           foundFeature = true
           return true
       }
-    }, {layerFilter})
+    }, {
+      layerFilter: l => l === this.frameLayer || l === this.imageryLayer,
+    })
 
     if (foundFeature) {
       this.refs.container.classList.add(styles.isHoveringFeature)
@@ -486,7 +488,7 @@ export class PrimaryMap extends React.Component<Props, State> {
       ],
       target: this.refs.container,
       view: new View({
-        center: proj.fromLonLat(DEFAULT_CENTER, 'EPSG:3857'),
+        center: proj.fromLonLat(DEFAULT_CENTER, WEB_MERCATOR),
         extent: proj.transformExtent(VIEW_BOUNDS, WGS84, WEB_MERCATOR),
         minZoom: MIN_ZOOM,
         maxZoom: MAX_ZOOM,
@@ -524,7 +526,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     const {basemapIndex, zoom, center} = this.props.view
     this.setState({basemapIndex})
     const view = this.map.getView()
-    view.setCenter(view.constrainCenter(proj.transform(center, 'EPSG:4326', 'EPSG:3857')))
+    view.setCenter(view.constrainCenter(proj.transform(center, WGS84, WEB_MERCATOR)))
     view.setZoom(zoom)
   }
 
@@ -567,7 +569,10 @@ export class PrimaryMap extends React.Component<Props, State> {
     const source = this.frameLayer.getSource()
     const reader = new GeoJSON()
     this.props.frames.forEach(raw => {
-      const frame = reader.readFeature(raw, {dataProjection: WGS84, featureProjection: WEB_MERCATOR})
+      const frame = reader.readFeature(raw, {
+        dataProjection: WGS84,
+        featureProjection: WEB_MERCATOR,
+      })
       source.addFeature(frame)
 
       const frameExtent = calculateExtent(frame.getGeometry())
@@ -630,7 +635,10 @@ export class PrimaryMap extends React.Component<Props, State> {
     }
 
     const reader = new GeoJSON()
-    const feature = reader.readFeature(geojson, {dataProjection: WGS84, featureProjection: 'EPSG:3857'})
+    const feature = reader.readFeature(geojson, {
+      dataProjection: WGS84,
+      featureProjection: WEB_MERCATOR,
+    })
 
     source.addFeature(feature)
   }
@@ -642,7 +650,10 @@ export class PrimaryMap extends React.Component<Props, State> {
     source.setAttributions(undefined)
     source.clear()
     if (imagery) {
-      const features = reader.readFeatures(imagery.images, {dataProjection: WGS84, featureProjection: WEB_MERCATOR})
+      const features = reader.readFeatures(imagery.images, {
+        dataProjection: WGS84,
+        featureProjection: WEB_MERCATOR,
+      })
       if (features.length) {
         features.forEach(feature => {
           feature.set(KEY_TYPE, TYPE_SCENE)
@@ -789,7 +800,10 @@ export class PrimaryMap extends React.Component<Props, State> {
       return  // Nothing to do
     }
     const reader = new GeoJSON()
-    const feature = reader.readFeature(selectedFeature, {dataProjection: WGS84, featureProjection: WEB_MERCATOR})
+    const feature = reader.readFeature(selectedFeature, {
+      dataProjection: WGS84,
+      featureProjection: WEB_MERCATOR,
+    })
     const center = extent.getCenter(calculateExtent(feature.getGeometry()))
     features.push(feature)
     this.featureDetailsOverlay.setPosition(center)

@@ -88,7 +88,7 @@ interface State {
   // Map state
   bbox?: [number, number, number, number]
   mapView?: MapView
-  hoverScenes?: any[]
+  hoverSceneIds?: string[]
   hoveredFeature?: beachfront.Job
   selectedFeature?: beachfront.Job | beachfront.Scene
 
@@ -269,7 +269,7 @@ export class Application extends React.Component<Props, State> {
             algorithms={this.state.algorithms.records}
             bbox={this.state.bbox}
             catalogApiKey={this.state.catalogApiKey}
-            hoverScenes={this.state.hoverScenes}
+            hoverSceneIds={this.state.hoverSceneIds}
             imagery={this.state.searchResults}
             isSearching={this.state.isSearching}
             map={this.refs.map}
@@ -475,12 +475,11 @@ export class Application extends React.Component<Props, State> {
   }
 
   private handleHoverScenes(scenes) {
-    function prep(a: any[] = []) {
-      return a.map(s => s.getId()).sort().join(',')
-    }
+    const fn = (a: string[] = []) => a.join(',')
+    const ids = Array.isArray(scenes) ? scenes.map(s => s.getId()).sort() : null
 
-    if (prep(this.state.hoverScenes) !== prep(scenes)) {
-      this.setState({ hoverScenes: scenes })
+    if (fn(this.state.hoverSceneIds) !== fn(ids)) {
+      this.setState({ hoverSceneIds: ids })
     }
   }
 
