@@ -132,9 +132,9 @@ interface Props {
 
 interface State {
   basemapIndex?: number
+  isMeasuring?: boolean
   loadingRefCount?: number
   tileLoadError?: boolean
-  isMeasuring?: boolean
 }
 
 export interface MapView {
@@ -153,13 +153,15 @@ export class PrimaryMap extends React.Component<Props, State> {
   private featureDetailsOverlay: Overlay
   private frameLayer: VectorLayer
   private highlightLayer: VectorLayer
+  private hoverInteraction: Select
+  private hoverScenes: {[key: string]: beachfront.Scene}
   private imageSearchResultsOverlay: Overlay
   private imageryLayer: VectorLayer
   private map: Map
   private previewLayers: {[key: string]: Tile}
   private selectInteraction: Select
   private skipNextViewUpdate: boolean
-  private featureId?: (number | string)
+  private featureId?: number | string
 
   constructor() {
     super()
@@ -168,6 +170,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.handleBasemapChange = this.handleBasemapChange.bind(this)
     this.handleDrawStart = this.handleDrawStart.bind(this)
     this.handleDrawEnd = this.handleDrawEnd.bind(this)
+    this.handleHover = this.handleHover.bind(this)
     this.handleMeasureStart = this.handleMeasureStart.bind(this)
     this.handleMeasureEnd = this.handleMeasureEnd.bind(this)
     this.handleLoadError = this.handleLoadError.bind(this)
@@ -379,6 +382,12 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.props.onBoundingBoxChange(null)
   }
 
+  private handleHover(event) {
+    if (event.selected.length || event.deselected.length) {
+      this.props.onHoverScenes(this.hoverInteraction.getFeatures().getArray())
+    }
+  }
+
   private handleMeasureEnd() {
     this.setState({
       isMeasuring: false,
@@ -416,12 +425,6 @@ export class PrimaryMap extends React.Component<Props, State> {
   }
 
   private handleMouseMove(event) {
-    const scenes = []
-    this.map.forEachFeatureAtPixel(event.pixel, feature => {
-      scenes.push(feature)
-    }, { layerFilter: l => l === this.imageryLayer })
-    this.props.onHoverScenes(scenes)
-
     if (this.state.isMeasuring) {
       this.refs.container.classList.remove(styles.isHoveringFeature)
       return
@@ -463,11 +466,15 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.frameLayer = generateFrameLayer()
     this.imageryLayer = generateImageryLayer()
     this.detectionsLayers = {}
+    this.hoverScenes = {}
     this.previewLayers = {}
 
     this.bboxDrawInteraction = generateBboxDrawInteraction(this.drawLayer)
     this.bboxDrawInteraction.on('drawstart', this.handleDrawStart)
     this.bboxDrawInteraction.on('drawend', this.handleDrawEnd)
+
+    this.hoverInteraction = generateHoverInteraction(this.imageryLayer)
+    this.hoverInteraction.on('select', this.handleHover)
 
     this.selectInteraction = generateSelectInteraction(this.frameLayer, this.imageryLayer)
     this.selectInteraction.on('select', this.handleSelect)
@@ -477,7 +484,11 @@ export class PrimaryMap extends React.Component<Props, State> {
 
     this.map = new Map({
       controls: generateControls(),
-      interactions: generateBaseInteractions().extend([this.bboxDrawInteraction, this.selectInteraction]),
+      interactions: generateBaseInteractions().extend([
+        this.bboxDrawInteraction,
+        this.selectInteraction,
+        this.hoverInteraction,
+      ]),
       layers: [
         // Order matters here
         ...this.basemapLayers,
@@ -789,7 +800,6 @@ export class PrimaryMap extends React.Component<Props, State> {
         console.warn('wat mode=%s', this.props.mode)
         break
     }
-
   }
 
   private updateSelectedFeature() {
@@ -1101,6 +1111,23 @@ function generateScenePreviewSource(provider, imageId, apiKey) {
            .replace('__SCENE_ID__', imageId)
            .replace('__API_KEY__', apiKey),
   }))
+}
+
+function generateHoverInteraction(...layers) {
+  return new Select({
+    layers,
+    multi: true,
+    condition: condition.pointerMove,
+    style: new Style({
+      fill: new Fill({
+        color: 'rgba(255, 255, 255, .15)',
+      }),
+      stroke: new Stroke({
+        color: 'rgb(23, 91, 130)',
+        width: 3,
+      }),
+    }),
+  })
 }
 
 function generateSelectInteraction(...layers) {
