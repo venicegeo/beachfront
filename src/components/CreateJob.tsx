@@ -37,6 +37,7 @@ interface Props {
   algorithms: beachfront.Algorithm[]
   bbox: number[]
   catalogApiKey: string
+  hoverScenes: any[]
   imagery: beachfront.ImageryCatalogPage
   isSearching: boolean
   map: PrimaryMap
@@ -146,10 +147,14 @@ export class CreateJob extends React.Component<Props, State> {
                       f.bbox[f.bbox.length - 1],
                     ].map(n => n.toFixed(6)) // TODO: .map((s, i) => s.padStart(11 - i))
                     const selectedId = this.props.selectedScene && this.props.selectedScene.id
+                    const hoverIds = (this.props.hoverScenes || []).map(s => s.getId())
 
                     return (
                       <tr
-                        className={selectedId === f.id ? styles.selected : styles.unselected}
+                        className={[
+                          selectedId === f.id && styles.selected,
+                          hoverIds.includes(f.id) && styles.hovered,
+                        ].filter(Boolean).join(' ')}
                         key={f.id}
                         onClick={() => this.handleListClick(f)}
                         onMouseEnter={() => this.handleListMouseEnter(f)}

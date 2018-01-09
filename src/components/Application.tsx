@@ -88,6 +88,7 @@ interface State {
   // Map state
   bbox?: [number, number, number, number]
   mapView?: MapView
+  hoverScenes?: any[]
   hoveredFeature?: beachfront.Job
   selectedFeature?: beachfront.Job | beachfront.Scene
 
@@ -119,6 +120,7 @@ export class Application extends React.Component<Props, State> {
     this.handleDismissJobError = this.handleDismissJobError.bind(this)
     this.handleDismissProductLineError = this.handleDismissProductLineError.bind(this)
     this.handleForgetJob = this.handleForgetJob.bind(this)
+    this.handleHoverScenes = this.handleHoverScenes.bind(this)
     this.handleJobCreated = this.handleJobCreated.bind(this)
     this.handleNavigateToJob = this.handleNavigateToJob.bind(this)
     this.handlePanToProductLine = this.handlePanToProductLine.bind(this)
@@ -201,6 +203,7 @@ export class Application extends React.Component<Props, State> {
           wmsUrl={this.state.geoserver.wmsUrl}
           shrunk={this.state.route.pathname !== '/'}
           onBoundingBoxChange={this.handleBoundingBoxChange}
+          onHoverScenes={this.handleHoverScenes}
           onSearchPageChange={this.handleSearchSubmit}
           onSelectFeature={this.handleSelectFeature}
           onViewChange={mapView => this.setState({ mapView })}
@@ -266,6 +269,7 @@ export class Application extends React.Component<Props, State> {
             algorithms={this.state.algorithms.records}
             bbox={this.state.bbox}
             catalogApiKey={this.state.catalogApiKey}
+            hoverScenes={this.state.hoverScenes}
             imagery={this.state.searchResults}
             isSearching={this.state.isSearching}
             map={this.refs.map}
@@ -468,6 +472,16 @@ export class Application extends React.Component<Props, State> {
           jobs: this.state.jobs.$append(job),
         })
       })
+  }
+
+  private handleHoverScenes(scenes) {
+    function prep(a: any[] = []) {
+      return a.map(s => s.getId()).sort().join(',')
+    }
+
+    if (prep(this.state.hoverScenes) !== prep(scenes)) {
+      this.setState({ hoverScenes: scenes })
+    }
   }
 
   private handleJobCreated(job) {

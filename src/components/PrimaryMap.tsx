@@ -125,6 +125,7 @@ interface Props {
   onBoundingBoxChange(bbox: number[])
   onSearchPageChange(page: {count: number, startIndex: number})
   onSelectFeature(feature: beachfront.Job | beachfront.Scene)
+  onHoverScenes(scenes: any[])
   onViewChange(view: MapView)
   logout()
 }
@@ -273,7 +274,7 @@ export class PrimaryMap extends React.Component<Props, State> {
   handleSelectFeature(feature_or_id) {
     const feature: any = typeof feature_or_id === 'string'
       ? this.imageryLayer.getSource().getFeatureById(feature_or_id)
-      : this.imageryLayer.getSource().getFeatureById(feature_or_id.getId())
+      : feature_or_id
 
     switch (feature ? feature.get(KEY_TYPE) : null) {
       case TYPE_DIVOT_INBOARD:
@@ -415,6 +416,12 @@ export class PrimaryMap extends React.Component<Props, State> {
   }
 
   private handleMouseMove(event) {
+    const scenes = []
+    this.map.forEachFeatureAtPixel(event.pixel, (feature, _) => {
+      scenes.push(feature)
+    }, { layerFilter: l => l === this.imageryLayer })
+    this.props.onHoverScenes(scenes)
+
     if (this.state.isMeasuring) {
       this.refs.container.classList.remove(styles.isHoveringFeature)
       return
@@ -430,10 +437,10 @@ export class PrimaryMap extends React.Component<Props, State> {
           return true
       }
     }, {layerFilter})
+
     if (foundFeature) {
       this.refs.container.classList.add(styles.isHoveringFeature)
-    }
-    else {
+    } else {
       this.refs.container.classList.remove(styles.isHoveringFeature)
     }
   }
