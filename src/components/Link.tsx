@@ -32,22 +32,23 @@ export const Link = ({
   activeClassName,
   children,
   className,
+  hash = '',
   isActive,
   pathname,
   search = '',
-  hash = '',
   title,
   onClick,
 }: Props) => (
   <a
     href={pathname + search + hash}
-    className={`${className} ${isActive === true || (typeof isActive === 'undefined' && location.pathname === pathname) ? activeClassName : ''}`}
+    className={[
+      className,
+      isActive || (isActive == null && location.pathname === pathname) ? activeClassName : '',
+    ].filter(Boolean).join(' ')}
     title={title}
     onClick={event => {
       event.preventDefault()
       return onClick({ pathname, search, hash })
     }}
-    >
-    {children}
-  </a>
+  >{children}</a>
 )
