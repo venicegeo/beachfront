@@ -44,7 +44,7 @@
 .results table {
   border-collapse: collapse;
   margin: 10px 5px;
-  width: calc(100% - 20px);
+  width: calc(100% - 10px);
 }
 
 .results td,
@@ -75,8 +75,9 @@
   padding-top: 8px;
 }
 
+.results tbody tr.hovered,
 .results tbody tr:hover {
-  background-color: lightgray;
+  background-color: rgba(61, 148, 197, 0.3);
   cursor: pointer;
 }
 
@@ -84,8 +85,9 @@
   background-color: linen;
 }
 
+.results tbody tr:nth-child(2n).hovered,
 .results tbody tr:nth-child(2n):hover {
-  background-color: hsl(30, 33%, 78%);
+  background-color: rgba(61, 148, 197, 0.3);
 }
 
 .results tbody td,
@@ -109,8 +111,4 @@
     inset 0 0 1px 1px rgba(61, 148, 197, 0.5),
     inset 0 0 2px 2px rgba(61, 148, 197, 0.3);
   outline: solid 2px rgba(61, 148, 197, 0.8);
-}
-
-.results tbody tr.hovered {
-  background-color: rgba(61, 148, 197, 0.3);
 }

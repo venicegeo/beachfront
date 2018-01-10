@@ -154,7 +154,6 @@ export class PrimaryMap extends React.Component<Props, State> {
   private frameLayer: VectorLayer
   private highlightLayer: VectorLayer
   private hoverInteraction: Select
-  private hoverScenes: {[key: string]: beachfront.Scene}
   private imageSearchResultsOverlay: Overlay
   private imageryLayer: VectorLayer
   private map: Map
@@ -171,6 +170,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.handleDrawStart = this.handleDrawStart.bind(this)
     this.handleDrawEnd = this.handleDrawEnd.bind(this)
     this.handleHover = this.handleHover.bind(this)
+    this.handleHoverScene = this.handleHoverScene.bind(this)
     this.handleMeasureStart = this.handleMeasureStart.bind(this)
     this.handleMeasureEnd = this.handleMeasureEnd.bind(this)
     this.handleLoadError = this.handleLoadError.bind(this)
@@ -212,6 +212,7 @@ export class PrimaryMap extends React.Component<Props, State> {
       this.renderSelectionPreview()
       this.updateSelectedFeature()
     }
+
     if (previousProps.detections !== this.props.detections) {
       this.renderDetections()
     }
@@ -272,6 +273,19 @@ export class PrimaryMap extends React.Component<Props, State> {
         />
       </main>
     )
+  }
+
+  handleHoverScene(feature_or_id: string | beachfront.Scene) {
+    const feature: any = typeof feature_or_id === 'string'
+      ? this.imageryLayer.getSource().getFeatureById(feature_or_id)
+      : feature_or_id
+    const collection = this.hoverInteraction.getFeatures()
+
+    collection.clear()
+
+    if (feature) {
+      collection.push(feature)
+    }
   }
 
   handleSelectFeature(feature_or_id) {
@@ -466,7 +480,6 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.frameLayer = generateFrameLayer()
     this.imageryLayer = generateImageryLayer()
     this.detectionsLayers = {}
-    this.hoverScenes = {}
     this.previewLayers = {}
 
     this.bboxDrawInteraction = generateBboxDrawInteraction(this.drawLayer)
@@ -969,6 +982,15 @@ function generateBboxDrawInteraction(drawLayer) {
   return draw
 }
 
+function generateFeatureDetailsOverlay(componentRef) {
+  return new Overlay({
+    autoPan:     true,
+    element:     findDOMNode(componentRef),
+    id:          'featureDetails',
+    positioning: 'top-left',
+  })
+}
+
 function generateFrameLayer() {
   return new VectorLayer({
     source: new VectorSource(),
@@ -1070,6 +1092,23 @@ function generateHighlightLayer() {
   })
 }
 
+function generateHoverInteraction(...layers) {
+  return new Select({
+    layers,
+    multi: true,
+    condition: condition.pointerMove,
+    style: new Style({
+      fill: new Fill({
+        color: 'rgba(255, 255, 255, 0.15)',
+      }),
+      stroke: new Stroke({
+        color: 'rgb(23, 91, 130)',
+        width: 4,
+      }),
+    }),
+  })
+}
+
 function generateImageryLayer() {
   return new VectorLayer({
     source: new VectorSource(),
@@ -1082,15 +1121,6 @@ function generateImageryLayer() {
         width: 1,
       }),
     }),
-  })
-}
-
-function generateFeatureDetailsOverlay(componentRef) {
-  return new Overlay({
-    autoPan:     true,
-    element:     findDOMNode(componentRef),
-    id:          'featureDetails',
-    positioning: 'top-left',
   })
 }
 
@@ -1113,23 +1143,6 @@ function generateScenePreviewSource(provider, imageId, apiKey) {
   }))
 }
 
-function generateHoverInteraction(...layers) {
-  return new Select({
-    layers,
-    multi: true,
-    condition: condition.pointerMove,
-    style: new Style({
-      fill: new Fill({
-        color: 'rgba(255, 255, 255, .15)',
-      }),
-      stroke: new Stroke({
-        color: 'rgb(23, 91, 130)',
-        width: 3,
-      }),
-    }),
-  })
-}
-
 function generateSelectInteraction(...layers) {
   return new Select({
     layers,
@@ -1138,7 +1151,7 @@ function generateSelectInteraction(...layers) {
     style: new Style({
       stroke: new Stroke({
         color: 'black',
-        width: 3,
+        width: 2,
       }),
     }),
   })

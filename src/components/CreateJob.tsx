@@ -46,6 +46,7 @@ interface Props {
   selectedScene: beachfront.Scene
   onCatalogApiKeyChange(apiKey: string)
   onClearBbox()
+  onHoverScenes(scenes: beachfront.Scene[])
   onJobCreated(job: beachfront.Job)
   onSearchCriteriaChange(criteria: SearchCriteria)
   onSearchSubmit()
@@ -122,7 +123,7 @@ export class CreateJob extends React.Component<Props, State> {
             </li>
           )}
 
-          {this.props.bbox && this.props.imagery && (
+          {this.props.bbox && this.props.imagery && this.props.map && (
             <li className={styles.results}>
               <h2>
                 {`${
@@ -206,17 +207,15 @@ export class CreateJob extends React.Component<Props, State> {
   }
 
   private handleListClick(feature) {
-    if (this.props.map) {
-      this.props.map.handleSelectFeature(feature.id)
-    }
+    this.props.map.handleSelectFeature(feature.id)
   }
 
-  private handleListMouseEnter(_) {
-    // Do nothing.
+  private handleListMouseEnter(feature) {
+    this.props.map.handleHoverScene(feature.id)
   }
 
   private handleListMouseLeave(_) {
-    // Do nothing.
+    this.props.map.handleHoverScene(null)
   }
 
   private handleCreateJob(algorithm) {

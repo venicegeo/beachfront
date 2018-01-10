@@ -278,6 +278,7 @@ export class Application extends React.Component<Props, State> {
             selectedScene={this.state.selectedFeature && this.state.selectedFeature.properties.type === TYPE_SCENE ? this.state.selectedFeature as beachfront.Scene : null}
             onCatalogApiKeyChange={this.handleCatalogApiKeyChange}
             onClearBbox={this.handleClearBbox}
+            onHoverScenes={this.handleHoverScenes}
             onJobCreated={this.handleJobCreated}
             onSearchCriteriaChange={this.handleSearchCriteriaChange}
             onSearchSubmit={this.handleSearchSubmit}
