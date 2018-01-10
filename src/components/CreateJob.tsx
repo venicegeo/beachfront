@@ -211,11 +211,13 @@ export class CreateJob extends React.Component<Props, State> {
   }
 
   private handleListMouseEnter(feature) {
+    this.props.onHoverScenes(null)
     this.props.map.handleHoverScene(feature.id)
   }
 
   private handleListMouseLeave(_) {
     this.props.map.handleHoverScene(null)
+    this.props.onHoverScenes(null)
   }
 
   private handleCreateJob(algorithm) {

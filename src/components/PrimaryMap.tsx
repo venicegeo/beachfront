@@ -396,10 +396,8 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.props.onBoundingBoxChange(null)
   }
 
-  private handleHover(event) {
-    if (event.selected.length || event.deselected.length) {
-      this.props.onHoverScenes(this.hoverInteraction.getFeatures().getArray())
-    }
+  private handleHover(_) {
+    this.props.onHoverScenes(this.hoverInteraction.getFeatures().getArray())
   }
 
   private handleMeasureEnd() {
@@ -933,10 +931,10 @@ function generateDrawLayer() {
     }),
     style: new Style({
       fill: new Fill({
-        color: 'hsla(202, 70%, 50%, .35)',
+        color: 'hsla(202, 70%, 50%, 0.35)',
       }),
       stroke: new Stroke({
-        color: 'hsla(202, 70%, 50%, .7)',
+        color: 'hsla(202, 70%, 50%, 0.7)',
         width: 1,
         lineDash: [5, 5],
       }),
@@ -1099,11 +1097,11 @@ function generateHoverInteraction(...layers) {
     condition: condition.pointerMove,
     style: new Style({
       fill: new Fill({
-        color: 'rgba(255, 255, 255, 0.15)',
+        color: 'rgba(255, 255, 255, 0.12)',
       }),
       stroke: new Stroke({
-        color: 'rgb(23, 91, 130)',
-        width: 4,
+        color: 'hsla(200, 70%, 90%, 0.8)',
+        width: 5,
       }),
     }),
   })
@@ -1117,7 +1115,7 @@ function generateImageryLayer() {
         color: 'rgba(0, 0, 0, 0.12)',
       }),
       stroke: new Stroke({
-        color: 'rgba(0, 0, 0, 0.4)',
+        color: 'rgba(0, 0, 0, 0.32)',
         width: 1,
       }),
     }),

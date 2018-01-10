@@ -476,7 +476,7 @@ export class Application extends React.Component<Props, State> {
   }
 
   private handleHoverScenes(scenes) {
-    const fn = (a: string[] = []) => a.join(',')
+    const fn = (a: string[]) => (a || []).join(',')
     const ids = Array.isArray(scenes) ? scenes.map(s => s.getId()).sort() : null
 
     if (fn(this.state.hoverSceneIds) !== fn(ids)) {
