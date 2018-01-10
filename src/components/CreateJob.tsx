@@ -95,6 +95,21 @@ export class CreateJob extends React.Component<Props, State> {
     }
   }
 
+  componentDidUpdate(props: Props) {
+    if (this.props.selectedScene && this.props.selectedScene !== props.selectedScene) {
+      const row = document.querySelector(`.${styles.selected}`)
+
+      if (row) {
+        const box = row.getBoundingClientRect()
+        const height = +(window.innerHeight || document.documentElement.clientHeight)
+
+        if (Math.floor(box.top) <= 30 || box.bottom > height - 30) {
+          row.scrollIntoView({ behavior: 'smooth' })
+        }
+      }
+    }
+  }
+
   render() {
     return (
       <div className={styles.root}>

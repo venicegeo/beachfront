@@ -577,20 +577,18 @@ export class Application extends React.Component<Props, State> {
       selectedFeature = this.state.jobs.records.find(j => route.jobIds.includes(j.id))
     }
 
+    /* TODO: Okay?
     if (!route.jobIds.length && selectedFeature && selectedFeature.properties.type === TYPE_JOB) {
       selectedFeature = null
     } else if (route.pathname !== this.state.route.pathname && selectedFeature && selectedFeature.properties.type === TYPE_SCENE) {
       selectedFeature = null
     }
+    */
 
     this.setState({
       route,
       selectedFeature,
-      /*
-      bbox: this.state.bbox || null,
-      */
-      searchResults: this.state.searchResults || null,
-      /*
+      /* TODO: Okay?
       bbox: this.state.route.pathname === route.pathname ? this.state.bbox : null,
       searchResults: this.state.route.pathname === route.pathname ? this.state.searchResults : null,
       */

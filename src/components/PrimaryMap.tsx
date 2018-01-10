@@ -798,12 +798,12 @@ export class PrimaryMap extends React.Component<Props, State> {
         this.deactivateSelectInteraction()
         break
       case MODE_NORMAL:
-        this.clearDraw()
+        /* this.clearDraw() TODO: Okay? */
         this.deactivateBboxDrawInteraction()
         this.activateSelectInteraction()
         break
       case MODE_PRODUCT_LINES:
-        this.clearDraw()
+        /* this.clearDraw() TODO: Okay? */
         this.deactivateBboxDrawInteraction()
         this.activateSelectInteraction()
         break
@@ -1101,7 +1101,7 @@ function generateHoverInteraction(...layers) {
       }),
       stroke: new Stroke({
         color: 'hsla(200, 70%, 90%, 0.8)',
-        width: 5,
+        width: 4,
       }),
     }),
   })
