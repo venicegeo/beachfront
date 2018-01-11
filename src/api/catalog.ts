@@ -16,7 +16,11 @@
 
 import axios, {AxiosInstance, Promise} from 'axios'
 import {getClient, DEFAULT_TIMEOUT} from './session'
-import {API_ROOT} from '../config'
+import {
+  API_ROOT,
+  IMAGERY_ENDPOINT,
+  USER_ENDPOINT,
+} from '../config'
 
 import {
   SOURCE_PLANETSCOPE,
@@ -29,7 +33,7 @@ let _client: AxiosInstance
 
 export function initialize(): Promise<void> {
   const session = getClient()
-  return session.get('/v0/user')
+  return session.get(USER_ENDPOINT)
     .then(_ => {
       _client = axios.create({
         baseURL: API_ROOT,
@@ -71,7 +75,7 @@ export function search({
     default:
       return Promise.reject(new Error(`Unknown data source prefix: '${source}'`))
   }
-  return _client.get(`/v0/imagery/discover/${itemType}`, {
+  return _client.get(`${IMAGERY_ENDPOINT}/discover/${itemType}`, {
   params: {
       cloudCover:      cloudCover + .05,
       PL_API_KEY:      catalogApiKey,

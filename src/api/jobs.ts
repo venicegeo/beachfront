@@ -16,6 +16,7 @@
 
 import {Promise} from 'axios'
 import {getClient} from './session'
+import {JOB_ENDPOINT} from '../config'
 
 interface ParamsCreateJob {
   algorithmId: string
@@ -30,7 +31,7 @@ export function createJob({
   catalogApiKey,
   sceneId,
 }: ParamsCreateJob): Promise<beachfront.Job> {
-  return getClient().post('/v0/job', {
+  return getClient().post(JOB_ENDPOINT, {
     algorithm_id:   algorithmId,
     name:           name,
     planet_api_key: catalogApiKey,
@@ -44,11 +45,11 @@ export function createJob({
 }
 
 export function forgetJob(jobId: string) {
-  return getClient().delete(`/v0/job/${jobId}`)
+  return getClient().delete(`${JOB_ENDPOINT}/${jobId}`)
 }
 
 export function fetchJobs(): Promise<beachfront.Job[]> {
-  return getClient().get('/v0/job')
+  return getClient().get(JOB_ENDPOINT)
     .then(
       response => response.data.jobs.features,
       err => {
@@ -59,7 +60,7 @@ export function fetchJobs(): Promise<beachfront.Job[]> {
 }
 
 export function fetchJob(jobId: string): Promise<beachfront.Job> {
-  return getClient().get(`/v0/job/${jobId}`)
+  return getClient().get(`${JOB_ENDPOINT}/${jobId}`)
     .then(
       response => response.data.job,
       err => {

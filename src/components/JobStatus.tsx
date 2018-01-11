@@ -21,6 +21,7 @@ import * as moment from 'moment'
 import {Link} from './Link'
 import {FileDownloadLink} from './FileDownloadLink'
 import {Timestamp} from './Timestamp'
+import {JOB_ENDPOINT} from '../config'
 
 import {
   STATUS_SUCCESS,
@@ -125,7 +126,7 @@ export class JobStatus extends React.Component<Props, State> {
               jobId={id}
               filename={properties.name + '.geojson'}
               className={styles.download}
-              apiUrl={'/v0/job/' + id + '.geojson'}
+              apiUrl={JOB_ENDPOINT + '/' + id + '.geojson'}
               displayText="Download GeoJSON"
               onProgress={this.handleDownloadProgress}
               onStart={this.handleDownloadStart}
@@ -137,7 +138,7 @@ export class JobStatus extends React.Component<Props, State> {
               jobId={id}
               filename={properties.name + '.gpkg'}
               className={styles.download}
-              apiUrl={'/v0/job/' + id + '.gpkg'}
+              apiUrl={JOB_ENDPOINT + '/' + id + '.gpkg'}
               displayText="Download GPKG"
               onProgress={this.handleDownloadProgress}
               onStart={this.handleDownloadStart}

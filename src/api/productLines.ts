@@ -16,6 +16,7 @@
 
 import {Promise} from 'axios'
 import {getClient} from './session'
+import {JOB_ENDPOINT, PRODUCTLINE_ENDPOINT} from '../config'
 
 export function create({
   algorithmId,
@@ -27,7 +28,7 @@ export function create({
   name,
 }: ParamsCreateProductline): Promise<beachfront.ProductLine> {
   const [minX, minY, maxX, maxY] = bbox
-  return getClient().post('/v0/productline', {
+  return getClient().post(PRODUCTLINE_ENDPOINT, {
     algorithm_id:      algorithmId,
     category:          category,
     max_cloud_cover:   maxCloudCover,
@@ -51,7 +52,7 @@ export function fetchJobs({
   productLineId,
   sinceDate,
 }: ParamsFetchJobs): Promise<beachfront.Job[]> {
-  return getClient().get(`/v0/job/by_productline/${productLineId}?since=${sinceDate}`)
+  return getClient().get(`${JOB_ENDPOINT}/by_productline/${productLineId}?since=${sinceDate}`)
     .then(response => response.data.jobs.features)
     .catch(err => {
       console.error('(productLines:fetchJobs) failed:', err)
@@ -60,7 +61,7 @@ export function fetchJobs({
 }
 
 export function fetchProductLines(): Promise<beachfront.ProductLine[]> {
-  return getClient().get('/v0/productline')
+  return getClient().get(PRODUCTLINE_ENDPOINT)
     .then(response => response.data.productlines.features)
     .catch(err => {
       console.error('(productLines:fetchProductLines) failed:', err)

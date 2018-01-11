@@ -21,7 +21,7 @@ export const DEFAULT_TIMEOUT = 18000
 const DEFAULT_ENTRY_URL = '/'
 
 let _client: AxiosInstance,
-    _onExpired: () => void
+  _onExpired: () => void
 
 export function destroy(): void {
   _client = null
@@ -37,7 +37,7 @@ export function initialize(): boolean {
     return true
   }
 
-    // User has been redirected back from bf-api
+  // User has been redirected back from bf-api
   if (location.search.indexOf('logged_in=true') !== -1) {
     sessionStorage.setItem('__timestamp__', new Date().toISOString())
 
