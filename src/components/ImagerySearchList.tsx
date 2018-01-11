@@ -46,9 +46,10 @@ export class ImagerySearchList extends React.Component<Props, State> {
     const compare = this.compare = {
       acquiredDate(a, b) {
         return moment.utc(a.properties.acquiredDate).diff(b.properties.acquiredDate)
+          || compare.bbox(a, b)
       },
       bbox(a, b) {
-        return b.bbox[3] - a.bbox[3] || a.bbox[0] - a.bbox[0] || compare.acquiredDate(a, b)
+        return b.bbox[3] - a.bbox[3] || a.bbox[0] - b.bbox[0] || compare.acquiredDate(a, b)
       },
       cloudCover(a, b) {
         return a.properties.cloudCover - b.properties.cloudCover || compare.acquiredDate(a, b)
