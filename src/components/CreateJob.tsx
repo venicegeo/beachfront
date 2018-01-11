@@ -21,6 +21,7 @@ import * as React from 'react'
 import * as moment from 'moment'
 import {AlgorithmList} from './AlgorithmList'
 import {ImagerySearch} from './ImagerySearch'
+import {ImagerySearchList} from './ImagerySearchList'
 import {NewJobDetails} from './NewJobDetails'
 import {PrimaryMap} from './PrimaryMap'
 import {createJob} from '../api/jobs'
@@ -95,21 +96,6 @@ export class CreateJob extends React.Component<Props, State> {
     }
   }
 
-  componentDidUpdate(props: Props) {
-    if (this.props.selectedScene && this.props.selectedScene !== props.selectedScene) {
-      const row = document.querySelector(`.${styles.selected}`)
-
-      if (row) {
-        const box = row.getBoundingClientRect()
-        const height = +(window.innerHeight || document.documentElement.clientHeight)
-
-        if (Math.floor(box.top) <= 30 || box.bottom > height - 30) {
-          row.scrollIntoView({ behavior: 'smooth' })
-        }
-      }
-    }
-  }
-
   render() {
     return (
       <div className={styles.root}>
@@ -139,53 +125,14 @@ export class CreateJob extends React.Component<Props, State> {
           )}
 
           {this.props.bbox && this.props.imagery && this.props.map && (
-            <li className={styles.results}>
-              <h2>
-                {`${
-                  this.props.imagery.count
-                } ${
-                  this.props.imagery.count === 1 ? 'Image' : 'Images'
-                }`} Found
-              </h2>
-              <table>
-                <thead>
-                  <tr>
-                    <td>Sensor</td>
-                    <td>Location</td>
-                    <td>Date Captured (UTC)</td>
-                    <td>Cloud Cover</td>
-                  </tr>
-                </thead>
-                <tbody>
-                  {this.props.imagery.images.features.map(f => {
-                    const loc = [
-                      f.bbox[0],
-                      f.bbox[f.bbox.length - 1],
-                    ].map(n => n.toFixed(6)) // TODO: .map((s, i) => s.padStart(11 - i))
-                    const selectedId = this.props.selectedScene && this.props.selectedScene.id
-                    const hoverIds = this.props.hoverSceneIds || []
-
-                    return (
-                      <tr
-                        className={[
-                          selectedId === f.id && styles.selected,
-                          hoverIds.includes(f.id) && styles.hovered,
-                        ].filter(Boolean).join(' ')}
-                        key={f.id}
-                        onClick={() => this.handleListClick(f)}
-                        onMouseEnter={() => this.handleListMouseEnter(f)}
-                        onMouseLeave={() => this.handleListMouseLeave(f)}
-                      >
-                        <td>{f.properties.sensorName}</td>
-                        <td>{loc.join(', ')}</td>
-                        <td>{moment.utc(f.properties.acquiredDate).format(`${DATE_FORMAT} HH:mm`)}</td>
-                        <td>{f.properties.cloudCover.toFixed(1)}%</td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
-            </li>
+            <ImagerySearchList
+              imagery={this.props.imagery}
+              hoverSceneIds={this.props.hoverSceneIds}
+              selectedScene={this.props.selectedScene}
+              onClick={this.handleListClick}
+              onMouseEnter={this.handleListMouseEnter}
+              onMouseLeave={this.handleListMouseLeave}
+            />
           )}
 
           {this.props.bbox && this.props.selectedScene && (
@@ -221,16 +168,16 @@ export class CreateJob extends React.Component<Props, State> {
     )
   }
 
-  private handleListClick(feature) {
+  private handleListClick(feature: beachfront.Scene) {
     this.props.map.handleSelectFeature(feature.id)
   }
 
-  private handleListMouseEnter(feature) {
+  private handleListMouseEnter(feature: beachfront.Scene) {
     this.props.onHoverScenes(null)
     this.props.map.handleHoverScene(feature.id)
   }
 
-  private handleListMouseLeave(_) {
+  private handleListMouseLeave(_: beachfront.Scene) {
     this.props.map.handleHoverScene(null)
     this.props.onHoverScenes(null)
   }
