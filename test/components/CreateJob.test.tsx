@@ -25,25 +25,23 @@ describe('<CreateJob/>', () => {
 
   beforeEach(() => {
     _props = {
-      algorithms:               [],
-      bbox:                     [0, 0, 0, 0],
-      catalogApiKey:            'test-catalog-api-key',
-      isSearching:              false,
-      searchCriteria: {
-        cloudCover: 10,
-        dateFrom:   '2016-01-01',
-        dateTo:     '2016-12-31',
-      },
-      searchError: null,
-      selectedScene: {
-        id: 'test-scene-id',
-        properties: {},
-      },
+      algorithms:             [],
+      bbox:                   [0, 0, 0, 0],
+      catalogApiKey:          'test-catalog-api-key',
+      hoverSceneIds:          [],
+      imagery:                null,
+      isSearching:            false,
+      map:                    null,
+      searchCriteria:         { cloudCover: 10, dateFrom: '2016-01-01', dateTo: '2016-12-31' },
+      searchError:            null,
+      selectedScene:          { id: 'test-scene-id', properties: {} },
       onCatalogApiKeyChange:  sinon.stub(),
       onClearBbox:            sinon.stub(),
+      onHoverScenes:          sinon.stub(),
       onJobCreated:           sinon.stub(),
       onSearchCriteriaChange: sinon.stub(),
       onSearchSubmit:         sinon.stub(),
+      onSelectFeature:        sinon.stub(),
     }
   })
 
@@ -53,15 +51,20 @@ describe('<CreateJob/>', () => {
         algorithms={_props.algorithms}
         bbox={_props.bbox}
         catalogApiKey={_props.catalogApiKey}
+        hoverSceneIds={_props.hoverSceneIds}
+        imagery={_props.imagery}
         isSearching={_props.isSearching}
+        map={_props.map}
         searchCriteria={_props.searchCriteria}
         searchError={_props.searchError}
         selectedScene={_props.selectedScene}
         onCatalogApiKeyChange={_props.onCatalogApiKeyChange}
         onClearBbox={_props.onClearBbox}
+        onHoverScenes={_props.onHoverScenes}
         onJobCreated={_props.onJobCreated}
         onSearchCriteriaChange={_props.onSearchCriteriaChange}
         onSearchSubmit={_props.onSearchSubmit}
+        onSelectFeature={_props.onSelectFeature}
       />,
     )
     assert.equal(wrapper.find('.CreateJob-root').length, 1)
@@ -77,15 +80,20 @@ describe('<CreateJob/>', () => {
         algorithms={_props.algorithms}
         bbox={null}
         catalogApiKey={_props.catalogApiKey}
+        hoverSceneIds={_props.hoverSceneIds}
+        imagery={_props.imagery}
         isSearching={_props.isSearching}
+        map={_props.map}
         searchCriteria={_props.searchCriteria}
         searchError={_props.searchError}
         selectedScene={null}
         onCatalogApiKeyChange={_props.onCatalogApiKeyChange}
         onClearBbox={_props.onClearBbox}
+        onHoverScenes={_props.onHoverScenes}
         onJobCreated={_props.onJobCreated}
         onSearchCriteriaChange={_props.onSearchCriteriaChange}
         onSearchSubmit={_props.onSearchSubmit}
+        onSelectFeature={_props.onSelectFeature}
       />,
     )
     assert.equal(wrapper.find('.CreateJob-placeholder').length, 1)
@@ -97,15 +105,20 @@ describe('<CreateJob/>', () => {
         algorithms={_props.algorithms}
         bbox={null}
         catalogApiKey={_props.catalogApiKey}
+        hoverSceneIds={_props.hoverSceneIds}
+        imagery={_props.imagery}
         isSearching={_props.isSearching}
+        map={_props.map}
         searchCriteria={_props.searchCriteria}
         searchError={_props.searchError}
         selectedScene={null}
         onCatalogApiKeyChange={_props.onCatalogApiKeyChange}
         onClearBbox={_props.onClearBbox}
+        onHoverScenes={_props.onHoverScenes}
         onJobCreated={_props.onJobCreated}
         onSearchCriteriaChange={_props.onSearchCriteriaChange}
         onSearchSubmit={_props.onSearchSubmit}
+        onSelectFeature={_props.onSelectFeature}
       />,
     )
     assert.equal(wrapper.find('.CreateJob-search').length, 0)
@@ -117,15 +130,20 @@ describe('<CreateJob/>', () => {
         algorithms={_props.algorithms}
         bbox={_props.bbox}
         catalogApiKey={_props.catalogApiKey}
+        hoverSceneIds={_props.hoverSceneIds}
+        imagery={_props.imagery}
         isSearching={_props.isSearching}
+        map={_props.map}
         searchCriteria={_props.searchCriteria}
         searchError={_props.searchError}
         selectedScene={null}
         onCatalogApiKeyChange={_props.onCatalogApiKeyChange}
         onClearBbox={_props.onClearBbox}
+        onHoverScenes={_props.onHoverScenes}
         onJobCreated={_props.onJobCreated}
         onSearchCriteriaChange={_props.onSearchCriteriaChange}
         onSearchSubmit={_props.onSearchSubmit}
+        onSelectFeature={_props.onSelectFeature}
       />,
     )
     assert.equal(wrapper.find('.CreateJob-details').length, 0)
@@ -137,15 +155,20 @@ describe('<CreateJob/>', () => {
         algorithms={_props.algorithms}
         bbox={_props.bbox}
         catalogApiKey={_props.catalogApiKey}
+        hoverSceneIds={_props.hoverSceneIds}
+        imagery={_props.imagery}
         isSearching={_props.isSearching}
+        map={_props.map}
         searchCriteria={_props.searchCriteria}
         searchError={_props.searchError}
         selectedScene={null}
         onCatalogApiKeyChange={_props.onCatalogApiKeyChange}
         onClearBbox={_props.onClearBbox}
+        onHoverScenes={_props.onHoverScenes}
         onJobCreated={_props.onJobCreated}
         onSearchCriteriaChange={_props.onSearchCriteriaChange}
         onSearchSubmit={_props.onSearchSubmit}
+        onSelectFeature={_props.onSelectFeature}
       />,
     )
     assert.equal(wrapper.find('.CreateJob-algorithms').length, 0)
@@ -157,15 +180,20 @@ describe('<CreateJob/>', () => {
         algorithms={_props.algorithms}
         bbox={_props.bbox}
         catalogApiKey={_props.catalogApiKey}
+        hoverSceneIds={_props.hoverSceneIds}
+        imagery={_props.imagery}
         isSearching={_props.isSearching}
+        map={_props.map}
         searchCriteria={_props.searchCriteria}
         searchError={_props.searchError}
         selectedScene={_props.selectedScene}
         onCatalogApiKeyChange={_props.onCatalogApiKeyChange}
         onClearBbox={_props.onClearBbox}
+        onHoverScenes={_props.onHoverScenes}
         onJobCreated={_props.onJobCreated}
         onSearchCriteriaChange={_props.onSearchCriteriaChange}
         onSearchSubmit={_props.onSearchSubmit}
+        onSelectFeature={_props.onSelectFeature}
       />,
     )
     assert.equal(wrapper.state('name'), 'test-scene-id')
@@ -177,15 +205,20 @@ describe('<CreateJob/>', () => {
         algorithms={_props.algorithms}
         bbox={_props.bbox}
         catalogApiKey={_props.catalogApiKey}
+        hoverSceneIds={_props.hoverSceneIds}
+        imagery={_props.imagery}
         isSearching={_props.isSearching}
+        map={_props.map}
         searchCriteria={_props.searchCriteria}
         searchError={_props.searchError}
         selectedScene={_props.selectedScene}
         onCatalogApiKeyChange={_props.onCatalogApiKeyChange}
         onClearBbox={_props.onClearBbox}
+        onHoverScenes={_props.onHoverScenes}
         onJobCreated={_props.onJobCreated}
         onSearchCriteriaChange={_props.onSearchCriteriaChange}
         onSearchSubmit={_props.onSearchSubmit}
+        onSelectFeature={_props.onSelectFeature}
       />,
     )
     assert.equal(wrapper.state('name'), 'test-scene-id')
@@ -197,15 +230,20 @@ describe('<CreateJob/>', () => {
         algorithms={_props.algorithms}
         bbox={_props.bbox}
         catalogApiKey={_props.catalogApiKey}
+        hoverSceneIds={_props.hoverSceneIds}
+        imagery={_props.imagery}
         isSearching={_props.isSearching}
+        map={_props.map}
         searchCriteria={_props.searchCriteria}
         searchError={_props.searchError}
         selectedScene={_props.selectedScene}
         onCatalogApiKeyChange={_props.onCatalogApiKeyChange}
         onClearBbox={_props.onClearBbox}
+        onHoverScenes={_props.onHoverScenes}
         onJobCreated={_props.onJobCreated}
         onSearchCriteriaChange={_props.onSearchCriteriaChange}
         onSearchSubmit={_props.onSearchSubmit}
+        onSelectFeature={_props.onSelectFeature}
       />,
     )
     const instance = wrapper.instance() as any as Internals
@@ -225,15 +263,20 @@ describe('<CreateJob/>', () => {
         algorithms={_props.algorithms}
         bbox={_props.bbox}
         catalogApiKey={_props.catalogApiKey}
+        hoverSceneIds={_props.hoverSceneIds}
+        imagery={_props.imagery}
         isSearching={_props.isSearching}
+        map={_props.map}
         searchCriteria={_props.searchCriteria}
         searchError={_props.searchError}
         selectedScene={_props.selectedScene}
         onCatalogApiKeyChange={_props.onCatalogApiKeyChange}
         onClearBbox={_props.onClearBbox}
+        onHoverScenes={_props.onHoverScenes}
         onJobCreated={_props.onJobCreated}
         onSearchCriteriaChange={_props.onSearchCriteriaChange}
         onSearchSubmit={_props.onSearchSubmit}
+        onSelectFeature={_props.onSelectFeature}
       />,
     )
     wrapper.setProps({ selectedScene: {
@@ -249,18 +292,20 @@ describe('<CreateJob/>', () => {
         algorithms={_props.algorithms}
         bbox={_props.bbox}
         catalogApiKey={_props.catalogApiKey}
+        hoverSceneIds={_props.hoverSceneIds}
+        imagery={_props.imagery}
         isSearching={_props.isSearching}
+        map={_props.map}
         searchCriteria={_props.searchCriteria}
         searchError={_props.searchError}
-        selectedScene={({
-          id:         'planetscope:test-prefixed-scene-id',
-          properties: {},
-        } as any)}
+        selectedScene={({ id: 'planetscope:test-prefixed-scene-id', properties: {} } as any)}
         onCatalogApiKeyChange={_props.onCatalogApiKeyChange}
         onClearBbox={_props.onClearBbox}
+        onHoverScenes={_props.onHoverScenes}
         onJobCreated={_props.onJobCreated}
         onSearchCriteriaChange={_props.onSearchCriteriaChange}
         onSearchSubmit={_props.onSearchSubmit}
+        onSelectFeature={_props.onSelectFeature}
       />,
     )
     assert.equal(wrapper.state('name'), 'test-prefixed-scene-id')

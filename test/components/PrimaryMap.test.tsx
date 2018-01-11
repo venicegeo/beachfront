@@ -50,15 +50,16 @@ describe('<PrimaryMap/>', () => {
       highlightedFeature:  null,
       imagery:             null,
       isSearching:         false,
+      logout:              sinon.stub(),
       mode:                MODE_NORMAL,
       selectedFeature:     null,
       shrunk:              false,
       wmsUrl:              'http://test-geoserver-url',
       onBoundingBoxChange: sinon.stub(),
+      onHoverScenes:       sinon.stub(),
       onSearchPageChange:  sinon.stub(),
       onSelectFeature:     sinon.stub(),
       onViewChange:        sinon.stub(),
-      logout:              sinon.stub(),
     }
   })
 
@@ -72,16 +73,17 @@ describe('<PrimaryMap/>', () => {
         highlightedFeature={_props.highlightedFeature}
         imagery={_props.imagery}
         isSearching={_props.isSearching}
+        logout={_props.logout}
         mode={_props.mode}
         selectedFeature={_props.selectedFeature}
         shrunk={_props.shrunk}
         view={_props.view}
         wmsUrl={_props.wmsUrl}
         onBoundingBoxChange={_props.onBoundingBoxChange}
+        onHoverScenes={_props.onHoverScenes}
         onSearchPageChange={_props.onSearchPageChange}
         onSelectFeature={_props.onSelectFeature}
         onViewChange={_props.onViewChange}
-        logout={_props.logout}
       />,
     )
     assert.equal(wrapper.find('.PrimaryMap-root').length, 1)
@@ -98,16 +100,17 @@ describe('<PrimaryMap/>', () => {
         highlightedFeature={_props.highlightedFeature}
         imagery={_props.imagery}
         isSearching={_props.isSearching}
+        logout={_props.logout}
         mode={_props.mode}
         selectedFeature={_props.selectedFeature}
         shrunk={_props.shrunk}
         view={_props.view}
         wmsUrl={_props.wmsUrl}
         onBoundingBoxChange={_props.onBoundingBoxChange}
+        onHoverScenes={_props.onHoverScenes}
         onSearchPageChange={_props.onSearchPageChange}
         onSelectFeature={_props.onSelectFeature}
         onViewChange={_props.onViewChange}
-        logout={_props.logout}
       />,
     )
     assert.instanceOf((wrapper.instance() as any as Internals).map, Map)
@@ -124,16 +127,17 @@ describe('<PrimaryMap/>', () => {
         highlightedFeature={_props.highlightedFeature}
         imagery={_props.imagery}
         isSearching={_props.isSearching}
+        logout={_props.logout}
         mode={_props.mode}
         selectedFeature={_props.selectedFeature}
         shrunk={_props.shrunk}
         view={view}
         wmsUrl={_props.wmsUrl}
         onBoundingBoxChange={_props.onBoundingBoxChange}
+        onHoverScenes={_props.onHoverScenes}
         onSearchPageChange={_props.onSearchPageChange}
         onSelectFeature={_props.onSelectFeature}
         onViewChange={_props.onViewChange}
-        logout={_props.logout}
       />,
     )
 
@@ -205,16 +209,17 @@ describe('<PrimaryMap/>', () => {
         highlightedFeature={_props.highlightedFeature}
         imagery={_props.imagery}
         isSearching={_props.isSearching}
+        logout={_props.logout}
         mode={_props.mode}
         selectedFeature={_props.selectedFeature}
         shrunk={_props.shrunk}
         view={_props.view}
         wmsUrl={_props.wmsUrl}
         onBoundingBoxChange={_props.onBoundingBoxChange}
+        onHoverScenes={_props.onHoverScenes}
         onSearchPageChange={_props.onSearchPageChange}
         onSelectFeature={_props.onSelectFeature}
         onViewChange={_props.onViewChange}
-        logout={_props.logout}
       />,
     )
 
@@ -260,16 +265,17 @@ describe('<PrimaryMap/>', () => {
         highlightedFeature={_props.highlightedFeature}
         imagery={_props.imagery}
         isSearching={_props.isSearching}
+        logout={_props.logout}
         mode={_props.mode}
         selectedFeature={generateScene()}
         shrunk={_props.shrunk}
         view={_props.view}
         wmsUrl={_props.wmsUrl}
         onBoundingBoxChange={_props.onBoundingBoxChange}
+        onHoverScenes={_props.onHoverScenes}
         onSearchPageChange={_props.onSearchPageChange}
         onSelectFeature={_props.onSelectFeature}
         onViewChange={_props.onViewChange}
-        logout={_props.logout}
       />,
     )
 
@@ -291,16 +297,17 @@ describe('<PrimaryMap/>', () => {
         highlightedFeature={_props.highlightedFeature}
         imagery={_props.imagery}
         isSearching={_props.isSearching}
+        logout={_props.logout}
         mode={_props.mode}
         selectedFeature={generateScene()}
         shrunk={_props.shrunk}
         view={_props.view}
         wmsUrl={_props.wmsUrl}
         onBoundingBoxChange={_props.onBoundingBoxChange}
+        onHoverScenes={_props.onHoverScenes}
         onSearchPageChange={_props.onSearchPageChange}
         onSelectFeature={_props.onSelectFeature}
         onViewChange={_props.onViewChange}
-        logout={_props.logout}
       />,
     )
 

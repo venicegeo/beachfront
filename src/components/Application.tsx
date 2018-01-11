@@ -188,7 +188,6 @@ export class Application extends React.Component<Props, State> {
           onClick={this.navigateTo}
         />
         <PrimaryMap
-          ref="map"
           bbox={this.state.bbox}
           catalogApiKey={this.state.catalogApiKey}
           detections={this.detectionsForCurrentMode}
@@ -198,10 +197,11 @@ export class Application extends React.Component<Props, State> {
           isSearching={this.state.isSearching}
           logout={this.logout}
           mode={this.mapMode}
+          ref="map"
           selectedFeature={this.state.selectedFeature}
+          shrunk={this.state.route.pathname !== '/'}
           view={this.state.mapView}
           wmsUrl={this.state.geoserver.wmsUrl}
-          shrunk={this.state.route.pathname !== '/'}
           onBoundingBoxChange={this.handleBoundingBoxChange}
           onHoverScenes={this.handleHoverScenes}
           onSearchPageChange={this.handleSearchSubmit}
@@ -273,8 +273,8 @@ export class Application extends React.Component<Props, State> {
             imagery={this.state.searchResults}
             isSearching={this.state.isSearching}
             map={this.refs.map}
-            searchError={this.state.searchError}
             searchCriteria={this.state.searchCriteria}
+            searchError={this.state.searchError}
             selectedScene={this.state.selectedFeature && this.state.selectedFeature.properties.type === TYPE_SCENE ? this.state.selectedFeature as beachfront.Scene : null}
             onCatalogApiKeyChange={this.handleCatalogApiKeyChange}
             onClearBbox={this.handleClearBbox}

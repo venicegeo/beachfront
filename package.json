@@ -15,6 +15,7 @@
     "start": "npm run watch",
     "test": "karma start",
     "test:ci": "NODE_ENV=ci karma start --single-run --browsers Chrome,Firefox --reporters progress,coverage,junit",
+    "test:once": "karma start --single-run",
     "typings:install": "typings install",
     "watch": "webpack-dev-server --inline --colors --history-api-fallback --https --cert .development_ssl_certificate.pem --key .development_ssl_certificate.key --host 0.0.0.0"
   },
