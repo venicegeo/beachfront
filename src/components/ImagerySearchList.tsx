@@ -15,7 +15,7 @@
  **/
 
 const styles: any = require('./ImagerySearchList.css')
-const DATE_FORMAT = 'YYYY-MM-DD'
+const DATETIME_FORMAT = 'YYYY-MM-DD HH:mm'
 
 import * as React from 'react'
 import * as moment from 'moment'
@@ -34,11 +34,34 @@ interface State {
 }
 
 export class ImagerySearchList extends React.Component<Props, State> {
+  private compare: any
+
   constructor(props: Props) {
     super(props)
 
     this.state = {
-      sortBy: null,
+      sortBy: 'acquiredDate',
+    }
+
+    const compare = this.compare = {
+      acquiredDate(a, b) {
+        return moment.utc(a.properties.acquiredDate).diff(b.properties.acquiredDate)
+      },
+      bbox(a, b) {
+        return b.bbox[3] - a.bbox[3] || a.bbox[0] - a.bbox[0]
+      },
+      cloudCover(a, b) {
+        return a.properties.cloudCover - b.properties.cloudCover
+      },
+      sensorName(a, b) {
+        if (a.properties.sensorName < b.properties.sensorName) {
+          return -1
+        } else if (a.properties.sensorName > b.properties.sensorName) {
+          return 1
+        } else {
+          return compare.acquiredDate(a, b)
+        }
+      },
     }
   }
 
@@ -61,6 +84,7 @@ export class ImagerySearchList extends React.Component<Props, State> {
     const { hoverSceneIds, imagery, selectedScene } = this.props
     const selectedSceneId = selectedScene && selectedScene.id
     const hoverIds = hoverSceneIds || []
+    const scenes = imagery.images.features.sort(this.compare[this.state.sortBy])
 
     return (
       <div className={styles.results}>
@@ -69,17 +93,17 @@ export class ImagerySearchList extends React.Component<Props, State> {
         <table>
           <thead>
             <tr>
-              <td>Sensor</td>
-              <td>Location</td>
-              <td>Date Captured (UTC)</td>
-              <td>Cloud Cover</td>
+              <td onClick={() => this.setState({ sortBy: 'sensorName' })}>Sensor</td>
+              <td onClick={() => this.setState({ sortBy: 'bbox' })}>Location</td>
+              <td onClick={() => this.setState({ sortBy: 'acquiredDate' })}>Date Captured (UTC)</td>
+              <td onClick={() => this.setState({ sortBy: 'cloudCover' })}>Cloud Cover</td>
             </tr>
           </thead>
           <tbody>
-            {imagery.images.features.map(f => {
+            {scenes.map(f => {
               const loc = [
                 f.bbox[0],
-                f.bbox[f.bbox.length - 1],
+                f.bbox[3],
               ].map(n => n.toFixed(6)) // TODO: .map((s, i) => s.padStart(11 - i))
 
               return (
@@ -95,7 +119,7 @@ export class ImagerySearchList extends React.Component<Props, State> {
                 >
                   <td>{f.properties.sensorName}</td>
                   <td>{loc.join(', ')}</td>
-                  <td>{moment.utc(f.properties.acquiredDate).format(`${DATE_FORMAT} HH:mm`)}</td>
+                  <td>{moment.utc(f.properties.acquiredDate).format(DATETIME_FORMAT)}</td>
                   <td>{f.properties.cloudCover.toFixed(1)}%</td>
                 </tr>
               )
