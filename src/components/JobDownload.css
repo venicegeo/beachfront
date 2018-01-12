@@ -1,0 +1,152 @@
+/**
+ * Copyright 2017, RadiantBlue Technologies, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ **/
+
+@import '../styles/constants.css';
+
+:root {
+  --border-radius: 8px;
+}
+
+.root,
+.root > a,
+.root > a:before,
+.root > ul,
+.root > ul > li {
+  transition: background-color 150ms ease-in-out;
+}
+
+.root > ul {
+  background-color: var(--COLOR_CONTROL);
+  bottom: 0;
+  display: flex;
+  font-size: 13px;
+  flex-direction: column;
+  left: -130px;
+  list-style: none;
+  min-height: 100%;
+  padding: 0;
+  position: absolute;
+  right: 45px;
+  z-index: 9;
+}
+
+.root:hover > ul {
+  background-color: var(--COLOR_BRAND_DARK);
+  border-radius: 4px;
+}
+
+.root > ul > li {
+  align-items: center;
+  box-shadow: inset -1px 0 rgba(255, 255, 255, 0.2), inset 0 1px rgba(255, 255, 255, 0.2);
+  display: flex;
+  flex: 1 0 auto;
+  min-height: 28px;
+}
+
+.root > ul > li:first-child {
+  border-top-left-radius: var(--border-radius);
+  border-top-right-radius: var(--border-radius);
+}
+
+.root > ul > li:last-child {
+  border-bottom-left-radius: var(--border-radius);
+  border-bottom-right-radius: var(--border-radius);
+}
+
+.root > ul > li:hover {
+  background-color: hsl(202, 80%, 20%);
+}
+
+.root > ul > li > a {
+  flex: 1 0 auto;
+  padding: 0.25em 0.75em;
+  white-space: nowrap;
+}
+
+.root > ul > li > a > i:global(.fa) {
+  padding-right: 0.25em;
+  width: 17px;
+}
+
+.root.errors,
+.root.errors > ul > li.error,
+:global(.JobStatus-controls):hover .root.errors > ul > li.error,
+:global(.JobStatus-controls):hover .root.errors > a:before {
+  background-color: indianred;
+}
+
+.root.errors > ul > li.error:hover,
+.root.errors:hover,
+:global(.JobStatus-controls):hover .root.errors:hover > a:before,
+:global(.JobStatus-controls):hover .root.errors:hover > ul > li.error {
+  background-color: hsl(0, 53%, 48%);
+}
+
+:global(.JobStatus-controls):hover .root.errors > ul > li.error:hover {
+  background-color: hsl(0, 53%, 38%);
+}
+
+.root.errors > .error {
+  background-color: indianred;
+  border: solid 3px whitesmoke;
+  border-radius: 8px;
+  box-shadow:
+    0 24px 38px 3px rgba(0, 0, 0, 0.14),
+    0 9px 46px 8px rgba(0, 0, 0, 0.12),
+    0 11px 15px -7px rgba(0, 0, 0, 0.2);
+  color: white;
+  font-size: 16px;
+  font-weight: normal;
+  left: 500px;
+  max-width: 50%;
+  min-width: 300px;
+  padding: 10px;
+  position: fixed;
+}
+
+.root.errors > .error .close {
+  color: whitesmoke;
+  cursor: pointer;
+  display: inline-block;
+  font-size: 20px;
+  font-weight: bold;
+  padding: 0 5px;
+  position: absolute;
+  right: 2px;
+  top: 0;
+}
+
+.root.errors > .error .close:hover {
+  color: white;
+  text-shadow: 0 0 4px white;
+}
+
+.root.errors > .error .header {
+  border-bottom: solid 1px whitesmoke;
+  font-weight: bold;
+  padding: 0 25px 0 5px;
+}
+
+.root.errors > .error .message {
+  padding: 5px;
+}
+
+.root.errors > .error .message .stack {
+  display: none;
+  font-family: monospace;
+  font-size: 11px;
+  white-space: pre-wrap;
+}
