@@ -125,14 +125,16 @@ export class CreateJob extends React.Component<Props, State> {
           )}
 
           {this.props.bbox && this.props.imagery && this.props.map && (
-            <ImagerySearchList
-              imagery={this.props.imagery}
-              hoverSceneIds={this.props.hoverSceneIds}
-              selectedScene={this.props.selectedScene}
-              onClick={this.handleListClick}
-              onMouseEnter={this.handleListMouseEnter}
-              onMouseLeave={this.handleListMouseLeave}
-            />
+            <li className={styles.results}>
+              <ImagerySearchList
+                imagery={this.props.imagery}
+                hoverSceneIds={this.props.hoverSceneIds}
+                selectedScene={this.props.selectedScene}
+                onClick={this.handleListClick}
+                onMouseEnter={this.handleListMouseEnter}
+                onMouseLeave={this.handleListMouseLeave}
+              />
+            </li>
           )}
 
           {this.props.bbox && this.props.selectedScene && (
