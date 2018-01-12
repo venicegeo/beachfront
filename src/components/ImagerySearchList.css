@@ -21,7 +21,7 @@
 
 .results table {
   border-collapse: collapse;
-  margin: 10px 5px;
+  margin: 0 5px;
   width: calc(100% - 10px);
 }
 
@@ -43,7 +43,7 @@
   font-weight: bold;
   text-align: center;
   vertical-align: bottom;
-  padding: 1px;
+  padding: 10px 1px 1px;
   position: sticky;
   top: 0;
 }

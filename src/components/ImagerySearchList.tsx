@@ -71,10 +71,21 @@ export class ImagerySearchList extends React.Component<Props, State> {
       const row = document.querySelector(`.${styles.selected}`)
 
       if (row) {
+        /*
+         * This offset is the sum of all the elements that are above the
+         * visible elements of the <tbody/> containing the search results.  It
+         * helps determine if we need to scroll the results 'up' to make it
+         * visible.
+         */
+        const offset = [
+          `.${styles.results} thead`,
+          '.CreateJob-root header',
+          '.ClassificationBanner-root',
+        ].reduce((rc, s) => rc + document.querySelector(s).clientHeight, 0)
         const box = row.getBoundingClientRect()
-        const height = +(window.innerHeight || document.documentElement.clientHeight)
+        const height = window.innerHeight || document.documentElement.clientHeight
 
-        if (Math.floor(box.top) <= 30 || box.bottom > height - 30) {
+        if (Math.floor(box.top) <= offset || box.bottom > height - offset) {
           row.scrollIntoView({ behavior: 'smooth' })
         }
       }
