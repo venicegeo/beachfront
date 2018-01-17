@@ -33,7 +33,7 @@
     "karma-mocha": "1.1.1",
     "karma-mocha-reporter": "2.0.5",
     "karma-sourcemap-loader": "0.3.7",
-    "karma-webpack": "2.0.5",
+    "karma-webpack": "2.0.9",
     "mocha": "3.2.0",
     "postcss-cssnext": "2.9.0",
     "postcss-import": "8.0.2",
