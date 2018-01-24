@@ -16,9 +16,6 @@
 
 @import '../styles/constants.css';
 
-.results {
-}
-
 .results table {
   border-collapse: collapse;
   margin: 0 5px;

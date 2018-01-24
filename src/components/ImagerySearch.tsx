@@ -23,6 +23,10 @@ import {AxiosError} from 'axios'
 import {CatalogSearchCriteria} from './CatalogSearchCriteria'
 import {LoadingAnimation} from './LoadingAnimation'
 
+interface State {
+  open?: boolean
+}
+
 interface Props {
   bbox: number[]
   catalogApiKey: string
@@ -40,43 +44,54 @@ interface Props {
   onSubmit()
 }
 
-export class ImagerySearch extends React.Component<Props, {}> {
+export class ImagerySearch extends React.Component<Props, State> {
   constructor() {
     super()
+
+    this.state = {
+      open: true,
+    }
+
     this.handleSubmit = this.handleSubmit.bind(this)
   }
 
   render() {
     return (
-      <form className={styles.root} onSubmit={this.handleSubmit}>
-        <h2>Source Imagery</h2>
+      <div className={styles.root}>
+        <h2 onClick={() => this.setState({ open: !this.state.open })}>
+          <i
+            className={`fa fa-chevron-${this.state.open ? 'down' : 'right'}`}
+          /> Source Imagery
+        </h2>
 
-        <CatalogSearchCriteria
-          apiKey={this.props.catalogApiKey}
-          bbox={this.props.bbox}
-          cloudCover={this.props.cloudCover}
-          dateFrom={this.props.dateFrom}
-          dateTo={this.props.dateTo}
-          disabled={this.props.isSearching}
-          source={this.props.source}
-          onApiKeyChange={this.props.onApiKeyChange}
-          onClearBbox={this.props.onClearBbox}
-          onCloudCoverChange={this.props.onCloudCoverChange}
-          onDateChange={this.props.onDateChange}
-          onSourceChange={this.props.onSourceChange}
-          errorElement={this.renderErrorElement()}
-        />
+        {this.state.open && <form className={styles.root} onSubmit={this.handleSubmit}>
+          <CatalogSearchCriteria
+            apiKey={this.props.catalogApiKey}
+            bbox={this.props.bbox}
+            cloudCover={this.props.cloudCover}
+            dateFrom={this.props.dateFrom}
+            dateTo={this.props.dateTo}
+            disabled={this.props.isSearching}
+            source={this.props.source}
+            onApiKeyChange={this.props.onApiKeyChange}
+            onClearBbox={this.props.onClearBbox}
+            onCloudCoverChange={this.props.onCloudCoverChange}
+            onDateChange={this.props.onDateChange}
+            onSourceChange={this.props.onSourceChange}
+            errorElement={this.renderErrorElement()}
+          />
 
-        <div className={styles.controls}>
-          <button type="submit" disabled={!this.canSubmit}>Search for Imagery</button>
-        </div>
-
-        {this.props.isSearching && (
-          <div className={styles.loadingMask}>
-            <LoadingAnimation className={styles.loadingAnimation}/>
+          <div className={styles.controls}>
+            <button type="submit" disabled={!this.canSubmit}>Search for Imagery</button>
           </div>
-        )}
-      </form>
+
+          {this.props.isSearching && (
+            <div className={styles.loadingMask}>
+              <LoadingAnimation className={styles.loadingAnimation}/>
+            </div>
+          )}
+        </form>}
+      </div>
     )
   }
 
