@@ -28,7 +28,7 @@ describe('<CreateJob/>', () => {
       algorithms:             [],
       bbox:                   [0, 0, 0, 0],
       catalogApiKey:          'test-catalog-api-key',
-      hoverSceneIds:          [],
+      collections:            {},
       imagery:                null,
       isSearching:            false,
       map:                    null,
@@ -37,11 +37,9 @@ describe('<CreateJob/>', () => {
       selectedScene:          { id: 'test-scene-id', properties: {} },
       onCatalogApiKeyChange:  sinon.stub(),
       onClearBbox:            sinon.stub(),
-      onHoverScenes:          sinon.stub(),
       onJobCreated:           sinon.stub(),
       onSearchCriteriaChange: sinon.stub(),
       onSearchSubmit:         sinon.stub(),
-      onSelectFeature:        sinon.stub(),
     }
   })
 
@@ -51,7 +49,7 @@ describe('<CreateJob/>', () => {
         algorithms={_props.algorithms}
         bbox={_props.bbox}
         catalogApiKey={_props.catalogApiKey}
-        hoverSceneIds={_props.hoverSceneIds}
+        collections={_props.collections}
         imagery={_props.imagery}
         isSearching={_props.isSearching}
         map={_props.map}
@@ -60,11 +58,9 @@ describe('<CreateJob/>', () => {
         selectedScene={_props.selectedScene}
         onCatalogApiKeyChange={_props.onCatalogApiKeyChange}
         onClearBbox={_props.onClearBbox}
-        onHoverScenes={_props.onHoverScenes}
         onJobCreated={_props.onJobCreated}
         onSearchCriteriaChange={_props.onSearchCriteriaChange}
         onSearchSubmit={_props.onSearchSubmit}
-        onSelectFeature={_props.onSelectFeature}
       />,
     )
     assert.equal(wrapper.find('.CreateJob-root').length, 1)
@@ -80,7 +76,7 @@ describe('<CreateJob/>', () => {
         algorithms={_props.algorithms}
         bbox={null}
         catalogApiKey={_props.catalogApiKey}
-        hoverSceneIds={_props.hoverSceneIds}
+        collections={_props.collections}
         imagery={_props.imagery}
         isSearching={_props.isSearching}
         map={_props.map}
@@ -89,11 +85,9 @@ describe('<CreateJob/>', () => {
         selectedScene={null}
         onCatalogApiKeyChange={_props.onCatalogApiKeyChange}
         onClearBbox={_props.onClearBbox}
-        onHoverScenes={_props.onHoverScenes}
         onJobCreated={_props.onJobCreated}
         onSearchCriteriaChange={_props.onSearchCriteriaChange}
         onSearchSubmit={_props.onSearchSubmit}
-        onSelectFeature={_props.onSelectFeature}
       />,
     )
     assert.equal(wrapper.find('.CreateJob-placeholder').length, 1)
@@ -105,7 +99,7 @@ describe('<CreateJob/>', () => {
         algorithms={_props.algorithms}
         bbox={null}
         catalogApiKey={_props.catalogApiKey}
-        hoverSceneIds={_props.hoverSceneIds}
+        collections={_props.collections}
         imagery={_props.imagery}
         isSearching={_props.isSearching}
         map={_props.map}
@@ -114,11 +108,9 @@ describe('<CreateJob/>', () => {
         selectedScene={null}
         onCatalogApiKeyChange={_props.onCatalogApiKeyChange}
         onClearBbox={_props.onClearBbox}
-        onHoverScenes={_props.onHoverScenes}
         onJobCreated={_props.onJobCreated}
         onSearchCriteriaChange={_props.onSearchCriteriaChange}
         onSearchSubmit={_props.onSearchSubmit}
-        onSelectFeature={_props.onSelectFeature}
       />,
     )
     assert.equal(wrapper.find('.CreateJob-search').length, 0)
@@ -130,7 +122,7 @@ describe('<CreateJob/>', () => {
         algorithms={_props.algorithms}
         bbox={_props.bbox}
         catalogApiKey={_props.catalogApiKey}
-        hoverSceneIds={_props.hoverSceneIds}
+        collections={_props.collections}
         imagery={_props.imagery}
         isSearching={_props.isSearching}
         map={_props.map}
@@ -139,11 +131,9 @@ describe('<CreateJob/>', () => {
         selectedScene={null}
         onCatalogApiKeyChange={_props.onCatalogApiKeyChange}
         onClearBbox={_props.onClearBbox}
-        onHoverScenes={_props.onHoverScenes}
         onJobCreated={_props.onJobCreated}
         onSearchCriteriaChange={_props.onSearchCriteriaChange}
         onSearchSubmit={_props.onSearchSubmit}
-        onSelectFeature={_props.onSelectFeature}
       />,
     )
     assert.equal(wrapper.find('.CreateJob-details').length, 0)
@@ -155,7 +145,7 @@ describe('<CreateJob/>', () => {
         algorithms={_props.algorithms}
         bbox={_props.bbox}
         catalogApiKey={_props.catalogApiKey}
-        hoverSceneIds={_props.hoverSceneIds}
+        collections={_props.collections}
         imagery={_props.imagery}
         isSearching={_props.isSearching}
         map={_props.map}
@@ -164,11 +154,9 @@ describe('<CreateJob/>', () => {
         selectedScene={null}
         onCatalogApiKeyChange={_props.onCatalogApiKeyChange}
         onClearBbox={_props.onClearBbox}
-        onHoverScenes={_props.onHoverScenes}
         onJobCreated={_props.onJobCreated}
         onSearchCriteriaChange={_props.onSearchCriteriaChange}
         onSearchSubmit={_props.onSearchSubmit}
-        onSelectFeature={_props.onSelectFeature}
       />,
     )
     assert.equal(wrapper.find('.CreateJob-algorithms').length, 0)
@@ -180,7 +168,7 @@ describe('<CreateJob/>', () => {
         algorithms={_props.algorithms}
         bbox={_props.bbox}
         catalogApiKey={_props.catalogApiKey}
-        hoverSceneIds={_props.hoverSceneIds}
+        collections={_props.collections}
         imagery={_props.imagery}
         isSearching={_props.isSearching}
         map={_props.map}
@@ -189,11 +177,9 @@ describe('<CreateJob/>', () => {
         selectedScene={_props.selectedScene}
         onCatalogApiKeyChange={_props.onCatalogApiKeyChange}
         onClearBbox={_props.onClearBbox}
-        onHoverScenes={_props.onHoverScenes}
         onJobCreated={_props.onJobCreated}
         onSearchCriteriaChange={_props.onSearchCriteriaChange}
         onSearchSubmit={_props.onSearchSubmit}
-        onSelectFeature={_props.onSelectFeature}
       />,
     )
     assert.equal(wrapper.state('name'), 'test-scene-id')
@@ -205,7 +191,7 @@ describe('<CreateJob/>', () => {
         algorithms={_props.algorithms}
         bbox={_props.bbox}
         catalogApiKey={_props.catalogApiKey}
-        hoverSceneIds={_props.hoverSceneIds}
+        collections={_props.collections}
         imagery={_props.imagery}
         isSearching={_props.isSearching}
         map={_props.map}
@@ -214,11 +200,9 @@ describe('<CreateJob/>', () => {
         selectedScene={_props.selectedScene}
         onCatalogApiKeyChange={_props.onCatalogApiKeyChange}
         onClearBbox={_props.onClearBbox}
-        onHoverScenes={_props.onHoverScenes}
         onJobCreated={_props.onJobCreated}
         onSearchCriteriaChange={_props.onSearchCriteriaChange}
         onSearchSubmit={_props.onSearchSubmit}
-        onSelectFeature={_props.onSelectFeature}
       />,
     )
     assert.equal(wrapper.state('name'), 'test-scene-id')
@@ -230,7 +214,7 @@ describe('<CreateJob/>', () => {
         algorithms={_props.algorithms}
         bbox={_props.bbox}
         catalogApiKey={_props.catalogApiKey}
-        hoverSceneIds={_props.hoverSceneIds}
+        collections={_props.collections}
         imagery={_props.imagery}
         isSearching={_props.isSearching}
         map={_props.map}
@@ -239,11 +223,9 @@ describe('<CreateJob/>', () => {
         selectedScene={_props.selectedScene}
         onCatalogApiKeyChange={_props.onCatalogApiKeyChange}
         onClearBbox={_props.onClearBbox}
-        onHoverScenes={_props.onHoverScenes}
         onJobCreated={_props.onJobCreated}
         onSearchCriteriaChange={_props.onSearchCriteriaChange}
         onSearchSubmit={_props.onSearchSubmit}
-        onSelectFeature={_props.onSelectFeature}
       />,
     )
     const instance = wrapper.instance() as any as Internals
@@ -263,7 +245,7 @@ describe('<CreateJob/>', () => {
         algorithms={_props.algorithms}
         bbox={_props.bbox}
         catalogApiKey={_props.catalogApiKey}
-        hoverSceneIds={_props.hoverSceneIds}
+        collections={_props.collections}
         imagery={_props.imagery}
         isSearching={_props.isSearching}
         map={_props.map}
@@ -272,11 +254,9 @@ describe('<CreateJob/>', () => {
         selectedScene={_props.selectedScene}
         onCatalogApiKeyChange={_props.onCatalogApiKeyChange}
         onClearBbox={_props.onClearBbox}
-        onHoverScenes={_props.onHoverScenes}
         onJobCreated={_props.onJobCreated}
         onSearchCriteriaChange={_props.onSearchCriteriaChange}
         onSearchSubmit={_props.onSearchSubmit}
-        onSelectFeature={_props.onSelectFeature}
       />,
     )
     wrapper.setProps({ selectedScene: {
@@ -292,7 +272,7 @@ describe('<CreateJob/>', () => {
         algorithms={_props.algorithms}
         bbox={_props.bbox}
         catalogApiKey={_props.catalogApiKey}
-        hoverSceneIds={_props.hoverSceneIds}
+        collections={_props.collections}
         imagery={_props.imagery}
         isSearching={_props.isSearching}
         map={_props.map}
@@ -301,11 +281,9 @@ describe('<CreateJob/>', () => {
         selectedScene={({ id: 'planetscope:test-prefixed-scene-id', properties: {} } as any)}
         onCatalogApiKeyChange={_props.onCatalogApiKeyChange}
         onClearBbox={_props.onClearBbox}
-        onHoverScenes={_props.onHoverScenes}
         onJobCreated={_props.onJobCreated}
         onSearchCriteriaChange={_props.onSearchCriteriaChange}
         onSearchSubmit={_props.onSearchSubmit}
-        onSelectFeature={_props.onSelectFeature}
       />,
     )
     assert.equal(wrapper.state('name'), 'test-prefixed-scene-id')

@@ -56,7 +56,7 @@ describe('<PrimaryMap/>', () => {
       shrunk:              false,
       wmsUrl:              'http://test-geoserver-url',
       onBoundingBoxChange: sinon.stub(),
-      onHoverScenes:       sinon.stub(),
+      omMapInitialization: sinon.stub(),
       onSearchPageChange:  sinon.stub(),
       onSelectFeature:     sinon.stub(),
       onViewChange:        sinon.stub(),
@@ -80,7 +80,7 @@ describe('<PrimaryMap/>', () => {
         view={_props.view}
         wmsUrl={_props.wmsUrl}
         onBoundingBoxChange={_props.onBoundingBoxChange}
-        onHoverScenes={_props.onHoverScenes}
+        onMapInitialization={_props.onMapInitialization}
         onSearchPageChange={_props.onSearchPageChange}
         onSelectFeature={_props.onSelectFeature}
         onViewChange={_props.onViewChange}
@@ -107,7 +107,7 @@ describe('<PrimaryMap/>', () => {
         view={_props.view}
         wmsUrl={_props.wmsUrl}
         onBoundingBoxChange={_props.onBoundingBoxChange}
-        onHoverScenes={_props.onHoverScenes}
+        onMapInitialization={_props.onMapInitialization}
         onSearchPageChange={_props.onSearchPageChange}
         onSelectFeature={_props.onSelectFeature}
         onViewChange={_props.onViewChange}
@@ -134,7 +134,7 @@ describe('<PrimaryMap/>', () => {
         view={view}
         wmsUrl={_props.wmsUrl}
         onBoundingBoxChange={_props.onBoundingBoxChange}
-        onHoverScenes={_props.onHoverScenes}
+        onMapInitialization={_props.onMapInitialization}
         onSearchPageChange={_props.onSearchPageChange}
         onSelectFeature={_props.onSelectFeature}
         onViewChange={_props.onViewChange}
@@ -216,7 +216,7 @@ describe('<PrimaryMap/>', () => {
         view={_props.view}
         wmsUrl={_props.wmsUrl}
         onBoundingBoxChange={_props.onBoundingBoxChange}
-        onHoverScenes={_props.onHoverScenes}
+        onMapInitialization={_props.onMapInitialization}
         onSearchPageChange={_props.onSearchPageChange}
         onSelectFeature={_props.onSelectFeature}
         onViewChange={_props.onViewChange}
@@ -272,7 +272,7 @@ describe('<PrimaryMap/>', () => {
         view={_props.view}
         wmsUrl={_props.wmsUrl}
         onBoundingBoxChange={_props.onBoundingBoxChange}
-        onHoverScenes={_props.onHoverScenes}
+        onMapInitialization={_props.onMapInitialization}
         onSearchPageChange={_props.onSearchPageChange}
         onSelectFeature={_props.onSelectFeature}
         onViewChange={_props.onViewChange}
@@ -304,7 +304,7 @@ describe('<PrimaryMap/>', () => {
         view={_props.view}
         wmsUrl={_props.wmsUrl}
         onBoundingBoxChange={_props.onBoundingBoxChange}
-        onHoverScenes={_props.onHoverScenes}
+        onMapInitialization={_props.onMapInitialization}
         onSearchPageChange={_props.onSearchPageChange}
         onSelectFeature={_props.onSelectFeature}
         onViewChange={_props.onViewChange}
