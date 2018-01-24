@@ -30,6 +30,7 @@ interface State {
   hoveredIds?: string[]
   selectedIds?: string[]
   sortBy?: string
+  sortReverse?: boolean
 }
 
 export class ImagerySearchList extends React.Component<Props, State> {
@@ -42,6 +43,7 @@ export class ImagerySearchList extends React.Component<Props, State> {
       hoveredIds: [],
       selectedIds: [],
       sortBy: 'acquiredDate',
+      sortReverse: false,
     }
 
     const compare = this.compare = {
@@ -88,6 +90,29 @@ export class ImagerySearchList extends React.Component<Props, State> {
   render() {
     const scenes = this.props.imagery.images.features.sort(this.compare[this.state.sortBy])
 
+    if (this.state.sortReverse) {
+      scenes.reverse()
+    }
+
+    const TableHeader = (props: any) => {
+      let icon = 'fa-sort'
+
+      if (props.name === this.state.sortBy) {
+        if (this.state.sortReverse) {
+          icon += '-asc'
+        } else {
+          icon += '-desc'
+        }
+      }
+
+      return (
+        <td onClick={() => this.sortOn(props.name)}>
+          {props.label}
+          <i className={`fa ${icon}`}/>
+        </td>
+      )
+    }
+
     return (
       <div className={styles.results}>
         <h2>{`${scenes.length} ${scenes.length === 1 ? 'Image' : 'Images'}`} Found</h2>
@@ -95,10 +120,10 @@ export class ImagerySearchList extends React.Component<Props, State> {
         <table>
           <thead>
             <tr>
-              <td onClick={() => this.setState({ sortBy: 'sensorName' })}>Sensor</td>
-              <td onClick={() => this.setState({ sortBy: 'bbox' })}>Location</td>
-              <td onClick={() => this.setState({ sortBy: 'acquiredDate' })}>Date Captured (UTC)</td>
-              <td onClick={() => this.setState({ sortBy: 'cloudCover' })}>Cloud Cover</td>
+              <TableHeader name="sensorName" label="Sensor Name"/>
+              <TableHeader name="bbox" label="Location"/>
+              <TableHeader name="acquiredDate" label="Date Captured (UTC)"/>
+              <TableHeader name="cloudCover" label="Cloud Cover"/>
             </tr>
           </thead>
           <tbody onMouseEnter={() => this.props.collections.hovered.clear()}>
@@ -153,6 +178,14 @@ export class ImagerySearchList extends React.Component<Props, State> {
       if (Math.floor(box.top) <= offset || box.bottom > height - row.clientHeight) {
         row.scrollIntoView({ behavior: 'smooth' })
       }
+    }
+  }
+
+  private sortOn(column: string) {
+    if (this.state.sortBy === column) {
+      this.setState({ sortReverse: !this.state.sortReverse })
+    } else {
+      this.setState({ sortBy: column, sortReverse: false })
     }
   }
 }

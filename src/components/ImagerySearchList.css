@@ -35,17 +35,37 @@
 .results thead td,
 .results thead th {
   background-color: white;
+  border-right: 1px solid rgba(61, 148, 197, 0.2);
+  border-bottom: 1px solid rgba(61, 148, 197, 0.2);
   box-shadow:
     0 2px rgba(23, 91, 130, 0.4),
     0 3px rgba(23, 91, 130, 0.2),
     0 4px rgba(23, 91, 130, 0.1);
   color: var(--COLOR_HEADINGS);
+  cursor: pointer;
   font-weight: bold;
   text-align: center;
   vertical-align: bottom;
-  padding: 10px 1px 1px;
+  padding: 10px 14px 1px 4px;
   position: sticky;
   top: 0;
+}
+
+.results thead td:last-child,
+.results thead th:last-child {
+  border-right: none;
+}
+
+.results thead td i:global(.fa),
+.results thead th i:global(.fa) {
+  position: absolute;
+  bottom: 3px;
+  right: 3px;
+}
+
+.results thead td i:global(.fa-sort),
+.results thead th i:global(.fa-sort) {
+  opacity: 0.25;
 }
 
 .results tbody tr:first-child td,
@@ -76,10 +96,6 @@
   font-family: Inconsolata, monospace;
   text-align: center;
   white-space: nowrap;
-}
-
-.results tr td:last-child {
-  text-align: right;
 }
 
 .results tbody tr.selected {
