@@ -471,12 +471,15 @@ export class PrimaryMap extends React.Component<Props, State> {
   }
 
   private handleSelect(event) {
-    if (event.selected.length === 0 && event.deselected.length === 0) {
-      return  // Disregard spurious select event.
-    }
+    if (event.selected.length || event.deselected.length) {
+      let index = event.selected.findIndex(f => f.ol_uid === this.featureId) + 1
 
-    const index = event.selected.findIndex(f => f.ol_uid === this.featureId) + 1
-    this.handleSelectFeature(event.selected[index % event.selected.length])
+      if (!event.mapBrowserEvent.pointerEvent.shiftKey) {
+        index += event.selected.length - (index ? 2 : 1)
+      }
+
+      this.handleSelectFeature(event.selected[index % event.selected.length])
+    }
   }
 
   private initializeOpenLayers() {
@@ -1115,7 +1118,7 @@ function generateHoverInteraction(...layers) {
   return new Select({
     layers,
     multi: true,
-    condition: condition.pointerMove,
+    condition: e => condition.pointerMove(e) && condition.noModifierKeys(e),
     style: new Style({
       fill: new Fill({
         color: 'rgba(255, 255, 255, 0.12)',
@@ -1164,13 +1167,16 @@ function generateSelectInteraction(...layers) {
   return new Select({
     layers,
     multi: true,
-    condition: condition.click,
+    condition: e => condition.click(e) && (
+      condition.noModifierKeys(e) || condition.shiftKeyOnly(e)
+    ),
     style: new Style({
       stroke: new Stroke({
         color: 'black',
         width: 2,
       }),
     }),
+    toggleCondition: condition.never,
   })
 }
 
