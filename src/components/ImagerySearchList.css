@@ -53,8 +53,7 @@
   padding-top: 8px;
 }
 
-.results tbody tr.hovered,
-.results tbody tr:hover {
+.results tbody tr.hovered {
   background-color: rgba(61, 148, 197, 0.3);
   cursor: pointer;
 }
@@ -63,8 +62,7 @@
   background-color: linen;
 }
 
-.results tbody tr:nth-child(2n).hovered,
-.results tbody tr:nth-child(2n):hover {
+.results tbody tr:nth-child(2n).hovered {
   background-color: rgba(61, 148, 197, 0.3);
 }
 

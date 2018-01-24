@@ -74,13 +74,13 @@ export class ImagerySearchList extends React.Component<Props, State> {
       this.setState({
         hoveredIds: event.target.getArray().map(s => s.getId()),
       })
-    }, 20, { leading: true, trailing: true }))
+    }, 10))
 
     this.props.collections.selected.on(['add', 'remove'], debounce(event => {
       this.setState({
         selectedIds: event.target.getArray().map(s => s.getId()),
       }, this.scrollToSelected)
-    }, 20, { leading: true, trailing: true }))
+    }, 10))
 
     this.scrollToSelected()
   }
@@ -101,7 +101,7 @@ export class ImagerySearchList extends React.Component<Props, State> {
               <td onClick={() => this.setState({ sortBy: 'cloudCover' })}>Cloud Cover</td>
             </tr>
           </thead>
-          <tbody>
+          <tbody onMouseEnter={() => this.props.collections.hovered.clear()}>
             {scenes.map(f => {
               const loc = [f.bbox[0], f.bbox[3]].map(n => n.toFixed(6))
 
@@ -115,8 +115,6 @@ export class ImagerySearchList extends React.Component<Props, State> {
                   onClick={() => this.props.collections.handleSelectFeature(f.id)}
                   onMouseEnter={() => {
                     const { imagery, hovered } = this.props.collections
-
-                    hovered.clear()
                     hovered.push(imagery.getArray().find(i => i.getId() === f.id))
                   }}
                   onMouseLeave={() => this.props.collections.hovered.clear()}
