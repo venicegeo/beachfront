@@ -20,6 +20,7 @@ const tileErrorPlaceholder: string = require('../images/tile-error.png')
 
 import * as React from 'react'
 import {findDOMNode} from 'react-dom'
+import Collection from 'ol/collection'
 import LineString from 'ol/geom/linestring'
 import Draw from 'ol/interaction/draw'
 import VectorLayer from 'ol/layer/vector'
@@ -123,9 +124,9 @@ interface Props {
   wmsUrl:             string
   shrunk:             boolean
   onBoundingBoxChange(bbox: number[])
+  onMapInitialization(collections: any)
   onSearchPageChange(page: {count: number, startIndex: number})
   onSelectFeature(feature: beachfront.Job | beachfront.Scene)
-  onHoverScenes(scenes: any[])
   onViewChange(view: MapView)
   logout()
 }
@@ -169,8 +170,6 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.handleBasemapChange = this.handleBasemapChange.bind(this)
     this.handleDrawEnd = this.handleDrawEnd.bind(this)
     this.handleDrawStart = this.handleDrawStart.bind(this)
-    this.handleHover = this.handleHover.bind(this)
-    this.handleHoverScene = this.handleHoverScene.bind(this)
     this.handleLoadError = this.handleLoadError.bind(this)
     this.handleLoadStart = this.handleLoadStart.bind(this)
     this.handleLoadStop = this.handleLoadStop.bind(this)
@@ -202,9 +201,14 @@ export class PrimaryMap extends React.Component<Props, State> {
       this.updateSelectedFeature()
     }
 
-    // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
-    window['primaryMap'] = this  // tslint:disable-line
-    // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
+    if (this.props.onMapInitialization) {
+      this.props.onMapInitialization({
+        hovered: this.hoverInteraction.getFeatures(),
+        imagery: this.imageryLayer.getSource().getFeaturesCollection(),
+        selected: this.selectInteraction.getFeatures(),
+        handleSelectFeature: this.handleSelectFeature,
+      })
+    }
   }
 
   componentDidUpdate(previousProps: Props, previousState: State) {
@@ -415,10 +419,6 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.props.onBoundingBoxChange(null)
   }
 
-  private handleHover(_) {
-    this.props.onHoverScenes(this.hoverInteraction.getFeatures().getArray())
-  }
-
   private handleMeasureEnd() {
     this.setState({ isMeasuring: false })
   }
@@ -493,7 +493,6 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.bboxDrawInteraction.on('drawend', this.handleDrawEnd)
 
     this.hoverInteraction = generateHoverInteraction(this.imageryLayer)
-    this.hoverInteraction.on('select', this.handleHover)
 
     this.selectInteraction = generateSelectInteraction(this.frameLayer, this.imageryLayer)
     this.selectInteraction.on('select', this.handleSelect)
@@ -1131,7 +1130,7 @@ function generateHoverInteraction(...layers) {
 
 function generateImageryLayer() {
   return new VectorLayer({
-    source: new VectorSource(),
+    source: new VectorSource({ features: new Collection() }),
     style: new Style({
       fill: new Fill({
         color: 'rgba(0, 0, 0, 0.12)',

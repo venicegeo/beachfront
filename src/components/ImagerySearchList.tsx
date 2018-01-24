@@ -19,18 +19,17 @@ const DATETIME_FORMAT = 'YYYY-MM-DD HH:mm'
 
 import * as React from 'react'
 import * as moment from 'moment'
+import * as debounce from 'lodash/debounce'
 
 interface Props {
-  hoverSceneIds: string[]
+  collections: any
   imagery: beachfront.ImageryCatalogPage
-  selectedScene: beachfront.Scene
-  onClick(scene: beachfront.Scene)
-  onMouseEnter(scene: beachfront.Scene)
-  onMouseLeave(scene: beachfront.Scene)
 }
 
 interface State {
-  sortBy: string
+  hoveredIds?: string[]
+  selectedIds?: string[]
+  sortBy?: string
 }
 
 export class ImagerySearchList extends React.Component<Props, State> {
@@ -40,6 +39,8 @@ export class ImagerySearchList extends React.Component<Props, State> {
     super(props)
 
     this.state = {
+      hoveredIds: [],
+      selectedIds: [],
       sortBy: 'acquiredDate',
     }
 
@@ -64,43 +65,32 @@ export class ImagerySearchList extends React.Component<Props, State> {
         }
       },
     }
+
+    this.scrollToSelected = this.scrollToSelected.bind(this)
   }
 
-  componentDidUpdate(props: Props) {
-    if (this.props.selectedScene && this.props.selectedScene !== props.selectedScene) {
-      const row = document.querySelector(`.${styles.selected}`)
+  componentDidMount() {
+    this.props.collections.hovered.on(['add', 'remove'], debounce(event => {
+      this.setState({
+        hoveredIds: event.target.getArray().map(s => s.getId()),
+      })
+    }, 20, { leading: true, trailing: true }))
 
-      if (row) {
-        /*
-         * This offset is the sum of all the elements that are above the
-         * visible elements of the <tbody/> containing the search results.  It
-         * helps determine if we need to scroll the results 'up' to make it
-         * visible.
-         */
-        const offset = [
-          `.${styles.results} thead`,
-          '.CreateJob-root header',
-          '.ClassificationBanner-root',
-        ].reduce((rc, s) => rc + document.querySelector(s).clientHeight, 0)
-        const box = row.getBoundingClientRect()
-        const height = window.innerHeight || document.documentElement.clientHeight
+    this.props.collections.selected.on(['add', 'remove'], debounce(event => {
+      this.setState({
+        selectedIds: event.target.getArray().map(s => s.getId()),
+      }, this.scrollToSelected)
+    }, 20, { leading: true, trailing: true }))
 
-        if (Math.floor(box.top) <= offset || box.bottom > height - offset) {
-          row.scrollIntoView({ behavior: 'smooth' })
-        }
-      }
-    }
+    this.scrollToSelected()
   }
 
   render() {
-    const { hoverSceneIds, imagery, selectedScene } = this.props
-    const selectedSceneId = selectedScene && selectedScene.id
-    const hoverIds = hoverSceneIds || []
-    const scenes = imagery.images.features.sort(this.compare[this.state.sortBy])
+    const scenes = this.props.imagery.images.features.sort(this.compare[this.state.sortBy])
 
     return (
       <div className={styles.results}>
-        <h2>{`${imagery.count} ${imagery.count === 1 ? 'Image' : 'Images'}`} Found</h2>
+        <h2>{`${scenes.length} ${scenes.length === 1 ? 'Image' : 'Images'}`} Found</h2>
 
         <table>
           <thead>
@@ -113,21 +103,23 @@ export class ImagerySearchList extends React.Component<Props, State> {
           </thead>
           <tbody>
             {scenes.map(f => {
-              const loc = [
-                f.bbox[0],
-                f.bbox[3],
-              ].map(n => n.toFixed(6)) // TODO: .map((s, i) => s.padStart(11 - i))
+              const loc = [f.bbox[0], f.bbox[3]].map(n => n.toFixed(6))
 
               return (
                 <tr
                   className={[
-                    selectedSceneId === f.id && styles.selected,
-                    hoverIds.includes(f.id) && styles.hovered,
+                    this.state.selectedIds.includes(f.id) && styles.selected,
+                    this.state.hoveredIds.includes(f.id) && styles.hovered,
                   ].filter(Boolean).join(' ')}
                   key={f.id}
-                  onClick={() => this.props.onClick(f as beachfront.Scene)}
-                  onMouseEnter={() => this.props.onMouseEnter(f as beachfront.Scene)}
-                  onMouseLeave={() => this.props.onMouseLeave(f as beachfront.Scene)}
+                  onClick={() => this.props.collections.handleSelectFeature(f.id)}
+                  onMouseEnter={() => {
+                    const { imagery, hovered } = this.props.collections
+
+                    hovered.clear()
+                    hovered.push(imagery.getArray().find(i => i.getId() === f.id))
+                  }}
+                  onMouseLeave={() => this.props.collections.hovered.clear()}
                 >
                   <td>{f.properties.sensorName}</td>
                   <td>{loc.join(', ')}</td>
@@ -140,5 +132,29 @@ export class ImagerySearchList extends React.Component<Props, State> {
         </table>
       </div>
     )
+  }
+
+  private scrollToSelected() {
+    const row = document.querySelector(`.${styles.selected}`)
+
+    if (row) {
+      /*
+       * This offset is the sum of all the elements that are above the
+       * visible elements of the <tbody/> containing the search results.  It
+       * helps determine if we need to scroll the results 'up' to make it
+       * visible.
+       */
+      const offset = [
+        `.${styles.results} thead`,
+        '.CreateJob-root header',
+        '.ClassificationBanner-root',
+      ].reduce((rc, s) => rc + document.querySelector(s).clientHeight, 0)
+      const box = row.getBoundingClientRect()
+      const height = window.innerHeight || document.documentElement.clientHeight
+
+      if (Math.floor(box.top) <= offset || box.bottom > height - row.clientHeight) {
+        row.scrollIntoView({ behavior: 'smooth' })
+      }
+    }
   }
 }

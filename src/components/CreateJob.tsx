@@ -38,7 +38,7 @@ interface Props {
   algorithms: beachfront.Algorithm[]
   bbox: number[]
   catalogApiKey: string
-  hoverSceneIds: string[]
+  collections: any
   imagery: beachfront.ImageryCatalogPage
   isSearching: boolean
   map: PrimaryMap
@@ -47,11 +47,9 @@ interface Props {
   selectedScene: beachfront.Scene
   onCatalogApiKeyChange(apiKey: string)
   onClearBbox()
-  onHoverScenes(scenes: beachfront.Scene[])
   onJobCreated(job: beachfront.Job)
   onSearchCriteriaChange(criteria: SearchCriteria)
   onSearchSubmit()
-  onSelectFeature(feature: any) // (feature: beachfront.Job | beachfront.Scene)
 }
 
 interface State {
@@ -81,9 +79,6 @@ export class CreateJob extends React.Component<Props, State> {
     }
     this.handleCreateJob = this.handleCreateJob.bind(this)
     this.handleComputeMaskChange = this.handleComputeMaskChange.bind(this)
-    this.handleListClick = this.handleListClick.bind(this)
-    this.handleListMouseEnter = this.handleListMouseEnter.bind(this)
-    this.handleListMouseLeave = this.handleListMouseLeave.bind(this)
     this.handleNameChange = this.handleNameChange.bind(this)
     this.handleSearchCloudCoverChange = this.handleSearchCloudCoverChange.bind(this)
     this.handleSearchDateChange = this.handleSearchDateChange.bind(this)
@@ -127,12 +122,8 @@ export class CreateJob extends React.Component<Props, State> {
           {this.props.bbox && this.props.imagery && this.props.map && (
             <li className={styles.results}>
               <ImagerySearchList
+                collections={this.props.collections}
                 imagery={this.props.imagery}
-                hoverSceneIds={this.props.hoverSceneIds}
-                selectedScene={this.props.selectedScene}
-                onClick={this.handleListClick}
-                onMouseEnter={this.handleListMouseEnter}
-                onMouseLeave={this.handleListMouseLeave}
               />
             </li>
           )}
@@ -168,20 +159,6 @@ export class CreateJob extends React.Component<Props, State> {
         </ul>
       </div>
     )
-  }
-
-  private handleListClick(feature: beachfront.Scene) {
-    this.props.map.handleSelectFeature(feature.id)
-  }
-
-  private handleListMouseEnter(feature: beachfront.Scene) {
-    this.props.onHoverScenes(null)
-    this.props.map.handleHoverScene(feature.id)
-  }
-
-  private handleListMouseLeave(_: beachfront.Scene) {
-    this.props.map.handleHoverScene(null)
-    this.props.onHoverScenes(null)
   }
 
   private handleCreateJob(algorithm) {

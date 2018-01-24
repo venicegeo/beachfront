@@ -88,8 +88,8 @@ interface State {
   // Map state
   bbox?: [number, number, number, number]
   mapView?: MapView
-  hoverSceneIds?: string[]
   hoveredFeature?: beachfront.Job
+  collections?: any
   selectedFeature?: beachfront.Job | beachfront.Scene
 
   // Search state
@@ -120,7 +120,6 @@ export class Application extends React.Component<Props, State> {
     this.handleDismissJobError = this.handleDismissJobError.bind(this)
     this.handleDismissProductLineError = this.handleDismissProductLineError.bind(this)
     this.handleForgetJob = this.handleForgetJob.bind(this)
-    this.handleHoverScenes = this.handleHoverScenes.bind(this)
     this.handleJobCreated = this.handleJobCreated.bind(this)
     this.handleNavigateToJob = this.handleNavigateToJob.bind(this)
     this.handlePanToProductLine = this.handlePanToProductLine.bind(this)
@@ -203,7 +202,7 @@ export class Application extends React.Component<Props, State> {
           view={this.state.mapView}
           wmsUrl={this.state.geoserver.wmsUrl}
           onBoundingBoxChange={this.handleBoundingBoxChange}
-          onHoverScenes={this.handleHoverScenes}
+          onMapInitialization={(collections: any) => this.setState({ collections })}
           onSearchPageChange={this.handleSearchSubmit}
           onSelectFeature={this.handleSelectFeature}
           onViewChange={mapView => this.setState({ mapView })}
@@ -269,7 +268,7 @@ export class Application extends React.Component<Props, State> {
             algorithms={this.state.algorithms.records}
             bbox={this.state.bbox}
             catalogApiKey={this.state.catalogApiKey}
-            hoverSceneIds={this.state.hoverSceneIds}
+            collections={this.state.collections}
             imagery={this.state.searchResults}
             isSearching={this.state.isSearching}
             map={this.refs.map}
@@ -278,11 +277,9 @@ export class Application extends React.Component<Props, State> {
             selectedScene={this.state.selectedFeature && this.state.selectedFeature.properties.type === TYPE_SCENE ? this.state.selectedFeature as beachfront.Scene : null}
             onCatalogApiKeyChange={this.handleCatalogApiKeyChange}
             onClearBbox={this.handleClearBbox}
-            onHoverScenes={this.handleHoverScenes}
             onJobCreated={this.handleJobCreated}
             onSearchCriteriaChange={this.handleSearchCriteriaChange}
             onSearchSubmit={this.handleSearchSubmit}
-            onSelectFeature={this.handleSelectFeature}
           />
         )
       case '/create-product-line':
@@ -473,15 +470,6 @@ export class Application extends React.Component<Props, State> {
           jobs: this.state.jobs.$append(job),
         })
       })
-  }
-
-  private handleHoverScenes(scenes) {
-    const fn = (a: string[]) => (a || []).join(',')
-    const ids = Array.isArray(scenes) ? scenes.map(s => s.getId()).sort() : null
-
-    if (fn(this.state.hoverSceneIds) !== fn(ids)) {
-      this.setState({ hoverSceneIds: ids })
-    }
   }
 
   private handleJobCreated(job) {
