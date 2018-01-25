@@ -20,6 +20,8 @@ const DATETIME_FORMAT = 'YYYY-MM-DD HH:mm'
 import * as React from 'react'
 import * as moment from 'moment'
 import * as debounce from 'lodash/debounce'
+import Collection from 'ol/collection'
+import Select from 'ol/interaction/select'
 
 interface Props {
   collections: any
@@ -70,23 +72,21 @@ export class ImagerySearchList extends React.Component<Props, State> {
       },
     }
 
+    this.setHoveredIds = debounce(this.setHoveredIds.bind(this), 10)
+    this.setSelectedIds = debounce(this.setSelectedIds.bind(this), 10)
     this.scrollToSelected = this.scrollToSelected.bind(this)
+    this.sortOn = this.sortOn.bind(this)
   }
 
   componentDidMount() {
-    this.props.collections.hovered.on(['add', 'remove'], debounce(event => {
-      this.setState({
-        hoveredIds: event.target.getArray().map(s => s.getId()),
-      })
-    }, 10))
-
-    this.props.collections.selected.on(['add', 'remove'], debounce(event => {
-      this.setState({
-        selectedIds: event.target.getArray().map(s => s.getId()),
-      }, this.scrollToSelected)
-    }, 10))
-
+    this.props.collections.hovered.on(['add', 'remove'], this.setHoveredIds)
+    this.props.collections.selected.on(['add', 'remove'], this.setSelectedIds)
     this.scrollToSelected()
+  }
+
+  componentWillUnmount() {
+    this.props.collections.hovered.un(['add', 'remove'], this.setHoveredIds)
+    this.props.collections.selected.un(['add', 'remove'], this.setSelectedIds)
   }
 
   render() {
@@ -185,6 +185,16 @@ export class ImagerySearchList extends React.Component<Props, State> {
         row.scrollIntoView({ behavior: 'smooth' })
       }
     }
+  }
+
+  private setHoveredIds(event: Select.Event): void {
+    this.setState({ hoveredIds: (event.target as Collection).getArray().map(f => f.getId()) })
+  }
+
+  private setSelectedIds(event: Select.Event): void {
+    this.setState({
+      selectedIds: (event.target as Collection).getArray().map(f => f.getId()),
+    }, this.scrollToSelected)
   }
 
   private sortOn(column: string) {

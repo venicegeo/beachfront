@@ -16,10 +16,14 @@
 
 @import '../styles/constants.css';
 
+.results > h2 {
+  cursor: pointer;
+}
+
 .results table {
   border-collapse: collapse;
-  margin: 0 5px;
-  width: calc(100% - 10px);
+  margin: 0;
+  width: 100%;
 }
 
 .results td,

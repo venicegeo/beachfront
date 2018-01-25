@@ -16,7 +16,9 @@
 
 @import '../styles/constants.css';
 
-.root {}
+.root > h2 {
+  cursor: pointer;
+}
 
 .controls {
   margin-top: 15px;
