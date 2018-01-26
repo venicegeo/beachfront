@@ -155,8 +155,6 @@ export class CreateJob extends React.Component<Props, State> {
     })
       .then(job => {
         this.setState({ isCreating: false })
-        // Reset Search Criteria
-        this.props.onSearchCriteriaChange(createSearchCriteria())
 
         // Release the job
         this.props.onJobCreated(job)
