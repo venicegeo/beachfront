@@ -58,7 +58,10 @@ export const CatalogSearchCriteria = (props: Props) => (
     <h3>Catalog</h3>
     <label className={styles.source}>
       <span>Source</span>
-      <select value={props.source} onChange={event => props.onSourceChange((event.target as HTMLSelectElement).value)}>
+      <select
+        value={props.source}
+        onChange={event => props.onSourceChange((event.target as HTMLSelectElement).value)}
+      >
         <option value={SOURCE_SENTINEL}>Copernicus Sentinel-2 (Planet)</option>
         <option value={SOURCE_LANDSAT}>Landsat8 (Planet)</option>
         <option value={SOURCE_RAPIDEYE}>RapidEye (Planet)</option>

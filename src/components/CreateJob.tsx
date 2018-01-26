@@ -62,14 +62,15 @@ interface State {
 
 export const createSearchCriteria = (): SearchCriteria => ({
   cloudCover: 10,
-  dateFrom:   moment.utc().subtract(30, 'days').format(DATE_FORMAT),
-  dateTo:     moment.utc().format(DATE_FORMAT),
-  source:     SOURCE_RAPIDEYE,
+  dateFrom: moment.utc().subtract(30, 'days').format(DATE_FORMAT),
+  dateTo: moment.utc().format(DATE_FORMAT),
+  source: SOURCE_RAPIDEYE,
 })
 
 export class CreateJob extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props)
+
     this.state = {
       isCreating: false,
       computeMask: false,
@@ -77,6 +78,7 @@ export class CreateJob extends React.Component<Props, State> {
       shouldAutogenerateName: true,
       algorithmError: '',
     }
+
     this.handleCreateJob = this.handleCreateJob.bind(this)
     this.handleComputeMaskChange = this.handleComputeMaskChange.bind(this)
     this.handleNameChange = this.handleNameChange.bind(this)
@@ -86,7 +88,10 @@ export class CreateJob extends React.Component<Props, State> {
   }
 
   componentWillReceiveProps(nextProps: Props) {
-    if (this.state.shouldAutogenerateName && nextProps.selectedScene && nextProps.selectedScene !== this.props.selectedScene) {
+    if (this.state.shouldAutogenerateName
+      && nextProps.selectedScene
+      && nextProps.selectedScene !== this.props.selectedScene
+    ) {
       this.setState({ name: generateName(nextProps.selectedScene.id) })
     }
   }
@@ -113,6 +118,7 @@ export class CreateJob extends React.Component<Props, State> {
                 onClearBbox={this.props.onClearBbox}
                 onCloudCoverChange={this.handleSearchCloudCoverChange}
                 onDateChange={this.handleSearchDateChange}
+                onSearchCriteriaChange={this.props.onSearchCriteriaChange}
                 onSourceChange={this.handleSearchSourceChange}
                 onSubmit={this.props.onSearchSubmit}
               />
@@ -163,22 +169,19 @@ export class CreateJob extends React.Component<Props, State> {
 
   private handleCreateJob(algorithm) {
     this.setState({ isCreating: true })
+
     createJob({
       algorithmId: algorithm.id,
       computeMask: this.state.computeMask,
-      name:        this.state.name,
-      sceneId:     this.props.selectedScene.id,
+      name: this.state.name,
+      sceneId: this.props.selectedScene.id,
       catalogApiKey: this.props.catalogApiKey,
+    }).then(job => {
+      this.setState({ isCreating: false })
+      this.props.onJobCreated(job) // Release the job.
+    }).catch(algorithmError => {
+      this.setState({ algorithmError, isCreating: false })
     })
-      .then(job => {
-        this.setState({ isCreating: false })
-
-        // Release the job
-        this.props.onJobCreated(job)
-      })
-        .catch(algorithmError => {
-            this.setState({ algorithmError, isCreating: false })
-        })
   }
 
   private handleSearchCloudCoverChange(cloudCover) {
@@ -203,10 +206,7 @@ export class CreateJob extends React.Component<Props, State> {
   }
 
   private handleNameChange(name) {
-    this.setState({
-      name,
-      shouldAutogenerateName: !name,
-    })
+    this.setState({ name, shouldAutogenerateName: !name })
   }
 }
 

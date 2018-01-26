@@ -22,6 +22,7 @@ import * as moment from 'moment'
 import {AxiosError} from 'axios'
 import {CatalogSearchCriteria} from './CatalogSearchCriteria'
 import {LoadingAnimation} from './LoadingAnimation'
+import {SearchCriteria, createSearchCriteria} from './CreateJob'
 
 interface State {
   open?: boolean
@@ -40,6 +41,7 @@ interface Props {
   onClearBbox()
   onCloudCoverChange(value: number)
   onDateChange(fromValue: string, toValue: string)
+  onSearchCriteriaChange(criteria: SearchCriteria)
   onSourceChange(source: string)
   onSubmit()
 }
@@ -82,6 +84,11 @@ export class ImagerySearch extends React.Component<Props, State> {
           />
 
           <div className={styles.controls}>
+            <button
+              type="button"
+              onClick={() => this.props.onSearchCriteriaChange(createSearchCriteria())}
+            >Reset Defaults</button>
+
             <button type="submit" disabled={!this.canSubmit}>Search for Imagery</button>
           </div>
 
@@ -149,10 +156,10 @@ export class ImagerySearch extends React.Component<Props, State> {
   //
 
   private dateValidation() {
-      const from = moment.utc(this.props.dateFrom, DATE_FORMAT, true)
-      const to = moment.utc(this.props.dateTo, DATE_FORMAT, true)
+    const from = moment.utc(this.props.dateFrom, DATE_FORMAT, true)
+    const to = moment.utc(this.props.dateTo, DATE_FORMAT, true)
 
-      return from.isValid() && to.isValid() && from.isSameOrBefore(to)
+    return from.isValid() && to.isValid() && from.isSameOrBefore(to)
   }
 
   private get canSubmit() {
