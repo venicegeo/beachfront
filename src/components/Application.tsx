@@ -369,7 +369,7 @@ export class Application extends React.Component<Props, State> {
       if (this.state.jobs.records.find(j => j.id === jobId)) {
         return
       }
-      console.debug('(application:componentDidUpdate) fetching job %s', jobId)
+      console.log('(application:componentDidUpdate) fetching job %s', jobId)
       jobsService.fetchJob(jobId)
         .then(record => {
           this.setState({ jobs: this.state.jobs.$append(record) })
@@ -594,7 +594,7 @@ export class Application extends React.Component<Props, State> {
   }
 
   private refreshRecords() {
-    console.debug('(application:refreshRecords) fetching latest jobs and product lines')
+    console.log('(application:refreshRecords) fetching latest jobs and product lines')
     return Promise.all([
       this.fetchJobs(),
       this.fetchProductLines(),
@@ -652,14 +652,14 @@ export class Application extends React.Component<Props, State> {
       onAvailable: () => this.setState({ isUpdateAvailable: true }),
     })
 
-    console.debug('(application:startBackgroundTasks) starting job/productline polling at %s second intervals', Math.ceil(RECORD_POLLING_INTERVAL / 1000))
+    console.log('(application:startBackgroundTasks) starting job/productline polling at %s second intervals', Math.ceil(RECORD_POLLING_INTERVAL / 1000))
     this.pollingInstance = setInterval(this.refreshRecords.bind(this), RECORD_POLLING_INTERVAL)
   }
 
   private stopBackgroundTasks() {
     updateService.stopWorker()
 
-    console.debug('(application:stopBackgroundTasks) stopping job/productline polling')
+    console.log('(application:stopBackgroundTasks) stopping job/productline polling')
     clearInterval(this.pollingInstance)
   }
 
