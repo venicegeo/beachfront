@@ -91,7 +91,6 @@ export class ImagerySearchList extends React.Component<Props, State> {
   }
 
   render() {
-    console.debug('>>> sourceName: %s <<<', this.sourceName)
     const scenes = this.props.imagery.images.features.sort(this.compare[this.state.sortBy])
 
     if (this.state.sortReverse) {
