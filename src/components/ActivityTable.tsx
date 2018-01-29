@@ -21,6 +21,7 @@ import * as moment from 'moment'
 import {Dropdown} from './Dropdown'
 import {FileDownloadLink} from './FileDownloadLink'
 import {LoadingAnimation} from './LoadingAnimation'
+import {normalizeSceneId} from './SceneFeatureDetails'
 
 interface Props {
   className?: string
@@ -136,7 +137,7 @@ function getCapturedOn({ properties }: beachfront.Job) {
 }
 
 function getSceneId({ properties }: beachfront.Job) {
-  return properties.scene_id.replace(/^(planetscope|rapideye|landsat|sentinel):/, '')
+  return normalizeSceneId(properties.scene_id)
 }
 
 function getImageSensor({ properties }: beachfront.Job) {

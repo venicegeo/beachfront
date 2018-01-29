@@ -25,7 +25,8 @@ import {ImagerySearchList} from './ImagerySearchList'
 import {NewJobDetails} from './NewJobDetails'
 import {PrimaryMap} from './PrimaryMap'
 import {createJob} from '../api/jobs'
-import {SOURCE_RAPIDEYE} from '../constants'
+import {normalizeSceneId} from './SceneFeatureDetails'
+import {SOURCE_DEFAULT} from '../constants'
 
 export interface SearchCriteria {
   cloudCover: number
@@ -64,7 +65,7 @@ export const createSearchCriteria = (): SearchCriteria => ({
   cloudCover: 10,
   dateFrom: moment.utc().subtract(30, 'days').format(DATE_FORMAT),
   dateTo: moment.utc().format(DATE_FORMAT),
-  source: SOURCE_RAPIDEYE,
+  source: SOURCE_DEFAULT,
 })
 
 export class CreateJob extends React.Component<Props, State> {
@@ -74,7 +75,7 @@ export class CreateJob extends React.Component<Props, State> {
     this.state = {
       isCreating: false,
       computeMask: false,
-      name: props.selectedScene ? generateName(props.selectedScene.id) : '',
+      name: props.selectedScene ? normalizeSceneId(props.selectedScene.id) : '',
       shouldAutogenerateName: true,
       algorithmError: '',
     }
@@ -92,7 +93,7 @@ export class CreateJob extends React.Component<Props, State> {
       && nextProps.selectedScene
       && nextProps.selectedScene !== this.props.selectedScene
     ) {
-      this.setState({ name: generateName(nextProps.selectedScene.id) })
+      this.setState({ name: normalizeSceneId(nextProps.selectedScene.id) })
     }
   }
 
@@ -208,12 +209,4 @@ export class CreateJob extends React.Component<Props, State> {
   private handleNameChange(name) {
     this.setState({ name, shouldAutogenerateName: !name })
   }
-}
-
-//
-// Helpers
-//
-
-function generateName(sceneId): string {
-  return sceneId.replace(/^(rapideye|planetscope|landsat|sentinel):/, '')
 }

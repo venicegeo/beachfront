@@ -21,12 +21,7 @@ const date_format = DATE_FORMAT.toLowerCase()
 import * as React from 'react'
 import {StaticMinimap} from './StaticMinimap'
 import * as moment from 'moment'
-import {
-  SOURCE_PLANETSCOPE,
-  SOURCE_RAPIDEYE,
-  SOURCE_LANDSAT,
-  SOURCE_SENTINEL,
-} from '../constants'
+import {SCENE_TILE_PROVIDERS} from '../config'
 
 interface Props {
   apiKey: string
@@ -62,10 +57,9 @@ export const CatalogSearchCriteria = (props: Props) => (
         value={props.source}
         onChange={event => props.onSourceChange((event.target as HTMLSelectElement).value)}
       >
-        <option value={SOURCE_SENTINEL}>Copernicus Sentinel-2 (Planet)</option>
-        <option value={SOURCE_LANDSAT}>Landsat8 (Planet)</option>
-        <option value={SOURCE_RAPIDEYE}>RapidEye (Planet)</option>
-        <option value={SOURCE_PLANETSCOPE}>PlanetScope (Planet)</option>
+        {SCENE_TILE_PROVIDERS.map(p => (
+          <option key={p.prefix} value={p.prefix}>{p.name} ({p.provider})</option>
+        ))}
       </select>
     </label>
     <label className={styles.apiKey}>

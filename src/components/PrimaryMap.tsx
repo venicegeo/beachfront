@@ -64,6 +64,7 @@ import {BasemapSelect} from './BasemapSelect'
 import {FeatureDetails} from './FeatureDetails'
 import {LoadingAnimation} from './LoadingAnimation'
 import {ImagerySearchResults} from './ImagerySearchResults'
+import {normalizeSceneId} from './SceneFeatureDetails'
 import {featureToBbox, deserializeBbox, serializeBbox, toGeoJSON} from '../utils/geometries'
 import {
   BASEMAP_TILE_PROVIDERS,
@@ -1200,10 +1201,6 @@ function toPreviewable(features: Array<beachfront.Job|beachfront.Scene>) {
     sceneId: f.properties.type === TYPE_JOB ? f.properties.scene_id : f.id,
     extent: featureToBbox(f),
   }))
-}
-
-function normalizeSceneId(id: string) {
-  return id ? id.replace(/^(planetscope|rapideye|landsat|sentinel):/, '') : null
 }
 
 function tileLoadFunction(imageTile, src) {

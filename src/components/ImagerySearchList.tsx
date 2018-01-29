@@ -22,6 +22,7 @@ import * as moment from 'moment'
 import * as debounce from 'lodash/debounce'
 import Collection from 'ol/collection'
 import Select from 'ol/interaction/select'
+import {SCENE_TILE_PROVIDERS} from '../config'
 
 interface Props {
   collections: any
@@ -90,6 +91,7 @@ export class ImagerySearchList extends React.Component<Props, State> {
   }
 
   render() {
+    console.debug('>>> sourceName: %s <<<', this.sourceName)
     const scenes = this.props.imagery.images.features.sort(this.compare[this.state.sortBy])
 
     if (this.state.sortReverse) {
@@ -120,7 +122,7 @@ export class ImagerySearchList extends React.Component<Props, State> {
         <h2 onClick={() => this.setState({ open: !this.state.open })}>
           <i
             className={`fa fa-chevron-${this.state.open ? 'down' : 'right'}`}
-          /> {`${scenes.length} ${scenes.length === 1 ? 'Image' : 'Images'}`} Found
+          /> {scenes.length} {this.sourceName} {`${scenes.length === 1 ? 'Image' : 'Images'}`} Found
         </h2>
 
         {this.state.open && <table>
@@ -161,6 +163,19 @@ export class ImagerySearchList extends React.Component<Props, State> {
         </table>}
       </div>
     )
+  }
+
+  private get sourceName() {
+    const features = this.props.imagery.images.features as any
+    let provider
+
+    if (features.length) {
+      const prefix = features[0].id.replace(/:.*/, '')
+
+      provider = SCENE_TILE_PROVIDERS.find(p => p.prefix === prefix)
+    }
+
+    return provider ? provider.name : null
   }
 
   private scrollToSelected() {

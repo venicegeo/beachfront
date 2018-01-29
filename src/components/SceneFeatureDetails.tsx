@@ -18,15 +18,18 @@ const styles: any = require('./SceneFeatureDetails.css')
 
 import * as React from 'react'
 import * as moment from 'moment'
+import {SCENE_TILE_PROVIDERS} from '../config'
 
 interface Props {
   className?: string
   feature: beachfront.Scene
 }
 
-export const SceneFeatureDetails = ({className, feature}: Props) => (
-  <div className={`${styles.root} ${className || ''}`}>
-    <h1 title={normalizeId(feature.id)}>{normalizeId(feature.id)}</h1>
+export const SceneFeatureDetails = ({className, feature}: Props) => {
+  const id = normalizeSceneId(feature.id)
+
+  return <div className={`${styles.root} ${className || ''}`}>
+    <h1 title={id}>{id}</h1>
 
     <dl>
       <dt>Date Captured</dt>
@@ -39,11 +42,10 @@ export const SceneFeatureDetails = ({className, feature}: Props) => (
       <dd>{feature.properties.sensorName}</dd>
     </dl>
   </div>
-)
+}
 
-function normalizeId(featureId) {
-  if (!featureId) {
-    return 'nil'
-  }
-  return featureId.replace(/^(landsat|sentinel|rapideye|planetscope):/, '')
+const stripProviderRe = new RegExp(`^(${SCENE_TILE_PROVIDERS.map(p => p.prefix).join('|')}):`)
+
+export function normalizeSceneId(id: string | null): string | null {
+  return id ? id.replace(stripProviderRe, '') : null
 }
