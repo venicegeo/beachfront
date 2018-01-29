@@ -37,6 +37,7 @@ describe('<ImagerySearch/>', () => {
       onClearBbox:        sinon.stub(),
       onCloudCoverChange: sinon.stub(),
       onDateChange:       sinon.stub(),
+      onSearchCriteriaChange: sinon.stub(),
       onSubmit:           sinon.stub(),
       onSourceChange:     sinon.stub(),
     }
@@ -56,6 +57,7 @@ describe('<ImagerySearch/>', () => {
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
+        onSearchCriteriaChange={_props.onSearchCriteriaChange}
         onSubmit={_props.onSubmit}
         onSourceChange={_props.onSourceChange}
       />,
@@ -78,6 +80,7 @@ describe('<ImagerySearch/>', () => {
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
+        onSearchCriteriaChange={_props.onSearchCriteriaChange}
         onSubmit={_props.onSubmit}
         onSourceChange={_props.onSourceChange}
       />,
@@ -100,6 +103,7 @@ describe('<ImagerySearch/>', () => {
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
+        onSearchCriteriaChange={_props.onSearchCriteriaChange}
         onSubmit={_props.onSubmit}
         onSourceChange={_props.onSourceChange}
       />,
@@ -122,6 +126,7 @@ describe('<ImagerySearch/>', () => {
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
+        onSearchCriteriaChange={_props.onSearchCriteriaChange}
         onSubmit={_props.onSubmit}
         onSourceChange={_props.onSourceChange}
       />,
@@ -144,6 +149,7 @@ describe('<ImagerySearch/>', () => {
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
+        onSearchCriteriaChange={_props.onSearchCriteriaChange}
         onSubmit={_props.onSubmit}
         onSourceChange={_props.onSourceChange}
       />,
@@ -166,6 +172,7 @@ describe('<ImagerySearch/>', () => {
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
+        onSearchCriteriaChange={_props.onSearchCriteriaChange}
         onSubmit={_props.onSubmit}
         onSourceChange={_props.onSourceChange}
       />,
@@ -188,6 +195,7 @@ describe('<ImagerySearch/>', () => {
             onClearBbox={_props.onClearBbox}
             onCloudCoverChange={_props.onCloudCoverChange}
             onDateChange={_props.onDateChange}
+            onSearchCriteriaChange={_props.onSearchCriteriaChange}
             onSubmit={_props.onSubmit}
             onSourceChange={_props.onSourceChange}
         />,
@@ -210,6 +218,7 @@ describe('<ImagerySearch/>', () => {
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
+        onSearchCriteriaChange={_props.onSearchCriteriaChange}
         onSubmit={_props.onSubmit}
         onSourceChange={_props.onSourceChange}
       />,
@@ -238,6 +247,7 @@ describe('<ImagerySearch/>', () => {
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
+        onSearchCriteriaChange={_props.onSearchCriteriaChange}
         onSubmit={_props.onSubmit}
         onSourceChange={_props.onSourceChange}
       />,
@@ -259,6 +269,7 @@ describe('<ImagerySearch/>', () => {
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
+        onSearchCriteriaChange={_props.onSearchCriteriaChange}
         onSubmit={_props.onSubmit}
         onSourceChange={_props.onSourceChange}
       />,
@@ -280,6 +291,7 @@ describe('<ImagerySearch/>', () => {
         onClearBbox={_props.onClearBbox}
         onCloudCoverChange={_props.onCloudCoverChange}
         onDateChange={_props.onDateChange}
+        onSearchCriteriaChange={_props.onSearchCriteriaChange}
         onSubmit={_props.onSubmit}
         onSourceChange={_props.onSourceChange}
       />,

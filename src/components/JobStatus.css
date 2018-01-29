@@ -17,6 +17,7 @@
 @import '../styles/constants.css';
 
 :root {
+  --border-radius: 6px;
   --padding-size: 15px;
   --bgcolor-active: #f2faff;
   --bgcolor-failed: var(--COLOR_RED);
@@ -39,11 +40,12 @@
    ========================================================================= */
 
 .root {
+  box-shadow: inset 0 1px hsl(202, 30%, 90%);
   display: flex;
   flex-direction: column;
   background-color: #fff;
-  margin-bottom: 1px;
   font-size: 14px;
+  overflow: visible;
   position: relative;
 }
 
@@ -313,27 +315,30 @@
 .controls > .download,
 .controls > .download > a,
 .controls > .download > a:before {
-  transition: background-color 150ms ease-in-out;
+  transition: 150ms ease-in-out;
 }
 
-.controls > * + * {
-  box-shadow: inset 0 1px rgba(255, 255, 255, 0.2);
+.controls > a,
+.controls > a:before,
+.controls > .download > a,
+.controls > .download > a:before {
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.5);
 }
 
 .controls > .download:first-child > a:before,
 .controls > a:first-child:before {
-  border-top-left-radius: 4px;
+  border-top-left-radius: var(--border-radius);
 }
 
 .controls > .download:last-child > a:before,
 .controls > a:last-child:before {
-  border-bottom-left-radius: 4px;
+  border-bottom-left-radius: var(--border-radius);
 }
 
-.controls > .download:hover,
-.controls > .download:hover > a:before,
 .controls > a:hover,
-.controls > a:hover:before {
+.controls > a:hover:before,
+.controls > .download:hover,
+.controls > .download:hover > a:before {
   background-color: var(--control-bgcolor-hover);
 }
 
@@ -358,7 +363,6 @@
   bottom: 0;
   width: 0;
   overflow: hidden;
-  transition: background-color 150ms ease-in-out, width 150ms ease-in-out;
   white-space: nowrap;
   background-color: var(--control-bgcolor);
 }

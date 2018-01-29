@@ -17,19 +17,21 @@
 @import '../styles/constants.css';
 
 :root {
-  --border-radius: 8px;
+  --border-radius: 6px;
 }
 
 .root,
 .root > a,
 .root > a:before,
-.root > ul,
-.root > ul > li {
+ul.list,
+ul.list > li {
   transition: background-color 150ms ease-in-out;
 }
 
-.root > ul {
+ul.list {
   background-color: var(--COLOR_CONTROL);
+  border-radius: var(--border-radius);
+  border-bottom-right-radius: 0;
   bottom: 0;
   display: flex;
   font-size: 13px;
@@ -43,12 +45,11 @@
   z-index: 9;
 }
 
-.root:hover > ul {
+.root:hover > ul.list {
   background-color: var(--COLOR_BRAND_DARK);
-  border-radius: 4px;
 }
 
-.root > ul > li {
+ul.list > li {
   align-items: center;
   box-shadow: inset -1px 0 rgba(255, 255, 255, 0.2), inset 0 1px rgba(255, 255, 255, 0.2);
   display: flex;
@@ -56,53 +57,54 @@
   min-height: 28px;
 }
 
-.root > ul > li:first-child {
+ul.list > li:first-child {
   border-top-left-radius: var(--border-radius);
   border-top-right-radius: var(--border-radius);
 }
 
-.root > ul > li:last-child {
+ul.list > li:last-child {
   border-bottom-left-radius: var(--border-radius);
   border-bottom-right-radius: var(--border-radius);
 }
 
-.root > ul > li:hover {
+ul.list > li:hover {
   background-color: hsl(202, 80%, 20%);
 }
 
-.root > ul > li > a {
+ul.list > li > a {
   flex: 1 0 auto;
   padding: 0.25em 0.75em;
   white-space: nowrap;
 }
 
-.root > ul > li > a > i:global(.fa) {
-  padding-right: 0.25em;
+ul.list > li > a > i:global(.fa) {
+  padding-right: 0.5em;
+  text-align: center;
   width: 17px;
 }
 
 .root.errors,
-.root.errors > ul > li.error,
-:global(.JobStatus-controls):hover .root.errors > ul > li.error,
+.root.errors > ul.list > li.error,
+:global(.JobStatus-controls):hover .root.errors > ul.list > li.error,
 :global(.JobStatus-controls):hover .root.errors > a:before {
   background-color: indianred;
 }
 
-.root.errors > ul > li.error:hover,
+.root.errors > ul.list > li.error:hover,
 .root.errors:hover,
 :global(.JobStatus-controls):hover .root.errors:hover > a:before,
-:global(.JobStatus-controls):hover .root.errors:hover > ul > li.error {
+:global(.JobStatus-controls):hover .root.errors:hover > ul.list > li.error {
   background-color: hsl(0, 53%, 48%);
 }
 
-:global(.JobStatus-controls):hover .root.errors > ul > li.error:hover {
+:global(.JobStatus-controls):hover .root.errors > ul.list > li.error:hover {
   background-color: hsl(0, 53%, 38%);
 }
 
 .root.errors > .error {
   background-color: indianred;
   border: solid 3px whitesmoke;
-  border-radius: 8px;
+  border-radius: var(--border-radius);
   box-shadow:
     0 24px 38px 3px rgba(0, 0, 0, 0.14),
     0 9px 46px 8px rgba(0, 0, 0, 0.12),

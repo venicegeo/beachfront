@@ -17,6 +17,7 @@
 const styles: any = require('./JobDownload.css')
 
 import * as React from 'react'
+import {findDOMNode} from 'react-dom'
 import {FileDownloadLink} from './FileDownloadLink'
 import * as wrap from 'lodash/wrap'
 
@@ -64,6 +65,8 @@ const JobDownloadErrors = (props: any) => {
 }
 
 export class JobDownload extends React.Component<Props, State> {
+  refs: any
+
   downloadtypes: DownloadType[] = [
     {
       extension: 'geojson',
@@ -77,6 +80,14 @@ export class JobDownload extends React.Component<Props, State> {
       mimetype: 'application/x-sqlite3',
       name: 'GeoPackage',
     },
+    /*
+    {
+      extension: 'zip',
+      icon: 'object-ungroup',
+      mimetype: 'application/zip',
+      name: 'Shapefile',
+    },
+    */
   ]
 
   downloads = {}
@@ -97,6 +108,7 @@ export class JobDownload extends React.Component<Props, State> {
     this.onError = this.onError.bind(this)
     this.onProgress = this.onProgress.bind(this)
     this.onStart = this.onStart.bind(this)
+    this.setOffset = this.setOffset.bind(this)
   }
 
   componentWillReceiveProps(nextProps: Props) {
@@ -109,6 +121,11 @@ export class JobDownload extends React.Component<Props, State> {
         } else {
           this.setState({ isActive, isOpen: false })
         }
+      }
+
+      // HACK
+      if (this.props.isHover) {
+        this.setOffset()
       }
     }
   }
@@ -142,10 +159,10 @@ export class JobDownload extends React.Component<Props, State> {
         <a onClick={this.handleClick} title="Download">
           {this.state.isDownloading
             ? `${isNaN(this.state.percentage) ? '—' : this.state.percentage}%`
-            : <i className="fa fa-cloud-download"/>
+            : <i className="fa fa-download"/>
           }
         </a>
-        {this.state.isActive && <ul>{DownloadTypesList}</ul>}
+        {this.state.isActive && <ul ref="ul" className={styles.list}>{DownloadTypesList}</ul>}
         <JobDownloadErrors errors={this.state.errors} dismiss={this.dismissErrors}/>
       </div>
     )
@@ -171,7 +188,7 @@ export class JobDownload extends React.Component<Props, State> {
     this.setState({
       isActive: this.state.isDownloading || !this.state.isOpen,
       isOpen: !this.state.isOpen,
-    })
+    }, () => this.setOffset(this.refs.ul))
   }
 
   private dismissErrors() {
@@ -220,5 +237,23 @@ export class JobDownload extends React.Component<Props, State> {
       percentage: this.percentage,
     })
     this.props.onStart()
+  }
+
+  /*
+   * This method is a hack to enable the list of download types to appear above
+   * the JobStatusList header without always messing up the scrollbar.  I'm
+   * doing direct element style manipulation to avoid passing too much trivial
+   * information up and down the react component stack and rewriting some of
+   * those components to use the values.
+   */
+  private setOffset(add?: any) {
+    const e = findDOMNode(this).closest('li.JobStatus-root').closest('ul') as HTMLElement
+
+    if (add) {
+      e.style.paddingTop = `${e.offsetTop}px`
+      e.style.top = '0'
+    } else {
+      e.style.top = e.style.paddingTop = ''
+    }
   }
 }

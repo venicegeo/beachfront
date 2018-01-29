@@ -47,8 +47,8 @@
 }
 
 .submenu h2 {
-  margin: 1px 0;
-  padding: 5px var(--header-margin-horizontal);
+  margin: 0;
+  padding: 5px 6px;
   font-size: 1.2em;
   background-color: var(--header-bgcolor);
   color: white;

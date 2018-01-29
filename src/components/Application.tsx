@@ -90,6 +90,7 @@ interface State {
   bbox?: [number, number, number, number]
   mapView?: MapView
   hoveredFeature?: beachfront.Job
+  collections?: any
   selectedFeature?: beachfront.Job | beachfront.Scene
 
   // Search state
@@ -106,6 +107,7 @@ export const createApplication = (element) => render(
   />, element)
 
 export class Application extends React.Component<Props, State> {
+  refs: any
   private initializationPromise: Promise<any>
   private pollingInstance: number
   private idleInterval: any
@@ -198,11 +200,13 @@ export class Application extends React.Component<Props, State> {
           isSearching={this.state.isSearching}
           logout={this.logout}
           mode={this.mapMode}
+          ref="map"
           selectedFeature={this.state.selectedFeature}
+          shrunk={this.state.route.pathname !== '/'}
           view={this.state.mapView}
           wmsUrl={this.state.geoserver.wmsUrl}
-          shrunk={this.state.route.pathname !== '/'}
           onBoundingBoxChange={this.handleBoundingBoxChange}
+          onMapInitialization={(collections: any) => this.setState({ collections })}
           onSearchPageChange={this.handleSearchSubmit}
           onSelectFeature={this.handleSelectFeature}
           onViewChange={mapView => this.setState({ mapView })}
@@ -269,9 +273,12 @@ export class Application extends React.Component<Props, State> {
             algorithms={this.state.algorithms.records}
             bbox={this.state.bbox}
             catalogApiKey={this.state.catalogApiKey}
+            collections={this.state.collections}
+            imagery={this.state.searchResults}
             isSearching={this.state.isSearching}
-            searchError={this.state.searchError}
+            map={this.refs.map}
             searchCriteria={this.state.searchCriteria}
+            searchError={this.state.searchError}
             selectedScene={this.state.selectedFeature && this.state.selectedFeature.properties.type === TYPE_SCENE ? this.state.selectedFeature as beachfront.Scene : null}
             onCatalogApiKeyChange={this.handleCatalogApiKeyChange}
             onClearBbox={this.handleClearBbox}
@@ -351,10 +358,14 @@ export class Application extends React.Component<Props, State> {
 
   private get mapMode() {
     switch (this.state.route.pathname) {
-      case '/create-job': return (this.state.bbox && this.state.searchResults) ? MODE_SELECT_IMAGERY : MODE_DRAW_BBOX
-      case '/create-product-line': return MODE_DRAW_BBOX
-      case '/product-lines': return MODE_PRODUCT_LINES
-      default: return MODE_NORMAL
+      case '/create-job':
+        return this.state.bbox && this.state.searchResults ? MODE_SELECT_IMAGERY : MODE_DRAW_BBOX
+      case '/create-product-line':
+        return MODE_DRAW_BBOX
+      case '/product-lines':
+        return MODE_PRODUCT_LINES
+      default:
+        return MODE_NORMAL
     }
   }
 
@@ -363,7 +374,7 @@ export class Application extends React.Component<Props, State> {
       if (this.state.jobs.records.find(j => j.id === jobId)) {
         return
       }
-      console.debug('(application:componentDidUpdate) fetching job %s', jobId)
+      console.log('(application:componentDidUpdate) fetching job %s', jobId)
       jobsService.fetchJob(jobId)
         .then(record => {
           this.setState({ jobs: this.state.jobs.$append(record) })
@@ -538,12 +549,11 @@ export class Application extends React.Component<Props, State> {
     if (this.state.selectedFeature === feature) {
       return  // Nothing to do
     }
-    this.setState({
-      selectedFeature: feature || null,
-    })
+
     this.navigateTo({
       pathname: this.state.route.pathname,
-      search:   (feature && feature.properties.type === TYPE_JOB) ? `?jobId=${feature.id}` : '',
+      search: feature && feature.properties.type === TYPE_JOB ? `?jobId=${feature.id}` : '',
+      selectedFeature: feature,
     })
   }
 
@@ -551,24 +561,30 @@ export class Application extends React.Component<Props, State> {
     const route = generateRoute(loc)
     history.pushState(null, null, route.href)
 
-    // Update selected feature if needed
-    let {selectedFeature} = this.state
+    // Update selected feature if needed.
+    let selectedFeature = 'selectedFeature' in loc
+      ? loc.selectedFeature
+      : this.state.selectedFeature
 
     if (route.jobIds.length) {
       selectedFeature = this.state.jobs.records.find(j => route.jobIds.includes(j.id))
     }
 
+    /* TODO: Okay?
     if (!route.jobIds.length && selectedFeature && selectedFeature.properties.type === TYPE_JOB) {
       selectedFeature = null
     } else if (route.pathname !== this.state.route.pathname && selectedFeature && selectedFeature.properties.type === TYPE_SCENE) {
       selectedFeature = null
     }
+    */
 
     this.setState({
       route,
       selectedFeature,
+      /* TODO: Okay?
       bbox: this.state.route.pathname === route.pathname ? this.state.bbox : null,
       searchResults: this.state.route.pathname === route.pathname ? this.state.searchResults : null,
+      */
       searchError: this.state.route.pathname === route.pathname ? this.state.searchError : null,
     })
   }
@@ -583,7 +599,7 @@ export class Application extends React.Component<Props, State> {
   }
 
   private refreshRecords() {
-    console.debug('(application:refreshRecords) fetching latest jobs and product lines')
+    console.log('(application:refreshRecords) fetching latest jobs and product lines')
     return Promise.all([
       this.fetchJobs(),
       /*
@@ -656,14 +672,14 @@ export class Application extends React.Component<Props, State> {
       onAvailable: () => this.setState({ isUpdateAvailable: true }),
     })
 
-    console.debug('(application:startBackgroundTasks) starting job/productline polling at %s second intervals', Math.ceil(RECORD_POLLING_INTERVAL / 1000))
+    console.log('(application:startBackgroundTasks) starting job/productline polling at %s second intervals', Math.ceil(RECORD_POLLING_INTERVAL / 1000))
     this.pollingInstance = setInterval(this.refreshRecords.bind(this), RECORD_POLLING_INTERVAL)
   }
 
   private stopBackgroundTasks() {
     updateService.stopWorker()
 
-    console.debug('(application:stopBackgroundTasks) stopping job/productline polling')
+    console.log('(application:stopBackgroundTasks) stopping job/productline polling')
     clearInterval(this.pollingInstance)
   }
 
@@ -730,7 +746,7 @@ function generateInitialState(): State {
 
 function deserialize(): State {
   return {
-    algorithms:       createCollection(JSON.parse(sessionStorage.getItem('algorithms_records')) || []),
+    algorithms: createCollection(JSON.parse(sessionStorage.getItem('algorithms_records')) || []),
     bbox:             JSON.parse(sessionStorage.getItem('bbox')),
     geoserver:        JSON.parse(sessionStorage.getItem('geoserver')),
     isSessionExpired: JSON.parse(sessionStorage.getItem('isSessionExpired')),

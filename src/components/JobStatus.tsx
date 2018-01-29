@@ -21,6 +21,7 @@ import * as moment from 'moment'
 import {Link} from './Link'
 import {Timestamp} from './Timestamp'
 import {JobDownload} from './JobDownload'
+import {normalizeSceneId} from './SceneFeatureDetails'
 
 import {
   STATUS_SUCCESS,
@@ -234,10 +235,6 @@ export class JobStatus extends React.Component<Props, State> {
 //
 // Helpers
 //
-
-function normalizeSceneId(sceneId) {
-  return sceneId.replace(/^(rapideye|planetscope|landsat|sentinel):/, '')
-}
 
 function segmentIfNeeded(s: string) {
   return s.length > 30 ? s.replace(/(\W)/g, '$1 ') : s
