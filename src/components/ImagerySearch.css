@@ -47,15 +47,15 @@
   font-weight: 500;
   line-height: 1.4;
   margin: 0;
-  padding: 0.5em 1em 1em;
+  padding: 0.5em 1em;
 }
 
 .errorMessage pre {
   background-color: rgba(0, 0, 0, 0.2);
   font-size: 12px;
-  margin: 0;
-  padding: 1em;
+  margin: 0.5em 0 0;
   overflow: hidden;
+  padding: 1em;
   text-align: left;
 }
 
