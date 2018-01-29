@@ -372,7 +372,7 @@ export class UserTour extends React.Component<any, any> {
       },
       {
         step: 10,
-        selector: '.ImagerySearch-controls button',
+        selector: '.ImagerySearch-controls button[type=submit]',
         position: 'top',
         verticalOffset: 21,
         title: <div className={styles.title}>Search for Imagery</div>,
@@ -383,7 +383,7 @@ export class UserTour extends React.Component<any, any> {
           if (this.props.application.state.searchResults) {
             return Promise.resolve()
           } else {
-            this.query('.ImagerySearch-controls button').click()
+            this.query('.ImagerySearch-controls button[type=submit]').click()
             this.showArrow(false)
 
             return new Promise((resolve, reject) => {
