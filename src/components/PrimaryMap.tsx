@@ -349,6 +349,10 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.bboxDrawInteraction.setActive(true)
   }
 
+  private activateHoverInteraction() {
+    this.hoverInteraction.setActive(true)
+  }
+
   private activateSelectInteraction() {
     this.selectInteraction.setActive(true)
   }
@@ -371,6 +375,14 @@ export class PrimaryMap extends React.Component<Props, State> {
 
   private deactivateBboxDrawInteraction() {
     this.bboxDrawInteraction.setActive(false)
+  }
+
+  private deactivateHoverInteraction(clear = true) {
+    if (clear) {
+      this.hoverInteraction.getFeatures().clear()
+    }
+
+    this.hoverInteraction.setActive(false)
   }
 
   private deactivateSelectInteraction(skipReset = false) {
@@ -793,6 +805,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     if (this.state.isMeasuring) {
       this.deactivateBboxDrawInteraction()
       this.deactivateSelectInteraction(true)
+      this.deactivateHoverInteraction(false)
       return
     }
 
@@ -800,20 +813,24 @@ export class PrimaryMap extends React.Component<Props, State> {
       case MODE_SELECT_IMAGERY:
         this.deactivateBboxDrawInteraction()
         this.activateSelectInteraction()
+        this.activateHoverInteraction()
         break
       case MODE_DRAW_BBOX:
         this.activateBboxDrawInteraction()
         this.deactivateSelectInteraction()
+        this.deactivateHoverInteraction()
         break
       case MODE_NORMAL:
         /* this.clearDraw() TODO: Okay? */
         this.deactivateBboxDrawInteraction()
         this.activateSelectInteraction()
+        this.deactivateHoverInteraction()
         break
       case MODE_PRODUCT_LINES:
         /* this.clearDraw() TODO: Okay? */
         this.deactivateBboxDrawInteraction()
         this.activateSelectInteraction()
+        this.deactivateHoverInteraction()
         break
       default:
         console.warn('wat mode=%s', this.props.mode)
