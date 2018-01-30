@@ -63,8 +63,8 @@ interface State {
 
 export const createSearchCriteria = (): SearchCriteria => ({
   cloudCover: 10,
-  dateFrom: moment.utc().subtract(30, 'days').format(DATE_FORMAT),
-  dateTo: moment.utc().format(DATE_FORMAT),
+  dateFrom: moment().subtract(30, 'days').format(DATE_FORMAT),
+  dateTo: moment().format(DATE_FORMAT),
   source: SOURCE_DEFAULT,
 })
 
