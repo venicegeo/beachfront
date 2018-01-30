@@ -16,31 +16,47 @@
 
 @import '../styles/constants.css';
 
-.root {}
+.root > h2 {
+  cursor: pointer;
+}
 
 .controls {
+  margin: 15px 0;
+  padding: 5px 15px 0;
   text-align: center;
 }
 
+.controls button {
+  margin: 0 0.5em;
+}
+
 .errorMessage {
-  padding: 15px;
   background-color: var(--COLOR_RED);
+  box-shadow: inset 0 0 2px 2px rgba(0, 0, 0, 0.2);
   color: white;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .errorMessage h4 {
-  margin: 0 0 .5em;
   color: inherit;
   font-size: 1.3em;
+  padding: 0.5em 1em;
+}
+
+.errorMessage p {
+  font-weight: 500;
+  line-height: 1.4;
+  margin: 0;
+  padding: 0.5em 1em;
 }
 
 .errorMessage pre {
-  margin: 1em -15px -10px;
+  background-color: rgba(0, 0, 0, 0.2);
+  font-size: 12px;
+  margin: 0.5em 0 0;
+  overflow: hidden;
   padding: 1em;
   text-align: left;
-  background-color: rgba(0,0,0,.2);
-  overflow-x: auto;
 }
 
 .loadingMask {

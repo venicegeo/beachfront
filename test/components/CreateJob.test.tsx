@@ -25,20 +25,16 @@ describe('<CreateJob/>', () => {
 
   beforeEach(() => {
     _props = {
-      algorithms:               [],
-      bbox:                     [0, 0, 0, 0],
-      catalogApiKey:            'test-catalog-api-key',
-      isSearching:              false,
-      searchCriteria: {
-        cloudCover: 10,
-        dateFrom:   '2016-01-01',
-        dateTo:     '2016-12-31',
-      },
-      searchError: null,
-      selectedScene: {
-        id: 'test-scene-id',
-        properties: {},
-      },
+      algorithms:             [],
+      bbox:                   [0, 0, 0, 0],
+      catalogApiKey:          'test-catalog-api-key',
+      collections:            {},
+      imagery:                null,
+      isSearching:            false,
+      map:                    null,
+      searchCriteria:         { cloudCover: 10, dateFrom: '2016-01-01', dateTo: '2016-12-31' },
+      searchError:            null,
+      selectedScene:          { id: 'test-scene-id', properties: {} },
       onCatalogApiKeyChange:  sinon.stub(),
       onClearBbox:            sinon.stub(),
       onJobCreated:           sinon.stub(),
@@ -53,7 +49,10 @@ describe('<CreateJob/>', () => {
         algorithms={_props.algorithms}
         bbox={_props.bbox}
         catalogApiKey={_props.catalogApiKey}
+        collections={_props.collections}
+        imagery={_props.imagery}
         isSearching={_props.isSearching}
+        map={_props.map}
         searchCriteria={_props.searchCriteria}
         searchError={_props.searchError}
         selectedScene={_props.selectedScene}
@@ -77,7 +76,10 @@ describe('<CreateJob/>', () => {
         algorithms={_props.algorithms}
         bbox={null}
         catalogApiKey={_props.catalogApiKey}
+        collections={_props.collections}
+        imagery={_props.imagery}
         isSearching={_props.isSearching}
+        map={_props.map}
         searchCriteria={_props.searchCriteria}
         searchError={_props.searchError}
         selectedScene={null}
@@ -97,7 +99,10 @@ describe('<CreateJob/>', () => {
         algorithms={_props.algorithms}
         bbox={null}
         catalogApiKey={_props.catalogApiKey}
+        collections={_props.collections}
+        imagery={_props.imagery}
         isSearching={_props.isSearching}
+        map={_props.map}
         searchCriteria={_props.searchCriteria}
         searchError={_props.searchError}
         selectedScene={null}
@@ -117,7 +122,10 @@ describe('<CreateJob/>', () => {
         algorithms={_props.algorithms}
         bbox={_props.bbox}
         catalogApiKey={_props.catalogApiKey}
+        collections={_props.collections}
+        imagery={_props.imagery}
         isSearching={_props.isSearching}
+        map={_props.map}
         searchCriteria={_props.searchCriteria}
         searchError={_props.searchError}
         selectedScene={null}
@@ -137,7 +145,10 @@ describe('<CreateJob/>', () => {
         algorithms={_props.algorithms}
         bbox={_props.bbox}
         catalogApiKey={_props.catalogApiKey}
+        collections={_props.collections}
+        imagery={_props.imagery}
         isSearching={_props.isSearching}
+        map={_props.map}
         searchCriteria={_props.searchCriteria}
         searchError={_props.searchError}
         selectedScene={null}
@@ -157,7 +168,10 @@ describe('<CreateJob/>', () => {
         algorithms={_props.algorithms}
         bbox={_props.bbox}
         catalogApiKey={_props.catalogApiKey}
+        collections={_props.collections}
+        imagery={_props.imagery}
         isSearching={_props.isSearching}
+        map={_props.map}
         searchCriteria={_props.searchCriteria}
         searchError={_props.searchError}
         selectedScene={_props.selectedScene}
@@ -177,7 +191,10 @@ describe('<CreateJob/>', () => {
         algorithms={_props.algorithms}
         bbox={_props.bbox}
         catalogApiKey={_props.catalogApiKey}
+        collections={_props.collections}
+        imagery={_props.imagery}
         isSearching={_props.isSearching}
+        map={_props.map}
         searchCriteria={_props.searchCriteria}
         searchError={_props.searchError}
         selectedScene={_props.selectedScene}
@@ -197,7 +214,10 @@ describe('<CreateJob/>', () => {
         algorithms={_props.algorithms}
         bbox={_props.bbox}
         catalogApiKey={_props.catalogApiKey}
+        collections={_props.collections}
+        imagery={_props.imagery}
         isSearching={_props.isSearching}
+        map={_props.map}
         searchCriteria={_props.searchCriteria}
         searchError={_props.searchError}
         selectedScene={_props.selectedScene}
@@ -225,7 +245,10 @@ describe('<CreateJob/>', () => {
         algorithms={_props.algorithms}
         bbox={_props.bbox}
         catalogApiKey={_props.catalogApiKey}
+        collections={_props.collections}
+        imagery={_props.imagery}
         isSearching={_props.isSearching}
+        map={_props.map}
         searchCriteria={_props.searchCriteria}
         searchError={_props.searchError}
         selectedScene={_props.selectedScene}
@@ -249,13 +272,13 @@ describe('<CreateJob/>', () => {
         algorithms={_props.algorithms}
         bbox={_props.bbox}
         catalogApiKey={_props.catalogApiKey}
+        collections={_props.collections}
+        imagery={_props.imagery}
         isSearching={_props.isSearching}
+        map={_props.map}
         searchCriteria={_props.searchCriteria}
         searchError={_props.searchError}
-        selectedScene={({
-          id:         'planetscope:test-prefixed-scene-id',
-          properties: {},
-        } as any)}
+        selectedScene={({ id: 'planetscope:test-prefixed-scene-id', properties: {} } as any)}
         onCatalogApiKeyChange={_props.onCatalogApiKeyChange}
         onClearBbox={_props.onClearBbox}
         onJobCreated={_props.onJobCreated}

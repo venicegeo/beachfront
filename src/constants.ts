@@ -24,10 +24,7 @@ export const STATUS_PENDING = 'Pending'
 export const STATUS_INACTIVE = 'Inactive'
 export const STATUS_CANCELLED = 'Cancelled'
 
-export const SOURCE_PLANETSCOPE = 'planetscope'
-export const SOURCE_RAPIDEYE = 'rapideye'
-export const SOURCE_LANDSAT = 'landsat'
-export const SOURCE_SENTINEL = 'sentinel'
+export const SOURCE_DEFAULT = 'rapideye'
 
 // Feature Properties
 export const TYPE_JOB = 'JOB'
