@@ -208,19 +208,17 @@ export class ImagerySearchList extends React.Component<Props, State> {
     }
   }
 
-  private setHoveredIds(event?: Select.Event): string[] {
-    const rc = this.getFeatureIds(event ? event.target : this.props.collections.hovered)
-    this.setState({ hoveredIds: rc })
-
-    return rc
+  private setHoveredIds(event?: Select.Event): void {
+    this.setState((_, props) => ({
+      hoveredIds: this.getFeatureIds(event ? event.target : props.collections.hovered),
+    }))
   }
 
-  private setSelectedIds(event?: Select.Event): string[] {
-    const rc = this.getFeatureIds(event ? event.target : this.props.collections.selected)
-    this.setState({ selectedIds: rc }, this.scrollToSelected)
-
-    return rc
-  }
+  private setSelectedIds(event?: Select.Event): void {
+    this.setState((_, props) => ({
+      selectedIds: this.getFeatureIds(event ? event.target : props.collections.selected),
+    }), this.scrollToSelected)
+   }
 
   private sortOn(column: string) {
     if (this.state.sortBy === column) {
