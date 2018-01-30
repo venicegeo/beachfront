@@ -20,6 +20,10 @@
   composes: submenu from '../styles/menus.css';
 }
 
+.root header {
+  z-index: 1;
+}
+
 .communicationError {
   padding: 15px;
   background-color: var(--COLOR_RED);
@@ -35,11 +39,11 @@
   font-size: 1.3em;
 }
 
-.root ul {
+.root > ul {
   background-color: hsl(202, 30%, 90%);
 }
 
-.isEmpty ul {
+.isEmpty > ul {
   background-color: white;
 }
 
