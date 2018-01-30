@@ -82,6 +82,8 @@ export class ImagerySearchList extends React.Component<Props, State> {
   componentDidMount() {
     this.props.collections.hovered.on(['add', 'remove'], this.setHoveredIds)
     this.props.collections.selected.on(['add', 'remove'], this.setSelectedIds)
+    this.setHoveredIds()
+    this.setSelectedIds()
     this.scrollToSelected()
   }
 
@@ -177,6 +179,10 @@ export class ImagerySearchList extends React.Component<Props, State> {
     return provider ? provider.name : null
   }
 
+  private getFeatureIds(collection: Collection): string[] {
+    return collection.getArray().map(f => f.getId())
+  }
+
   private scrollToSelected() {
     const row = document.querySelector(`.${styles.selected}`)
 
@@ -201,15 +207,17 @@ export class ImagerySearchList extends React.Component<Props, State> {
     }
   }
 
-  private setHoveredIds(event: Select.Event): void {
-    this.setState({ hoveredIds: (event.target as Collection).getArray().map(f => f.getId()) })
+  private setHoveredIds(event?: Select.Event): void {
+    this.setState((_, props) => ({
+      hoveredIds: this.getFeatureIds(event ? event.target : props.collections.hovered),
+    }))
   }
 
-  private setSelectedIds(event: Select.Event): void {
-    this.setState({
-      selectedIds: (event.target as Collection).getArray().map(f => f.getId()),
-    }, this.scrollToSelected)
-  }
+  private setSelectedIds(event?: Select.Event): void {
+    this.setState((_, props) => ({
+      selectedIds: this.getFeatureIds(event ? event.target : props.collections.selected),
+    }), this.scrollToSelected)
+   }
 
   private sortOn(column: string) {
     if (this.state.sortBy === column) {
