@@ -98,7 +98,7 @@ export const TOUR = {
   bbox: [-85, 19.7, -74, 23.4],
   bboxName: 'Cuba',
   searchCriteria: {
-    cloudCover: 8,
+    cloudCover: 6,
     dateFrom: '2017-07-01',
     dateTo: '2017-10-31',
     source: 'landsat',

@@ -334,29 +334,32 @@ export class UserTour extends React.Component<any, any> {
           return new Promise(resolve => {
             let app = this.props.application
 
-            function* gen(from, to) {
-              let sign = Math.sign(to - from)
+            function gen(from, to): number[] {
+              const rc: number[] = []
+              const sign = Math.sign(to - from)
 
               for (let i = from + sign; Math.abs(to - i); i += sign) {
-                yield i
+                rc.unshift(i)
               }
 
-              yield to
+              rc.unshift(to)
+
+              return rc
             }
 
             if (app.state.searchCriteria.cloudCover === this.searchCriteria.cloudCover) {
               resolve()
             } else {
               let fn = (g) => {
-                let i = g.next()
+                const i = g.pop()
 
-                if (i.done) {
+                if (i == null) {
                   setTimeout(resolve, 100)
                 } else {
                   setTimeout(() => {
                     app.setState({
                       searchCriteria: Object.assign({}, app.state.searchCriteria, {
-                        cloudCover: i.value,
+                        cloudCover: i,
                       }),
                     })
 
