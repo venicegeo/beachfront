@@ -511,7 +511,7 @@ export class UserTour extends React.Component<any, any> {
       },
       {
         step: 15,
-        selector: '.JobStatusList-root .JobStatus-root:last-child',
+        selector: `.JobStatusList-root .JobStatus-root.JobStatus-isActive`,
         verticalOffset: -8,
         title: <div className={styles.title}>Job Status</div>,
         body: <div className={styles.body}>
@@ -523,17 +523,25 @@ export class UserTour extends React.Component<any, any> {
       },
       {
         step: 16,
-        selector: '.JobStatusList-root .JobStatus-root:last-child .JobStatus-metadata',
+        selector: '.JobStatusList-root .JobStatus-isActive .JobStatus-metadata',
         position: 'right',
         title: <div className={styles.title}>Job Details</div>,
         body: <div className={styles.body}>
           The details will give you information about the job and its imagery.
         </div>,
-        before: this.expandJobStatus,
+        before() {
+          return this.expandJobStatus().then(() => {
+            const elem = this.query('.JobStatusList-root .JobStatus-isActive')
+
+            if (!elem.classList.contains('JobStatus-isExpanded')) {
+              elem.querySelector('.JobStatus-details').click()
+            }
+          })
+        },
       },
       {
         step: 17,
-        selector: '.JobStatusList-root .JobStatus-root:last-child .JobStatus-controls a i',
+        selector: `.JobStatusList-root .JobStatus-isActive .JobStatus-controls a i`,
         position: 'right',
         verticalOffset: -15,
         title: <div className={styles.title}>View Job on Map</div>,
@@ -554,14 +562,13 @@ export class UserTour extends React.Component<any, any> {
         </div>,
         async before() {
           if (this.props.application.state.route.pathname === '/jobs') {
-            this.query('.JobStatusList-root .JobStatus-root:last-child .JobStatus-controls a')
-              .click()
+            this.query(`.JobStatusList-root .JobStatus-isActive .JobStatus-controls a`).click()
           }
         },
       },
       {
         step: 19,
-        selector: '.JobStatusList-root .JobStatus-root:last-child',
+        selector: `.JobStatusList-root .JobStatus-isActive`,
         position: 'right',
         title: <div className={styles.title}>Other Job Actions</div>,
         body: <div className={styles.body}>
@@ -574,13 +581,21 @@ export class UserTour extends React.Component<any, any> {
       },
       {
         step: 20,
-        selector: '.JobStatusList-root .JobStatus-root:last-child .JobStatus-removeToggle',
+        selector: `.JobStatusList-root .JobStatus-isActive .JobStatus-removeToggle`,
         position: 'top',
         title: <div className={styles.title}>Delete Job</div>,
         body: <div className={styles.body}>
           If you expand the job details, then you can click here to delete the job.
         </div>,
-        before: this.expandJobStatus,
+        before() {
+          return this.expandJobStatus().then(() => {
+            const elem = this.query('.JobStatusList-root .JobStatus-isActive')
+
+            if (!elem.classList.contains('JobStatus-isExpanded')) {
+              (elem.querySelector('.JobStatus-details') as HTMLElement).click()
+            }
+          })
+        },
       },
       {
         step: 21,
@@ -676,12 +691,13 @@ export class UserTour extends React.Component<any, any> {
 
   private expandJobStatus() {
     return new Promise((resolve, reject) => {
-      const promise = this.props.application.state.route.pathname === '/jobs'
+      const app = this.props.application
+      const promise = app.state.route.pathname === '/jobs'
         ? Promise.resolve()
-        : this.navigateTo('/jobs')
+        : this.navigateTo({ pathname: '/jobs', search: app.state.route.search })
 
       promise.then(() => {
-        const elem = this.query('.JobStatusList-root .JobStatus-root:last-child')
+        const elem = this.query(`.JobStatusList-root .${styles.newJob}`)
 
         if (!elem || Array.from(elem.classList).find(n => n === 'JobStatus-isExpanded')) {
           resolve()
@@ -760,24 +776,25 @@ export class UserTour extends React.Component<any, any> {
       && parseInt(box.right) <= client.width
   }
 
-  private navigateTo(pathname): Promise<any> {
-    let app = this.props.application
+  private navigateTo(props): Promise<any> {
+    const app = this.props.application
+    const nav = typeof props === 'string' ? { pathname: props } : props
 
-    if (pathname === app.state.route.pathname) {
-      return Promise.resolve(pathname)
+    if (nav.pathname === app.state.route.pathname) {
+      return Promise.resolve(nav.pathname)
     } else {
       return new Promise((resolve, reject) => {
-        app.navigateTo({ pathname: pathname })
+        app.navigateTo(nav)
 
         let timeout = 30000
         let t0 = Date.now()
         let interval = setInterval(() => {
-          if (pathname === app.state.route.pathname) {
+          if (nav.pathname === app.state.route.pathname) {
             clearInterval(interval)
-            resolve(pathname)
+            resolve(nav.pathname)
           } else if (Date.now() - t0 > timeout) {
             clearInterval(interval)
-            reject(`Timed out after ${timeout / 1000} seconds waiting for ${pathname}.`)
+            reject(`Timed out after ${timeout / 1000} seconds waiting for ${nav.pathname}.`)
           }
         }, 10)
       })
