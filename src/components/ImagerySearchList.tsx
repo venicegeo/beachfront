@@ -73,6 +73,7 @@ export class ImagerySearchList extends React.Component<Props, State> {
       },
     }
 
+    this.getFeatureIds = this.getFeatureIds.bind(this)
     this.setHoveredIds = debounce(this.setHoveredIds.bind(this), 10)
     this.setSelectedIds = debounce(this.setSelectedIds.bind(this), 10)
     this.scrollToSelected = this.scrollToSelected.bind(this)

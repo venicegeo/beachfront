@@ -104,14 +104,16 @@
   composes: buffered-container;
   margin: .5em 0;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   font-size: 15px;
+  word-break: break-all;
 }
 
 .caret {
   width: 1em;
   color: rgba(0,0,0, .3);
+  margin-top: 2px;
   transform: rotate(0deg);
   transform-origin: .4em .5em;
   transition: transform .15s ease-in-out;
@@ -156,6 +158,7 @@
 
 .metadata {
   composes: buffered-container;
+  cursor: default;
   overflow: hidden;
   max-height: 0;
   background-color: rgba(0, 0, 0, .04);

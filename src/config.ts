@@ -78,6 +78,34 @@ export const SCENE_TILE_PROVIDERS = [
   },
 ]
 
+export const TOUR = {
+  algorithm: ':first-child',
+  /*
+  apiKeyInstructions: `
+    To get an API key, ask the experts at <a
+      href="https://rocketchat.gs.mil/channel/planetdas_askanexpert"
+      target="_blank"
+    >Rocket.Chat #planetdas_askanexpert</a>.
+  `,
+  */
+  apiKeyInstructions: `
+    To get an API key you must have a Planet account.  For more information see <a
+      href="https://support.planet.com/hc/en-us/articles/212318178-What-is-my-API-key-"
+      target="_blank"
+    >What Is My API Key?</a>
+  `,
+  basemap: 'OSM',
+  bbox: [-85, 19.7, -74, 23.4],
+  bboxName: 'Cuba',
+  searchCriteria: {
+    cloudCover: 8,
+    dateFrom: '2017-07-01',
+    dateTo: '2017-10-31',
+    source: 'landsat',
+  },
+  zoom: 6,
+}
+
 // Minimum versions of supported browsers.
 export const SUPPORTED_BROWSERS = {
   chrome: 55,

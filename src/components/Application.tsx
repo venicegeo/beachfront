@@ -56,9 +56,9 @@ import {
   SESSION_IDLE_STORE,
   SESSION_IDLE_UNITS,
 } from '../config'
+import {UserTour} from './Tour'
 
 import {
-  STATUS_SUCCESS,
   TYPE_JOB,
   TYPE_SCENE,
 } from '../constants'
@@ -110,6 +110,7 @@ export class Application extends React.Component<Props, State> {
   private initializationPromise: Promise<any>
   private pollingInstance: number
   private idleInterval: any
+  private tour: any
 
   constructor(props) {
     super(props)
@@ -136,6 +137,7 @@ export class Application extends React.Component<Props, State> {
     this.logout = this.logout.bind(this)
     this.startIdleTimer = this.startIdleTimer.bind(this)
     this.stopIdleTimer = this.stopIdleTimer.bind(this)
+    this.startTour = this.startTour.bind(this)
     this.timerIncrement = this.timerIncrement.bind(this)
     this.resetTimer = this.resetTimer.bind(this)
   }
@@ -165,7 +167,7 @@ export class Application extends React.Component<Props, State> {
         let [jobId] = this.state.route.jobIds
 
         if (jobId && !this.state.selectedFeature) {
-          this.state.selectedFeature = this.state.jobs.records.find(job => job.id === jobId)
+          this.setState({ selectedFeature: this.state.jobs.records.find(job => job.id === jobId) })
         }
       }).then(this.importJobsIfNeeded.bind(this))
       this.startIdleTimer()
@@ -185,6 +187,7 @@ export class Application extends React.Component<Props, State> {
         <Navigation
           activeRoute={this.state.route}
           onClick={this.navigateTo}
+          startTour={this.startTour}
         />
         <PrimaryMap
           bbox={this.state.bbox}
@@ -255,6 +258,7 @@ export class Application extends React.Component<Props, State> {
         <Login/>
       )
     }
+
     switch (this.state.route.pathname) {
       case '/about':
         return (
@@ -337,7 +341,7 @@ export class Application extends React.Component<Props, State> {
       case '/product-lines':
         return this.state.selectedFeature ? [this.state.selectedFeature as any] : this.state.productLines.records
       default:
-        return this.state.jobs.records.filter(j => this.state.route.jobIds.includes(j.id) && j.properties.status === STATUS_SUCCESS)
+        return this.state.jobs.records.filter(j => this.state.route.jobIds.includes(j.id))
     }
   }
 
@@ -597,7 +601,10 @@ export class Application extends React.Component<Props, State> {
     console.log('(application:refreshRecords) fetching latest jobs and product lines')
     return Promise.all([
       this.fetchJobs(),
+      /*
+       * No need to fetch product lines till we get them working.
       this.fetchProductLines(),
+      */
     ])
   }
 
@@ -625,6 +632,18 @@ export class Application extends React.Component<Props, State> {
 
   private stopIdleTimer() {
     clearInterval(this.idleInterval)
+  }
+
+  private startTour() {
+    if (this.tour) {
+      if (!this.tour.state.isTourActive) {
+        this.tour.start()
+      }
+    } else {
+      let root = document.createElement('div')
+      document.body.appendChild(root)
+      this.tour = render(<UserTour application={this}/>, root)
+    }
   }
 
   private resetTimer() {

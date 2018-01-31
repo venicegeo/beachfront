@@ -573,8 +573,12 @@ export class PrimaryMap extends React.Component<Props, State> {
     const {basemapIndex, zoom, center} = this.props.view
     this.setState({ basemapIndex })
     const view = this.map.getView()
-    view.setCenter(view.constrainCenter(proj.transform(center, WGS84, WEB_MERCATOR)))
-    view.setZoom(zoom)
+
+    view.animate({
+      center: view.constrainCenter(proj.transform(center, WGS84, WEB_MERCATOR)),
+      duration: 2000,
+      zoom: zoom,
+    })
   }
 
   private renderDetections() {
@@ -1154,7 +1158,7 @@ function generateImageryLayer() {
     source: new VectorSource({ features: new Collection() }),
     style: new Style({
       fill: new Fill({
-        color: 'rgba(0, 0, 0, 0.12)',
+        color: 'rgba(0, 0, 0, 0.08)',
       }),
       stroke: new Stroke({
         color: 'rgba(0, 0, 0, 0.32)',

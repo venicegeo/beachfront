@@ -51,7 +51,7 @@ export const createCollection = (initialRecords = []) => ({
   },
 
   $records(records) {
-    return Object.assign({}, this, {records, fetching: false})
+    return Object.assign({}, this, {records, error: null, fetching: false})
   },
 
   $error(error) {
