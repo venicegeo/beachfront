@@ -59,7 +59,6 @@ import {
 import {UserTour} from './Tour'
 
 import {
-  STATUS_SUCCESS,
   TYPE_JOB,
   TYPE_SCENE,
 } from '../constants'
@@ -168,7 +167,7 @@ export class Application extends React.Component<Props, State> {
         let [jobId] = this.state.route.jobIds
 
         if (jobId && !this.state.selectedFeature) {
-          this.state.selectedFeature = this.state.jobs.records.find(job => job.id === jobId)
+          this.setState({ selectedFeature: this.state.jobs.records.find(job => job.id === jobId) })
         }
       }).then(this.importJobsIfNeeded.bind(this))
       this.startIdleTimer()
@@ -342,7 +341,7 @@ export class Application extends React.Component<Props, State> {
       case '/product-lines':
         return this.state.selectedFeature ? [this.state.selectedFeature as any] : this.state.productLines.records
       default:
-        return this.state.jobs.records.filter(j => this.state.route.jobIds.includes(j.id) && j.properties.status === STATUS_SUCCESS)
+        return this.state.jobs.records.filter(j => this.state.route.jobIds.includes(j.id))
     }
   }
 

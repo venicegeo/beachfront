@@ -1158,7 +1158,7 @@ function generateImageryLayer() {
     source: new VectorSource({ features: new Collection() }),
     style: new Style({
       fill: new Fill({
-        color: 'rgba(0, 0, 0, 0.12)',
+        color: 'rgba(0, 0, 0, 0.08)',
       }),
       stroke: new Stroke({
         color: 'rgba(0, 0, 0, 0.32)',
