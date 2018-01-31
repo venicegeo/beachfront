@@ -27,7 +27,10 @@ const cssimport = require('postcss-import')
 const pkg = require('./package')
 
 const __environment__ = process.env.NODE_ENV || 'development'
+const COMPILER_TARGET = process.env.COMPILER_TARGET || 'es6'
+/*
 const COMPILER_TARGET = process.env.COMPILER_TARGET || (__environment__ === 'development' ? 'es6' : 'es5')
+*/
 
 module.exports = {
   devtool: '#cheap-module-eval-source-map',
