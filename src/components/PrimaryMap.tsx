@@ -201,6 +201,9 @@ export class PrimaryMap extends React.Component<Props, State> {
     if (this.props.selectedFeature) {
       this.updateSelectedFeature()
     }
+    
+    // Used by tests
+    window['primaryMap'] = this  // tslint:disable-line
 
     if (this.props.onMapInitialization) {
       this.props.onMapInitialization({
