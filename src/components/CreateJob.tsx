@@ -55,7 +55,6 @@ interface Props {
 
 interface State {
   isCreating?: boolean
-  computeMask?: boolean
   name?: string
   shouldAutogenerateName?: boolean
   algorithmError?: any
@@ -74,14 +73,12 @@ export class CreateJob extends React.Component<Props, State> {
 
     this.state = {
       isCreating: false,
-      computeMask: false,
       name: props.selectedScene ? normalizeSceneId(props.selectedScene.id) : '',
       shouldAutogenerateName: true,
       algorithmError: '',
     }
 
     this.handleCreateJob = this.handleCreateJob.bind(this)
-    this.handleComputeMaskChange = this.handleComputeMaskChange.bind(this)
     this.handleNameChange = this.handleNameChange.bind(this)
     this.handleSearchCloudCoverChange = this.handleSearchCloudCoverChange.bind(this)
     this.handleSearchDateChange = this.handleSearchDateChange.bind(this)
@@ -138,9 +135,7 @@ export class CreateJob extends React.Component<Props, State> {
           {this.props.bbox && this.props.selectedScene && (
             <li className={styles.details}>
               <NewJobDetails
-                computeMask={this.state.computeMask}
                 name={this.state.name}
-                onComputeMaskChange={this.handleComputeMaskChange}
                 onNameChange={this.handleNameChange}
               />
             </li>
@@ -173,7 +168,6 @@ export class CreateJob extends React.Component<Props, State> {
 
     createJob({
       algorithmId: algorithm.id,
-      computeMask: this.state.computeMask,
       name: this.state.name,
       sceneId: this.props.selectedScene.id,
       catalogApiKey: this.props.catalogApiKey,
@@ -200,10 +194,6 @@ export class CreateJob extends React.Component<Props, State> {
 
   private handleSearchSourceChange(source: string) {
     this.props.onSearchCriteriaChange({ ...this.props.searchCriteria, source })
-  }
-
-  private handleComputeMaskChange(computeMask: boolean) {
-    this.setState({ computeMask })
   }
 
   private handleNameChange(name) {

@@ -25,9 +25,7 @@ describe('<NewJobDetails/>', () => {
 
   beforeEach(() => {
     _props = {
-      computeMask: true,
       name: 'test-name',
-      onComputeMaskChange: sinon.stub(),
       onNameChange: sinon.stub(),
     }
   })
@@ -35,22 +33,17 @@ describe('<NewJobDetails/>', () => {
   it('renders', () => {
     const wrapper = mount(
       <NewJobDetails
-        computeMask={_props.computeMask}
         name={_props.name}
-        onComputeMaskChange={_props.onComputeMaskChange}
         onNameChange={_props.onNameChange}
       />
     )
     assert.equal(wrapper.find('input').not('[type="checkbox"]').prop('value'), 'test-name')
-    assert.isTrue(wrapper.find('input[type="checkbox"]').prop('checked'))
   })
 
   it('emits change event', () => {
     const wrapper = mount(
       <NewJobDetails
-        computeMask={_props.computeMask}
         name={_props.name}
-        onComputeMaskChange={_props.onComputeMaskChange}
         onNameChange={_props.onNameChange}
       />,
     )
@@ -63,28 +56,11 @@ describe('<NewJobDetails/>', () => {
   it('updates name when props change', () => {
     const wrapper = mount(
       <NewJobDetails
-        computeMask={_props.computeMask}
         name={_props.name}
-        onComputeMaskChange={_props.onComputeMaskChange}
         onNameChange={_props.onNameChange}
       />,
     )
     wrapper.setProps({name: 'test-new-value'})
     assert.equal(wrapper.find('input').not('[type="checkbox"]').prop('value'), 'test-new-value')
-    assert.isTrue(wrapper.find('input[type="checkbox"]').prop('checked'))
-  })
-
-  it('updates compute mask when props change', () => {
-    const wrapper = mount(
-      <NewJobDetails
-        computeMask={_props.computeMask}
-        name={_props.name}
-        onComputeMaskChange={_props.onComputeMaskChange}
-        onNameChange={_props.onNameChange}
-      />,
-    )
-    wrapper.setProps({computeMask: false})
-    assert.equal(wrapper.find('input').not('[type="checkbox"]').prop('value'), 'test-name')
-    assert.isFalse(wrapper.find('input[type="checkbox"]').prop('checked'))
   })
 })
