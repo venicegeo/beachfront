@@ -38,6 +38,7 @@
   line-height: var(--header-height);
   font-weight: 100;
   background-color: hsl(202, 70%, 30%);
+  box-shadow: inset 0 -1px hsla(202, 30%, 90%, 0.2);
 }
 
 .submenu h1 {
@@ -47,8 +48,8 @@
 }
 
 .submenu h2 {
-  margin: 1px 0;
-  padding: 5px var(--header-margin-horizontal);
+  margin: 0;
+  padding: 5px 6px;
   font-size: 1.2em;
   background-color: var(--header-bgcolor);
   color: white;

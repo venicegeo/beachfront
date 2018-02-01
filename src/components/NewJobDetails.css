@@ -19,3 +19,8 @@
   margin-top: 1em;
   margin-bottom: 1em;
 }
+
+.hint {
+  font-size: 12px;
+  white-space: nowrap;
+}

@@ -35,7 +35,7 @@ export const Login = () => (
         <span className={styles.buttonIcons}>
             <span className="fa fa-lock"/>
         </span>
-        Accept and Login with GeoAxis
+        Accept and Login with GEOAxIS
       </a>
     </div>
   </Modal>

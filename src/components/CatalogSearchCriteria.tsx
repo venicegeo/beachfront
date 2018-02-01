@@ -15,16 +15,13 @@
  **/
 
 const styles: any = require('./CatalogSearchCriteria.css')
+const DATE_FORMAT = 'YYYY-MM-DD'
+const date_format = DATE_FORMAT.toLowerCase()
 
 import * as React from 'react'
 import {StaticMinimap} from './StaticMinimap'
 import * as moment from 'moment'
-import {
-  SOURCE_PLANETSCOPE,
-  SOURCE_RAPIDEYE,
-  SOURCE_LANDSAT,
-  SOURCE_SENTINEL,
-} from '../constants'
+import {SCENE_TILE_PROVIDERS} from '../config'
 
 interface Props {
   apiKey: string
@@ -56,11 +53,13 @@ export const CatalogSearchCriteria = (props: Props) => (
     <h3>Catalog</h3>
     <label className={styles.source}>
       <span>Source</span>
-      <select value={props.source} onChange={event => props.onSourceChange((event.target as HTMLSelectElement).value)}>
-        <option value={SOURCE_SENTINEL}>Copernicus Sentinel-2 (Planet)</option>
-        <option value={SOURCE_LANDSAT}>Landsat8 (Planet)</option>
-        <option value={SOURCE_RAPIDEYE}>RapidEye (Planet)</option>
-        <option value={SOURCE_PLANETSCOPE}>PlanetScope (Planet)</option>
+      <select
+        value={props.source}
+        onChange={event => props.onSourceChange((event.target as HTMLSelectElement).value)}
+      >
+        {SCENE_TILE_PROVIDERS.map(p => (
+          <option key={p.prefix} value={p.prefix}>{p.name} ({p.provider})</option>
+        ))}
       </select>
     </label>
     <label className={styles.apiKey}>
@@ -82,25 +81,39 @@ export const CatalogSearchCriteria = (props: Props) => (
             value={props.dateFrom}
             type="text"
             pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}"
-            title="YYYY-MM-DD"
+            placeholder={date_format}
+            title={date_format}
             disabled={props.disabled}
-            onChange={event => props.onDateChange((event.target as HTMLInputElement).value, props.dateTo)}
+            onChange={event => props.onDateChange(
+              (event.target as HTMLInputElement).value,
+              props.dateTo
+            )}
           />
         </label>
+        {isValidDate(props.dateFrom) || <div className={styles.invalidDates}>
+          Invalid date ({date_format})
+        </div>}
         <label className={styles.captureDateTo}>
           <span>To</span>
           <input
             value={props.dateTo}
             type="text"
             pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}"
-            title="YYYY-MM-DD"
+            placeholder={date_format}
+            title={date_format}
             disabled={props.disabled}
-            onChange={event => props.onDateChange(props.dateFrom, (event.target as HTMLInputElement).value)}
+            onChange={event => props.onDateChange(
+              props.dateFrom,
+              (event.target as HTMLInputElement).value
+            )}
           />
         </label>
-        {isInvalidDate(props.dateFrom) && <div className={styles.invalidDates}>From date is not valid.</div>}
-        {isInvalidDate(props.dateTo) && <div className={styles.invalidDates}>To date is not valid.</div>}
-        {isInvalidDateRange(props.dateFrom, props.dateTo) && <div className={styles.invalidDates}>From date must be before To date.</div>}
+        {isValidDate(props.dateTo) || <div className={styles.invalidDates}>
+          Invalid date ({date_format})
+        </div>}
+        {isValidDateRange(props.dateFrom, props.dateTo) || <div className={styles.invalidDates}>
+          From date must be before To date.
+        </div>}
       </div>
     )}
 
@@ -112,19 +125,22 @@ export const CatalogSearchCriteria = (props: Props) => (
         type="range"
         min="0"
         max="100"
-        onChange={event => props.onCloudCoverChange(parseInt((event.target as HTMLInputElement).value, 10))}
+        onChange={event => props.onCloudCoverChange(
+          parseInt((event.target as HTMLInputElement).value, 10)
+        )}
       />
-      <span className={styles.value}>{props.cloudCover > 0 && '< '}{props.cloudCover}%</span>
+      <span className={styles.value}>&le;&thinsp;{props.cloudCover}%</span>
     </label>
   </div>
 )
 
-function isInvalidDate(sampleDate) {
-    return !moment(sampleDate).isValid()
+function isValidDate(date) {
+  return moment.utc(date, DATE_FORMAT, true).isValid()
 }
 
-function isInvalidDateRange(from, to) {
-    const fromMoment = moment(from)
-    const toMoment = moment(to)
-    return !moment(fromMoment).isSameOrBefore(toMoment)
+function isValidDateRange(from, to) {
+  const fromMoment = moment.utc(from, DATE_FORMAT, true)
+  const toMoment = moment.utc(to, DATE_FORMAT, true)
+
+  return !fromMoment.isValid() || !toMoment.isValid() || fromMoment.isSameOrBefore(toMoment)
 }

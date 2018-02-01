@@ -23,7 +23,7 @@ import {CatalogSearchCriteria} from './CatalogSearchCriteria'
 import {NewProductLineDetails} from './NewProductLineDetails'
 import {create} from '../api/productLines'
 import {
-  SOURCE_RAPIDEYE,
+  SOURCE_DEFAULT,
 } from '../constants'
 
 interface Props {
@@ -59,7 +59,7 @@ export class CreateProductLine extends React.Component<Props, State> {
       isCreating: false,
       name:       '',
       shouldAutogenerateName: true,
-      source: SOURCE_RAPIDEYE,
+      source: SOURCE_DEFAULT,
     }
     this.handleAlgorithmSelect = this.handleAlgorithmSelect.bind(this)
     this.handleSourceChange = this.handleSourceChange.bind(this)
