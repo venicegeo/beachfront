@@ -4,11 +4,18 @@
   "description": "User interface for the Beachfront project",
   "scripts": {
     "build": "webpack",
-    "create-ssl-certs": "openssl req -newkey rsa:2048 -nodes -keyout .development_ssl_certificate.key -sha256 -x509 -days 3652 -subj /C=US/ST=Unknown/L=Unknown/O=Beachfront/OU=Development/CN=localhost -out .development_ssl_certificate.pem",
     "clean": "rimraf report dist beachfront.zip",
+    "clear": "rm -rf beachfront.zip dist/ node_modules/ report/ typings/",
+    "create-ssl-certs": "openssl req -newkey rsa:2048 -nodes -keyout .development_ssl_certificate.key -sha256 -x509 -days 3652 -subj /C=US/ST=Unknown/L=Unknown/O=Beachfront/OU=Development/CN=localhost -out .development_ssl_certificate.pem",
     "lint": "tslint '{src,test}/**/*.{ts,tsx}' -t verbose",
+    "postinstall": "npm run typings:install",
+    "prereinstall": "npm run clear",
+    "prestart": "npm run reinstall",
+    "reinstall": "npm install",
+    "start": "npm run watch",
     "test": "karma start",
     "test:ci": "NODE_ENV=ci karma start --single-run --browsers Chrome,Firefox --reporters progress,coverage,junit",
+    "test:once": "karma start --single-run",
     "typings:install": "typings install",
     "watch": "webpack-dev-server --inline --colors --history-api-fallback --https --cert .development_ssl_certificate.pem --key .development_ssl_certificate.key --host 0.0.0.0"
   },
@@ -23,7 +30,7 @@
     "css-loader": "0.23.1",
     "enzyme": "2.4.1",
     "file-loader": "0.8.5",
-    "html-webpack-plugin": "2.24.1",
+    "html-webpack-plugin": "2.30.1",
     "istanbul-instrumenter-loader": "1.1.0",
     "karma": "1.1.2",
     "karma-chrome-launcher": "2.0.0",
@@ -33,7 +40,7 @@
     "karma-mocha": "1.1.1",
     "karma-mocha-reporter": "2.0.5",
     "karma-sourcemap-loader": "0.3.7",
-    "karma-webpack": "2.0.5",
+    "karma-webpack": "2.0.9",
     "mocha": "3.2.0",
     "postcss-cssnext": "2.9.0",
     "postcss-import": "8.0.2",
@@ -55,9 +62,10 @@
     "core-js": "2.4.1",
     "font-awesome": "4.6.3",
     "lodash": "4.17.4",
-    "moment": "2.17.0",
+    "moment": "2.20.1",
     "ol": "4.1.1",
     "react": "15.2.1",
-    "react-dom": "15.2.1"
+    "react-dom": "15.2.1",
+    "react-user-tour": "3.0.0"
   }
 }

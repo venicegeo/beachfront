@@ -45,6 +45,13 @@ export function serializeBbox(extent) {
   return p1.concat(p2).map(truncate)
 }
 
+export function toGeoJSON(feature) {
+  return new GeoJSON().writeFeatureObject(feature, {
+    dataProjection: WGS84,
+    featureProjection: WEB_MERCATOR,
+  })
+}
+
 //
 // Helpers
 //

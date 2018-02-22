@@ -17,7 +17,7 @@
 const styles: any = require('./Login.css')
 const brand: string = require('../images/brand-small-square.svg')
 
-import {IDAM_ROOT} from '../config'
+import {API_ROOT} from '../config'
 import {CONSENT_BANNER_TEXT} from '../config'
 import * as React from 'react'
 import {Modal} from './Modal'
@@ -31,11 +31,11 @@ export const Login = () => (
         className={styles.warning}
         dangerouslySetInnerHTML={CONSENT_BANNER_TEXT}
       />
-      <a className={styles.button} href={IDAM_ROOT + '/login/geoaxis'}>
+      <a className={styles.button} href={API_ROOT + '/login/geoaxis'}>
         <span className={styles.buttonIcons}>
             <span className="fa fa-lock"/>
         </span>
-        Accept and Login with GeoAxis
+        Accept and Login with GEOAxIS
       </a>
     </div>
   </Modal>

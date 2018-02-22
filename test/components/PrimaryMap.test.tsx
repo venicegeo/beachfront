@@ -50,15 +50,16 @@ describe('<PrimaryMap/>', () => {
       highlightedFeature:  null,
       imagery:             null,
       isSearching:         false,
+      logout:              sinon.stub(),
       mode:                MODE_NORMAL,
       selectedFeature:     null,
       shrunk:              false,
       wmsUrl:              'http://test-geoserver-url',
       onBoundingBoxChange: sinon.stub(),
+      omMapInitialization: sinon.stub(),
       onSearchPageChange:  sinon.stub(),
       onSelectFeature:     sinon.stub(),
       onViewChange:        sinon.stub(),
-      logout:              sinon.stub(),
     }
   })
 
@@ -72,16 +73,17 @@ describe('<PrimaryMap/>', () => {
         highlightedFeature={_props.highlightedFeature}
         imagery={_props.imagery}
         isSearching={_props.isSearching}
+        logout={_props.logout}
         mode={_props.mode}
         selectedFeature={_props.selectedFeature}
         shrunk={_props.shrunk}
         view={_props.view}
         wmsUrl={_props.wmsUrl}
         onBoundingBoxChange={_props.onBoundingBoxChange}
+        onMapInitialization={_props.onMapInitialization}
         onSearchPageChange={_props.onSearchPageChange}
         onSelectFeature={_props.onSelectFeature}
         onViewChange={_props.onViewChange}
-        logout={_props.logout}
       />,
     )
     assert.equal(wrapper.find('.PrimaryMap-root').length, 1)
@@ -98,16 +100,17 @@ describe('<PrimaryMap/>', () => {
         highlightedFeature={_props.highlightedFeature}
         imagery={_props.imagery}
         isSearching={_props.isSearching}
+        logout={_props.logout}
         mode={_props.mode}
         selectedFeature={_props.selectedFeature}
         shrunk={_props.shrunk}
         view={_props.view}
         wmsUrl={_props.wmsUrl}
         onBoundingBoxChange={_props.onBoundingBoxChange}
+        onMapInitialization={_props.onMapInitialization}
         onSearchPageChange={_props.onSearchPageChange}
         onSelectFeature={_props.onSelectFeature}
         onViewChange={_props.onViewChange}
-        logout={_props.logout}
       />,
     )
     assert.instanceOf((wrapper.instance() as any as Internals).map, Map)
@@ -124,33 +127,43 @@ describe('<PrimaryMap/>', () => {
         highlightedFeature={_props.highlightedFeature}
         imagery={_props.imagery}
         isSearching={_props.isSearching}
+        logout={_props.logout}
         mode={_props.mode}
         selectedFeature={_props.selectedFeature}
         shrunk={_props.shrunk}
         view={view}
         wmsUrl={_props.wmsUrl}
         onBoundingBoxChange={_props.onBoundingBoxChange}
+        onMapInitialization={_props.onMapInitialization}
         onSearchPageChange={_props.onSearchPageChange}
         onSelectFeature={_props.onSelectFeature}
         onViewChange={_props.onViewChange}
-        logout={_props.logout}
       />,
     )
 
-    it('has correct center on init', () => {
+    /*
+     * Some tests now require additional time to run due to adding animation to
+     * openlayers view transitions.  This in turn requires us to exceed the
+     * default Mocha 2000ms timeout for a test.  To do that we need to execute
+     * this.timeout(), which is not possible in an arrow function.
+     */
+
+    it('has correct center on init', function() {
+      this.timeout(3000)
       const wrapper = getComponent({ basemapIndex: 0, center: [0, 0], zoom: 5.5 })
       return awaitMap(() => {
         const view = (wrapper.instance() as any as Internals).map.getView()
         assert.deepEqual(proj.toLonLat(view.getCenter()), [0, 0])
-      })
+      }, 2150)
     })
 
-    it('has correct zoom on init', () => {
+    it('has correct zoom on init', function() {
+      this.timeout(3000)
       const wrapper = getComponent({ basemapIndex: 0, center: [0, 0], zoom: 5.5 })
       return awaitMap(() => {
         const view = (wrapper.instance() as any as Internals).map.getView()
         assert.equal(view.getZoom(), 5.5)
-      })
+      }, 2150)
     })
 
     it('has correct basemap on init', () => {
@@ -160,22 +173,24 @@ describe('<PrimaryMap/>', () => {
       })
     })
 
-    it('recenters map when `view` prop changes', () => {
+    it('recenters map when `view` prop changes', function() {
+      this.timeout(3000)
       const wrapper = getComponent({ basemapIndex: 0, center: [0, 0], zoom: 5.5 })
       wrapper.setProps({ view: { basemapIndex: 0, center: [30, 30], zoom: 5.5 } })
       return awaitMap(() => {
         const view = (wrapper.instance() as any as Internals).map.getView()
         assert.deepEqual(proj.toLonLat(view.getCenter()).map(Math.round), [30, 30])
-      })
+      }, 2150)
     })
 
-    it('changes zoom when `view` prop changes', () => {
+    it('changes zoom when `view` prop changes', function() {
+      this.timeout(3000)
       const wrapper = getComponent({ basemapIndex: 0, center: [0, 0], zoom: 5.5 })
       wrapper.setProps({ view: { basemapIndex: 0, center: [0, 0], zoom: 10.5 } })
       return awaitMap(() => {
         const view = (wrapper.instance() as any as Internals).map.getView()
         assert.equal(view.getZoom(), 10.5)
-      })
+      }, 2150)
     })
 
     it('changes basemap when `view` prop changes', () => {
@@ -205,16 +220,17 @@ describe('<PrimaryMap/>', () => {
         highlightedFeature={_props.highlightedFeature}
         imagery={_props.imagery}
         isSearching={_props.isSearching}
+        logout={_props.logout}
         mode={_props.mode}
         selectedFeature={_props.selectedFeature}
         shrunk={_props.shrunk}
         view={_props.view}
         wmsUrl={_props.wmsUrl}
         onBoundingBoxChange={_props.onBoundingBoxChange}
+        onMapInitialization={_props.onMapInitialization}
         onSearchPageChange={_props.onSearchPageChange}
         onSelectFeature={_props.onSelectFeature}
         onViewChange={_props.onViewChange}
-        logout={_props.logout}
       />,
     )
 
@@ -260,16 +276,17 @@ describe('<PrimaryMap/>', () => {
         highlightedFeature={_props.highlightedFeature}
         imagery={_props.imagery}
         isSearching={_props.isSearching}
+        logout={_props.logout}
         mode={_props.mode}
         selectedFeature={generateScene()}
         shrunk={_props.shrunk}
         view={_props.view}
         wmsUrl={_props.wmsUrl}
         onBoundingBoxChange={_props.onBoundingBoxChange}
+        onMapInitialization={_props.onMapInitialization}
         onSearchPageChange={_props.onSearchPageChange}
         onSelectFeature={_props.onSelectFeature}
         onViewChange={_props.onViewChange}
-        logout={_props.logout}
       />,
     )
 
@@ -291,16 +308,17 @@ describe('<PrimaryMap/>', () => {
         highlightedFeature={_props.highlightedFeature}
         imagery={_props.imagery}
         isSearching={_props.isSearching}
+        logout={_props.logout}
         mode={_props.mode}
         selectedFeature={generateScene()}
         shrunk={_props.shrunk}
         view={_props.view}
         wmsUrl={_props.wmsUrl}
         onBoundingBoxChange={_props.onBoundingBoxChange}
+        onMapInitialization={_props.onMapInitialization}
         onSearchPageChange={_props.onSearchPageChange}
         onSelectFeature={_props.onSelectFeature}
         onViewChange={_props.onViewChange}
-        logout={_props.logout}
       />,
     )
 

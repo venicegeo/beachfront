@@ -19,6 +19,7 @@ import * as sinon from 'sinon'
 import * as session from '../../src/api/session'
 import * as geoserver from '../../src/api/geoserver'
 import {AxiosPromise} from 'axios'
+import {USER_ENDPOINT} from '../../src/config'
 
 describe('GeoServer Service', () => {
   let client: FakeClient
@@ -51,7 +52,7 @@ describe('GeoServer Service', () => {
       client.get.returns(resolve({services: {wms_server: 'test-wms-url'}}))
       return geoserver.lookup()
         .then(() => {
-          assert.deepEqual(client.get.firstCall.args, ['/v0/user'])
+          assert.deepEqual(client.get.firstCall.args, [USER_ENDPOINT])
         })
     })
 

@@ -22,8 +22,8 @@ import * as React from 'react'
 import {Link} from './Link'
 import {USER_GUIDE_URL} from '../config'
 
-const Icon = ({ path }) => (
-  <svg className={styles.icon} viewBox="0 0 40 40">
+const Icon = ({ path, size = 40 }) => (
+  <svg className={styles.icon} viewBox={`0 0 ${size} ${size}`}>
     <g className={styles.iconShadow} transform="translate(0, 2)">
       <path d={path} fillRule="evenodd"/>
     </g>
@@ -34,9 +34,10 @@ const Icon = ({ path }) => (
 interface Props {
   activeRoute: { pathname: string, search: string, hash: string }
   onClick(loc: { pathname: string, search: string, hash: string }): void
+  startTour(): void
 }
 
-export const Navigation = ({ activeRoute, onClick }: Props) => (
+export const Navigation = ({ activeRoute, onClick, startTour }: Props) => (
   <nav className={`${styles.root} ${activeRoute.pathname === '/' ? styles.atHome : ''}`}>
     <Link pathname="/about" onClick={onClick}>
       <img className={styles.brand} src={brand} alt="Beachfront"/>
@@ -45,7 +46,9 @@ export const Navigation = ({ activeRoute, onClick }: Props) => (
       <li className={styles.home}>
         <Link pathname="/" className={styles.linkHome} activeClassName={styles.active} onClick={onClick}>
           <img className={styles.complexIcon} src={brandSmall} alt="Beachfront"/>
-          <svg className={styles.icon} viewBox="0 0 64 64"><path d="M63,34.6220204 L63,13.9972317 C63,6.81886994 57.1809412,1 50.0027683,1 L13.9972317,1 C6.81886994,1 1,6.81905884 1,13.9972317 L1,19.1636842 L63,34.6220204 Z M63,41.8363158 L63,50.0027683 C63,57.1809412 57.1811301,63 50.0027683,63 L13.9972317,63 C6.81905884,63 1,57.1811301 1,50.0027683 L1,26.3779796 L63,41.8363158 Z" fillRule="evenodd"/></svg>
+          <svg className={styles.icon} viewBox="0 0 64 64">
+            <path d="M63,34.6220204 L63,13.9972317 C63,6.81886994 57.1809412,1 50.0027683,1 L13.9972317,1 C6.81886994,1 1,6.81905884 1,13.9972317 L1,19.1636842 L63,34.6220204 Z M63,41.8363158 L63,50.0027683 C63,57.1809412 57.1811301,63 50.0027683,63 L13.9972317,63 C6.81905884,63 1,57.1811301 1,50.0027683 L1,26.3779796 L63,41.8363158 Z" fillRule="evenodd"/>
+          </svg>
         </Link>
       </li>
       <li>
@@ -74,6 +77,12 @@ export const Navigation = ({ activeRoute, onClick }: Props) => (
         </Link>
       </li>
       */}
+      <li>
+        <div className={styles.linkTour} onClick={startTour}>
+          <Icon path="M4 16c0 .88.39 1.67 1 2.22V20c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h8v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1.78c.61-.55 1-1.34 1-2.22V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10zm3.5 1c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm9 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm1.5-6H6V6h12v5z" size={25}/>
+          <span className={styles.label}>Take a Tour</span>
+        </div>
+      </li>
       {userGuideLink()}
     </ul>
   </nav>

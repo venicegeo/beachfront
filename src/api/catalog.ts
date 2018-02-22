@@ -16,38 +16,31 @@
 
 import axios, {AxiosInstance, Promise} from 'axios'
 import {getClient, DEFAULT_TIMEOUT} from './session'
+import {API_ROOT, SCENE_TILE_PROVIDERS} from '../config'
 import {
   API_ROOT,
   IMAGERY_ENDPOINT,
   USER_ENDPOINT,
 } from '../config'
 
-import {
-  SOURCE_PLANETSCOPE,
-  SOURCE_RAPIDEYE,
-  SOURCE_LANDSAT,
-  SOURCE_SENTINEL,
-} from '../constants'
-
 let _client: AxiosInstance
 
 export function initialize(): Promise<void> {
   const session = getClient()
-  return session.get(USER_ENDPOINT)
-    .then(_ => {
-      _client = axios.create({
-        baseURL: API_ROOT,
-        timeout: DEFAULT_TIMEOUT,
-        withCredentials: true,
-        headers: {
-          'X-Requested-With': 'XMLHttpRequest',
-        },
-      })
+
+  return session.get(USER_ENDPOINT).then(_ => {
+    _client = axios.create({
+      baseURL: API_ROOT,
+      timeout: DEFAULT_TIMEOUT,
+      withCredentials: true,
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+      },
     })
-    .catch(err => {
-      console.error('(catalog:initialize) failed:', err)
-      throw err
-    })
+  }).catch(err => {
+    console.error('(catalog:initialize) failed:', err)
+    throw err
+  })
 }
 
 export function search({
@@ -60,47 +53,37 @@ export function search({
   startIndex,
   count,
 }): Promise<beachfront.ImageryCatalogPage> {
-
   console.warn('(catalog:search): Discarding parameters `count` (%s) and `startIndex` (%s)', count, startIndex)
-  let itemType
-  switch (source) {
-    case SOURCE_RAPIDEYE:
-    case SOURCE_PLANETSCOPE:
-    case SOURCE_LANDSAT:
-      itemType = source
-      break
-    case SOURCE_SENTINEL:
-      itemType = 'sentinel'
-      break
-    default:
-      return Promise.reject(new Error(`Unknown data source prefix: '${source}'`))
-  }
-  return _client.get(`${IMAGERY_ENDPOINT}/discover/${itemType}`, {
-  params: {
-      cloudCover:      cloudCover + .05,
-      PL_API_KEY:      catalogApiKey,
-      bbox:            bbox.join(','),
-      acquiredDate:    new Date(dateFrom).toISOString(),
-      maxAcquiredDate: new Date(dateTo).toISOString(),
-    },
-  })
-    .then(response => response.data)
-    // HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK
-    .then(images => {
+
+  if (SCENE_TILE_PROVIDERS.find(p => p.prefix === source)) {
+    return _client.get(`${IMAGERY_ENDPOINT}/discover/${source}`, {
+      params: {
+        cloudCover:      cloudCover + .05,
+        PL_API_KEY:      catalogApiKey,
+        bbox:            bbox.join(','),
+        acquiredDate:    new Date(dateFrom).toISOString(),
+        maxAcquiredDate: new Date(dateTo).toISOString(),
+      },
+    }).then(response => response.data).then(images => {
+      // HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK
       console.warn('(catalog:search) Normalizing bf-ia-broker response')
+
       images.features.forEach(f => {
         f.id = source + ':' + f.id
       })
+
       return {
         images,
-        count:      images.features.length,
+        count: images.features.length,
         startIndex: 0,
         totalCount: images.features.length,
       }
-    })
-    // HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK
-    .catch(err => {
+    }).catch(err => {
+      // HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK
       console.error('(catalog:search) failed:', err)
       throw err
     })
+  } else {
+    return Promise.reject(new Error(`Unknown data source prefix: '${source}'`))
+  }
 }

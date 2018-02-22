@@ -20,6 +20,7 @@ const tileErrorPlaceholder: string = require('../images/tile-error.png')
 
 import * as React from 'react'
 import {findDOMNode} from 'react-dom'
+import Collection from 'ol/collection'
 import LineString from 'ol/geom/linestring'
 import Draw from 'ol/interaction/draw'
 import VectorLayer from 'ol/layer/vector'
@@ -63,7 +64,8 @@ import {BasemapSelect} from './BasemapSelect'
 import {FeatureDetails} from './FeatureDetails'
 import {LoadingAnimation} from './LoadingAnimation'
 import {ImagerySearchResults} from './ImagerySearchResults'
-import {featureToBbox, deserializeBbox, serializeBbox} from '../utils/geometries'
+import {normalizeSceneId} from './SceneFeatureDetails'
+import {featureToBbox, deserializeBbox, serializeBbox, toGeoJSON} from '../utils/geometries'
 import {
   BASEMAP_TILE_PROVIDERS,
   SCENE_TILE_PROVIDERS,
@@ -123,6 +125,7 @@ interface Props {
   wmsUrl:             string
   shrunk:             boolean
   onBoundingBoxChange(bbox: number[])
+  onMapInitialization(collections: any)
   onSearchPageChange(page: {count: number, startIndex: number})
   onSelectFeature(feature: beachfront.Job | beachfront.Scene)
   onViewChange(view: MapView)
@@ -131,9 +134,9 @@ interface Props {
 
 interface State {
   basemapIndex?: number
+  isMeasuring?: boolean
   loadingRefCount?: number
   tileLoadError?: boolean
-  isMeasuring?: boolean
 }
 
 export interface MapView {
@@ -146,12 +149,14 @@ export class PrimaryMap extends React.Component<Props, State> {
   refs: any
 
   private basemapLayers: Tile[]
+  private bboxDrawInteraction: Draw
   private detectionsLayers: {[key: string]: Tile}
   private drawLayer: VectorLayer
-  private bboxDrawInteraction: Draw
   private featureDetailsOverlay: Overlay
+  private featureId?: number | string
   private frameLayer: VectorLayer
   private highlightLayer: VectorLayer
+  private hoverInteraction: Select
   private imageSearchResultsOverlay: Overlay
   private imageryLayer: VectorLayer
   private map: Map
@@ -164,17 +169,18 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.state = {basemapIndex: 0, loadingRefCount: 0}
     this.emitViewChange = debounce(this.emitViewChange.bind(this), 100)
     this.handleBasemapChange = this.handleBasemapChange.bind(this)
-    this.handleDrawStart = this.handleDrawStart.bind(this)
     this.handleDrawEnd = this.handleDrawEnd.bind(this)
-    this.handleMeasureStart = this.handleMeasureStart.bind(this)
-    this.handleMeasureEnd = this.handleMeasureEnd.bind(this)
+    this.handleDrawStart = this.handleDrawStart.bind(this)
     this.handleLoadError = this.handleLoadError.bind(this)
     this.handleLoadStart = this.handleLoadStart.bind(this)
     this.handleLoadStop = this.handleLoadStop.bind(this)
+    this.handleMeasureEnd = this.handleMeasureEnd.bind(this)
+    this.handleMeasureStart = this.handleMeasureStart.bind(this)
     this.handleMouseMove = throttle(this.handleMouseMove.bind(this), 15)
     this.handleSelect = this.handleSelect.bind(this)
-    this.updateView = debounce(this.updateView.bind(this), 100)
+    this.handleSelectFeature = this.handleSelectFeature.bind(this)
     this.renderImagerySearchBbox = debounce(this.renderImagerySearchBbox.bind(this))
+    this.updateView = debounce(this.updateView.bind(this), 100)
   }
 
   componentDidMount() {
@@ -185,55 +191,77 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.renderImagery()
     this.renderImagerySearchResultsOverlay()
     this.updateView()
+
     if (this.props.bbox) {
       this.renderImagerySearchBbox()
     }
+
     this.updateInteractions()
+
     if (this.props.selectedFeature) {
       this.updateSelectedFeature()
     }
-
-    // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
+    
+    // Used by tests
     window['primaryMap'] = this  // tslint:disable-line
-    // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
+
+    if (this.props.onMapInitialization) {
+      this.props.onMapInitialization({
+        hovered: this.hoverInteraction.getFeatures(),
+        imagery: this.imageryLayer.getSource().getFeaturesCollection(),
+        selected: this.selectInteraction.getFeatures(),
+        handleSelectFeature: this.handleSelectFeature,
+      })
+    }
   }
 
   componentDidUpdate(previousProps: Props, previousState: State) {
     if (!this.props.selectedFeature) {
       this.clearSelection()
     }
+
     if (previousProps.selectedFeature !== this.props.selectedFeature) {
       this.renderSelectionPreview()
       this.updateSelectedFeature()
     }
+
     if (previousProps.detections !== this.props.detections) {
       this.renderDetections()
     }
+
     if (previousProps.highlightedFeature !== this.props.highlightedFeature) {
       this.renderHighlight()
     }
+
     if (previousProps.frames !== this.props.frames) {
       this.renderFrames()
     }
+
     if (previousProps.imagery !== this.props.imagery) {
       this.renderImagery()
     }
+
     if (previousProps.isSearching !== this.props.isSearching) {
       this.clearSelection()
       this.renderImagerySearchResultsOverlay()
     }
+
     if (previousProps.shrunk !== this.props.shrunk) {
       this.updateMapSize()
     }
+
     if (previousProps.bbox !== this.props.bbox) {
       this.renderImagerySearchBbox()
     }
+
     if (previousState.basemapIndex !== this.state.basemapIndex) {
       this.updateBasemap()
     }
+
     if (previousProps.view !== this.props.view && this.props.view) {
       this.updateView()
     }
+
     if ((previousProps.mode !== this.props.mode) ||
       (previousState.isMeasuring !== this.state.isMeasuring)) {
       this.updateInteractions()
@@ -241,14 +269,17 @@ export class PrimaryMap extends React.Component<Props, State> {
   }
 
   render() {
-    const basemapNames = BASEMAP_TILE_PROVIDERS.map(b => b.name)
     return (
-      <main className={`${styles.root} ${this.props.shrunk ? styles.notHome : styles.home} ${this.state.loadingRefCount > 0 ? styles.isLoading : ''}`} ref="container" tabIndex={1}>
+      <main
+        className={`${styles.root} ${this.props.shrunk ? styles.notHome : styles.home} ${this.state.loadingRefCount ? styles.isLoading : ''}`}
+        ref="container"
+        tabIndex={1}
+      >
         <div className={styles.logout}><a onClick={this.props.logout}>Sign Out</a></div>
         <BasemapSelect
           className={styles.basemapSelect}
           index={this.state.basemapIndex}
-          basemaps={basemapNames}
+          basemaps={BASEMAP_TILE_PROVIDERS.map(b => b.name)}
           onChange={this.handleBasemapChange}
         />
         <FeatureDetails
@@ -268,12 +299,61 @@ export class PrimaryMap extends React.Component<Props, State> {
     )
   }
 
+  handleHoverScene(feature_or_id: string | beachfront.Scene) {
+    const feature: any = typeof feature_or_id === 'string'
+      ? this.imageryLayer.getSource().getFeatureById(feature_or_id)
+      : feature_or_id
+    const collection = this.hoverInteraction.getFeatures()
+
+    collection.clear()
+
+    if (feature) {
+      collection.push(feature)
+    }
+  }
+
+  handleSelectFeature(feature_or_id) {
+    const feature: any = typeof feature_or_id === 'string'
+      ? this.imageryLayer.getSource().getFeatureById(feature_or_id)
+      : feature_or_id
+
+    switch (feature ? feature.get(KEY_TYPE) : null) {
+      case TYPE_DIVOT_INBOARD:
+      case TYPE_DIVOT_OUTBOARD:
+      case TYPE_STEM:
+        // Proxy clicks on "inner" decorations out to the job frame itself
+        this.featureId = feature.ol_uid
+        const jobId = feature.get(KEY_OWNER_ID)
+        const jobFeature = this.frameLayer.getSource().getFeatureById(jobId)
+        const selections = this.selectInteraction.getFeatures()
+        selections.clear()
+        selections.push(jobFeature)
+        this.props.onSelectFeature(toGeoJSON(jobFeature) as beachfront.Job)
+        break
+      case TYPE_JOB:
+      case TYPE_SCENE:
+        this.featureId = feature.ol_uid
+        this.props.onSelectFeature(toGeoJSON(feature) as beachfront.Scene)
+        break
+      default:
+        // Not a valid "selectable" feature
+        this.featureId = null
+        this.clearSelection()
+        this.emitDeselectAll()
+        break
+    }
+  }
+
   //
   // Internals
   //
 
   private activateBboxDrawInteraction() {
     this.bboxDrawInteraction.setActive(true)
+  }
+
+  private activateHoverInteraction() {
+    this.hoverInteraction.setActive(true)
   }
 
   private activateSelectInteraction() {
@@ -300,6 +380,14 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.bboxDrawInteraction.setActive(false)
   }
 
+  private deactivateHoverInteraction(clear = true) {
+    if (clear) {
+      this.hoverInteraction.getFeatures().clear()
+    }
+
+    this.hoverInteraction.setActive(false)
+  }
+
   private deactivateSelectInteraction(skipReset = false) {
     if (!skipReset) {
       this.clearSelection()
@@ -311,14 +399,16 @@ export class PrimaryMap extends React.Component<Props, State> {
   private emitViewChange() {
     const view = this.map.getView()
     const {basemapIndex} = this.state
-    const center = proj.transform(view.getCenter(), 'EPSG:3857', 'EPSG:4326')
+    const center = proj.transform(view.getCenter(), WEB_MERCATOR, WGS84)
     const zoom = view.getZoom() || MIN_ZOOM  // HACK -- sometimes getZoom returns undefined...
+
     // Don't emit false positives
     if (!this.props.view
       || this.props.view.center[0] !== center[0]
       || this.props.view.center[1] !== center[1]
       || this.props.view.zoom !== zoom
-      || this.props.view.basemapIndex !== basemapIndex) {
+      || this.props.view.basemapIndex !== basemapIndex
+    ) {
       this.skipNextViewUpdate = true
       this.props.onViewChange({ basemapIndex, center, zoom })
     }
@@ -336,6 +426,7 @@ export class PrimaryMap extends React.Component<Props, State> {
   private handleDrawEnd(event) {
     const geometry = event.feature.getGeometry()
     const bbox = serializeBbox(geometry.getExtent())
+
     this.props.onBoundingBoxChange(bbox)
   }
 
@@ -345,23 +436,18 @@ export class PrimaryMap extends React.Component<Props, State> {
   }
 
   private handleMeasureEnd() {
-    this.setState({
-      isMeasuring: false,
-    })
+    this.setState({ isMeasuring: false })
   }
 
   private handleMeasureStart() {
-    this.setState({
-      isMeasuring: true,
-    })
+    this.setState({ isMeasuring: true })
   }
 
   private handleLoadError(event) {
-    this.setState({
-      loadingRefCount: Math.max(0, this.state.loadingRefCount - 1),
-    })
-
     const tile = event.tile
+
+    this.setState({ loadingRefCount: Math.max(0, this.state.loadingRefCount - 1) })
+
     if (!tile.loadingError) {
       tile.loadingError = true
       tile.load()
@@ -369,15 +455,11 @@ export class PrimaryMap extends React.Component<Props, State> {
   }
 
   private handleLoadStart() {
-    this.setState({
-      loadingRefCount: this.state.loadingRefCount + 1,
-    })
+    this.setState({ loadingRefCount: this.state.loadingRefCount + 1 })
   }
 
   private handleLoadStop() {
-    this.setState({
-      loadingRefCount: Math.max(0, this.state.loadingRefCount - 1),
-    })
+    this.setState({ loadingRefCount: Math.max(0, this.state.loadingRefCount - 1) })
   }
 
   private handleMouseMove(event) {
@@ -385,7 +467,7 @@ export class PrimaryMap extends React.Component<Props, State> {
       this.refs.container.classList.remove(styles.isHoveringFeature)
       return
     }
-    const layerFilter = l => l === this.frameLayer || l === this.imageryLayer
+
     let foundFeature = false
     this.map.forEachFeatureAtPixel(event.pixel, (feature) => {
       switch (feature.get(KEY_TYPE)) {
@@ -395,43 +477,24 @@ export class PrimaryMap extends React.Component<Props, State> {
           foundFeature = true
           return true
       }
-    }, {layerFilter})
+    }, { layerFilter: l => l === this.frameLayer || l === this.imageryLayer })
+
     if (foundFeature) {
       this.refs.container.classList.add(styles.isHoveringFeature)
-    }
-    else {
+    } else {
       this.refs.container.classList.remove(styles.isHoveringFeature)
     }
   }
 
   private handleSelect(event) {
-    if (event.selected.length === 0 && event.deselected.length === 0) {
-      return  // Disregard spurious select event
-    }
+    if (event.selected.length || event.deselected.length) {
+      let index = event.selected.findIndex(f => f.ol_uid === this.featureId) + 1
 
-    const [feature]: Feature[] = event.selected
-    const type = feature ? feature.get(KEY_TYPE) : null
+      if (!event.mapBrowserEvent.pointerEvent.shiftKey) {
+        index += event.selected.length - (index ? 2 : 1)
+      }
 
-    switch (type) {
-      case TYPE_DIVOT_INBOARD:
-      case TYPE_STEM:
-        // Proxy clicks on "inner" decorations out to the job frame itself
-        const jobId = feature.get(KEY_OWNER_ID)
-        const jobFeature = this.frameLayer.getSource().getFeatureById(jobId)
-        const selections = this.selectInteraction.getFeatures()
-        selections.clear()
-        selections.push(jobFeature)
-        this.props.onSelectFeature(toGeoJSON(jobFeature) as beachfront.Job)
-        break
-      case TYPE_JOB:
-      case TYPE_SCENE:
-        this.props.onSelectFeature(toGeoJSON(feature) as beachfront.Scene)
-        break
-      default:
-        // Not a valid "selectable" feature
-        this.clearSelection()
-        this.emitDeselectAll()
-        break
+      this.handleSelectFeature(event.selected[index % event.selected.length])
     }
   }
 
@@ -448,6 +511,8 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.bboxDrawInteraction.on('drawstart', this.handleDrawStart)
     this.bboxDrawInteraction.on('drawend', this.handleDrawEnd)
 
+    this.hoverInteraction = generateHoverInteraction(this.imageryLayer)
+
     this.selectInteraction = generateSelectInteraction(this.frameLayer, this.imageryLayer)
     this.selectInteraction.on('select', this.handleSelect)
 
@@ -456,7 +521,11 @@ export class PrimaryMap extends React.Component<Props, State> {
 
     this.map = new Map({
       controls: generateControls(),
-      interactions: generateBaseInteractions().extend([this.bboxDrawInteraction, this.selectInteraction]),
+      interactions: generateBaseInteractions().extend([
+        this.bboxDrawInteraction,
+        this.selectInteraction,
+        this.hoverInteraction,
+      ]),
       layers: [
         // Order matters here
         ...this.basemapLayers,
@@ -467,7 +536,7 @@ export class PrimaryMap extends React.Component<Props, State> {
       ],
       target: this.refs.container,
       view: new View({
-        center: proj.fromLonLat(DEFAULT_CENTER, 'EPSG:3857'),
+        center: proj.fromLonLat(DEFAULT_CENTER, WEB_MERCATOR),
         extent: proj.transformExtent(VIEW_BOUNDS, WGS84, WEB_MERCATOR),
         minZoom: MIN_ZOOM,
         maxZoom: MAX_ZOOM,
@@ -499,14 +568,20 @@ export class PrimaryMap extends React.Component<Props, State> {
       this.skipNextViewUpdate = false
       return
     }
+
     if (!this.props.view) {
       return
     }
+
     const {basemapIndex, zoom, center} = this.props.view
-    this.setState({basemapIndex})
+    this.setState({ basemapIndex })
     const view = this.map.getView()
-    view.setCenter(view.constrainCenter(proj.transform(center, 'EPSG:4326', 'EPSG:3857')))
-    view.setZoom(zoom)
+
+    view.animate({
+      center: view.constrainCenter(proj.transform(center, WGS84, WEB_MERCATOR)),
+      duration: 2000,
+      zoom: zoom,
+    })
   }
 
   private renderDetections() {
@@ -519,12 +594,12 @@ export class PrimaryMap extends React.Component<Props, State> {
     // Removals
     Object.keys(this.detectionsLayers).forEach(layerId => {
       const layer = this.detectionsLayers[layerId]
+
       alreadyRendered[layerId] = true
+
       if (!shouldRender[layerId]) {
         delete this.detectionsLayers[layerId]
-        animateLayerExit(layer).then(() => {
-          this.map.removeLayer(layer)
-        })
+        animateLayerExit(layer).then(() => { this.map.removeLayer(layer) })
       }
     })
 
@@ -547,8 +622,13 @@ export class PrimaryMap extends React.Component<Props, State> {
 
     const source = this.frameLayer.getSource()
     const reader = new GeoJSON()
+
     this.props.frames.forEach(raw => {
-      const frame = reader.readFeature(raw, {dataProjection: WGS84, featureProjection: WEB_MERCATOR})
+      const frame = reader.readFeature(raw, {
+        dataProjection: WGS84,
+        featureProjection: WEB_MERCATOR,
+      })
+
       source.addFeature(frame)
 
       const frameExtent = calculateExtent(frame.getGeometry())
@@ -562,36 +642,29 @@ export class PrimaryMap extends React.Component<Props, State> {
           topRight,
         ]),
       })
+
       stem.set(KEY_TYPE, TYPE_STEM)
       stem.set(KEY_OWNER_ID, id)
       source.addFeature(stem)
 
-      const divotInboard = new Feature({
-        geometry: new Point(center),
-      })
+      const divotInboard = new Feature({ geometry: new Point(center) })
       divotInboard.set(KEY_TYPE, TYPE_DIVOT_INBOARD)
       divotInboard.set(KEY_OWNER_ID, id)
       source.addFeature(divotInboard)
 
-      const divotOutboard = new Feature({
-        geometry: new Point(topRight),
-      })
+      const divotOutboard = new Feature({ geometry: new Point(topRight) })
       divotOutboard.set(KEY_TYPE, TYPE_DIVOT_OUTBOARD)
       divotOutboard.set(KEY_OWNER_ID, id)
       divotOutboard.set(KEY_STATUS, raw.properties.status)
       source.addFeature(divotOutboard)
 
-      const name = new Feature({
-        geometry: new Point(topRight),
-      })
+      const name = new Feature({ geometry: new Point(topRight) })
       name.set(KEY_TYPE, TYPE_LABEL_MAJOR)
       name.set(KEY_OWNER_ID, id)
       name.set(KEY_NAME, raw.properties.name.toUpperCase())
       source.addFeature(name)
 
-      const status = new Feature({
-        geometry: new Point(topRight),
-      })
+      const status = new Feature({ geometry: new Point(topRight) })
       status.set(KEY_TYPE, TYPE_LABEL_MINOR)
       status.set(KEY_OWNER_ID, id)
       status.set(KEY_STATUS, raw.properties.status)
@@ -611,7 +684,10 @@ export class PrimaryMap extends React.Component<Props, State> {
     }
 
     const reader = new GeoJSON()
-    const feature = reader.readFeature(geojson, {dataProjection: WGS84, featureProjection: 'EPSG:3857'})
+    const feature = reader.readFeature(geojson, {
+      dataProjection: WGS84,
+      featureProjection: WEB_MERCATOR,
+    })
 
     source.addFeature(feature)
   }
@@ -620,14 +696,18 @@ export class PrimaryMap extends React.Component<Props, State> {
     const {imagery} = this.props
     const reader = new GeoJSON()
     const source = this.imageryLayer.getSource()
+
     source.setAttributions(undefined)
     source.clear()
+
     if (imagery) {
-      const features = reader.readFeatures(imagery.images, {dataProjection: WGS84, featureProjection: WEB_MERCATOR})
+      const features = reader.readFeatures(imagery.images, {
+        dataProjection: WGS84,
+        featureProjection: WEB_MERCATOR,
+      })
+
       if (features.length) {
-        features.forEach(feature => {
-          feature.set(KEY_TYPE, TYPE_SCENE)
-        })
+        features.forEach(feature => { feature.set(KEY_TYPE, TYPE_SCENE) })
         source.addFeatures(features)
       }
     }
@@ -635,11 +715,13 @@ export class PrimaryMap extends React.Component<Props, State> {
 
   private renderImagerySearchResultsOverlay() {
     this.imageSearchResultsOverlay.setPosition(undefined)
+
     // HACK HACK HACK HACK HACK HACK HACK HACK
     const bbox = deserializeBbox(this.props.bbox)
     if (!bbox) {
       return  // Nothing to pin the overlay to
     }
+
     if (!this.props.imagery || this.props.isSearching) {
       return  // No results are in
     }
@@ -648,8 +730,7 @@ export class PrimaryMap extends React.Component<Props, State> {
       // Pager
       this.imageSearchResultsOverlay.setPosition(extent.getBottomRight(bbox))
       this.imageSearchResultsOverlay.setPositioning('top-right')
-    }
-    else {
+    } else {
       // No results
       this.imageSearchResultsOverlay.setPosition(extent.getCenter(bbox))
       this.imageSearchResultsOverlay.setPositioning('center-center')
@@ -663,9 +744,8 @@ export class PrimaryMap extends React.Component<Props, State> {
     if (!bbox) {
       return
     }
-    const feature = new Feature({
-      geometry: Polygon.fromExtent(bbox),
-    })
+
+    const feature = new Feature({ geometry: Polygon.fromExtent(bbox) })
     this.drawLayer.getSource().addFeature(feature)
   }
 
@@ -679,12 +759,11 @@ export class PrimaryMap extends React.Component<Props, State> {
     // Removals
     Object.keys(this.previewLayers).forEach(imageId => {
       const layer = this.previewLayers[imageId]
+
       alreadyRendered[imageId] = true
       if (!shouldRender[imageId]) {
         delete this.previewLayers[imageId]
-        animateLayerExit(layer).then(() => {
-          this.map.removeLayer(layer)
-        })
+        animateLayerExit(layer).then(() => { this.map.removeLayer(layer) })
       }
     })
 
@@ -733,6 +812,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     if (this.state.isMeasuring) {
       this.deactivateBboxDrawInteraction()
       this.deactivateSelectInteraction(true)
+      this.deactivateHoverInteraction(false)
       return
     }
 
@@ -740,37 +820,45 @@ export class PrimaryMap extends React.Component<Props, State> {
       case MODE_SELECT_IMAGERY:
         this.deactivateBboxDrawInteraction()
         this.activateSelectInteraction()
+        this.activateHoverInteraction()
         break
       case MODE_DRAW_BBOX:
         this.activateBboxDrawInteraction()
         this.deactivateSelectInteraction()
+        this.deactivateHoverInteraction()
         break
       case MODE_NORMAL:
-        this.clearDraw()
+        /* this.clearDraw() TODO: Okay? */
         this.deactivateBboxDrawInteraction()
         this.activateSelectInteraction()
+        this.deactivateHoverInteraction()
         break
       case MODE_PRODUCT_LINES:
-        this.clearDraw()
+        /* this.clearDraw() TODO: Okay? */
         this.deactivateBboxDrawInteraction()
         this.activateSelectInteraction()
+        this.deactivateHoverInteraction()
         break
       default:
         console.warn('wat mode=%s', this.props.mode)
         break
     }
-
   }
 
   private updateSelectedFeature() {
     const features = this.selectInteraction.getFeatures()
     features.clear()
+
     const {selectedFeature} = this.props
     if (!selectedFeature) {
       return  // Nothing to do
     }
+
     const reader = new GeoJSON()
-    const feature = reader.readFeature(selectedFeature, {dataProjection: WGS84, featureProjection: WEB_MERCATOR})
+    const feature = reader.readFeature(selectedFeature, {
+      dataProjection: WGS84,
+      featureProjection: WEB_MERCATOR,
+    })
     const center = extent.getCenter(calculateExtent(feature.getGeometry()))
     features.push(feature)
     this.featureDetailsOverlay.setPosition(center)
@@ -781,6 +869,7 @@ function animateLayerExit(layer) {
   return new Promise(resolve => {
     const step = 0.075
     let opacity = 1
+
     const tick = () => {
       if (opacity > 0) {
         opacity -= step
@@ -790,6 +879,7 @@ function animateLayerExit(layer) {
         resolve(layer)
       }
     }
+
     requestAnimationFrame(tick)
   })
 }
@@ -800,14 +890,18 @@ function calculateExtent(geometry: Geometry) {
     let [, minY, , maxY] = proj.transformExtent(geometry.getExtent(), WEB_MERCATOR, WGS84)
     let width = 0
     let minX = 180
+
     for (const [polygonMinX, , polygonMaxX] of extents) {
       width += polygonMaxX - polygonMinX
+
       if (polygonMaxX > 0) {
         minX -= polygonMaxX - polygonMinX
       }
     }
+
     return proj.transformExtent([minX, minY, minX + width, maxY], WGS84, WEB_MERCATOR)
   }
+
   return geometry.getExtent()  // Use as-is
 }
 
@@ -818,9 +912,14 @@ function crossesDateline(geometry: Geometry) {
 
 function generateBasemapLayers(providers) {
   return providers.map((provider, index) => {
-    const source = new XYZ(Object.assign({}, provider, {crossOrigin: 'anonymous', tileLoadFunction}))
+    const source = new XYZ(Object.assign({}, provider, {
+      crossOrigin: 'anonymous',
+      tileLoadFunction,
+    }))
     const layer = new Tile({source})
-    layer.setProperties({name: provider.name, visible: index === 0})
+
+    layer.setProperties({ name: provider.name, visible: index === 0 })
+
     return layer
   })
 }
@@ -877,10 +976,10 @@ function generateDrawLayer() {
     }),
     style: new Style({
       fill: new Fill({
-        color: 'hsla(202, 70%, 50%, .35)',
+        color: 'hsla(202, 70%, 50%, 0.35)',
       }),
       stroke: new Stroke({
-        color: 'hsla(202, 70%, 50%, .7)',
+        color: 'hsla(202, 70%, 50%, 0.7)',
         width: 1,
         lineDash: [5, 5],
       }),
@@ -922,8 +1021,19 @@ function generateBboxDrawInteraction(drawLayer) {
       }),
     }),
   })
+
   draw.setActive(false)
+
   return draw
+}
+
+function generateFeatureDetailsOverlay(componentRef) {
+  return new Overlay({
+    autoPan:     true,
+    element:     findDOMNode(componentRef),
+    id:          'featureDetails',
+    positioning: 'top-left',
+  })
 }
 
 function generateFrameLayer() {
@@ -931,6 +1041,7 @@ function generateFrameLayer() {
     source: new VectorSource(),
     style(feature: Feature, resolution: number) {
       const isClose = resolution < RESOLUTION_CLOSE
+
       switch (feature.get(KEY_TYPE)) {
         case TYPE_DIVOT_INBOARD:
           return new Style({
@@ -982,6 +1093,7 @@ function generateFrameLayer() {
         case TYPE_LABEL_MINOR:
           const name = feature.get(KEY_NAME)
           const sceneId = normalizeSceneId(feature.get(KEY_SCENE_ID))
+
           return new Style({
             text: new Text({
               fill: new Fill({
@@ -1027,27 +1139,35 @@ function generateHighlightLayer() {
   })
 }
 
-function generateImageryLayer() {
-  return new VectorLayer({
-    source: new VectorSource(),
+function generateHoverInteraction(...layers) {
+  return new Select({
+    layers,
+    multi: true,
+    condition: e => condition.pointerMove(e) && condition.noModifierKeys(e),
     style: new Style({
       fill: new Fill({
-        color: 'rgba(0,0,0, .15)',
+        color: 'rgba(255, 255, 255, 0.12)',
       }),
       stroke: new Stroke({
-        color: 'rgba(0,0,0, .5)',
-        width: 1,
+        color: 'hsla(200, 70%, 90%, 0.8)',
+        width: 4,
       }),
     }),
   })
 }
 
-function generateFeatureDetailsOverlay(componentRef) {
-  return new Overlay({
-    autoPan:     true,
-    element:     findDOMNode(componentRef),
-    id:          'featureDetails',
-    positioning: 'top-left',
+function generateImageryLayer() {
+  return new VectorLayer({
+    source: new VectorSource({ features: new Collection() }),
+    style: new Style({
+      fill: new Fill({
+        color: 'rgba(0, 0, 0, 0.08)',
+      }),
+      stroke: new Stroke({
+        color: 'rgba(0, 0, 0, 0.32)',
+        width: 1,
+      }),
+    }),
   })
 }
 
@@ -1064,22 +1184,24 @@ function generateScenePreviewSource(provider, imageId, apiKey) {
   return new XYZ(Object.assign({}, provider, {
     crossOrigin: 'anonymous',
     tileLoadFunction,
-    url: provider.url
-           .replace('__SCENE_ID__', imageId)
-           .replace('__API_KEY__', apiKey),
+    url: provider.url.replace('__SCENE_ID__', imageId).replace('__API_KEY__', apiKey),
   }))
 }
 
 function generateSelectInteraction(...layers) {
   return new Select({
     layers,
-    condition: condition.click,
+    multi: true,
+    condition: e => condition.click(e) && (
+      condition.noModifierKeys(e) || condition.shiftKeyOnly(e)
+    ),
     style: new Style({
       stroke: new Stroke({
         color: 'black',
-        width: 3,
+        width: 2,
       }),
     }),
+    toggleCondition: condition.never,
   })
 }
 
@@ -1105,21 +1227,11 @@ function toPreviewable(features: Array<beachfront.Job|beachfront.Scene>) {
   }))
 }
 
-function normalizeSceneId(id: string) {
-  return id ? id.replace(/^(planetscope|rapideye|landsat|sentinel):/, '') : null
-}
-
 function tileLoadFunction(imageTile, src) {
   if (imageTile.loadingError) {
     delete imageTile.loadingError
     imageTile.getImage().src = tileErrorPlaceholder
-  }
-  else {
+  } else {
     imageTile.getImage().src = src
   }
-}
-
-function toGeoJSON(feature) {
-  const io = new GeoJSON()
-  return io.writeFeatureObject(feature, {dataProjection: 'EPSG:4326', featureProjection: 'EPSG:3857'})
 }

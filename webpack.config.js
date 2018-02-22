@@ -48,6 +48,11 @@ module.exports = {
     filename: 'bundle.js'
   },
 
+  watchOptions: {
+    aggregateTimeout: 300,
+    poll: 1000
+  },
+
   module: {
     rules: [
       {
@@ -117,7 +122,6 @@ module.exports = {
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify(__environment__),
       'process.env.API_ROOT': process.env.API_ROOT ? JSON.stringify(process.env.API_ROOT) : (__environment__ === 'development') ? JSON.stringify('https://localhost:5000') : "'https://' + location.hostname.replace('beachfront', 'bf-api')",
-      'process.env.IDAM_ROOT': process.env.IDAM_ROOT ? JSON.stringify(process.env.IDAM_ROOT) : (__environment__ === 'development') ? JSON.stringify('https://localhost:5001') : "'https://' + location.hostname.replace('beachfront', 'pz-idam')",
       'process.env.CLASSIFICATION_BANNER_BACKGROUND': JSON.stringify(process.env.CLASSIFICATION_BANNER_BACKGROUND || 'green'),
       'process.env.CLASSIFICATION_BANNER_FOREGROUND': JSON.stringify(process.env.CLASSIFICATION_BANNER_FOREGROUND || 'white'),
       'process.env.CLASSIFICATION_BANNER_TEXT': JSON.stringify(process.env.CLASSIFICATION_BANNER_TEXT || 'UNCLASSIFIED // TESTING & DEVELOPMENT USE ONLY'),
