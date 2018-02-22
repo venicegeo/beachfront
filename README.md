@@ -4,6 +4,10 @@ User interface for the Beachfront project.
 
 ## Installing and Developing
 
+If bf-api isn't running locally (it usually isn't because it requires backing
+services and other dependencies to also be running) then you'll need to set
+the API_ROOT environment variable to be the url pointing to an instance of bf-api
+
 ```
 $ npm install
 $ npm run create-ssl-certs
@@ -12,7 +16,7 @@ $ npm run watch
 
 > __Note:__ You may need to add `.development_ssl_certificate.pem` to your development machine's SSL trust chain to avoid problems with CORS being blocked by browser SSL security errors.
 
-Open browser to `http://localhost:8080`.  Changes will automatically
+Open browser to `https://localhost:8080`.  Changes will automatically
 reload the browser.
 
 
