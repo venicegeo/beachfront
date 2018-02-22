@@ -16,9 +16,9 @@
 
 import axios, {AxiosInstance, Promise} from 'axios'
 import {getClient, DEFAULT_TIMEOUT} from './session'
-import {API_ROOT, SCENE_TILE_PROVIDERS} from '../config'
 import {
   API_ROOT,
+  SCENE_TILE_PROVIDERS,
   IMAGERY_ENDPOINT,
   USER_ENDPOINT,
 } from '../config'
