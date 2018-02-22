@@ -14,7 +14,6 @@
  * limitations under the License.
  **/
 
-
 const styles: any = require('./JobDownload.css')
 
 import * as React from 'react'

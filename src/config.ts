@@ -34,17 +34,10 @@ export const SESSION_IDLE_UNITS = 'minutes'
 export const SESSION_IDLE_INTERVAL = time.minute
 export const SESSION_IDLE_STORE = 'lastActivity'
 
-/*
-export const JOB_ENDPOINT = '/v0/job'
-export const USER_ENDPOINT = '/v0/user'
-export const IMAGERY_ENDPOINT = '/v0/imagery'
-export const ALGORITHM_ENDPOINT = '/v0/algorithm'
-export const PRODUCTLINE_ENDPOINT = '/v0/productline'
-*/
 export const JOB_ENDPOINT = '/job'
-export const USER_ENDPOINT = '/profile/me'
+export const USER_ENDPOINT = '/user'
 export const IMAGERY_ENDPOINT = '/ia'
-export const ALGORITHM_ENDPOINT = '/algorithms'
+export const ALGORITHM_ENDPOINT = '/algorithm'
 export const PRODUCTLINE_ENDPOINT = '/feed'
 
 export const BASEMAP_TILE_PROVIDERS = [
