@@ -70,6 +70,7 @@ interface Props {
 
 interface State {
   catalogApiKey?: string
+  apiKey?: string
   errors?: any[]
   isLoggedIn?: boolean
   isSessionLoggedOut?: boolean
@@ -322,6 +323,13 @@ export class Application extends React.Component<Props, State> {
             onPanTo={this.handlePanToProductLine}
           />
         )
+      case '/authHandler':
+        // We might need to use react-router or something that will give us the request/response object
+        // Add the api key to sessionStorage, continue on to the homepage
+        // TODO: How does the key get into the state
+        sessionStorage.setItem('api_key', this.state.apiKey)
+        this.navigateTo('/')
+        return
       default:
         return (
           <div className={styles.unknownRoute}>
@@ -702,6 +710,7 @@ export class Application extends React.Component<Props, State> {
 function generateInitialState(): State {
   const state: State = {
     catalogApiKey: '',
+    apiKey: '',
     errors: [],
     route: generateRoute(location),
     isLoggedIn: sessionService.initialize(),
@@ -752,6 +761,7 @@ function deserialize(): State {
     mapView:          JSON.parse(sessionStorage.getItem('mapView')),
     searchCriteria:   JSON.parse(sessionStorage.getItem('searchCriteria')),
     searchResults:    JSON.parse(sessionStorage.getItem('searchResults')),
+    apiKey:           JSON.parse(sessionStorage.getItem('api_key')),
     catalogApiKey:    localStorage.getItem('catalog_apiKey') || '',  // HACK
   }
 }
@@ -764,6 +774,7 @@ function serialize(state: State) {
   sessionStorage.setItem('mapView', JSON.stringify(state.mapView))
   sessionStorage.setItem('searchCriteria', JSON.stringify(state.searchCriteria))
   sessionStorage.setItem('searchResults', JSON.stringify(state.searchResults))
+  sessionStorage.setItem('api_key', JSON.stringify(state.apiKey))
   localStorage.setItem('catalog_apiKey', state.catalogApiKey)  // HACK
 }
 
