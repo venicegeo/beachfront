@@ -16,10 +16,11 @@
 
 import {Promise} from 'axios'
 import {getClient} from './session'
+import {ALGORITHM_ENDPOINT} from '../config'
 
 export function lookup(): Promise<beachfront.Algorithm[]> {
   const client = getClient()
-  return client.get('/v0/algorithm')
+  return client.get(ALGORITHM_ENDPOINT)
     .then(response => response.data.algorithms.map(normalize))
     .catch(err => {
       console.error('(algorithms:lookup) Failed:', err)

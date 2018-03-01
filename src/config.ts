@@ -34,6 +34,12 @@ export const SESSION_IDLE_UNITS = 'minutes'
 export const SESSION_IDLE_INTERVAL = time.minute
 export const SESSION_IDLE_STORE = 'lastActivity'
 
+export const JOB_ENDPOINT = '/job'
+export const USER_ENDPOINT = '/user'
+export const IMAGERY_ENDPOINT = '/ia'
+export const ALGORITHM_ENDPOINT = '/algorithm'
+export const PRODUCTLINE_ENDPOINT = '/feed'
+
 export const BASEMAP_TILE_PROVIDERS = [
   {
     name: 'OSM',

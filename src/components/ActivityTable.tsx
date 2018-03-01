@@ -22,6 +22,7 @@ import {Dropdown} from './Dropdown'
 import {FileDownloadLink} from './FileDownloadLink'
 import {LoadingAnimation} from './LoadingAnimation'
 import {normalizeSceneId} from './SceneFeatureDetails'
+import {JOB_ENDPOINT} from '../config'
 
 interface Props {
   className?: string
@@ -89,7 +90,7 @@ export const ActivityTable = ({
                   className={styles.downloadButton}
                   filename={job.properties.name + '.geojson'}
                   jobId={job.id}
-                  apiUrl={'/v0/job/' + job.id + '.geojson'}
+                  apiUrl={JOB_ENDPOINT + '/' + job.id + '.geojson'}
                   displayText="Download GeoJSON"
                   onComplete={() => console.log('onComplete')}
                   onError={() => console.log('onError')}
