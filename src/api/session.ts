@@ -57,16 +57,13 @@ export function initialize(): boolean {
 
 export function getClient(): AxiosInstance {
   if (!_client) {
-    const apiKey = sessionStorage.getItem('api_key') + ':'
-    // TODO: there may be more involved than just btoa()
-    const auth = btoa(apiKey)
     _client = axios.create({
       baseURL: API_ROOT,
       timeout: DEFAULT_TIMEOUT,
       withCredentials: true,
       headers: {
         'X-Requested-With': 'XMLHttpRequest',
-        'Authorization': 'Basic ' + auth,
+        'Authorization': 'Basic Og==',
       },
       validateStatus(status) {
         if (status === 401 && _onExpired) {
