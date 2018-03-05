@@ -20,6 +20,7 @@ import * as React from 'react'
 import {findDOMNode} from 'react-dom'
 import {FileDownloadLink} from './FileDownloadLink'
 import * as wrap from 'lodash/wrap'
+import {JOB_ENDPOINT} from '../config'
 
 interface Props {
   basename: string
@@ -134,7 +135,7 @@ export class JobDownload extends React.Component<Props, State> {
     const DownloadTypesList = this.downloadtypes.map(i =>
       <li className={i.extension in this.state.errors ? styles.error : ''} key={i.extension}>
         <FileDownloadLink
-          apiUrl={`/v0/job/${this.props.jobId}.${i.extension}`}
+          apiUrl={`${JOB_ENDPOINT}/${this.props.jobId}.${i.extension}`}
           displayText={`Download ${i.name}`}
           filename={`${this.props.basename}.${i.extension}`}
           icon={i.icon}

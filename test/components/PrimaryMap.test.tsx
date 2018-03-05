@@ -476,7 +476,7 @@ function generateRunningJob(id = 'test-job-id'): beachfront.Job {
     "properties": {
       "algorithm_name": "NDWI",
       "created_on": "2016-08-19T22:41:27.713Z",
-      "scene_time_of_collect": "2016-07-01T02:11:05.604Z",
+      "captured_on": "2016-07-01T02:11:05.604Z",
       "scene_id": "planetscope:test-scene-id",
       "scene_sensor_name": "test-scene-sensor-name",
       "name": "BF_19AUG2016",

@@ -35,7 +35,7 @@ declare namespace beachfront {
       algorithm_name: string
       created_on: string
       name: string
-      scene_time_of_collect: string
+      captured_on: string
       scene_id: string
       scene_sensor_name: string
       status: string

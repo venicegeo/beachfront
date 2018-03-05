@@ -34,10 +34,16 @@ export const SESSION_IDLE_UNITS = 'minutes'
 export const SESSION_IDLE_INTERVAL = time.minute
 export const SESSION_IDLE_STORE = 'lastActivity'
 
+export const JOB_ENDPOINT = '/job'
+export const USER_ENDPOINT = '/user'
+export const IMAGERY_ENDPOINT = '/ia'
+export const ALGORITHM_ENDPOINT = '/algorithm'
+export const PRODUCTLINE_ENDPOINT = '/feed'
+
 export const BASEMAP_TILE_PROVIDERS = [
   {
     name: 'OSM',
-    url: `https://${OSM_BASE_URL}/osm_tiles/{z}/{x}/{y}.png64`,
+    url: `https://${OSM_BASE_URL}/tiles/default/{z}/{x}/{y}.png64`,
     attributions: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
     maxZoom: 20,
   },

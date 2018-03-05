@@ -16,14 +16,19 @@
 
 import axios, {AxiosInstance, Promise} from 'axios'
 import {getClient, DEFAULT_TIMEOUT} from './session'
-import {API_ROOT, SCENE_TILE_PROVIDERS} from '../config'
+import {
+  API_ROOT,
+  SCENE_TILE_PROVIDERS,
+  IMAGERY_ENDPOINT,
+  USER_ENDPOINT,
+} from '../config'
 
 let _client: AxiosInstance
 
 export function initialize(): Promise<void> {
   const session = getClient()
 
-  return session.get('/v0/user').then(_ => {
+  return session.get(USER_ENDPOINT).then(_ => {
     _client = axios.create({
       baseURL: API_ROOT,
       timeout: DEFAULT_TIMEOUT,
@@ -52,7 +57,7 @@ export function search({
   console.warn('(catalog:search): Discarding parameters `count` (%s) and `startIndex` (%s)', count, startIndex)
 
   if (SCENE_TILE_PROVIDERS.find(p => p.prefix === source)) {
-    return _client.get(`/v0/imagery/discover/${source}`, {
+    return _client.get(`${IMAGERY_ENDPOINT}/discover/${source}`, {
       params: {
         cloudCover:      cloudCover + .05,
         PL_API_KEY:      catalogApiKey,
