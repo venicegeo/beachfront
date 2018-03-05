@@ -30,6 +30,7 @@ export function initialize(): Promise<void> {
       withCredentials: true,
       headers: {
         'X-Requested-With': 'XMLHttpRequest',
+        'Authorization': 'Basic Og==',
       },
     })
   }).catch(err => {
