@@ -49,7 +49,6 @@ export const AlgorithmList = (props: Props) => (
             errorElement={props.error && (
             <div className={styles.errorMessage}>
               <h4><i className="fa fa-warning"/> Algorithm failed</h4>
-              <p>Your API key does not allow access to this geographic area.</p>
               <p>{props.error.response.data}</p>
               <pre>{props.error.stack}</pre>
             </div>
