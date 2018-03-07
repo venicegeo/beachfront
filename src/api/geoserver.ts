@@ -16,7 +16,6 @@
 
 import {Promise} from 'axios'
 import {getClient} from './session'
-import {USER_ENDPOINT} from '../config'
 
 export interface Descriptor {
   wmsUrl?: string
@@ -25,9 +24,9 @@ export interface Descriptor {
 
 export function lookup(): Promise<Descriptor> {
   const client = getClient()
-  return client.get(USER_ENDPOINT)
+  return client.get('/')
     .then(response => ({
-      wmsUrl: response.data.services.wms_server.replace('https:', 'http:'),  // HACK
+      wmsUrl: response.data.geoserver.replace('https:', 'http:') + '/wms',  // HACK
     }))
     .catch(err => {
       console.error('(geoserver:lookup) failed:', err)
