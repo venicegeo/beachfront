@@ -17,7 +17,6 @@
 const styles: any = require('./JobStatus.css')
 
 import * as React from 'react'
-import * as moment from 'moment'
 import {Link} from './Link'
 import {Timestamp} from './Timestamp'
 import {JobDownload} from './JobDownload'
@@ -104,10 +103,10 @@ export class JobStatus extends React.Component<Props, State> {
                 <dd>{properties.algorithm_name}</dd>
                 <dt>Scene ID</dt>
                 <dd>{normalizeSceneId(properties.scene_id)}</dd>
-                <dt>Captured On</dt>
+                {/*<dt>Captured On</dt>
                 <dd>{moment(properties.captured_on).utc().format('MM/DD/YYYY HH:mm z')}</dd>
                 <dt>Sensor</dt>
-                <dd>{properties.scene_sensor_name}</dd>
+                <dd>{properties.scene_sensor_name}</dd>*/}
               </dl>
               <div className={styles.removeToggle}>
                 <button onClick={this.handleForgetToggle}>
