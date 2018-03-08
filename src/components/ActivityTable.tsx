@@ -17,7 +17,6 @@
 const styles = require('./ActivityTable.css')
 
 import * as React from 'react'
-import * as moment from 'moment'
 import {Dropdown} from './Dropdown'
 import {FileDownloadLink} from './FileDownloadLink'
 import {LoadingAnimation} from './LoadingAnimation'
@@ -68,8 +67,8 @@ export const ActivityTable = ({
         <thead>
           <tr>
             <th>Scene ID</th>
-            <th>Captured On</th>
-            <th>Sensor</th>
+            {/*<th>Captured On</th>
+            <th>Sensor</th>*/}
             <td></td>
           </tr>
         </thead>
@@ -83,8 +82,8 @@ export const ActivityTable = ({
               onMouseLeave={() => onHoverOut(job)}
               >
               <td>{getSceneId(job)}</td>
-              <td>{getCapturedOn(job)}</td>
-              <td>{getImageSensor(job)}</td>
+              {/*<td>{getCapturedOn(job)}</td>
+              <td>{getImageSensor(job)}</td>*/}
               <td className={styles.downloadCell} onClick={e => e.stopPropagation()}>
                 <FileDownloadLink
                   className={styles.downloadButton}
@@ -132,15 +131,15 @@ function generatePlaceholderRows(count) {
   return rows
 }
 
-function getCapturedOn({ properties }: beachfront.Job) {
+/*function getCapturedOn({ properties }: beachfront.Job) {
   const then = moment(properties.captured_on)
   return then.format(then.year() === new Date().getFullYear() ? 'MM/DD' : 'MM/DD/YYYY')
-}
+}*/
 
 function getSceneId({ properties }: beachfront.Job) {
   return normalizeSceneId(properties.scene_id)
 }
 
-function getImageSensor({ properties }: beachfront.Job) {
+/*function getImageSensor({ properties }: beachfront.Job) {
   return properties.scene_sensor_name
-}
+}*/

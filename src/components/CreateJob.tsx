@@ -177,9 +177,9 @@ export class CreateJob extends React.Component<Props, State> {
       name: this.state.name,
       sceneId: this.props.selectedScene.id,
       catalogApiKey: this.props.catalogApiKey,
-    }).then(job => {
+    }).then(jobProperties => {
       this.setState({ isCreating: false })
-      this.props.onJobCreated(job) // Release the job.
+      this.props.onJobCreated({id: jobProperties.job_id, properties: jobProperties} as beachfront.Job) // Release the job.
     }).catch(algorithmError => {
       this.setState({ algorithmError, isCreating: false })
     })

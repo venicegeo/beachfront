@@ -32,7 +32,7 @@ export function createJob({
   name,
   catalogApiKey,
   sceneId,
-}: ParamsCreateJob): Promise<beachfront.Job> {
+}: ParamsCreateJob): Promise<beachfront.JobProperties> {
   return getClient().post(JOB_ENDPOINT, {
     algorithm_id:   algorithmId,
     compute_mask:   computeMask,
@@ -40,7 +40,7 @@ export function createJob({
     planet_api_key: catalogApiKey,
     scene_id:       sceneId,
   })
-    .then(response => response.data.job)
+    .then(response => response.data)
     .catch(err => {
       console.error('(jobs:create) could not execute:', err)
       throw err
@@ -65,7 +65,7 @@ export function fetchJobs(): Promise<beachfront.Job[]> {
 export function fetchJob(jobId: string): Promise<beachfront.Job> {
   return getClient().get(`${JOB_ENDPOINT}/${jobId}`)
     .then(
-      response => response.data.job,
+      response => response.data,
       err => {
         console.error('(jobs:fetchJob) failed:', err)
         throw err
