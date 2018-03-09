@@ -31,6 +31,24 @@ declare namespace beachfront {
       type: 'PRODUCT_LINE'
     }
 
+    interface JobProperties {
+      job_id: string
+      name: string
+      status: string
+      created_by: string
+      created_on: string
+      algorithm_id: string
+      algorithm_name: string
+      algorithm_version: string
+      scene_id: string
+      tide: number
+      tide_min_24h: number
+      tide_max_24h: number
+      extras: any
+      compute_mask: boolean
+      type: 'JOB'
+    }
+
   }
 
   interface Algorithm {
@@ -41,27 +59,9 @@ declare namespace beachfront {
     type: string
   }
 
-  interface JobProperties {
-    job_id: string
-    name: string
-    status: string
-    created_by: string
-    created_on: string
-    algorithm_id: string
-    algorithm_name: string
-    algorithm_version: string
-    scene_id: string
-    tide: number
-    tide_min_24h: number
-    tide_max_24h: number
-    extras: any
-    compute_mask: boolean
-    type: 'JOB'
-  }
-
   interface Job extends GeoJSON.Feature<GeoJSON.Polygon> {
     id: string
-    properties: JobProperties
+    properties: _.JobProperties
   }
 
   interface ProductLine extends GeoJSON.Feature<GeoJSON.Polygon> {
