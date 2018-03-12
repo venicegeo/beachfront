@@ -667,16 +667,12 @@ export class Application extends React.Component<Props, State> {
 
   private startBackgroundTasks() {
     sessionService.onExpired(() => this.setState({ isSessionExpired: true }))
-    updateService.startWorker({
-      onAvailable: () => this.setState({ isUpdateAvailable: true }),
-    })
 
     console.log('(application:startBackgroundTasks) starting job/productline polling at %s second intervals', Math.ceil(RECORD_POLLING_INTERVAL / 1000))
     this.pollingInstance = setInterval(this.refreshRecords.bind(this), RECORD_POLLING_INTERVAL)
   }
 
   private stopBackgroundTasks() {
-    updateService.stopWorker()
 
     console.log('(application:stopBackgroundTasks) stopping job/productline polling')
     clearInterval(this.pollingInstance)
