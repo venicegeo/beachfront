@@ -31,7 +31,7 @@ export const Login = () => (
         className={styles.warning}
         dangerouslySetInnerHTML={CONSENT_BANNER_TEXT}
       />
-      <a className={styles.button} href={API_ROOT + '/login/geoaxis'}>
+      <a className={styles.button} href={API_ROOT + '/oauth/start'}>
         <span className={styles.buttonIcons}>
             <span className="fa fa-lock"/>
         </span>
