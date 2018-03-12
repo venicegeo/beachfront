@@ -39,14 +39,12 @@ import {
 import {ProductLineList} from './ProductLineList'
 import {SessionExpired} from './SessionExpired'
 import {SessionLoggedOut} from './SessionLoggedOut'
-import {UpdateAvailable} from './UpdateAvailable'
 import * as algorithmsService from '../api/algorithms'
 import * as catalogService from '../api/catalog'
 import * as geoserverService from '../api/geoserver'
 import * as jobsService from '../api/jobs'
 import * as productLinesService from '../api/productLines'
 import * as sessionService from '../api/session'
-import * as updateService from '../api/update'
 import {createCollection, Collection} from '../utils/collections'
 import {getFeatureCenter} from '../utils/geometries'
 import {
@@ -74,7 +72,6 @@ interface State {
   isLoggedIn?: boolean
   isSessionLoggedOut?: boolean
   isSessionExpired?: boolean
-  isUpdateAvailable?: boolean
   route?: Route
 
   // Services
@@ -234,15 +231,6 @@ export class Application extends React.Component<Props, State> {
               const client = sessionService.getClient()
               client.get(`/oauth/logout`).then(response => {
                 window.location.href = response.data
-              })
-            }}
-          />
-        )}
-        {this.state.isUpdateAvailable && (
-          <UpdateAvailable
-            onDismiss={() => {
-              this.setState({
-                isUpdateAvailable: false,
               })
             }}
           />
@@ -703,7 +691,6 @@ function generateInitialState(): State {
     isLoggedIn: sessionService.initialize(),
     isSessionExpired: false,
     isSessionLoggedOut: false,
-    isUpdateAvailable: false,
 
     // Services
     geoserver: {},
