@@ -112,7 +112,7 @@ describe('Session Service', () => {
     it('creates axios instance with sensible timeout', () => {
       service.getClient()
       assert.isAbove(stub.firstCall.args[0].timeout, 3000)
-      assert.isBelow(stub.firstCall.args[0].timeout, 30000)
+      assert.isBelow(stub.firstCall.args[0].timeout, 30001)
     })
 
     it('creates axios instance with correct CSRF header', () => {

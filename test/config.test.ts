@@ -22,10 +22,6 @@ describe('config', () => {
     assert.equal(config.API_ROOT, '/test-api-root')
   })
 
-  it('defines update worker timing properties', () => {
-    assert.isNumber(config.UPDATE_WORKER_INTERVAL)
-  })
-
   it('defines at least one basemap tile provider', () => {
     assert.isAbove(config.BASEMAP_TILE_PROVIDERS.length, 0)
   })
