@@ -19,7 +19,6 @@ import * as sinon from 'sinon'
 import * as session from '../../src/api/session'
 import * as geoserver from '../../src/api/geoserver'
 import {AxiosPromise} from 'axios'
-import {USER_ENDPOINT} from '../../src/config'
 
 describe('GeoServer Service', () => {
   let client: FakeClient
@@ -41,18 +40,18 @@ describe('GeoServer Service', () => {
 
   describe('discover()', () => {
     it('returns WMS URL', () => {
-      client.get.returns(resolve({services: {wms_server: 'test-wms-url'}}))
+      client.get.returns(resolve({geoserver: 'test-wms-url'}))
       return geoserver.lookup()
         .then(descriptor => {
-          assert.equal(descriptor.wmsUrl, 'test-wms-url')
+          assert.equal(descriptor.wmsUrl, 'test-wms-url/wms')
         })
     })
 
     it('calls correct URL', () => {
-      client.get.returns(resolve({services: {wms_server: 'test-wms-url'}}))
+      client.get.returns(resolve({geoserver: 'test-wms-url'}))
       return geoserver.lookup()
         .then(() => {
-          assert.deepEqual(client.get.firstCall.args, [USER_ENDPOINT])
+          assert.deepEqual(client.get.firstCall.args, ['/'])
         })
     })
 
