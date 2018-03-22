@@ -45,30 +45,66 @@ export const BASEMAP_TILE_PROVIDERS = [
 
 export const SCENE_TILE_PROVIDERS = [
   {
-    prefix: 'planetscope',
-    url: `https://tiles{0-3}.${PLANET_BASE_URL}/v1/experimental/tiles/PSOrthoTile/__SCENE_ID__/{z}/{x}/{y}.png?api_key=__API_KEY__`,
-    maxZoom:  13,
-    attributions: '&copy; <a href="https://www.planet.com" target="_blank" rel="noopener">Planet Labs (PlanetScope)</a>',
-  },
-  {
-    prefix: 'rapideye',
-    url: `https://tiles{0-3}.${PLANET_BASE_URL}/v1/experimental/tiles/REOrthoTile/__SCENE_ID__/{z}/{x}/{y}.png?api_key=__API_KEY__`,
-    maxZoom:  13,
-    attributions: '&copy; <a href="https://www.planet.com" target="_blank" rel="noopener">Planet Labs (RapidEye)</a>',
-  },
-  {
-    prefix: 'landsat',
-    url: `https://tiles{0-3}.${PLANET_BASE_URL}/v1/experimental/tiles/Landsat8L1G/__SCENE_ID__/{z}/{x}/{y}.png?api_key=__API_KEY__`,
-    maxZoom:  13,
-    attributions: '&copy; <a href="https://www.planet.com" target="_blank" rel="noopener">Planet Labs (Landsat8)</a>',
-  },
-  {
-    prefix: 'sentinel',
-    url: `https://tiles{0-3}.${PLANET_BASE_URL}/v1/experimental/tiles/Sentinel2L1C/__SCENE_ID__/{z}/{x}/{y}.png?api_key=__API_KEY__`,
-    maxZoom:  13,
     attributions: '&copy; <a href="https://www.planet.com" target="_blank" rel="noopener">Planet Labs (Copernicus Sentinel-2)</a>',
+    maxZoom:  13,
+    name: 'Copernicus Sentinel-2',
+    prefix: 'sentinel',
+    provider: 'Planet',
+    url: `https://tiles{0-3}.${PLANET_BASE_URL}/v1/experimental/tiles/Sentinel2L1C/__SCENE_ID__/{z}/{x}/{y}.png?api_key=__API_KEY__`,
+  },
+  {
+    attributions: '&copy; <a href="https://www.planet.com" target="_blank" rel="noopener">Planet Labs (Landsat8)</a>',
+    maxZoom:  13,
+    name: 'Landsat8',
+    prefix: 'landsat',
+    provider: 'Planet',
+    url: `https://tiles{0-3}.${PLANET_BASE_URL}/v1/experimental/tiles/Landsat8L1G/__SCENE_ID__/{z}/{x}/{y}.png?api_key=__API_KEY__`,
+  },
+  {
+    attributions: '&copy; <a href="https://www.planet.com" target="_blank" rel="noopener">Planet Labs (RapidEye)</a>',
+    maxZoom:  13,
+    name: 'RapidEye',
+    prefix: 'rapideye',
+    provider: 'Planet',
+    url: `https://tiles{0-3}.${PLANET_BASE_URL}/v1/experimental/tiles/REOrthoTile/__SCENE_ID__/{z}/{x}/{y}.png?api_key=__API_KEY__`,
+  },
+  {
+    attributions: '&copy; <a href="https://www.planet.com" target="_blank" rel="noopener">Planet Labs (PlanetScope)</a>',
+    maxZoom:  13,
+    name: 'PlanetScope',
+    prefix: 'planetscope',
+    provider: 'Planet',
+    url: `https://tiles{0-3}.${PLANET_BASE_URL}/v1/experimental/tiles/PSOrthoTile/__SCENE_ID__/{z}/{x}/{y}.png?api_key=__API_KEY__`,
   },
 ]
+
+export const TOUR = {
+  algorithm: ':first-child',
+  /*
+  apiKeyInstructions: `
+    To get an API key, ask the experts at <a
+      href="https://rocketchat.gs.mil/channel/planetdas_askanexpert"
+      target="_blank"
+    >Rocket.Chat #planetdas_askanexpert</a>.
+  `,
+  */
+  apiKeyInstructions: `
+    To get an API key you must have a Planet account.  For more information see <a
+      href="https://support.planet.com/hc/en-us/articles/212318178-What-is-my-API-key-"
+      target="_blank"
+    >What Is My API Key?</a>
+  `,
+  basemap: 'OSM',
+  bbox: [-85, 19.7, -74, 23.4],
+  bboxName: 'Cuba',
+  searchCriteria: {
+    cloudCover: 6,
+    dateFrom: '2017-07-01',
+    dateTo: '2017-10-31',
+    source: 'landsat',
+  },
+  zoom: 6,
+}
 
 // Minimum versions of supported browsers.
 export const SUPPORTED_BROWSERS = {

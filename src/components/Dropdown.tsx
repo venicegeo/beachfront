@@ -41,8 +41,7 @@ export class Dropdown extends React.Component<Props, State> {
     if (this.state.isOpen !== prevState.isOpen) {
       if (this.state.isOpen) {
         this.attachClickInterceptor()
-      }
-      else {
+      } else {
         this.detachClickInterceptor()
       }
     }
@@ -58,13 +57,17 @@ export class Dropdown extends React.Component<Props, State> {
     return (
       <div className={`${styles.root} ${className || ''} ${this.state.isOpen ? styles.isOpen : ''}`}>
         <div className={styles.button} onClick={this.handleToggleOpen}>
-          {current ? current.label : '???'} <i className="fa fa-caret-down"/>
+          {current ? current.label : '???'}
+          <i className="fa fa-caret-down"/>
         </div>
+
         <ul className={styles.options}>
           {options.map(option => (
-            <li key={option.label + option.value}
-                className={current === option ? styles.active : ''}
-                onClick={() => this.handleChange(option.value)}>{option.label}</li>
+            <li
+              key={option.label + option.value}
+              className={current === option ? styles.active : ''}
+              onClick={() => this.handleChange(option.value)}
+            >{option.label}</li>
           ))}
         </ul>
       </div>

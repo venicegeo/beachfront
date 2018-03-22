@@ -23,12 +23,16 @@ interface Props {
   onNameChange(value: string)
 }
 
-export const NewJobDetails = ({ name, onNameChange }: Props) => (
+export const NewJobDetails = (props: Props) => (
   <div className={styles.root}>
     <h2>Job Details</h2>
+
     <label className={styles.field}>
       <span>Name</span>
-      <input value={name} onChange={event => onNameChange((event.target as HTMLInputElement).value)}/>
+      <input
+        onChange={event => props.onNameChange((event.target as HTMLInputElement).value)}
+        value={props.name}
+      />
     </label>
   </div>
 )

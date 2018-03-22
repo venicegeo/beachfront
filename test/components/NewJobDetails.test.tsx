@@ -35,9 +35,9 @@ describe('<NewJobDetails/>', () => {
       <NewJobDetails
         name={_props.name}
         onNameChange={_props.onNameChange}
-      />,
+      />
     )
-    assert.equal((wrapper.find('input') as any).node.value, 'test-name')
+    assert.equal(wrapper.find('input').not('[type="checkbox"]').prop('value'), 'test-name')
   })
 
   it('emits change event', () => {
@@ -47,7 +47,7 @@ describe('<NewJobDetails/>', () => {
         onNameChange={_props.onNameChange}
       />,
     )
-    const input: any = wrapper.find('input')
+    const input: any = wrapper.find('input').not('[type="checkbox"]')
     input.node.value = 'test-new-value'
     input.simulate('change')
     assert.isTrue(_props.onNameChange.calledWithExactly('test-new-value'))
@@ -61,6 +61,6 @@ describe('<NewJobDetails/>', () => {
       />,
     )
     wrapper.setProps({name: 'test-new-value'})
-    assert.equal((wrapper.find('input') as any).node.value, 'test-new-value')
+    assert.equal(wrapper.find('input').not('[type="checkbox"]').prop('value'), 'test-new-value')
   })
 })

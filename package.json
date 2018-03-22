@@ -58,6 +58,7 @@
     "moment": "2.20.1",
     "ol": "4.1.1",
     "react": "15.2.1",
-    "react-dom": "15.2.1"
+    "react-dom": "15.2.1",
+    "react-user-tour": "3.0.0"
   }
 }

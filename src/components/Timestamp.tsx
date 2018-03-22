@@ -48,9 +48,9 @@ export class Timestamp extends React.Component<Props, State> {
   }
 
   render() {
-    const t = moment(this.props.timestamp)
+    const t = moment.utc(this.props.timestamp)
     const relativeTimestamp = t.fromNow()
-    const staticTimestamp   = t.format('llll')
+    const staticTimestamp   = t.local().format('llll')
     return (
       <span className={`${styles.root} ${this.props.className}`}
             title={this.state.relative ? staticTimestamp : relativeTimestamp}

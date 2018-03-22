@@ -15,6 +15,7 @@
  **/
 
 .root {
+  /* background-color: indianred; // Use this color once we can detect browser and version. */
   background-color: steelblue;
   border: solid 3px whitesmoke;
   border-radius: 8px;

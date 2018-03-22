@@ -56,9 +56,9 @@ import {
   SESSION_IDLE_STORE,
   SESSION_IDLE_UNITS,
 } from '../config'
+import {UserTour} from './Tour'
 
 import {
-  STATUS_SUCCESS,
   TYPE_JOB,
   TYPE_SCENE,
 } from '../constants'
@@ -89,6 +89,7 @@ interface State {
   bbox?: [number, number, number, number]
   mapView?: MapView
   hoveredFeature?: beachfront.Job
+  collections?: any
   selectedFeature?: beachfront.Job | beachfront.Scene
 
   // Search state
@@ -105,9 +106,11 @@ export const createApplication = (element) => render(
   />, element)
 
 export class Application extends React.Component<Props, State> {
+  refs: any
   private initializationPromise: Promise<any>
   private pollingInstance: number
   private idleInterval: any
+  private tour: any
 
   constructor(props) {
     super(props)
@@ -134,6 +137,7 @@ export class Application extends React.Component<Props, State> {
     this.logout = this.logout.bind(this)
     this.startIdleTimer = this.startIdleTimer.bind(this)
     this.stopIdleTimer = this.stopIdleTimer.bind(this)
+    this.startTour = this.startTour.bind(this)
     this.timerIncrement = this.timerIncrement.bind(this)
     this.resetTimer = this.resetTimer.bind(this)
   }
@@ -163,7 +167,7 @@ export class Application extends React.Component<Props, State> {
         let [jobId] = this.state.route.jobIds
 
         if (jobId && !this.state.selectedFeature) {
-          this.state.selectedFeature = this.state.jobs.records.find(job => job.id === jobId)
+          this.setState({ selectedFeature: this.state.jobs.records.find(job => job.id === jobId) })
         }
       }).then(this.importJobsIfNeeded.bind(this))
       this.startIdleTimer()
@@ -183,6 +187,7 @@ export class Application extends React.Component<Props, State> {
         <Navigation
           activeRoute={this.state.route}
           onClick={this.navigateTo}
+          startTour={this.startTour}
         />
         <PrimaryMap
           bbox={this.state.bbox}
@@ -194,11 +199,13 @@ export class Application extends React.Component<Props, State> {
           isSearching={this.state.isSearching}
           logout={this.logout}
           mode={this.mapMode}
+          ref="map"
           selectedFeature={this.state.selectedFeature}
+          shrunk={this.state.route.pathname !== '/'}
           view={this.state.mapView}
           wmsUrl={this.state.geoserver.wmsUrl}
-          shrunk={this.state.route.pathname !== '/'}
           onBoundingBoxChange={this.handleBoundingBoxChange}
+          onMapInitialization={(collections: any) => this.setState({ collections })}
           onSearchPageChange={this.handleSearchSubmit}
           onSelectFeature={this.handleSelectFeature}
           onViewChange={mapView => this.setState({ mapView })}
@@ -251,6 +258,7 @@ export class Application extends React.Component<Props, State> {
         <Login/>
       )
     }
+
     switch (this.state.route.pathname) {
       case '/about':
         return (
@@ -264,9 +272,12 @@ export class Application extends React.Component<Props, State> {
             algorithms={this.state.algorithms.records}
             bbox={this.state.bbox}
             catalogApiKey={this.state.catalogApiKey}
+            collections={this.state.collections}
+            imagery={this.state.searchResults}
             isSearching={this.state.isSearching}
-            searchError={this.state.searchError}
+            map={this.refs.map}
             searchCriteria={this.state.searchCriteria}
+            searchError={this.state.searchError}
             selectedScene={this.state.selectedFeature && this.state.selectedFeature.properties.type === TYPE_SCENE ? this.state.selectedFeature as beachfront.Scene : null}
             onCatalogApiKeyChange={this.handleCatalogApiKeyChange}
             onClearBbox={this.handleClearBbox}
@@ -330,7 +341,7 @@ export class Application extends React.Component<Props, State> {
       case '/product-lines':
         return this.state.selectedFeature ? [this.state.selectedFeature as any] : this.state.productLines.records
       default:
-        return this.state.jobs.records.filter(j => this.state.route.jobIds.includes(j.id) && j.properties.status === STATUS_SUCCESS)
+        return this.state.jobs.records.filter(j => this.state.route.jobIds.includes(j.id))
     }
   }
 
@@ -346,10 +357,14 @@ export class Application extends React.Component<Props, State> {
 
   private get mapMode() {
     switch (this.state.route.pathname) {
-      case '/create-job': return (this.state.bbox && this.state.searchResults) ? MODE_SELECT_IMAGERY : MODE_DRAW_BBOX
-      case '/create-product-line': return MODE_DRAW_BBOX
-      case '/product-lines': return MODE_PRODUCT_LINES
-      default: return MODE_NORMAL
+      case '/create-job':
+        return this.state.bbox && this.state.searchResults ? MODE_SELECT_IMAGERY : MODE_DRAW_BBOX
+      case '/create-product-line':
+        return MODE_DRAW_BBOX
+      case '/product-lines':
+        return MODE_PRODUCT_LINES
+      default:
+        return MODE_NORMAL
     }
   }
 
@@ -358,7 +373,7 @@ export class Application extends React.Component<Props, State> {
       if (this.state.jobs.records.find(j => j.id === jobId)) {
         return
       }
-      console.debug('(application:componentDidUpdate) fetching job %s', jobId)
+      console.log('(application:componentDidUpdate) fetching job %s', jobId)
       jobsService.fetchJob(jobId)
         .then(record => {
           this.setState({ jobs: this.state.jobs.$append(record) })
@@ -512,27 +527,32 @@ export class Application extends React.Component<Props, State> {
       isSearching: true,
       selectedFeature: null,
     })
+
     catalogService.search({
       count,
       startIndex,
       bbox: this.state.bbox,
       catalogApiKey: this.state.catalogApiKey,
       ...this.state.searchCriteria,
-    })
-      .then(searchResults => this.setState({ searchResults, searchError: null, isSearching: false }))
-      .catch(searchError => this.setState({ searchError, isSearching: false }))
+    }).then(searchResults => this.setState({
+      searchResults,
+      searchError: null,
+      isSearching: false,
+    })).catch(searchError => this.setState({
+      searchError,
+      isSearching: false,
+    }))
   }
 
   private handleSelectFeature(feature) {
     if (this.state.selectedFeature === feature) {
       return  // Nothing to do
     }
-    this.setState({
-      selectedFeature: feature || null,
-    })
+
     this.navigateTo({
       pathname: this.state.route.pathname,
-      search:   (feature && feature.properties.type === TYPE_JOB) ? `?jobId=${feature.id}` : '',
+      search: feature && feature.properties.type === TYPE_JOB ? `?jobId=${feature.id}` : '',
+      selectedFeature: feature,
     })
   }
 
@@ -540,23 +560,30 @@ export class Application extends React.Component<Props, State> {
     const route = generateRoute(loc)
     history.pushState(null, null, route.href)
 
-    // Update selected feature if needed
-    let {selectedFeature} = this.state
+    // Update selected feature if needed.
+    let selectedFeature = 'selectedFeature' in loc
+      ? loc.selectedFeature
+      : this.state.selectedFeature
+
     if (route.jobIds.length) {
       selectedFeature = this.state.jobs.records.find(j => route.jobIds.includes(j.id))
     }
+
+    /* TODO: Okay?
     if (!route.jobIds.length && selectedFeature && selectedFeature.properties.type === TYPE_JOB) {
       selectedFeature = null
-    }
-    else if (route.pathname !== this.state.route.pathname && selectedFeature && selectedFeature.properties.type === TYPE_SCENE) {
+    } else if (route.pathname !== this.state.route.pathname && selectedFeature && selectedFeature.properties.type === TYPE_SCENE) {
       selectedFeature = null
     }
+    */
 
     this.setState({
       route,
       selectedFeature,
+      /* TODO: Okay?
       bbox: this.state.route.pathname === route.pathname ? this.state.bbox : null,
       searchResults: this.state.route.pathname === route.pathname ? this.state.searchResults : null,
+      */
       searchError: this.state.route.pathname === route.pathname ? this.state.searchError : null,
     })
   }
@@ -571,10 +598,13 @@ export class Application extends React.Component<Props, State> {
   }
 
   private refreshRecords() {
-    console.debug('(application:refreshRecords) fetching latest jobs and product lines')
+    console.log('(application:refreshRecords) fetching latest jobs and product lines')
     return Promise.all([
       this.fetchJobs(),
+      /*
+       * No need to fetch product lines till we get them working.
       this.fetchProductLines(),
+      */
     ])
   }
 
@@ -604,6 +634,18 @@ export class Application extends React.Component<Props, State> {
     clearInterval(this.idleInterval)
   }
 
+  private startTour() {
+    if (this.tour) {
+      if (!this.tour.state.isTourActive) {
+        this.tour.start()
+      }
+    } else {
+      let root = document.createElement('div')
+      document.body.appendChild(root)
+      this.tour = render(<UserTour application={this}/>, root)
+    }
+  }
+
   private resetTimer() {
     // Only bother with resetting the timer if we're logged in
     if (this.state.isLoggedIn && !this.state.isSessionExpired) {
@@ -629,14 +671,14 @@ export class Application extends React.Component<Props, State> {
       onAvailable: () => this.setState({ isUpdateAvailable: true }),
     })
 
-    console.debug('(application:startBackgroundTasks) starting job/productline polling at %s second intervals', Math.ceil(RECORD_POLLING_INTERVAL / 1000))
+    console.log('(application:startBackgroundTasks) starting job/productline polling at %s second intervals', Math.ceil(RECORD_POLLING_INTERVAL / 1000))
     this.pollingInstance = setInterval(this.refreshRecords.bind(this), RECORD_POLLING_INTERVAL)
   }
 
   private stopBackgroundTasks() {
     updateService.stopWorker()
 
-    console.debug('(application:stopBackgroundTasks) stopping job/productline polling')
+    console.log('(application:stopBackgroundTasks) stopping job/productline polling')
     clearInterval(this.pollingInstance)
   }
 
@@ -703,7 +745,7 @@ function generateInitialState(): State {
 
 function deserialize(): State {
   return {
-    algorithms:       createCollection(JSON.parse(sessionStorage.getItem('algorithms_records')) || []),
+    algorithms: createCollection(JSON.parse(sessionStorage.getItem('algorithms_records')) || []),
     bbox:             JSON.parse(sessionStorage.getItem('bbox')),
     geoserver:        JSON.parse(sessionStorage.getItem('geoserver')),
     isSessionExpired: JSON.parse(sessionStorage.getItem('isSessionExpired')),

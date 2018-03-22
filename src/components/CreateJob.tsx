@@ -15,14 +15,18 @@
  **/
 
 const styles: any = require('./CreateJob.css')
+const DATE_FORMAT = 'YYYY-MM-DD'
 
 import * as React from 'react'
 import * as moment from 'moment'
 import {AlgorithmList} from './AlgorithmList'
 import {ImagerySearch} from './ImagerySearch'
+import {ImagerySearchList} from './ImagerySearchList'
 import {NewJobDetails} from './NewJobDetails'
+import {PrimaryMap} from './PrimaryMap'
 import {createJob} from '../api/jobs'
-import {SOURCE_RAPIDEYE} from '../constants'
+import {normalizeSceneId} from './SceneFeatureDetails'
+import {SOURCE_DEFAULT} from '../constants'
 
 export interface SearchCriteria {
   cloudCover: number
@@ -35,7 +39,10 @@ interface Props {
   algorithms: beachfront.Algorithm[]
   bbox: number[]
   catalogApiKey: string
+  collections: any
+  imagery: beachfront.ImageryCatalogPage
   isSearching: boolean
+  map: PrimaryMap
   searchError: any
   searchCriteria: SearchCriteria
   selectedScene: beachfront.Scene
@@ -55,20 +62,22 @@ interface State {
 
 export const createSearchCriteria = (): SearchCriteria => ({
   cloudCover: 10,
-  dateFrom:   moment().subtract(30, 'days').format('YYYY-MM-DD'),
-  dateTo:     moment().format('YYYY-MM-DD'),
-  source:     SOURCE_RAPIDEYE,
+  dateFrom: moment().subtract(30, 'days').format(DATE_FORMAT),
+  dateTo: moment().format(DATE_FORMAT),
+  source: SOURCE_DEFAULT,
 })
 
 export class CreateJob extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props)
+
     this.state = {
       isCreating: false,
-      name: props.selectedScene ? generateName(props.selectedScene.id) : '',
+      name: props.selectedScene ? normalizeSceneId(props.selectedScene.id) : '',
       shouldAutogenerateName: true,
       algorithmError: '',
     }
+
     this.handleCreateJob = this.handleCreateJob.bind(this)
     this.handleNameChange = this.handleNameChange.bind(this)
     this.handleSearchCloudCoverChange = this.handleSearchCloudCoverChange.bind(this)
@@ -77,8 +86,11 @@ export class CreateJob extends React.Component<Props, State> {
   }
 
   componentWillReceiveProps(nextProps: Props) {
-    if (this.state.shouldAutogenerateName && nextProps.selectedScene && nextProps.selectedScene !== this.props.selectedScene) {
-      this.setState({ name: generateName(nextProps.selectedScene.id) })
+    if (this.state.shouldAutogenerateName
+      && nextProps.selectedScene
+      && nextProps.selectedScene !== this.props.selectedScene
+    ) {
+      this.setState({ name: normalizeSceneId(nextProps.selectedScene.id) })
     }
   }
 
@@ -104,11 +116,22 @@ export class CreateJob extends React.Component<Props, State> {
                 onClearBbox={this.props.onClearBbox}
                 onCloudCoverChange={this.handleSearchCloudCoverChange}
                 onDateChange={this.handleSearchDateChange}
+                onSearchCriteriaChange={this.props.onSearchCriteriaChange}
                 onSourceChange={this.handleSearchSourceChange}
                 onSubmit={this.props.onSearchSubmit}
               />
             </li>
           )}
+
+          {this.props.bbox && this.props.imagery && this.props.map && (
+            <li className={styles.results}>
+              <ImagerySearchList
+                collections={this.props.collections}
+                imagery={this.props.imagery}
+              />
+            </li>
+          )}
+
           {this.props.bbox && this.props.selectedScene && (
             <li className={styles.details}>
               <NewJobDetails
@@ -117,6 +140,7 @@ export class CreateJob extends React.Component<Props, State> {
               />
             </li>
           )}
+
           {this.props.bbox && this.props.selectedScene && (
             <li className={styles.algorithms}>
               <AlgorithmList
@@ -141,23 +165,18 @@ export class CreateJob extends React.Component<Props, State> {
 
   private handleCreateJob(algorithm) {
     this.setState({ isCreating: true })
+
     createJob({
       algorithmId: algorithm.id,
-      name:        this.state.name,
-      sceneId:     this.props.selectedScene.id,
+      name: this.state.name,
+      sceneId: this.props.selectedScene.id,
       catalogApiKey: this.props.catalogApiKey,
+    }).then(job => {
+      this.setState({ isCreating: false })
+      this.props.onJobCreated(job) // Release the job.
+    }).catch(algorithmError => {
+      this.setState({ algorithmError, isCreating: false })
     })
-      .then(job => {
-        this.setState({ isCreating: false })
-        // Reset Search Criteria
-        this.props.onSearchCriteriaChange(createSearchCriteria())
-
-        // Release the job
-        this.props.onJobCreated(job)
-      })
-        .catch(algorithmError => {
-            this.setState({ algorithmError, isCreating: false })
-        })
   }
 
   private handleSearchCloudCoverChange(cloudCover) {
@@ -178,17 +197,6 @@ export class CreateJob extends React.Component<Props, State> {
   }
 
   private handleNameChange(name) {
-    this.setState({
-      name,
-      shouldAutogenerateName: !name,
-    })
+    this.setState({ name, shouldAutogenerateName: !name })
   }
-}
-
-//
-// Helpers
-//
-
-function generateName(sceneId): string {
-  return sceneId.replace(/^(rapideye|planetscope|landsat|sentinel):/, '')
 }

@@ -97,10 +97,6 @@ export class ProductLine extends React.Component<Props, State> {
               <dd>{properties.algorithm_name}</dd>
               <dt>Cloud Cover</dt>
               <dd>{properties.max_cloud_cover}% or less</dd>
-              {/*
-              <dt>Compute Mask</dt>
-              <dd>{computeMask}</dd>
-              */}
               <dt>Spatial Filter</dt>
               <dd>{properties.spatial_filter_id || 'None'}</dd>
               <dt>Owner</dt>
