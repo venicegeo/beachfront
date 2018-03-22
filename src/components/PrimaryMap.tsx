@@ -202,6 +202,10 @@ export class PrimaryMap extends React.Component<Props, State> {
       this.updateSelectedFeature()
     }
 
+   // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
+   window['primaryMap'] = this  // tslint:disable-line
+   // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
+
     if (this.props.onMapInitialization) {
       this.props.onMapInitialization({
         hovered: this.hoverInteraction.getFeatures(),
