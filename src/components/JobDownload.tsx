@@ -81,14 +81,12 @@ export class JobDownload extends React.Component<Props, State> {
       mimetype: 'application/x-sqlite3',
       name: 'GeoPackage',
     },
-    /*
     {
-      extension: 'zip',
+      extension: 'shp.zip',
       icon: 'object-ungroup',
       mimetype: 'application/zip',
       name: 'Shapefile',
     },
-    */
   ]
 
   downloads = {}
