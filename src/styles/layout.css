@@ -54,3 +54,19 @@ body {
   right: 0;
   bottom: var(--CLASSIFICATION_BANNER_HEIGHT);
 }
+
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+  /* IE10+ CSS styles go here */
+  .navigation {
+    top: 25px;
+    bottom: 25px;
+  }
+  .sidebar {
+    top: 25px;
+    bottom: 25px;
+  }
+  .map {
+    top: 25px;
+    bottom: 25px;
+  }
+}
