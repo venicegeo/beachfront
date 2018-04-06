@@ -28,25 +28,19 @@ import * as MAP from 'lodash/map'
 import {SUPPORTED_BROWSERS} from '../config'
 
 const styles: any = require('./BrowserSupport.css')
-/*
 const {detect} = require('detect-browser')
-*/
 
 function getState() {
   let rc: any = {
-    /*
     browser: detect(),
-    */
     supported: false,
     hide: JSON.parse(localStorage.getItem('dismissBrowserSupport')),
   }
 
-  /*
   if (rc.browser) {
     let version = SUPPORTED_BROWSERS[rc.browser.name]
     rc.supported = version && parseInt(rc.browser.version) >= version
   }
-  */
 
   return rc
 }
@@ -93,9 +87,8 @@ export class BrowserSupport extends React.Component<any, any> {
         >&times;</div>
 
         <div className={styles.message}>
-          {/*
           Your browser, {this.browserVersion()}, is not supported at this time.
-          */}
+
           Beachfront will work best when used with a supported browser.
         </div>
 
