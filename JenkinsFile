@@ -6,9 +6,25 @@ node {
     def zapHome = tool 'ZAProxy_v2_5_0'
     def nodejs = tool 'NodeJS_6'
 	
+  stage("Config") {
+	// clone the configuration repository and copy the current configuration
+	def configDir = "${root}/configuration"
+	def configFile = "${root}/config.json"
+	dir(configDir) {
+	  git url: "${env.CONFIGURATION_URL}", credentialsId: "${env.CONFIGURATION_CREDS}"
+	  sh "mv ${configDir}/${ENVIRONMENT}-config.json ${configFile}"
+	  deleteDir()
+	}
+	// read the current configuration
+	def configJson = readJSON file: "${configFile}"
+	for (param in configJson.credparams + configJson.jobparams) { 
+	  env."${param.name}" = (param.type == "booleanParam") ? "${param.defaultvalue}".toBoolean() : "${param.defaultvalue}"
+	}
+  }
+  
     stage("Setup") {
         deleteDir()
-        if(env.GITLAB_CREDS) {
+        if(env.USE_GIT_CREDS) {
             git url: "${env.GIT_URL}", branch: "${env.GIT_BRANCH}", credentialsId: "${env.GITLAB_CREDS}"
         } else {
             git url: "${env.GIT_URL}", branch: "${env.GIT_BRANCH}"
@@ -39,7 +55,7 @@ node {
     def appvers = sh(script: """git describe --long --tags --always | sed 's/\\./-/'g""", returnStdout: true)
     appvers = appvers.trim()
     def appName = "beachfront-${appvers}"
-    if(!params.SKIP_XVFB){
+    if(!env.SKIP_XVFB){
       stage("Karma Tests") {
           withEnv(["PATH+=${nodejs}/bin", "NPM_CONFIG_CACHE=${root}/.npmcache", "HOME=${WORKSPACE}"]) {
             withCredentials([[$class: 'UsernamePasswordBinding', credentialsId: "${env.ARTIFACT_STORAGE_CREDS}", variable: 'NPM_AUTH']]) {
@@ -52,7 +68,7 @@ node {
           }
       }
     }
-    if(params.SIDECAR_CONFIG_REPO) {
+    if(env.SIDECAR_CONFIG_REPO) {
         stage("Security Env Extra Configs") {
             sh "mkdir -p .sec-configs"
             dir ("./.sec-configs") {
@@ -61,7 +77,7 @@ node {
             }
         }
     }
-    if(!params.SKIP_SCANS) {
+    if(!env.SKIP_SCANS) {
 		/*stage("Sonar") {
 			withEnv([
 			  "PATH+=${nodejs}/bin",
@@ -176,7 +192,7 @@ node {
                 }
             }
         }
-		if(!params.SKIP_SCANS) {
+		if(!env.SKIP_SCANS) {
 			withCredentials([
 			  [$class: 'StringBinding', credentialsId: "${env.THREADFIX_API_KEY}", variable: "THREADFIX_KEY"]
 			]) {
@@ -212,7 +228,7 @@ node {
             }
         }
     }
-    if(!params.SKIP_INTEGRATION_TESTS) {
+    if(!env.SKIP_INTEGRATION_TESTS) {
         stage("Phase One Integration Tests") {
             if(!fileExists("integration-tests")) {
                 sh "mkdir -p integration-tests"
@@ -237,7 +253,7 @@ node {
             }
         }
     }
-    if(params.DEPLOY_PHASE_TWO) {
+    if(env.DEPLOY_PHASE_TWO) {
         stage("Phase Two Deploy") {
             if(!fileExists('.cf')) {
                 sh "mkdir -p .cf"
@@ -272,7 +288,7 @@ node {
                     }
                 }
             }
-			if(!params.SKIP_SCANS) {
+			if(!env.SKIP_SCANS) {
 				withCredentials([
 				  [$class: 'StringBinding', credentialsId: "${env.THREADFIX_API_KEY}", variable: "THREADFIX_KEY"]
 				]) {
