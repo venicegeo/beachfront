@@ -14,15 +14,6 @@
  * limitations under the License.
  **/
 
-/*
- * Some or all of the commented-out code that follows should be enabled once we
- * get permission to use the NPM module, detect-browser.  It has been initially
- * denied due to FOCI concerns (Australian authorship).  Once approved, add the
- * dependency in package.json and uncomment the required code.
- *
- *     "detect-browser": "2.0.0",
- */
-
 import * as React from 'react'
 import * as MAP from 'lodash/map'
 import {SUPPORTED_BROWSERS} from '../config'
