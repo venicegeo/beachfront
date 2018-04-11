@@ -31,7 +31,7 @@
   padding: 15px 30px;
   position: absolute;
   top: 30%;
-  z-index: 20;
+  z-index: 9999;
 }
 
 .close {

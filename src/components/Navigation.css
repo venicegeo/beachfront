@@ -235,3 +235,10 @@ li.home {
 .atHome .home .icon {
   opacity: 1;
 }
+
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+  /* IE10+ CSS styles go here */
+  .atHome {
+    z-index: 2;
+  }
+}
