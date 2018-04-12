@@ -27,3 +27,11 @@
   font-size: 14px;
   text-align: center;
 }
+
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+  /* IE10+ CSS styles go here */
+  .root {
+    z-index: 9999;
+    line-height: 25px;
+  }
+}
