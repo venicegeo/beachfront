@@ -145,7 +145,5 @@ module.exports = {
 
 if (__environment__ === 'production') {
   module.exports.devtool = 'source-map'
-/*
   module.exports.plugins.push(new webpack.optimize.UglifyJsPlugin({ compress: { warnings: false } }))
-*/
 }
