@@ -14,39 +14,24 @@
  * limitations under the License.
  **/
 
-/*
- * Some or all of the commented-out code that follows should be enabled once we
- * get permission to use the NPM module, detect-browser.  It has been initially
- * denied due to FOCI concerns (Australian authorship).  Once approved, add the
- * dependency in package.json and uncomment the required code.
- *
- *     "detect-browser": "2.0.0",
- */
-
 import * as React from 'react'
 import * as MAP from 'lodash/map'
 import {SUPPORTED_BROWSERS} from '../config'
 
 const styles: any = require('./BrowserSupport.css')
-/*
 const {detect} = require('detect-browser')
-*/
 
 function getState() {
   let rc: any = {
-    /*
     browser: detect(),
-    */
     supported: false,
     hide: JSON.parse(localStorage.getItem('dismissBrowserSupport')),
   }
 
-  /*
   if (rc.browser) {
     let version = SUPPORTED_BROWSERS[rc.browser.name]
     rc.supported = version && parseInt(rc.browser.version) >= version
   }
-  */
 
   return rc
 }
@@ -93,9 +78,8 @@ export class BrowserSupport extends React.Component<any, any> {
         >&times;</div>
 
         <div className={styles.message}>
-          {/*
           Your browser, {this.browserVersion()}, is not supported at this time.
-          */}
+
           Beachfront will work best when used with a supported browser.
         </div>
 
