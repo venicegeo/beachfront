@@ -180,7 +180,7 @@ node {
 					  cf set-env ${appName} DOMAIN ${env.PHASE_ONE_PCF_DOMAIN}
 					  cf set-env ${appName} OSM_BASE_URL ${env.OSM_BASE_URL}
 					  cf set-env ${appName} PLANET_BASE_URL ${env.PLANET_BASE_URL}
-                      cf set-env ${appName} USER_GUIDE_URL https://bf-docs.${env.PHASE_ONE_PCF_DOMAIN}
+                                          cf set-env ${appName} USER_GUIDE_URL https://bf-docs.${env.PHASE_ONE_PCF_DOMAIN}
 					"""
 					sh "cf start ${appName}"
                 } catch (Exception e) {
@@ -274,7 +274,7 @@ node {
 						  cf set-env ${appName} DOMAIN ${env.PHASE_TWO_PCF_DOMAIN}
 						  cf set-env ${appName} OSM_BASE_URL ${env.OSM_BASE_URL}
 						  cf set-env ${appName} PLANET_BASE_URL ${env.PLANET_BASE_URL}
-                          cf set-env ${appName} USER_GUIDE_URL https://bf-docs.${env.PHASE_TWO_PCF_DOMAIN}
+                                                  cf set-env ${appName} USER_GUIDE_URL https://bf-docs.${env.PHASE_TWO_PCF_DOMAIN}
 						"""
 						sh "cf start ${appName}"
                     } catch (Exception e) {
