@@ -131,7 +131,10 @@ node {
             "PATH+=${nodejs}/bin",
             "NPM_CONFIG_CACHE=${root}/.npmcache",
             "NODE_ENV=production",
-            "CONSENT_BANNER_TEXT=${CONSENT_BANNER_TEXT}"
+            "CONSENT_BANNER_TEXT=${CONSENT_BANNER_TEXT}",
+            "OSM_BASE_URL=${env.OSM_BASE_URL}",
+            "PLANET_BASE_URL=${env.PLANET_BASE_URL}",
+            "USER_GUIDE_URL=https://bf-docs.${env.PHASE_ONE_PCF_DOMAIN}"
           ]) {
               sh """
                 npm run build
@@ -178,9 +181,6 @@ node {
 					sh """
 					  cf set-env ${appName} SPACE ${env.PHASE_ONE_PCF_SPACE}
 					  cf set-env ${appName} DOMAIN ${env.PHASE_ONE_PCF_DOMAIN}
-					  cf set-env ${appName} OSM_BASE_URL ${env.OSM_BASE_URL}
-					  cf set-env ${appName} PLANET_BASE_URL ${env.PLANET_BASE_URL}
-                      cf set-env ${appName} USER_GUIDE_URL https://bf-docs.${env.PHASE_ONE_PCF_DOMAIN}
 					"""
 					sh "cf start ${appName}"
                 } catch (Exception e) {
@@ -272,9 +272,6 @@ node {
 						sh """					
 						  cf set-env ${appName} SPACE ${env.PHASE_TWO_PCF_SPACE}
 						  cf set-env ${appName} DOMAIN ${env.PHASE_TWO_PCF_DOMAIN}
-						  cf set-env ${appName} OSM_BASE_URL ${env.OSM_BASE_URL}
-						  cf set-env ${appName} PLANET_BASE_URL ${env.PLANET_BASE_URL}
-                          cf set-env ${appName} USER_GUIDE_URL https://bf-docs.${env.PHASE_TWO_PCF_DOMAIN}
 						"""
 						sh "cf start ${appName}"
                     } catch (Exception e) {
