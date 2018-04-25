@@ -132,9 +132,6 @@ node {
             "NPM_CONFIG_CACHE=${root}/.npmcache",
             "NODE_ENV=production",
             "CONSENT_BANNER_TEXT=${CONSENT_BANNER_TEXT}",
-            "OSM_BASE_URL=${env.OSM_BASE_URL}",
-            "PLANET_BASE_URL=${env.PLANET_BASE_URL}",
-            "USER_GUIDE_URL=https://bf-docs.${env.PHASE_ONE_PCF_DOMAIN}"
           ]) {
               sh """
                 npm run build
