@@ -128,7 +128,7 @@ module.exports = {
       'process.env.CONSENT_BANNER_TEXT': JSON.stringify(process.env.CONSENT_BANNER_TEXT || '<p>Users must accept the terms and conditions of the User Agreement before signing in to Beachfront. Contact us for account help.</p>'),
       'process.env.OSM_BASE_URL': JSON.stringify(process.env.OSM_BASE_URL || 'osm.geointservices.io'),
       'process.env.PLANET_BASE_URL': JSON.stringify(process.env.PLANET_BASE_URL || 'planet.com'),
-      'process.env.USER_GUIDE_URL': "'https://' + location.hostname.replace('beachfront', 'bf-docs')",
+      'process.env.USER_GUIDE_URL': '"https://" + location.hostname.replace("beachfront", "bf-docs")',
     }),
     new HtmlWebpackPlugin({
       template: 'src/index.html',
