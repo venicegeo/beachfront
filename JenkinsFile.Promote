@@ -82,9 +82,6 @@ node {
     try {
         sh "cf set-env ${appName} SPACE ${env.PROMOTE_SPACE}"
         sh "cf set-env ${appName} DOMAIN ${env.PROMOTE_DOMAIN}"
-        sh "cf set-env ${appName} OSM_BASE_URL ${env.OSM_BASE_URL}"
-        sh "cf set-env ${appName} PLANET_BASE_URL ${env.PLANET_BASE_URL}"
-        sh "cf set-env ${appName} USER_GUIDE_URL https://bf-docs.${env.PROMOTE_DOMAIN}"
         sh "cf start ${appName}"
       } catch (Exception e) {
         try {
