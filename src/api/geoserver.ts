@@ -26,7 +26,7 @@ export function lookup(): Promise<Descriptor> {
   const client = getClient()
   return client.get('/')
     .then(response => ({
-      wmsUrl: response.data.geoserver.replace('https:', 'http:') + '/wms',  // HACK
+      wmsUrl: response.data.geoserver + '/wms',
     }))
     .catch(err => {
       console.error('(geoserver:lookup) failed:', err)
