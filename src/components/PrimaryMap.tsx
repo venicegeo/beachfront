@@ -957,7 +957,7 @@ function generateControls() {
 
 function generateDetectionsSource(wmsUrl, feature: beachfront.Job|beachfront.ProductLine) {
   return new TileWMS({
-    detectionTileLoadFunction,
+    tileLoadFunction: detectionTileLoadFunction,
     crossOrigin: 'anonymous',
     url: wmsUrl,
     projection: WEB_MERCATOR,
