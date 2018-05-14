@@ -957,7 +957,7 @@ function generateControls() {
 
 function generateDetectionsSource(wmsUrl, feature: beachfront.Job|beachfront.ProductLine) {
   return new TileWMS({
-    tileLoadFunction,
+    detectionTileLoadFunction,
     crossOrigin: 'anonymous',
     url: wmsUrl,
     projection: WEB_MERCATOR,
@@ -1233,5 +1233,21 @@ function tileLoadFunction(imageTile, src) {
     imageTile.getImage().src = tileErrorPlaceholder
   } else {
     imageTile.getImage().src = src
+  }
+}
+
+function detectionTileLoadFunction(imageTile, src) {
+  if (imageTile.loadingError) {
+    delete imageTile.loadingError
+    imageTile.getImage().src = tileErrorPlaceholder
+  } else {
+    const client = new XMLHttpRequest()
+    client.open('GET', src)
+    client.setRequestHeader('Authorization', 'Basic ' + btoa(localStorage.getItem('api_key')))
+    src.on('tileloadstart', function() {
+      const data = 'data:image/png;base64,' + btoa(unescape(encodeURIComponent(src)))
+      imageTile.getImage().src = data
+    })
+    client.send()
   }
 }
