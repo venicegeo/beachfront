@@ -1244,15 +1244,24 @@ function detectionTileLoadFunction(imageTile, src) {
     const client = new XMLHttpRequest()
     client.open('GET', src)
     client.withCredentials = true
+    client.setRequestHeader('X-Requested-With', 'XMLHttpRequest')
     const apiKey = getCookie('api_key')
-    client.setRequestHeader('Authorization', 'Basic ' + btoa(apiKey))
+    const auth = 'Basic ' + btoa(apiKey + ':')
+    client.setRequestHeader('Authorization', auth)
     // client.responseType = 'arraybuffer'
     client.onload = function() {
-      const data = 'data:image/png;base64,' + btoa(decodeURIComponent(encodeURIComponent(client.response)))
+      const data = 'data:image/png;base64,' + b64EncodeUnicode(client.response)
       imageTile.getImage().src = data
     }
     client.send()
   }
+}
+
+function b64EncodeUnicode(str) {
+  return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function(match, p1) {
+    console.log(match)
+    return String.fromCharCode(parseInt(p1, 16))
+  }))
 }
 
 function getCookie(name) {
