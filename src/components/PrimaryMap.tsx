@@ -1244,10 +1244,11 @@ function detectionTileLoadFunction(imageTile, src) {
     const client = new XMLHttpRequest()
     client.open('GET', src)
     client.setRequestHeader('Authorization', 'Basic ' + btoa(localStorage.getItem('api_key')))
-    src.on('tileloadstart', function() {
-      const data = 'data:image/png;base64,' + btoa(unescape(encodeURIComponent(src)))
+    // client.responseType = 'arraybuffer'
+    client.onload = function() {
+      const data = 'data:image/png;base64,' + btoa(decodeURIComponent(encodeURIComponent(imageBytes)))
       imageTile.getImage().src = data
-    })
+    }
     client.send()
   }
 }
