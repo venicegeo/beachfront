@@ -1243,12 +1243,22 @@ function detectionTileLoadFunction(imageTile, src) {
   } else {
     const client = new XMLHttpRequest()
     client.open('GET', src)
-    client.setRequestHeader('Authorization', 'Basic ' + btoa(localStorage.getItem('api_key')))
+    client.withCredentials = true
+    const apiKey = getCookie('api_key')
+    client.setRequestHeader('Authorization', 'Basic ' + btoa(apiKey))
     // client.responseType = 'arraybuffer'
     client.onload = function() {
-      const data = 'data:image/png;base64,' + btoa(decodeURIComponent(encodeURIComponent(imageBytes)))
+      const data = 'data:image/png;base64,' + btoa(decodeURIComponent(encodeURIComponent(client.response)))
       imageTile.getImage().src = data
     }
     client.send()
   }
+}
+
+function getCookie(name) {
+  const match = document.cookie.match(new RegExp(name + '=([^;]+)'))
+  if (match) {
+    return match[1]
+  }
+  return null
 }
