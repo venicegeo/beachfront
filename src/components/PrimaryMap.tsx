@@ -957,7 +957,7 @@ function generateControls() {
 
 function generateDetectionsSource(wmsUrl, feature: beachfront.Job|beachfront.ProductLine) {
   return new TileWMS({
-    tileLoadFunction,
+    tileLoadFunction: detectionTileLoadFunction,
     crossOrigin: 'anonymous',
     url: wmsUrl,
     projection: WEB_MERCATOR,
@@ -1234,4 +1234,36 @@ function tileLoadFunction(imageTile, src) {
   } else {
     imageTile.getImage().src = src
   }
+}
+
+function detectionTileLoadFunction(imageTile, src) {
+  if (imageTile.loadingError) {
+    delete imageTile.loadingError
+    imageTile.getImage().src = tileErrorPlaceholder
+  } else {
+    const client = new XMLHttpRequest()
+    client.open('GET', src)
+    client.withCredentials = true
+    client.setRequestHeader('X-Requested-With', 'XMLHttpRequest')
+    const apiKey = getCookie('api_key')
+    const auth = 'Basic ' + btoa(apiKey + ':')
+    client.setRequestHeader('Authorization', auth)
+    client.responseType = 'arraybuffer'
+    client.onload = function() {
+      const arrayBufferView = new Uint8Array(client.response)
+      const blob = new Blob([arrayBufferView], { type: 'image/png' })
+      const urlCreator = window.URL
+      const imageUrl = urlCreator.createObjectURL(blob)
+      imageTile.getImage().src = imageUrl
+    }
+    client.send()
+  }
+}
+
+function getCookie(name) {
+  const match = document.cookie.match(new RegExp(name + '=([^;]+)'))
+  if (match) {
+    return match[1]
+  }
+  return null
 }
