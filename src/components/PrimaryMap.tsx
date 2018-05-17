@@ -1241,8 +1241,7 @@ function detectionTileLoadFunction(imageTile, src) {
     delete imageTile.loadingError
     imageTile.getImage().src = tileErrorPlaceholder
   } else {
-    imageTile.getImage().src = src
-    /*const client = new XMLHttpRequest()
+    const client = new XMLHttpRequest()
     client.open('GET', src)
     client.withCredentials = true
     client.setRequestHeader('X-Requested-With', 'XMLHttpRequest')
@@ -1257,14 +1256,14 @@ function detectionTileLoadFunction(imageTile, src) {
       const imageUrl = urlCreator.createObjectURL(blob)
       imageTile.getImage().src = imageUrl
     }
-    client.send()*/
+    client.send()
   }
 }
 
-/*function getCookie(name) {
+function getCookie(name) {
   const match = document.cookie.match(new RegExp(name + '=([^;]+)'))
   if (match) {
     return match[1]
   }
   return null
-}*/
+}
