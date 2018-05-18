@@ -380,7 +380,7 @@ export class UserTour extends React.Component<any, any> {
         verticalOffset: 21,
         title: <div className={styles.title}>Search for Imagery</div>,
         body: <div className={styles.body}>
-          Just click the button to submit the job.
+          Just click the button to perform the search.
         </div>,
         after() {
           if (this.props.application.state.searchResults) {
@@ -423,7 +423,7 @@ export class UserTour extends React.Component<any, any> {
         body: <div className={styles.body}>
           Here are outlines of the <ImageCount tour={this}/>
           matching the search criteria.  Click on one to load the image
-          itself&hellip; For now, we&apos;ll select one for you for now.
+          itself&hellip; For now, we&apos;ll select one for you.
         </div>,
         after() {
           return new Promise(resolve => {
@@ -524,7 +524,8 @@ export class UserTour extends React.Component<any, any> {
       {
         step: 16,
         selector: '.JobStatusList-root .JobStatus-isActive .JobStatus-metadata',
-        position: 'right',
+        position: 'top',
+        verticalOffset: 20,
         title: <div className={styles.title}>Job Details</div>,
         body: <div className={styles.body}>
           The details will give you information about the job and its imagery.
@@ -570,12 +571,12 @@ export class UserTour extends React.Component<any, any> {
         step: 19,
         selector: `.JobStatusList-root .JobStatus-isActive`,
         position: 'right',
+        verticalOffset: 15,
         title: <div className={styles.title}>Other Job Actions</div>,
         body: <div className={styles.body}>
           There are other actions that you can take on the job from here.
-          For example, once the job has sucessfully completed there will be
-          icons here to download the job, either in GeoJSON or GeoPackage
-          format.
+          For example, once the job has successfully completed there will be
+          icons here to download the job in various formats.
         </div>,
         before: this.expandJobStatus,
       },
