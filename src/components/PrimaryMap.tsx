@@ -98,7 +98,7 @@ const KEY_OWNER_ID = 'OWNER_ID'
 const KEY_STATUS = 'status'
 const KEY_STYLES = 'STYLES'
 const KEY_TYPE = 'type'
-const KEY_VIEWPARAMS = 'VIEWPARAMS'
+const KEY_ENV = 'env'
 const TYPE_DIVOT_INBOARD = 'DIVOT_INBOARD'
 const TYPE_DIVOT_OUTBOARD = 'DIVOT_OUTBOARD'
 const TYPE_LABEL_MAJOR = 'LABEL_MAJOR'
@@ -964,7 +964,7 @@ function generateDetectionsSource(wmsUrl, feature: beachfront.Job|beachfront.Pro
     params: {
       [KEY_LAYERS]: IDENTIFIER_DETECTIONS,
       [KEY_STYLES]: IDENTIFIER_DETECTIONS,
-      [KEY_VIEWPARAMS]: (feature.properties.type === TYPE_JOB ? 'jobid:' : 'productlineid:') + feature.id,  // HACK
+      [KEY_ENV]: (feature.properties.type === TYPE_JOB ? 'jobid:' : 'productlineid:') + feature.id,  // HACK
     },
   })
 }
