@@ -76,6 +76,7 @@ import {
   STATUS_FAIL,
   STATUS_INACTIVE,
   STATUS_PENDING,
+  STATUS_ACTIVATING,
   STATUS_RUNNING,
   STATUS_SUCCESS,
   STATUS_TIMED_OUT,
@@ -1208,6 +1209,7 @@ function generateSelectInteraction(...layers) {
 function getColorForStatus(status) {
   switch (status) {
     case STATUS_ACTIVE: return 'hsl(200, 94%, 54%)'
+    case STATUS_ACTIVATING: return 'hsl(300, 100%, 74%)'
     case STATUS_INACTIVE: return 'hsl(0, 0%, 50%)'
     case STATUS_PENDING:
     case STATUS_RUNNING: return 'hsl(48, 94%, 54%)'
