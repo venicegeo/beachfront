@@ -28,6 +28,7 @@ const pkg = require('./package')
 
 const __environment__ = process.env.NODE_ENV || 'development'
 const COMPILER_TARGET = process.env.COMPILER_TARGET || (__environment__ === 'development' ? 'es6' : 'es5')
+const enableSourceMaps = process.env.ENABLE_SOURCE_MAPS || 'true'
 
 module.exports = {
   devtool: '#cheap-module-eval-source-map',
@@ -143,7 +144,7 @@ module.exports = {
   ]
 }
 
-if (__environment__ === 'production') {
+if (__environment__ === 'production' && enableSourceMaps === 'true') {
   module.exports.devtool = 'source-map'
   module.exports.plugins.push(new webpack.optimize.UglifyJsPlugin({ sourceMap: true, compress: { warnings: false } }))
 }
