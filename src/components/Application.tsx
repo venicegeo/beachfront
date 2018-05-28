@@ -177,6 +177,13 @@ export class Application extends React.Component<Props, State> {
   }
 
   render() {
+    const allowedEndpoints = [
+      '/jobs',
+      '/create-job',
+      '/product-lines',
+      '/create-product-line',
+    ]
+    const shrunk = allowedEndpoints.indexOf(this.state.route.pathname) > -1
     return (
       <div className={styles.root}>
         <ClassificationBanner anchor="top"/>
@@ -198,7 +205,7 @@ export class Application extends React.Component<Props, State> {
           mode={this.mapMode}
           ref="map"
           selectedFeature={this.state.selectedFeature}
-          shrunk={this.state.route.pathname !== '/'}
+          shrunk={shrunk}
           view={this.state.mapView}
           wmsUrl={this.state.geoserver.wmsUrl}
           onBoundingBoxChange={this.handleBoundingBoxChange}
