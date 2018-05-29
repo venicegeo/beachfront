@@ -190,6 +190,7 @@ export class Application extends React.Component<Props, State> {
         <BrowserSupport/>
         <Navigation
           activeRoute={this.state.route}
+          shrunk={shrunk}
           onClick={this.navigateTo}
           startTour={this.startTour}
         />

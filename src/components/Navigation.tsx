@@ -33,12 +33,13 @@ const Icon = ({ path, size = 40 }) => (
 
 interface Props {
   activeRoute: { pathname: string, search: string, hash: string }
+  shrunk: boolean
   onClick(loc: { pathname: string, search: string, hash: string }): void
   startTour(): void
 }
 
-export const Navigation = ({ activeRoute, onClick, startTour }: Props) => (
-  <nav className={`${styles.root} ${activeRoute.pathname === '/' ? styles.atHome : ''}`}>
+export const Navigation = ({ activeRoute, onClick, startTour, shrunk }: Props) => (
+  <nav className={`${styles.root} ${!shrunk ? styles.atHome : ''}`}>
     <Link pathname="/about" onClick={onClick}>
       <img className={styles.brand} src={brand} alt="Beachfront"/>
     </Link>
