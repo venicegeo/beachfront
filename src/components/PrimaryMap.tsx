@@ -17,6 +17,7 @@
 require('ol/ol.css')
 const styles: any = require('./PrimaryMap.css')
 const tileErrorPlaceholder: string = require('../images/tile-error.png')
+const missingKeyPlaceholder: string = require('../images/tile-missing-key.png')
 
 import * as React from 'react'
 import {findDOMNode} from 'react-dom'
@@ -1227,10 +1228,20 @@ function toPreviewable(features: Array<beachfront.Job|beachfront.Scene>) {
   }))
 }
 
+function getPlaceholder() {
+  let placeholder = ''
+  if (localStorage.getItem('catalog_apiKey')) {
+    placeholder = tileErrorPlaceholder
+  } else {
+    placeholder = missingKeyPlaceholder
+  }
+  return placeholder
+}
+
 function tileLoadFunction(imageTile, src) {
   if (imageTile.loadingError) {
     delete imageTile.loadingError
-    imageTile.getImage().src = tileErrorPlaceholder
+    imageTile.getImage().src = getPlaceholder()
   } else {
     imageTile.getImage().src = src
   }
@@ -1239,7 +1250,7 @@ function tileLoadFunction(imageTile, src) {
 function detectionTileLoadFunction(imageTile, src) {
   if (imageTile.loadingError) {
     delete imageTile.loadingError
-    imageTile.getImage().src = tileErrorPlaceholder
+    imageTile.getImage().src = getPlaceholder()
   } else {
     const client = new XMLHttpRequest()
     client.open('GET', src)
