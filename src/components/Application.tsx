@@ -530,11 +530,14 @@ export class Application extends React.Component<Props, State> {
       bbox: this.state.bbox,
       catalogApiKey: this.state.catalogApiKey,
       ...this.state.searchCriteria,
-    }).then(searchResults => this.setState({
-      searchResults,
-      searchError: null,
-      isSearching: false,
-    })).catch(searchError => this.setState({
+    }).then(searchResults => {
+      this.setState({
+        searchResults,
+        searchError: null,
+        isSearching: false,
+      })
+      scrollIntoView('.ImagerySearchList-results')
+    }).catch(searchError => this.setState({
       searchError,
       isSearching: false,
     }))
@@ -776,4 +779,52 @@ function generateRoute({ pathname = '/', search = '', hash = '' }): Route {
     href: pathname + search + hash,
     jobIds: search.substr(1).split('&').filter(s => s.startsWith('jobId')).map(s => s.replace('jobId=', '')),
   }
+}
+
+function isElementInViewport(elem): boolean {
+  const box = elem.getBoundingClientRect()
+  const bannerHeight = 25
+  const client = {
+    height: (window.innerHeight || document.documentElement.clientHeight),
+    width: (window.innerWidth || document.documentElement.clientWidth),
+  }
+
+  return box.top >= bannerHeight
+    && box.left >= 0
+    && parseInt(box.bottom) <= client.height - bannerHeight
+    && parseInt(box.right) <= client.width
+}
+
+function query(selector: string): HTMLElement {
+  return document.querySelector(selector) as HTMLElement
+}
+
+function scrollIntoView(selector: any): Promise<any> {
+  return new Promise((resolve, reject) => {
+    let elem = typeof selector === 'string' ? query(selector) : selector
+
+    if (elem) {
+      if (isElementInViewport(elem)) {
+        resolve()
+      } else {
+        elem.scrollIntoView(true, { behavior: 'smooth' })
+
+        let timeout = 10000
+        let t0 = Date.now()
+        let interval = setInterval(() => {
+          if (isElementInViewport(elem)) {
+            clearInterval(interval)
+            setTimeout(resolve, 100)
+          } else if (Date.now() - t0 > timeout) {
+            clearInterval(interval)
+            reject(`Timed out after ${timeout / 1000} seconds scrolling ${selector} into view.`)
+          }
+        }, 100)
+      }
+    } else {
+      let message = `The DOM element, "${selector}", is not available.`
+      console.warn(message)
+      reject(message)
+    }
+  })
 }
