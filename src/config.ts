@@ -54,16 +54,16 @@ export const SCENE_TILE_PROVIDERS = [
     maxZoom:  13,
     name: 'Copernicus Sentinel-2',
     prefix: 'sentinel',
-    catalogSection: 'planet', // look in /planet/* in the catalog
+    catalogSection: 'planet', // Look in /planet/* in the catalog
     provider: 'Planet',
     url: `https://tiles{0-3}.${PLANET_BASE_URL}/v1/experimental/tiles/Sentinel2L1C/__SCENE_ID__/{z}/{x}/{y}.png?api_key=__API_KEY__`,
   },
   {
     attributions: '&copy; <a href="https://www.planet.com" target="_blank" rel="noopener">Planet Labs (Landsat8)</a>',
     maxZoom:  13,
-    name: 'Landsat8',
+    name: 'Landsat8 (Planet)',
     prefix: 'landsat',
-    catalogSection: 'planet', // look in /planet/* in the catalog
+    catalogSection: 'planet', // Look in /planet/* in the catalog
     provider: 'Planet',
     url: `https://tiles{0-3}.${PLANET_BASE_URL}/v1/experimental/tiles/Landsat8L1G/__SCENE_ID__/{z}/{x}/{y}.png?api_key=__API_KEY__`,
   },
@@ -72,7 +72,7 @@ export const SCENE_TILE_PROVIDERS = [
     maxZoom:  13,
     name: 'RapidEye',
     prefix: 'rapideye',
-    catalogSection: 'planet', // look in /planet/* in the catalog
+    catalogSection: 'planet', // Look in /planet/* in the catalog
     provider: 'Planet',
     url: `https://tiles{0-3}.${PLANET_BASE_URL}/v1/experimental/tiles/REOrthoTile/__SCENE_ID__/{z}/{x}/{y}.png?api_key=__API_KEY__`,
   },
@@ -81,10 +81,20 @@ export const SCENE_TILE_PROVIDERS = [
     maxZoom:  13,
     name: 'PlanetScope',
     prefix: 'planetscope',
-    catalogSection: 'planet', // look in /planet/* in the catalog
+    catalogSection: 'planet', // Look in /planet/* in the catalog
     provider: 'Planet',
     url: `https://tiles{0-3}.${PLANET_BASE_URL}/v1/experimental/tiles/PSOrthoTile/__SCENE_ID__/{z}/{x}/{y}.png?api_key=__API_KEY__`,
   },
+  {
+    attributions: '<a href="https://docs.opendata.aws/landsat-pds/readme.html">Landsat PDS</a>',
+    maxZoom:  13,
+    name: 'Landsat8 (Public Data Set)',
+    prefix: 'landsat_localindex',
+    catalogSection: 'localindex', // Look in /localindex/* in the catalog
+    provider: 'Landsat PDS',
+    url: `${IMAGERY_ENDPOINT}/tiles/landsat/__SCENE_ID__/{z}/{x}/{y}.jpg`,
+  },
+
 ]
 
 export const TOUR = {
