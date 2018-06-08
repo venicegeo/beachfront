@@ -61,7 +61,7 @@ export const SCENE_TILE_PROVIDERS = [
   {
     attributions: '&copy; <a href="https://www.planet.com" target="_blank" rel="noopener">Planet Labs (Landsat8)</a>',
     maxZoom:  13,
-    name: 'Landsat8 (Planet)',
+    name: 'Landsat8',
     prefix: 'landsat',
     catalogSection: 'planet', // Look in /planet/* in the catalog
     provider: 'Planet',
@@ -88,11 +88,11 @@ export const SCENE_TILE_PROVIDERS = [
   {
     attributions: '<a href="https://docs.opendata.aws/landsat-pds/readme.html">Landsat PDS</a>',
     maxZoom:  13,
-    name: 'Landsat8 (Public Data Set)',
-    prefix: 'landsat_localindex',
+    name: 'Landsat8',
+    prefix: 'landsat_pds',
     catalogSection: 'localindex', // Look in /localindex/* in the catalog
-    provider: 'Landsat PDS',
-    url: `${IMAGERY_ENDPOINT}/tiles/landsat/__SCENE_ID__/{z}/{x}/{y}.jpg`,
+    provider: 'Public Data Set',
+    url: `${IMAGERY_ENDPOINT}/tiles/landsat_pds/__SCENE_ID__/{z}/{x}/{y}.jpg`,
   },
 
 ]
