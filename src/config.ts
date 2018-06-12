@@ -92,7 +92,7 @@ export const SCENE_TILE_PROVIDERS = [
     prefix: 'landsat_pds',
     catalogSection: 'localindex', // Look in /localindex/* in the catalog
     provider: 'Public Data Set',
-    url: `${API_ROOT}${IMAGERY_ENDPOINT}/tiles/landsat_pds/__SCENE_ID__/{z}/{x}/{y}.jpg`,
+    url: `${API_ROOT}${IMAGERY_ENDPOINT}/localindex/tiles/landsat_pds/__SCENE_ID__/{z}/{x}/{y}.jpg`,
   },
 
 ]
