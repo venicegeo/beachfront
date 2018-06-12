@@ -21,7 +21,7 @@ export const OSM_BASE_URL                     = process.env.OSM_BASE_URL
 export const PLANET_BASE_URL                  = process.env.PLANET_BASE_URL
 export const USER_GUIDE_URL                   = process.env.USER_GUIDE_URL
 
-export const API_ROOT = process.env.API_ROOT
+export const API_ROOT = process.env.API_ROOT + (process.env.API_ROOT.endsWith("/") ? "" : "/")
 export const CONSENT_BANNER_TEXT = {__html: process.env.CONSENT_BANNER_TEXT}
 
 const time = {millisecond: 1, second: 1000, minute: 60000}
@@ -92,7 +92,7 @@ export const SCENE_TILE_PROVIDERS = [
     prefix: 'landsat_pds',
     catalogSection: 'localindex', // Look in /localindex/* in the catalog
     provider: 'Public Data Set',
-    url: `${API_ROOT}/${IMAGERY_ENDPOINT}/tiles/landsat_pds/__SCENE_ID__/{z}/{x}/{y}.jpg`,
+    url: `${API_ROOT}${IMAGERY_ENDPOINT}/tiles/landsat_pds/__SCENE_ID__/{z}/{x}/{y}.jpg`,
   },
 
 ]
