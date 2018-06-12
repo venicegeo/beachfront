@@ -54,6 +54,7 @@ export const SCENE_TILE_PROVIDERS = [
     maxZoom:  13,
     name: 'Copernicus Sentinel-2',
     prefix: 'sentinel',
+    catalogSection: 'planet', // Look in /planet/* in the catalog
     provider: 'Planet',
     url: `https://tiles{0-3}.${PLANET_BASE_URL}/v1/experimental/tiles/Sentinel2L1C/__SCENE_ID__/{z}/{x}/{y}.png?api_key=__API_KEY__`,
   },
@@ -62,6 +63,7 @@ export const SCENE_TILE_PROVIDERS = [
     maxZoom:  13,
     name: 'Landsat8',
     prefix: 'landsat',
+    catalogSection: 'planet', // Look in /planet/* in the catalog
     provider: 'Planet',
     url: `https://tiles{0-3}.${PLANET_BASE_URL}/v1/experimental/tiles/Landsat8L1G/__SCENE_ID__/{z}/{x}/{y}.png?api_key=__API_KEY__`,
   },
@@ -70,6 +72,7 @@ export const SCENE_TILE_PROVIDERS = [
     maxZoom:  13,
     name: 'RapidEye',
     prefix: 'rapideye',
+    catalogSection: 'planet', // Look in /planet/* in the catalog
     provider: 'Planet',
     url: `https://tiles{0-3}.${PLANET_BASE_URL}/v1/experimental/tiles/REOrthoTile/__SCENE_ID__/{z}/{x}/{y}.png?api_key=__API_KEY__`,
   },
@@ -78,9 +81,20 @@ export const SCENE_TILE_PROVIDERS = [
     maxZoom:  13,
     name: 'PlanetScope',
     prefix: 'planetscope',
+    catalogSection: 'planet', // Look in /planet/* in the catalog
     provider: 'Planet',
     url: `https://tiles{0-3}.${PLANET_BASE_URL}/v1/experimental/tiles/PSOrthoTile/__SCENE_ID__/{z}/{x}/{y}.png?api_key=__API_KEY__`,
   },
+  {
+    attributions: '<a href="https://docs.opendata.aws/landsat-pds/readme.html">Landsat PDS</a>',
+    maxZoom:  13,
+    name: 'Landsat8',
+    prefix: 'landsat_pds',
+    catalogSection: 'localindex', // Look in /localindex/* in the catalog
+    provider: 'Public Data Set',
+    url: `${IMAGERY_ENDPOINT}/tiles/landsat_pds/__SCENE_ID__/{z}/{x}/{y}.jpg`,
+  },
+
 ]
 
 export const TOUR = {

@@ -56,8 +56,9 @@ export function search({
 }): Promise<beachfront.ImageryCatalogPage> {
   console.warn('(catalog:search): Discarding parameters `count` (%s) and `startIndex` (%s)', count, startIndex)
 
-  if (SCENE_TILE_PROVIDERS.find(p => p.prefix === source)) {
-    return _client.get(`${IMAGERY_ENDPOINT}/discover/${source}`, {
+  let sceneTileProvider = SCENE_TILE_PROVIDERS.find(p => p.prefix === source)
+  if (!!sceneTileProvider) {
+    return _client.get(`${IMAGERY_ENDPOINT}/${sceneTileProvider.catalogSection}/discover/${source}`, {
       params: {
         cloudCover:      cloudCover + .05,
         PL_API_KEY:      catalogApiKey,
