@@ -56,7 +56,7 @@ export class ImagerySearchList extends React.Component<Props, State> {
     const compareCloudCover = (a, b) => a.properties.cloudCover - b.properties.cloudCover
     const compareSensorName = (a, b) => a.properties.sensorName < b.properties.sensorName ? -1 : a.properties.sensorName > b.properties.sensorName ? 1 : 0
 
-    const compare = this.compare = {
+    this.compare = {
       acquiredDate(a, b) {
         return compareAcquiredDate(a, b) || compareBbox(a, b)
       },
