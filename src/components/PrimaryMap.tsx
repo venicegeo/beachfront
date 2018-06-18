@@ -792,21 +792,11 @@ export class PrimaryMap extends React.Component<Props, State> {
         let layer: Tile
 
         if (provider.isXYZProvider) {
-          console.log("Creating static image preview");
-          console.log(f);
-          console.log(provider);
-          console.log(externalId);
-          console.log(catalogApiKey);
           layer = new Tile({
             extent: f.extent,
             source: generateXYZScenePreviewSource(provider, externalId, catalogApiKey),
           })
-        } else {
-          console.log("Creating static image preview");
-          console.log(f);
-          console.log(provider);
-          console.log(externalId);
-          console.log(catalogApiKey);
+        } else {     
           layer = new Image({
             source: generateImageStaticScenePreviewSource(provider, externalId, f.extent, catalogApiKey),
           })
@@ -1269,6 +1259,7 @@ function getPlaceholder() {
 }
 
 function tileLoadFunction(imageTile, src) {
+  console.log("tileLoadFunction", imageTile, src)
   if (imageTile.loadingError) {
     delete imageTile.loadingError
     imageTile.getImage().src = getPlaceholder()
