@@ -1204,7 +1204,7 @@ function generateImageStaticScenePreviewSource(provider, imageId, extent, apiKey
   return new ImageStatic(Object.assign({}, provider, {
     crossOrigin: 'anonymous',
     imageLoadFunction: tileLoadFunction,
-    projection: WGS84,
+    projection: WEB_MERCATOR,
     url: provider.url.replace('__SCENE_ID__', imageId).replace('__API_KEY__', apiKey),
     imageExtent: extent,
   }))
