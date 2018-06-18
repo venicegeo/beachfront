@@ -792,11 +792,21 @@ export class PrimaryMap extends React.Component<Props, State> {
         let layer: Tile
 
         if (provider.isXYZProvider) {
+          console.log("Creating static image preview");
+          console.log(f);
+          console.log(provider);
+          console.log(externalId);
+          console.log(catalogApiKey);
           layer = new Tile({
             extent: f.extent,
             source: generateXYZScenePreviewSource(provider, externalId, catalogApiKey),
           })
         } else {
+          console.log("Creating static image preview");
+          console.log(f);
+          console.log(provider);
+          console.log(externalId);
+          console.log(catalogApiKey);
           layer = new Image({
             extent: f.extent,
             source: generateImageStaticScenePreviewSource(provider, externalId, catalogApiKey),
