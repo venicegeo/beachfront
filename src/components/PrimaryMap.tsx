@@ -55,6 +55,8 @@ import XYZ from 'ol/source/xyz'
 import Fill from 'ol/style/fill'
 import Text from 'ol/style/text'
 import View from 'ol/view'
+import Image from 'ol/layer/image';
+import ImageStatic from 'ol/source/imagestatic'
 import * as debounce from 'lodash/debounce'
 import * as throttle from 'lodash/throttle'
 import {ExportControl} from '../utils/openlayers.ExportControl'
@@ -787,10 +789,18 @@ export class PrimaryMap extends React.Component<Props, State> {
         }
 
         const {catalogApiKey} = this.props
-        const layer = new Tile({
-          extent: f.extent,
-          source: generateScenePreviewSource(provider, externalId, catalogApiKey),
-        })
+        let layer: Tile
+
+        if (provider.isXYZProvider) {
+          layer = new Tile({
+            extent: f.extent,
+            source: generateXYZScenePreviewSource(provider, externalId, catalogApiKey),
+          })
+        } else {
+          layer = new Image({
+            source: generateImageStaticScenePreviewSource(provider, externalId, catalogApiKey),
+          })
+        }
 
         this.subscribeToLoadEvents(layer)
         this.previewLayers[f.sceneId] = layer
@@ -1180,10 +1190,19 @@ function generateImageSearchResultsOverlay(componentRef) {
   })
 }
 
-function generateScenePreviewSource(provider, imageId, apiKey) {
+function generateXYZScenePreviewSource(provider, imageId, apiKey) {
   return new XYZ(Object.assign({}, provider, {
     crossOrigin: 'anonymous',
     tileLoadFunction,
+    url: provider.url.replace('__SCENE_ID__', imageId).replace('__API_KEY__', apiKey),
+  }))
+}
+
+function generateImageStaticScenePreviewSource(provider, imageId, apiKey) {
+  return new ImageStatic(Object.assign({}, provider, {
+    crossOrigin: 'anonymous',
+    imageLoadFunction: tileLoadFunction,
+    projection: WGS84,
     url: provider.url.replace('__SCENE_ID__', imageId).replace('__API_KEY__', apiKey),
   }))
 }
