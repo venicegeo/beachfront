@@ -796,11 +796,13 @@ export class PrimaryMap extends React.Component<Props, State> {
             extent: f.extent,
             source: generateXYZScenePreviewSource(provider, externalId, catalogApiKey),
           })
-        } else {     
+        } else {
           layer = new Image({
             source: generateImageStaticScenePreviewSource(provider, externalId, f.extent, catalogApiKey),
           })
         }
+
+        console.log("Created preview layer", layer)
 
         this.subscribeToLoadEvents(layer)
         this.previewLayers[f.sceneId] = layer
