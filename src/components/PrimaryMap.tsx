@@ -798,6 +798,7 @@ export class PrimaryMap extends React.Component<Props, State> {
           })
         } else {
           layer = new Image({
+            extent: f.extent,
             source: generateImageStaticScenePreviewSource(provider, externalId, catalogApiKey),
           })
         }
