@@ -87,8 +87,8 @@ export const SCENE_TILE_PROVIDERS = [
   },
   {
     attributions: '<a href="https://docs.opendata.aws/landsat-pds/readme.html">Landsat PDS</a>',
-    minZoom:  5,
-    maxZoom:  5,
+    minZoom:  11,
+    maxZoom:  11,
     name: 'Landsat8',
     prefix: 'landsat_pds',
     catalogSection: 'localindex', // Look in /localindex/* in the catalog
