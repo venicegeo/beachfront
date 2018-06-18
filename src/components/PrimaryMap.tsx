@@ -808,8 +808,7 @@ export class PrimaryMap extends React.Component<Props, State> {
           console.log(externalId);
           console.log(catalogApiKey);
           layer = new Image({
-            extent: f.extent,
-            source: generateImageStaticScenePreviewSource(provider, externalId, catalogApiKey),
+            source: generateImageStaticScenePreviewSource(provider, externalId, f.extent, catalogApiKey),
           })
         }
 
@@ -1209,12 +1208,13 @@ function generateXYZScenePreviewSource(provider, imageId, apiKey) {
   }))
 }
 
-function generateImageStaticScenePreviewSource(provider, imageId, apiKey) {
+function generateImageStaticScenePreviewSource(provider, imageId, extent, apiKey) {
   return new ImageStatic(Object.assign({}, provider, {
     crossOrigin: 'anonymous',
     imageLoadFunction: tileLoadFunction,
     projection: WGS84,
     url: provider.url.replace('__SCENE_ID__', imageId).replace('__API_KEY__', apiKey),
+    imageExtent: extent,
   }))
 }
 
