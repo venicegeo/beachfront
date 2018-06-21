@@ -17,7 +17,7 @@
 import axios, {AxiosInstance} from 'axios'
 import {API_ROOT} from '../config'
 
-export const DEFAULT_TIMEOUT = 30000
+export const DEFAULT_TIMEOUT = 60000
 const DEFAULT_ENTRY_URL = '/'
 
 let _client: AxiosInstance,
