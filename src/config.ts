@@ -58,6 +58,7 @@ export const SCENE_TILE_PROVIDERS = [
     provider: 'Planet',
     url: `https://tiles{0-3}.${PLANET_BASE_URL}/v1/experimental/tiles/Sentinel2L1C/__SCENE_ID__/{z}/{x}/{y}.png?api_key=__API_KEY__`,
     isXYZProvider: true,
+    hideApiKeyInput: false,
   },
   {
     attributions: '&copy; <a href="https://www.planet.com" target="_blank" rel="noopener">Planet Labs (Landsat8)</a>',
@@ -68,6 +69,7 @@ export const SCENE_TILE_PROVIDERS = [
     provider: 'Planet',
     url: `https://tiles{0-3}.${PLANET_BASE_URL}/v1/experimental/tiles/Landsat8L1G/__SCENE_ID__/{z}/{x}/{y}.png?api_key=__API_KEY__`,
     isXYZProvider: true,
+    hideApiKeyInput: false,
   },
   {
     attributions: '&copy; <a href="https://www.planet.com" target="_blank" rel="noopener">Planet Labs (RapidEye)</a>',
@@ -78,6 +80,7 @@ export const SCENE_TILE_PROVIDERS = [
     provider: 'Planet',
     url: `https://tiles{0-3}.${PLANET_BASE_URL}/v1/experimental/tiles/REOrthoTile/__SCENE_ID__/{z}/{x}/{y}.png?api_key=__API_KEY__`,
     isXYZProvider: true,
+    hideApiKeyInput: false,
   },
   {
     attributions: '&copy; <a href="https://www.planet.com" target="_blank" rel="noopener">Planet Labs (PlanetScope)</a>',
@@ -88,6 +91,7 @@ export const SCENE_TILE_PROVIDERS = [
     provider: 'Planet',
     url: `https://tiles{0-3}.${PLANET_BASE_URL}/v1/experimental/tiles/PSOrthoTile/__SCENE_ID__/{z}/{x}/{y}.png?api_key=__API_KEY__`,
     isXYZProvider: true,
+    hideApiKeyInput: false,
   },
   {
     attributions: '<a href="https://docs.opendata.aws/landsat-pds/readme.html">Landsat PDS</a>',
@@ -97,6 +101,7 @@ export const SCENE_TILE_PROVIDERS = [
     provider: 'Public Data Set',
     url: `${API_ROOT}${IMAGERY_ENDPOINT}/localindex/preview/landsat_pds/__SCENE_ID__.jpg`,
     isXYZProvider: false,
+    hideApiKeyInput: true,
   },
 
 ]

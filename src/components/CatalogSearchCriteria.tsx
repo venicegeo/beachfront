@@ -68,6 +68,7 @@ export const CatalogSearchCriteria = (props: Props) => (
         value={props.apiKey}
         type="password"
         disabled={props.disabled}
+        hidden={(SCENE_TILE_PROVIDERS.find(p => p.prefix === props.source) || {hideApiKeyInput: false}).hideApiKeyInput}
         onChange={event => props.onApiKeyChange((event.target as HTMLInputElement).value)}
       />
     </label>
