@@ -26,7 +26,7 @@ interface Props {
 }
 
 export const About = ({ onDismiss }: Props) => (
-  <Modal onDismiss={onDismiss} onInitialize={() => {/* noop */}}>
+  <Modal className={styles.parent} onDismiss={onDismiss} onInitialize={() => {/* noop */}}>
     <div className={styles.root}>
       <section className={styles.heading}>
         <img src={brand} alt="Beachfront"/>

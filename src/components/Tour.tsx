@@ -390,7 +390,7 @@ export class UserTour extends React.Component<any, any> {
             this.showArrow(false)
 
             return new Promise((resolve, reject) => {
-              const timeout = 30000
+              const timeout = 60000
               const t0 = Date.now()
               const app = this.props.application
               const interval = setInterval(() => {
