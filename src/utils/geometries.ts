@@ -22,10 +22,22 @@ const WGS84 = 'EPSG:4326'
 const WEB_MERCATOR = 'EPSG:3857'
 
 export function getFeatureCenter(feature, featureProjection = WGS84) {
-  return extent.getCenter(featureToBbox(feature, featureProjection))
+  return extent.getCenter(featureToExtent(feature, featureProjection))
 }
 
-export function featureToBbox(feature, featureProjection = WEB_MERCATOR, dataProjection = WGS84) {
+export function bboxToExtent(bbox: number[], featureProjection = WEB_MERCATOR, dataProjection = WGS84) {
+  let [minLon, minLat, maxLon, maxLat] = bbox
+  return new GeoJSON().readGeometry({type: 'Polygon', coordinates: [[
+      [minLon, minLat],
+      [minLon, maxLat],
+      [maxLon, maxLat],
+      [maxLon, minLat],
+      [minLon, minLat],
+    ]],
+  }, {featureProjection, dataProjection}).getExtent()
+}
+
+export function featureToExtent(feature, featureProjection = WEB_MERCATOR, dataProjection = WGS84) {
   const reader = new GeoJSON()
   const geometry = reader.readGeometry(feature.geometry, {featureProjection, dataProjection})
   return geometry.getExtent()
