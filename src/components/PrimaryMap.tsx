@@ -802,7 +802,7 @@ export class PrimaryMap extends React.Component<Props, State> {
           })
         }
 
-        console.log("Created preview layer", layer)
+        console.log('Created preview layer', layer)
 
         this.subscribeToLoadEvents(layer)
         this.previewLayers[f.sceneId] = layer
@@ -1261,7 +1261,6 @@ function getPlaceholder() {
 }
 
 function tileLoadFunction(imageTile, src) {
-  console.log("tileLoadFunction", imageTile, src)
   if (imageTile.loadingError) {
     delete imageTile.loadingError
     imageTile.getImage().src = getPlaceholder()
