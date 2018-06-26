@@ -55,7 +55,7 @@ import XYZ from 'ol/source/xyz'
 import Fill from 'ol/style/fill'
 import Text from 'ol/style/text'
 import View from 'ol/view'
-import Image from 'ol/layer/image'
+import Image from 'ol/layer/image';
 import ImageStatic from 'ol/source/imagestatic'
 import * as debounce from 'lodash/debounce'
 import * as throttle from 'lodash/throttle'
@@ -68,7 +68,7 @@ import {FeatureDetails} from './FeatureDetails'
 import {LoadingAnimation} from './LoadingAnimation'
 import {ImagerySearchResults} from './ImagerySearchResults'
 import {normalizeSceneId} from './SceneFeatureDetails'
-import {featureToExtent, deserializeBbox, serializeBbox, bboxToExtent, toGeoJSON} from '../utils/geometries'
+import {featureToBbox, deserializeBbox, serializeBbox, toGeoJSON} from '../utils/geometries'
 import {
   BASEMAP_TILE_PROVIDERS,
   SCENE_TILE_PROVIDERS,
@@ -610,7 +610,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     const insertionIndex = this.map.getLayers().getArray().indexOf(this.frameLayer)
     detections.filter(d => shouldRender[d.id] && !alreadyRendered[d.id]).forEach(detection => {
       const layer = new Tile({
-        extent: featureToExtent(detection),
+        extent: featureToBbox(detection),
         source: generateDetectionsSource(wmsUrl, detection),
       })
 
@@ -1246,7 +1246,7 @@ function getColorForStatus(status) {
 function toPreviewable(features: Array<beachfront.Job|beachfront.Scene>) {
   return features.map(f => ({
     sceneId: f.properties.type === TYPE_JOB ? f.properties.scene_id : f.id,
-    extent: !!f.bbox ? bboxToExtent(f.bbox) : featureToExtent(f),
+    extent: featureToBbox(f),
   }))
 }
 
