@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-
 const styles: any = require('./JobStatusList.css')
 
 import * as React from 'react'
 import {JobStatus} from './JobStatus'
+import * as moment from 'moment'
 
 interface Props {
   activeIds: string[]
@@ -52,7 +52,9 @@ export const JobStatusList = ({
 
       {!jobs.length ? (
         <li className={styles.placeholder}>You haven't started any jobs yet</li>
-      ) : jobs.map(job => (
+      ) : jobs.sort((job1, job2) => {
+        return moment(job1.properties.created_on).isBefore(job2.properties.created_on) ? 1 : -1
+      }).map(job => (
         <JobStatus
           key={job.id}
           isActive={activeIds.includes(job.id)}
