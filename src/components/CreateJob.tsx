@@ -74,7 +74,7 @@ export class CreateJob extends React.Component<Props, State> {
 
     this.state = {
       isCreating: false,
-      computeMask: false,
+      computeMask: true,
       name: props.selectedScene ? normalizeSceneId(props.selectedScene.id) : '',
       shouldAutogenerateName: true,
       algorithmError: '',
