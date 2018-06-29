@@ -55,6 +55,31 @@ body {
   bottom: var(--CLASSIFICATION_BANNER_HEIGHT);
 }
 
+.map:-moz-full-screen {
+  height: 100%;
+  top:0;
+  bottom:0;
+  left:0;
+}
+.map:-webkit-full-screen {
+  height: 100%;
+  top:0;
+  bottom:0;
+  left:0;
+}
+.map:-ms-fullscreen {
+  height: 100%;
+  top:0;
+  bottom:0;
+  left:0;
+}
+.map:fullscreen {
+  height: 100%;
+  top:0;
+  bottom:0;
+  left:0;
+}
+
 @media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
   /* IE10+ CSS styles go here */
   .navigation {
