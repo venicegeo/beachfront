@@ -1252,7 +1252,7 @@ function getColorForStatus(status) {
 function toPreviewable(features: Array<beachfront.Job|beachfront.Scene>) {
   return features.map(f => ({
     sceneId: f.properties.type === TYPE_JOB ? f.properties.scene_id : f.id,
-    extent: !!f.properties.originalBbox ? bboxToExtent(f.bbox) : featureToExtent(f),
+    extent: !!f.properties.originalBbox ? bboxToExtent(f.properties.originalBbox) : featureToExtent(f),
   }))
 }
 
