@@ -47,7 +47,6 @@ declare namespace beachfront {
       extras: any
       compute_mask: boolean
       type: 'JOB'
-      originalBbox: number[]
     }
 
   }
@@ -81,7 +80,6 @@ declare namespace beachfront {
     cloudCover: number
     resolution: number
     sensorName: string
-    originalBbox: number[]
   }
 
   interface ImageryCatalogPage {

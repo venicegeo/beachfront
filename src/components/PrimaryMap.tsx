@@ -710,13 +710,7 @@ export class PrimaryMap extends React.Component<Props, State> {
       })
 
       if (features.length) {
-        features.forEach(feature => {
-          feature.set(KEY_TYPE, TYPE_SCENE)
-          let originalFeatureArray = imagery.images.features.filter(f => f.id === feature.getId())
-          if (originalFeatureArray.length > 0) {
-            feature.setProperties({originalBbox: originalFeatureArray[0].bbox})
-          }
-        })
+        features.forEach(feature => {feature.set(KEY_TYPE, TYPE_SCENE)})
         source.addFeatures(features)
       }
     }
@@ -1252,7 +1246,7 @@ function getColorForStatus(status) {
 function toPreviewable(features: Array<beachfront.Job|beachfront.Scene>) {
   return features.map(f => ({
     sceneId: f.properties.type === TYPE_JOB ? f.properties.scene_id : f.id,
-    extent: !!f.properties.originalBbox ? bboxToExtent(f.properties.originalBbox) : featureToExtent(f),
+    extent: featureToExtent(f),
   }))
 }
 

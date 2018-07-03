@@ -86,6 +86,6 @@ export function search({
       throw err
     })
   } else {
-    return Promise.reject(new Error(`Unknown data source prefix: '${source}'`))
+    return <any>Promise.reject(new Error(`Unknown data source prefix: '${source}'`))
   }
 }
