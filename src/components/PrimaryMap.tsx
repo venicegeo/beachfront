@@ -68,7 +68,7 @@ import {FeatureDetails} from './FeatureDetails'
 import {LoadingAnimation} from './LoadingAnimation'
 import {ImagerySearchResults} from './ImagerySearchResults'
 import {normalizeSceneId} from './SceneFeatureDetails'
-import {featureToExtent, deserializeBbox, serializeBbox, bboxToExtent, toGeoJSON} from '../utils/geometries'
+import {featureToExtent, deserializeBbox, serializeBbox, toGeoJSON} from '../utils/geometries'
 import {
   BASEMAP_TILE_PROVIDERS,
   SCENE_TILE_PROVIDERS,
