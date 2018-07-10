@@ -37,6 +37,7 @@ export interface SearchCriteria {
 
 interface Props {
   algorithms: beachfront.Algorithm[]
+  enabledPlatforms: string[]
   bbox: number[]
   catalogApiKey: string
   collections: any
@@ -107,6 +108,7 @@ export class CreateJob extends React.Component<Props, State> {
           {this.props.bbox && (
             <li className={styles.search}>
               <ImagerySearch
+                enabledPlatforms={this.props.enabledPlatforms}
                 bbox={this.props.bbox}
                 catalogApiKey={this.props.catalogApiKey}
                 cloudCover={this.props.searchCriteria.cloudCover}

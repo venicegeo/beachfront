@@ -30,6 +30,7 @@ interface Props {
   dateFrom?: string
   dateTo?: string
   disabled?: boolean
+  enabledPlatforms: string[]
   errorElement?: React.ReactElement<any>
   source: string
   onApiKeyChange(apiKey: string)
@@ -57,7 +58,9 @@ export const CatalogSearchCriteria = (props: Props) => (
         value={props.source}
         onChange={event => props.onSourceChange((event.target as HTMLSelectElement).value)}
       >
-        {SCENE_TILE_PROVIDERS.map(p => (
+        {SCENE_TILE_PROVIDERS
+          .filter(p => props.enabledPlatforms.some(platform => p.prefix === platform))
+          .map(p => (
           <option key={p.prefix} value={p.prefix}>{p.name} ({p.provider})</option>
         ))}
       </select>
