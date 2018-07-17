@@ -28,6 +28,7 @@ import {
   STATUS_ERROR,
   STATUS_TIMED_OUT,
   STATUS_CANCELLED,
+  STATUS_ACTIVATING,
 } from '../constants'
 
 interface Props {
