@@ -516,6 +516,7 @@ export class UserTour extends React.Component<any, any> {
         title: <div className={styles.title}>Job Status</div>,
         body: <div className={styles.body}>
           Here is the job you just submitted.
+          Currently its status is <JobStatus tour={this}/>.
           On the map you will see the job and its status as well.
           Click on the job in the list to see more details.
         </div>,
