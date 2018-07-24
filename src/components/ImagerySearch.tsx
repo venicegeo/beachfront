@@ -30,6 +30,7 @@ interface State {
 
 interface Props {
   bbox: number[]
+  enabledPlatforms: string[]
   catalogApiKey: string
   cloudCover: number
   dateFrom: string
@@ -74,6 +75,7 @@ export class ImagerySearch extends React.Component<Props, State> {
             dateFrom={this.props.dateFrom}
             dateTo={this.props.dateTo}
             disabled={this.props.isSearching}
+            enabledPlatforms={this.props.enabledPlatforms}
             source={this.props.source}
             onApiKeyChange={this.props.onApiKeyChange}
             onClearBbox={this.props.onClearBbox}

@@ -45,6 +45,7 @@ import * as geoserverService from '../api/geoserver'
 import * as jobsService from '../api/jobs'
 import * as productLinesService from '../api/productLines'
 import * as sessionService from '../api/session'
+import * as statusService from '../api/status'
 import {createCollection, Collection} from '../utils/collections'
 import {getFeatureCenter} from '../utils/geometries'
 import {
@@ -78,6 +79,7 @@ interface State {
   geoserver?: geoserverService.Descriptor
 
   // Data Collections
+  enabledPlatforms?: Collection<string>
   algorithms?: Collection<beachfront.Algorithm>
   jobs?: Collection<beachfront.Job>
   productLines?: Collection<beachfront.ProductLine>
@@ -266,6 +268,7 @@ export class Application extends React.Component<Props, State> {
         return (
           <CreateJob
             algorithms={this.state.algorithms.records}
+            enabledPlatforms={this.state.enabledPlatforms.records}
             bbox={this.state.bbox}
             catalogApiKey={this.state.catalogApiKey}
             collections={this.state.collections}
@@ -288,6 +291,7 @@ export class Application extends React.Component<Props, State> {
             algorithms={this.state.algorithms.records}
             bbox={this.state.bbox}
             catalogApiKey={this.state.catalogApiKey}
+            enabledPlatforms={this.state.enabledPlatforms.records}
             onCatalogApiKeyChange={this.handleCatalogApiKeyChange}
             onClearBbox={this.handleClearBbox}
             onProductLineCreated={this.handleProductLineCreated}
@@ -384,10 +388,18 @@ export class Application extends React.Component<Props, State> {
 
   private initializeServices() {
     this.initializationPromise = Promise.all([
+      this.fetchEnabledPlatforms(),
       this.fetchAlgorithms(),
       this.fetchGeoserverConfig(),
       this.initializeCatalog(),
     ])
+  }
+
+  private fetchEnabledPlatforms() {
+    this.setState({enabledPlatforms: this.state.enabledPlatforms.$fetching()})
+    return statusService.getEnabledPlatforms()
+      .then(sources => this.setState({enabledPlatforms: this.state.enabledPlatforms.$records(sources)}))
+      .catch(err => this.setState({enabledPlatforms: this.state.enabledPlatforms.$error(err)}))
   }
 
   private fetchAlgorithms() {
@@ -739,6 +751,7 @@ function generateInitialState(): State {
 
 function deserialize(): State {
   return {
+    enabledPlatforms: createCollection(JSON.parse(sessionStorage.getItem('enabled_platforms_records')) || []),
     algorithms: createCollection(JSON.parse(sessionStorage.getItem('algorithms_records')) || []),
     bbox:             JSON.parse(sessionStorage.getItem('bbox')),
     geoserver:        JSON.parse(sessionStorage.getItem('geoserver')),
@@ -751,6 +764,7 @@ function deserialize(): State {
 }
 
 function serialize(state: State) {
+  sessionStorage.setItem('enabled_platforms_records', JSON.stringify(state.enabledPlatforms.records))
   sessionStorage.setItem('algorithms_records', JSON.stringify(state.algorithms.records))
   sessionStorage.setItem('bbox', JSON.stringify(state.bbox))
   sessionStorage.setItem('geoserver', JSON.stringify(state.geoserver))

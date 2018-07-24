@@ -43,43 +43,6 @@ const SourceName = (props: any) => {
   return <q>{props.tour.sourceName}</q>
 }
 
-class JobStatus extends React.Component<any, any> {
-  private interval: number
-  private app: any
-
-  constructor(props: any) {
-    super(props)
-
-    this.app = this.props.tour.props.application
-    this.state = { status: null }
-  }
-
-  componentDidMount() {
-    this.interval = setInterval(() => {
-      let jobs = this.app.state.jobs.records
-      let job = jobs[jobs.length - 1]
-
-      if (job && this.state.status !== job.properties.status) {
-        this.setState({ status: job.properties.status })
-      }
-
-      if (/success/i.test(this.state.status)) {
-        clearInterval(this.interval)
-      }
-    }, 250)
-  }
-
-  componentWillUnmount() {
-    clearInterval(this.interval)
-  }
-
-  render() {
-    return (
-      <span className={styles.status}>{this.state.status}</span>
-    )
-  }
-}
-
 const UserTourErrorMessage = (props: any) => {
   return props.message ? <div className={styles.error}>
     <div className={styles.close} title="Dismiss" onClick={props.tour.cancel}>&times;</div>
@@ -516,7 +479,6 @@ export class UserTour extends React.Component<any, any> {
         title: <div className={styles.title}>Job Status</div>,
         body: <div className={styles.body}>
           Here is the job you just submitted.
-          Currently its status is <JobStatus tour={this}/>.
           On the map you will see the job and its status as well.
           Click on the job in the list to see more details.
         </div>,

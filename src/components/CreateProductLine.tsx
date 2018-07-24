@@ -30,6 +30,7 @@ interface Props {
   algorithms:        beachfront.Algorithm[]
   bbox:              [number, number, number, number]
   catalogApiKey:     string
+  enabledPlatforms?: string[]
 
   onCatalogApiKeyChange(apiKey: string)
   onClearBbox()
@@ -84,6 +85,7 @@ export class CreateProductLine extends React.Component<Props, State> {
                 apiKey={this.props.catalogApiKey}
                 bbox={this.props.bbox}
                 cloudCover={this.state.cloudCover}
+                enabledPlatforms={this.props.enabledPlatforms}
                 source={this.state.source}
                 onApiKeyChange={this.props.onCatalogApiKeyChange}
                 onClearBbox={this.props.onClearBbox}

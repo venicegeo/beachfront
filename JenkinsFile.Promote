@@ -78,7 +78,7 @@ node {
     sh "cf target -o ${env.PCF_ORG} -s ${env.PROMOTE_SPACE}"
 
     // Push the app
-    sh "cf push ${appName} -f manifest.jenkins.yml --hostname ${appName} -d ${env.PROMOTE_DOMAIN} --no-start"
+    sh "cf push ${appName} -f manifest.jenkins.yml --hostname ${appName} -d ${env.PROMOTE_DOMAIN} --no-start --no-route"
     try {
         sh "cf set-env ${appName} SPACE ${env.PROMOTE_SPACE}"
         sh "cf set-env ${appName} DOMAIN ${env.PROMOTE_DOMAIN}"
@@ -93,7 +93,7 @@ node {
         error("Error during application start. Deleting ${appName} and failing the build.")
       }
       // Assign Routes
-      def legacyAppNames = sh(script: "cf routes | grep \"${appBaseName} \" | awk '{print \$4}'", returnStdout: true)
+      def legacyAppNames = sh(script: "cf routes | grep \"${appBaseName}\" | awk '{print \$4}'", returnStdout: true)
       sh "cf map-route ${appName} ${env.PROMOTE_DOMAIN} --hostname beachfront"
 
       // Delete old Routes

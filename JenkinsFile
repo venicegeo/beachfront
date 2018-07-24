@@ -172,7 +172,7 @@ node {
                   cf api ${env.PCF_API_ENDPOINT}
                   cf auth ${CFUSER} ${CFPASS}
                   cf target -o ${env.PCF_ORG} -s ${env.PHASE_ONE_PCF_SPACE}
-                  cf push ${appName} -f manifest.jenkins.yml --hostname ${appName} -d ${env.PHASE_ONE_PCF_DOMAIN} --no-start
+                  cf push ${appName} -f manifest.jenkins.yml --hostname ${appName} -d ${env.PHASE_ONE_PCF_DOMAIN} --no-start --no-route
 				"""
 				try {
 					sh """
@@ -210,7 +210,7 @@ node {
                   cf auth ${CFUSER} ${CFPASS}
                   cf target -o ${env.PCF_ORG} -s ${env.PHASE_ONE_PCF_SPACE}
                 """
-                def legacyAppNames = sh(script: """cf routes | grep \"beachfront \" | awk '{print \$4}'""", returnStdout: true)
+                def legacyAppNames = sh(script: """cf routes | grep \"beachfront\" | awk '{print \$4}'""", returnStdout: true)
                 sh "cf map-route ${appName} ${env.PHASE_ONE_PCF_DOMAIN} --hostname beachfront"
                 // Remove legacy applications
                 for (Object legacyApp : legacyAppNames.trim().tokenize(',')) {
@@ -263,7 +263,7 @@ node {
                       cf api ${env.PCF_API_ENDPOINT}
                       cf auth ${CFUSER} ${CFPASS}
                       cf target -o ${env.PCF_ORG} -s ${env.PHASE_TWO_PCF_SPACE}
-                      cf push ${appName} -f manifest.jenkins.yml --hostname ${appName} -d ${env.PHASE_TWO_PCF_DOMAIN} --no-start
+                      cf push ${appName} -f manifest.jenkins.yml --hostname ${appName} -d ${env.PHASE_TWO_PCF_DOMAIN} --no-start --no-route
 					"""
 					try {					
 						sh """					
@@ -301,7 +301,7 @@ node {
                       cf auth ${CFUSER} ${CFPASS}
                       cf target -o ${env.PCF_ORG} -s ${env.PHASE_TWO_PCF_SPACE}
                     """
-                    def legacyAppNames = sh(script: """cf routes | grep \"beachfront \" | awk '{print \$4}'""", returnStdout: true)
+                    def legacyAppNames = sh(script: """cf routes | grep \"beachfront\" | awk '{print \$4}'""", returnStdout: true)
                     sh "cf map-route ${appName} ${env.PHASE_TWO_PCF_DOMAIN} --hostname beachfront"
                     // Remove legacy applications
                     for (Object legacyApp : legacyAppNames.trim().tokenize(',')) {
