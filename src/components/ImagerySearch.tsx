@@ -115,6 +115,7 @@ export class ImagerySearch extends React.Component<Props, State> {
     const {response} = error as AxiosError
     switch (response && response.status) {
       case 401:
+      case 403:
         heading = 'Unauthorized'
         details = 'Your credentials were rejected by the data source.  Please contact the Beachfront team for technical support.'
         break
@@ -125,6 +126,10 @@ export class ImagerySearch extends React.Component<Props, State> {
       case 404:
         heading = 'Catalog did not understand request'
         details = 'Please contact the Beachfront team for technical support.'
+        break
+      case 412:
+        heading = 'Invalid API key'
+        details = 'The API key you specified for accessing the data source was invalid or had insufficient permissions. Please contact the Beachfront team for technical support.'
         break
       case 500:
         heading = 'Catalog error'
