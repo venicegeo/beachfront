@@ -23,6 +23,7 @@ import {AxiosError} from 'axios'
 import {CatalogSearchCriteria} from './CatalogSearchCriteria'
 import {LoadingAnimation} from './LoadingAnimation'
 import {SearchCriteria, createSearchCriteria} from './CreateJob'
+import { SCENE_TILE_PROVIDERS } from '../config'
 
 interface State {
   open?: boolean
@@ -170,7 +171,11 @@ export class ImagerySearch extends React.Component<Props, State> {
   }
 
   private get canSubmit() {
-    return !this.props.isSearching && this.props.catalogApiKey && this.dateValidation()
+    return !this.props.isSearching && (!this.apiKeyRequired || this.props.catalogApiKey) && this.dateValidation()
+  }
+
+  private get apiKeyRequired() {
+    return !(SCENE_TILE_PROVIDERS.find(p => p.prefix === this.props.source) || { hideApiKeyInput: false }).hideApiKeyInput
   }
 
   private handleSubmit(event) {
