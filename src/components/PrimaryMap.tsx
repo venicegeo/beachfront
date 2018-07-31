@@ -31,6 +31,7 @@ import RegularShape from 'ol/style/regularshape'
 import Stroke from 'ol/style/stroke'
 import Style from 'ol/style/style'
 import control from 'ol/control'
+import FullScreen from 'ol/control/fullscreen'
 import MousePosition from 'ol/control/mouseposition'
 import ScaleLine from 'ol/control/scaleline'
 import ZoomSlider from 'ol/control/zoomslider'
@@ -959,6 +960,7 @@ function generateControls() {
       coordinateFormat: coordinate.toStringHDMS,
       projection: WGS84,
     }),
+    new FullScreen(),
     new ExportControl(styles.export),
     new SearchControl(styles.search),
     new MeasureControl(styles.measure),
