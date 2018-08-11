@@ -66,9 +66,16 @@
 }
 
 .cloudCover .value {
+  display: flex;
+  align-items: center;
   margin: 0 0 0 .5em;
   width: 3.1em;
   opacity: .5;
-  text-align: left;
   white-space: nowrap;
+}
+
+.leSign {
+  flex: 0;
+  font-size: 20px;
+  padding-right: 0 !important;
 }

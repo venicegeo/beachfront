@@ -133,7 +133,10 @@ export const CatalogSearchCriteria = (props: Props) => (
           parseInt((event.target as HTMLInputElement).value, 10)
         )}
       />
-      <span className={styles.value}>&le;&thinsp;{props.cloudCover}%</span>
+      <span className={styles.value}>
+        <span className={styles.leSign}>&le;&thinsp;</span>
+        {props.cloudCover}%
+      </span>
     </label>
   </div>
 )
