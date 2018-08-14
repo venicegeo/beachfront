@@ -802,6 +802,8 @@ export class PrimaryMap extends React.Component<Props, State> {
           })
         }
 
+        layer.setZIndex(1)
+
         console.log('Created preview layer', layer)
 
         this.subscribeToLoadEvents(layer)
@@ -1157,9 +1159,6 @@ function generateHoverInteraction(...layers) {
     multi: true,
     condition: e => condition.pointerMove(e) && condition.noModifierKeys(e),
     style: new Style({
-      fill: new Fill({
-        color: 'rgba(255, 255, 255, 0.12)',
-      }),
       stroke: new Stroke({
         color: 'hsla(200, 70%, 90%, 0.8)',
         width: 4,
