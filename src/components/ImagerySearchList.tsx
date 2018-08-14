@@ -54,20 +54,21 @@ export class ImagerySearchList extends React.Component<Props, State> {
     const compareAcquiredDate = (a, b) => moment.utc(a.properties.acquiredDate).diff(b.properties.acquiredDate)
     const compareBbox = (a, b) => b.bbox[3] - a.bbox[3] || a.bbox[0] - b.bbox[0]
     const compareCloudCover = (a, b) => a.properties.cloudCover - b.properties.cloudCover
-    const compareSensorName = (a, b) => a.properties.sensorName < b.properties.sensorName ? -1 : a.properties.sensorName > b.properties.sensorName ? 1 : 0
+    const compareSensorName = (a, b) => a.properties.sensorName.localeCompare(b.properties.sensorName)
+    const compareId = (a, b) => a.id.localeCompare(b.id)
 
     this.compare = {
       acquiredDate(a, b) {
-        return compareAcquiredDate(a, b) || compareBbox(a, b)
+        return compareAcquiredDate(a, b) || compareBbox(a, b) || compareId(a, b)
       },
       bbox(a, b) {
-        return compareBbox(a, b) || compareAcquiredDate(a, b)
+        return compareBbox(a, b) || compareAcquiredDate(a, b) || compareId(a, b)
       },
       cloudCover(a, b) {
-        return compareCloudCover(a, b) || compareAcquiredDate(a, b)
+        return compareCloudCover(a, b) || compareAcquiredDate(a, b) || compareId(a, b)
       },
       sensorName(a, b) {
-        return compareSensorName(a, b) || compareAcquiredDate(a, b)
+        return compareSensorName(a, b) || compareAcquiredDate(a, b) || compareId(a, b)
       },
     }
 
