@@ -524,7 +524,7 @@ export class PrimaryMap extends React.Component<Props, State> {
 
     this.hoverInteraction = generateHoverInteraction(this.imageryLayer)
 
-    this.selectInteraction = generateSelectInteraction(this.frameLayer, this.imageryLayer)
+    this.selectInteraction = generateSelectInteraction(this.frameLayer, this.imageryLayer, this.pinLayer)
     this.selectInteraction.on('select', this.handleSelect)
 
     this.featureDetailsOverlay = generateFeatureDetailsOverlay(this.refs.featureDetails)
