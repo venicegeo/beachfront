@@ -103,9 +103,9 @@ export class ImagerySearchList extends React.Component<Props, State> {
 
       if (props.name === this.state.sortBy) {
         if (this.state.sortReverse) {
-          icon += '-asc'
-        } else {
           icon += '-desc'
+        } else {
+          icon += '-asc'
         }
       }
 
