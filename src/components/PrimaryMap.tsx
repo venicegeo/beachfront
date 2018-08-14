@@ -802,8 +802,6 @@ export class PrimaryMap extends React.Component<Props, State> {
           })
         }
 
-        layer.setZIndex(1)
-
         console.log('Created preview layer', layer)
 
         this.subscribeToLoadEvents(layer)
