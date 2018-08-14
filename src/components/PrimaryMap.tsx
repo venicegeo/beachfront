@@ -158,6 +158,7 @@ export class PrimaryMap extends React.Component<Props, State> {
   private featureDetailsOverlay: Overlay
   private featureId?: number | string
   private frameLayer: VectorLayer
+  private pinLayer: VectorLayer
   private highlightLayer: VectorLayer
   private hoverInteraction: Select
   private imageSearchResultsOverlay: Overlay
@@ -193,6 +194,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.renderFrames()
     this.renderImagery()
     this.renderImagerySearchResultsOverlay()
+    this.renderPins()
     this.updateView()
 
     if (this.props.bbox) {
@@ -238,6 +240,7 @@ export class PrimaryMap extends React.Component<Props, State> {
 
     if (previousProps.frames !== this.props.frames) {
       this.renderFrames()
+      this.renderPins()
     }
 
     if (previousProps.imagery !== this.props.imagery) {
@@ -369,6 +372,10 @@ export class PrimaryMap extends React.Component<Props, State> {
 
   private clearFrames() {
     this.frameLayer.getSource().clear()
+  }
+
+  private clearPins() {
+    this.pinLayer.getSource().clear()
   }
 
   private clearSelection() {
@@ -506,6 +513,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.drawLayer = generateDrawLayer()
     this.highlightLayer = generateHighlightLayer()
     this.frameLayer = generateFrameLayer()
+    this.pinLayer = generatePinLayer()
     this.imageryLayer = generateImageryLayer()
     this.detectionsLayers = {}
     this.previewLayers = {}
@@ -536,6 +544,7 @@ export class PrimaryMap extends React.Component<Props, State> {
         this.drawLayer,
         this.imageryLayer,
         this.highlightLayer,
+        this.pinLayer,
       ],
       target: this.refs.container,
       view: new View({
@@ -614,16 +623,17 @@ export class PrimaryMap extends React.Component<Props, State> {
         source: generateDetectionsSource(wmsUrl, detection),
       })
 
+      layer.setZIndex(2)
       this.subscribeToLoadEvents(layer)
       this.detectionsLayers[detection.id] = layer
       this.map.getLayers().insertAt(insertionIndex, layer)
     })
   }
 
-  private renderFrames() {
-    this.clearFrames()
+  private renderPins() {
+    this.clearPins()
 
-    const source = this.frameLayer.getSource()
+    const source = this.pinLayer.getSource()
     const reader = new GeoJSON()
 
     this.props.frames.forEach(raw => {
@@ -631,8 +641,6 @@ export class PrimaryMap extends React.Component<Props, State> {
         dataProjection: WGS84,
         featureProjection: WEB_MERCATOR,
       })
-
-      source.addFeature(frame)
 
       const frameExtent = calculateExtent(frame.getGeometry())
       const topRight = extent.getTopRight(extent.buffer(frameExtent, STEM_OFFSET))
@@ -674,6 +682,22 @@ export class PrimaryMap extends React.Component<Props, State> {
       status.set(KEY_SCENE_ID, (raw as beachfront.Job).properties.scene_id)
       status.set(KEY_NAME, (raw as beachfront.Job).properties.name)
       source.addFeature(status)
+    })
+  }
+
+  private renderFrames() {
+    this.clearFrames()
+
+    const source = this.frameLayer.getSource()
+    const reader = new GeoJSON()
+
+    this.props.frames.forEach(raw => {
+      const frame = reader.readFeature(raw, {
+        dataProjection: WGS84,
+        featureProjection: WEB_MERCATOR,
+      })
+
+      source.addFeature(frame)
     })
   }
 
@@ -802,6 +826,7 @@ export class PrimaryMap extends React.Component<Props, State> {
           })
         }
 
+        layer.setZIndex(1)
         console.log('Created preview layer', layer)
 
         this.subscribeToLoadEvents(layer)
@@ -1045,6 +1070,86 @@ function generateFeatureDetailsOverlay(componentRef) {
     element:     findDOMNode(componentRef),
     id:          'featureDetails',
     positioning: 'top-left',
+  })
+}
+
+function generatePinLayer() {
+  return new VectorLayer({
+    zIndex: 3
+    source: new VectorSource(),
+    style(feature: Feature, resolution: number) {
+      const isClose = resolution < RESOLUTION_CLOSE
+
+      switch (feature.get(KEY_TYPE)) {
+        case TYPE_DIVOT_INBOARD:
+          return new Style({
+            image: new RegularShape({
+              angle: Math.PI / 4,
+              points: 4,
+              radius: 5,
+              fill: new Fill({
+                color: 'black',
+              }),
+            }),
+          })
+        case TYPE_DIVOT_OUTBOARD:
+          return new Style({
+            image: new RegularShape({
+              angle: Math.PI / 4,
+              points: 4,
+              radius: 10,
+              stroke: new Stroke({
+                color: 'black',
+                width: 1,
+              }),
+              fill: new Fill({
+                color: getColorForStatus(feature.get(KEY_STATUS)),
+              }),
+            }),
+          })
+        case TYPE_STEM:
+          return new Style({
+            stroke: new Stroke({
+              color: 'black',
+              width: 1,
+            }),
+          })
+        case TYPE_LABEL_MAJOR:
+          return new Style({
+            text: new Text({
+              fill: new Fill({
+                color: isClose ? 'black' : 'transparent',
+              }),
+              offsetX: 13,
+              offsetY: 1,
+              font: 'bold 17px Catamaran, Verdana, sans-serif',
+              text: feature.get(KEY_NAME).toUpperCase(),
+              textAlign: 'left',
+              textBaseline: 'middle',
+            }),
+          })
+        case TYPE_LABEL_MINOR:
+          const name = feature.get(KEY_NAME)
+          const sceneId = normalizeSceneId(feature.get(KEY_SCENE_ID))
+
+          return new Style({
+            text: new Text({
+              fill: new Fill({
+                color: isClose ? 'rgba(0,0,0,.6)' : 'transparent',
+              }),
+              offsetX: 13,
+              offsetY: 15,
+              font: '11px Verdana, sans-serif',
+              text: ([
+                feature.get(KEY_STATUS),
+                sceneId !== name ? sceneId : null,
+              ].filter(Boolean)).join(' // ').toUpperCase(),
+              textAlign: 'left',
+              textBaseline: 'middle',
+            }),
+          })
+      }
+    },
   })
 }
 
