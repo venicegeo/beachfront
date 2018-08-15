@@ -1074,8 +1074,7 @@ function generateFeatureDetailsOverlay(componentRef) {
 }
 
 function generatePinLayer() {
-  return new VectorLayer({
-    zIndex: 3,
+  const layer = new VectorLayer({
     source: new VectorSource(),
     style(feature: Feature, resolution: number) {
       const isClose = resolution < RESOLUTION_CLOSE
@@ -1151,6 +1150,10 @@ function generatePinLayer() {
       }
     },
   })
+
+  layer.setZIndex(3)
+
+  return layer
 }
 
 function generateFrameLayer() {
