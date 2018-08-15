@@ -543,8 +543,8 @@ export class PrimaryMap extends React.Component<Props, State> {
         this.frameLayer,
         this.drawLayer,
         this.imageryLayer,
-        this.highlightLayer,
         this.pinLayer,
+        this.highlightLayer,
       ],
       target: this.refs.container,
       view: new View({
@@ -1075,7 +1075,7 @@ function generateFeatureDetailsOverlay(componentRef) {
 
 function generatePinLayer() {
   return new VectorLayer({
-    zIndex: 3
+    zIndex: 3,
     source: new VectorSource(),
     style(feature: Feature, resolution: number) {
       const isClose = resolution < RESOLUTION_CLOSE
