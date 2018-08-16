@@ -1161,86 +1161,15 @@ function generateFrameLayer() {
     source: new VectorSource(),
     style(feature: Feature, resolution: number) {
       const isClose = resolution < RESOLUTION_CLOSE
-
-      switch (feature.get(KEY_TYPE)) {
-        case TYPE_DIVOT_INBOARD:
-          return new Style({
-            image: new RegularShape({
-              angle: Math.PI / 4,
-              points: 4,
-              radius: 5,
-              fill: new Fill({
-                color: 'black',
-              }),
-            }),
-          })
-        case TYPE_DIVOT_OUTBOARD:
-          return new Style({
-            image: new RegularShape({
-              angle: Math.PI / 4,
-              points: 4,
-              radius: 10,
-              stroke: new Stroke({
-                color: 'black',
-                width: 1,
-              }),
-              fill: new Fill({
-                color: getColorForStatus(feature.get(KEY_STATUS)),
-              }),
-            }),
-          })
-        case TYPE_STEM:
-          return new Style({
-            stroke: new Stroke({
-              color: 'black',
-              width: 1,
-            }),
-          })
-        case TYPE_LABEL_MAJOR:
-          return new Style({
-            text: new Text({
-              fill: new Fill({
-                color: isClose ? 'black' : 'transparent',
-              }),
-              offsetX: 13,
-              offsetY: 1,
-              font: 'bold 17px Catamaran, Verdana, sans-serif',
-              text: feature.get(KEY_NAME).toUpperCase(),
-              textAlign: 'left',
-              textBaseline: 'middle',
-            }),
-          })
-        case TYPE_LABEL_MINOR:
-          const name = feature.get(KEY_NAME)
-          const sceneId = normalizeSceneId(feature.get(KEY_SCENE_ID))
-
-          return new Style({
-            text: new Text({
-              fill: new Fill({
-                color: isClose ? 'rgba(0,0,0,.6)' : 'transparent',
-              }),
-              offsetX: 13,
-              offsetY: 15,
-              font: '11px Verdana, sans-serif',
-              text: ([
-                feature.get(KEY_STATUS),
-                sceneId !== name ? sceneId : null,
-              ].filter(Boolean)).join(' // ').toUpperCase(),
-              textAlign: 'left',
-              textBaseline: 'middle',
-            }),
-          })
-        default:
-          return new Style({
-            stroke: new Stroke({
-              color: 'rgba(0, 0, 0, .4)',
-              lineDash: [10, 10],
-            }),
-            fill: new Fill({
-              color: isClose ? 'transparent' : 'hsla(202, 100%, 85%, 0.5)',
-            }),
-          })
-      }
+      return new Style({
+        stroke: new Stroke({
+          color: 'rgba(0, 0, 0, .4)',
+          lineDash: [10, 10],
+        }),
+        fill: new Fill({
+          color: isClose ? 'transparent' : 'hsla(202, 100%, 85%, 0.5)',
+        }),
+      })
     },
   })
 }
