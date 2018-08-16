@@ -407,15 +407,16 @@ export class PrimaryMap extends React.Component<Props, State> {
     const zoom = view.getZoom() || MIN_ZOOM  // HACK -- sometimes getZoom returns undefined...
 
     // Don't emit false positives
-    if (!this.props.view
-      || this.props.view.center[0] !== center[0]
-      || this.props.view.center[1] !== center[1]
-      || this.props.view.zoom !== zoom
-      || this.props.view.basemapIndex !== basemapIndex
-    ) {
-      this.skipNextViewUpdate = true
-      this.props.onViewChange({ basemapIndex, center, zoom })
+    if (this.props.view
+      && this.props.view.center
+      && this.props.view.center[0] === center[0]
+      && this.props.view.zoom === zoom
+      && this.props.view.basemapIndex === basemapIndex) {
+      return
     }
+
+    this.skipNextViewUpdate = true
+    this.props.onViewChange({ basemapIndex, center, zoom })
   }
 
   private emitDeselectAll() {
