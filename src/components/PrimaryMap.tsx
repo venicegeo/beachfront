@@ -1170,6 +1170,7 @@ function generateFrameLayer() {
   return new VectorLayer({
     source: new VectorSource(),
     style(feature: Feature, resolution: number) {
+      feature = feature // HACK HACK HACK HACK HACK
       const isClose = resolution < RESOLUTION_CLOSE
       return new Style({
         stroke: new Stroke({
