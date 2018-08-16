@@ -144,8 +144,9 @@ interface State {
 
 export interface MapView {
   basemapIndex: number
-  center: [number, number]
-  zoom: number
+  center?: [number, number]
+  zoom?: number
+  extent?: ol.Extent
 }
 
 export class PrimaryMap extends React.Component<Props, State> {
@@ -195,7 +196,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.renderImagery()
     this.renderImagerySearchResultsOverlay()
     this.renderPins()
-    this.updateView()
+    this.updateView(2000)
 
     if (this.props.bbox) {
       this.renderImagerySearchBbox()
@@ -413,15 +414,16 @@ export class PrimaryMap extends React.Component<Props, State> {
     const zoom = view.getZoom() || MIN_ZOOM  // HACK -- sometimes getZoom returns undefined...
 
     // Don't emit false positives
-    if (!this.props.view
-      || this.props.view.center[0] !== center[0]
-      || this.props.view.center[1] !== center[1]
-      || this.props.view.zoom !== zoom
-      || this.props.view.basemapIndex !== basemapIndex
-    ) {
-      this.skipNextViewUpdate = true
-      this.props.onViewChange({ basemapIndex, center, zoom })
+    if (this.props.view
+      && this.props.view.center
+      && this.props.view.center[0] === center[0]
+      && this.props.view.zoom === zoom
+      && this.props.view.basemapIndex === basemapIndex) {
+      return
     }
+
+    this.skipNextViewUpdate = true
+    this.props.onViewChange({ basemapIndex, center, zoom })
   }
 
   private emitDeselectAll() {
@@ -575,7 +577,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.map.on('measure:end', this.handleMeasureEnd)
   }
 
-  private updateView() {
+  private updateView(duration?: number) {
     if (this.skipNextViewUpdate) {
       this.skipNextViewUpdate = false
       return
@@ -585,15 +587,23 @@ export class PrimaryMap extends React.Component<Props, State> {
       return
     }
 
-    const {basemapIndex, zoom, center} = this.props.view
+    const {basemapIndex, zoom, center, extent} = this.props.view
     this.setState({ basemapIndex })
     const view = this.map.getView()
 
-    view.animate({
-      center: view.constrainCenter(proj.transform(center, WGS84, WEB_MERCATOR)),
-      duration: 2000,
-      zoom: zoom,
-    })
+    if (extent) {
+      view.fit(extent, {
+        padding: [100, 100, 100, 100],
+        constrainResolution: false,
+        duration,
+      })
+    } else {
+      view.animate({
+        center: view.constrainCenter(proj.transform(center, WGS84, WEB_MERCATOR)),
+        zoom,
+        duration,
+      })
+    }
   }
 
   private renderDetections() {

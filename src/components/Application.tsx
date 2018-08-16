@@ -47,7 +47,7 @@ import * as productLinesService from '../api/productLines'
 import * as sessionService from '../api/session'
 import * as statusService from '../api/status'
 import {createCollection, Collection} from '../utils/collections'
-import {getFeatureCenter} from '../utils/geometries'
+import {featureToExtent, getFeatureCenter} from '../utils/geometries'
 import {
   RECORD_POLLING_INTERVAL,
   SESSION_IDLE_INTERVAL,
@@ -133,6 +133,7 @@ export class Application extends React.Component<Props, State> {
     this.handleSelectFeature = this.handleSelectFeature.bind(this)
     this.navigateTo = this.navigateTo.bind(this)
     this.panTo = this.panTo.bind(this)
+    this.panToExtent = this.panToExtent.bind(this)
     this.logout = this.logout.bind(this)
     this.startIdleTimer = this.startIdleTimer.bind(this)
     this.stopIdleTimer = this.stopIdleTimer.bind(this)
@@ -496,7 +497,8 @@ export class Application extends React.Component<Props, State> {
 
   private handleNavigateToJob(loc) {
     this.navigateTo(loc)
-    this.panTo(getFeatureCenter(this.state.jobs.records.find(j => loc.search.includes(j.id))))
+    const feature = this.state.jobs.records.find(j => loc.search.includes(j.id))
+    this.panToExtent(featureToExtent(feature))
   }
 
   private handlePanToProductLine(productLine) {
@@ -604,7 +606,19 @@ export class Application extends React.Component<Props, State> {
       mapView: Object.assign({}, this.state.mapView, {
         center: point,
         zoom,
+        extent: null,
       }),
+    })
+  }
+
+  private panToExtent(extent: ol.Extent) {
+    this.setState({
+      mapView: {
+        ...this.state.mapView,
+        center: null,
+        zoom: null,
+        extent,
+      },
     })
   }
 

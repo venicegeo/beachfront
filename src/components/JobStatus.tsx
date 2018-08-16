@@ -130,7 +130,7 @@ export class JobStatus extends React.Component<Props, State> {
             onMouseLeave={() => this.setState({ isControlHover: false })}
           >
             <Link
-              pathname="/"
+              pathname="/jobs"
               search={`?jobId=${id}`}
               title="View on Map"
               onClick={this.props.onNavigate}>
