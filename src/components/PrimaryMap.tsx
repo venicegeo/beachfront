@@ -159,6 +159,7 @@ export class PrimaryMap extends React.Component<Props, State> {
   private featureDetailsOverlay: Overlay
   private featureId?: number | string
   private frameLayer: VectorLayer
+  private pinLayer: VectorLayer
   private highlightLayer: VectorLayer
   private hoverInteraction: Select
   private imageSearchResultsOverlay: Overlay
@@ -194,6 +195,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.renderFrames()
     this.renderImagery()
     this.renderImagerySearchResultsOverlay()
+    this.renderPins()
     this.updateView(2000)
 
     if (this.props.bbox) {
@@ -239,6 +241,7 @@ export class PrimaryMap extends React.Component<Props, State> {
 
     if (previousProps.frames !== this.props.frames) {
       this.renderFrames()
+      this.renderPins()
     }
 
     if (previousProps.imagery !== this.props.imagery) {
@@ -370,6 +373,10 @@ export class PrimaryMap extends React.Component<Props, State> {
 
   private clearFrames() {
     this.frameLayer.getSource().clear()
+  }
+
+  private clearPins() {
+    this.pinLayer.getSource().clear()
   }
 
   private clearSelection() {
@@ -508,6 +515,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.drawLayer = generateDrawLayer()
     this.highlightLayer = generateHighlightLayer()
     this.frameLayer = generateFrameLayer()
+    this.pinLayer = generatePinLayer()
     this.imageryLayer = generateImageryLayer()
     this.detectionsLayers = {}
     this.previewLayers = {}
@@ -518,7 +526,7 @@ export class PrimaryMap extends React.Component<Props, State> {
 
     this.hoverInteraction = generateHoverInteraction(this.imageryLayer)
 
-    this.selectInteraction = generateSelectInteraction(this.frameLayer, this.imageryLayer)
+    this.selectInteraction = generateSelectInteraction(this.frameLayer, this.imageryLayer, this.pinLayer)
     this.selectInteraction.on('select', this.handleSelect)
 
     this.featureDetailsOverlay = generateFeatureDetailsOverlay(this.refs.featureDetails)
@@ -537,6 +545,7 @@ export class PrimaryMap extends React.Component<Props, State> {
         this.frameLayer,
         this.drawLayer,
         this.imageryLayer,
+        this.pinLayer,
         this.highlightLayer,
       ],
       target: this.refs.container,
@@ -624,16 +633,17 @@ export class PrimaryMap extends React.Component<Props, State> {
         source: generateDetectionsSource(wmsUrl, detection),
       })
 
+      layer.setZIndex(2)
       this.subscribeToLoadEvents(layer)
       this.detectionsLayers[detection.id] = layer
       this.map.getLayers().insertAt(insertionIndex, layer)
     })
   }
 
-  private renderFrames() {
-    this.clearFrames()
+  private renderPins() {
+    this.clearPins()
 
-    const source = this.frameLayer.getSource()
+    const source = this.pinLayer.getSource()
     const reader = new GeoJSON()
 
     this.props.frames.forEach(raw => {
@@ -641,8 +651,6 @@ export class PrimaryMap extends React.Component<Props, State> {
         dataProjection: WGS84,
         featureProjection: WEB_MERCATOR,
       })
-
-      source.addFeature(frame)
 
       const frameExtent = calculateExtent(frame.getGeometry())
       const topRight = extent.getTopRight(extent.buffer(frameExtent, STEM_OFFSET))
@@ -684,6 +692,22 @@ export class PrimaryMap extends React.Component<Props, State> {
       status.set(KEY_SCENE_ID, (raw as beachfront.Job).properties.scene_id)
       status.set(KEY_NAME, (raw as beachfront.Job).properties.name)
       source.addFeature(status)
+    })
+  }
+
+  private renderFrames() {
+    this.clearFrames()
+
+    const source = this.frameLayer.getSource()
+    const reader = new GeoJSON()
+
+    this.props.frames.forEach(raw => {
+      const frame = reader.readFeature(raw, {
+        dataProjection: WGS84,
+        featureProjection: WEB_MERCATOR,
+      })
+
+      source.addFeature(frame)
     })
   }
 
@@ -812,6 +836,7 @@ export class PrimaryMap extends React.Component<Props, State> {
           })
         }
 
+        layer.setZIndex(1)
         console.log('Created preview layer', layer)
 
         this.subscribeToLoadEvents(layer)
@@ -1058,8 +1083,8 @@ function generateFeatureDetailsOverlay(componentRef) {
   })
 }
 
-function generateFrameLayer() {
-  return new VectorLayer({
+function generatePinLayer() {
+  const layer = new VectorLayer({
     source: new VectorSource(),
     style(feature: Feature, resolution: number) {
       const isClose = resolution < RESOLUTION_CLOSE
@@ -1132,17 +1157,29 @@ function generateFrameLayer() {
               textBaseline: 'middle',
             }),
           })
-        default:
-          return new Style({
-            stroke: new Stroke({
-              color: 'rgba(0, 0, 0, .4)',
-              lineDash: [10, 10],
-            }),
-            fill: new Fill({
-              color: isClose ? 'transparent' : 'hsla(202, 100%, 85%, 0.5)',
-            }),
-          })
       }
+    },
+  })
+
+  layer.setZIndex(3)
+
+  return layer
+}
+
+function generateFrameLayer() {
+  return new VectorLayer({
+    source: new VectorSource(),
+    style(feature: Feature, resolution: number) {
+      const isClose = resolution < RESOLUTION_CLOSE
+      return new Style({
+        stroke: new Stroke({
+          color: 'rgba(0, 0, 0, .4)',
+          lineDash: [10, 10],
+        }),
+        fill: new Fill({
+          color: isClose ? 'transparent' : 'hsla(202, 100%, 85%, 0.5)',
+        }),
+      })
     },
   })
 }
