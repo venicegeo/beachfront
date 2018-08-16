@@ -144,8 +144,9 @@ interface State {
 
 export interface MapView {
   basemapIndex: number
-  center: [number, number]
-  zoom: number
+  center?: [number, number]
+  zoom?: number
+  extent?: ol.Extent
 }
 
 export class PrimaryMap extends React.Component<Props, State> {
@@ -193,7 +194,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.renderFrames()
     this.renderImagery()
     this.renderImagerySearchResultsOverlay()
-    this.updateView()
+    this.updateView(2000)
 
     if (this.props.bbox) {
       this.renderImagerySearchBbox()
@@ -566,7 +567,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.map.on('measure:end', this.handleMeasureEnd)
   }
 
-  private updateView() {
+  private updateView(duration?: number) {
     if (this.skipNextViewUpdate) {
       this.skipNextViewUpdate = false
       return
@@ -576,15 +577,23 @@ export class PrimaryMap extends React.Component<Props, State> {
       return
     }
 
-    const {basemapIndex, zoom, center} = this.props.view
+    const {basemapIndex, zoom, center, extent} = this.props.view
     this.setState({ basemapIndex })
     const view = this.map.getView()
 
-    view.animate({
-      center: view.constrainCenter(proj.transform(center, WGS84, WEB_MERCATOR)),
-      duration: 2000,
-      zoom: zoom,
-    })
+    if (extent) {
+      view.fit(extent, {
+        padding: [100, 100, 100, 100],
+        constrainResolution: false,
+        duration,
+      })
+    } else {
+      view.animate({
+        center: view.constrainCenter(proj.transform(center, WGS84, WEB_MERCATOR)),
+        zoom,
+        duration,
+      })
+    }
   }
 
   private renderDetections() {
