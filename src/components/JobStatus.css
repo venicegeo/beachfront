@@ -87,7 +87,6 @@
 }
 
 .activating {
-  background-color: var(--bgcolor-active);
   border-color: var(--bordercolor-active);
 }
 

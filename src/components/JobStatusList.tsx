@@ -28,41 +28,38 @@ interface Props {
   onNavigateToJob(loc: { pathname: string, search: string, hash: string })
 }
 
-export const JobStatusList = ({
-  activeIds,
-  error,
-  jobs,
-  onDismissError,
-  onForgetJob,
-  onNavigateToJob,
-}: Props) => (
-  <div className={`${styles.root} ${!jobs.length ? styles.isEmpty : ''}`}>
-    <header>
-      <h1>Jobs</h1>
-    </header>
+export class JobStatusList extends React.Component<Props, void> {
+  render() {
+    return (
+      <div className={`${styles.root} ${!this.props.jobs.length ? styles.isEmpty : ''}`}>
+        <header>
+          <h1>Jobs</h1>
+        </header>
 
-    <ul>
-      {error && (
-        <li className={styles.communicationError}>
-          <h4><i className="fa fa-warning"/> Communication Error</h4>
-          <p>Cannot communicate with the server. (<code>{error.toString()}</code>)</p>
-          <button onClick={onDismissError}>Retry</button>
-        </li>
-      )}
+        <ul>
+          {this.props.error && (
+            <li className={styles.communicationError}>
+              <h4><i className="fa fa-warning"/> Communication Error</h4>
+              <p>Cannot communicate with the server. (<code>{this.props.error.toString()}</code>)</p>
+              <button onClick={this.props.onDismissError}>Retry</button>
+            </li>
+          )}
 
-      {!jobs.length ? (
-        <li className={styles.placeholder}>You haven't started any jobs yet</li>
-      ) : jobs.sort((job1, job2) => {
-        return moment(job1.properties.created_on).isBefore(job2.properties.created_on) ? 1 : -1
-      }).map(job => (
-        <JobStatus
-          key={job.id}
-          isActive={activeIds.includes(job.id)}
-          job={job}
-          onNavigate={onNavigateToJob}
-          onForgetJob={onForgetJob}
-        />
-      ))}
-    </ul>
-  </div>
-)
+          {!this.props.jobs.length ? (
+            <li className={styles.placeholder}>You haven't started any this.props.jobs yet</li>
+          ) : this.props.jobs.sort((job1, job2) => {
+            return moment(job1.properties.created_on).isBefore(job2.properties.created_on) ? 1 : -1
+          }).map(job => (
+            <JobStatus
+              key={job.id}
+              isActive={this.props.activeIds.includes(job.id)}
+              job={job}
+              onNavigate={this.props.onNavigateToJob}
+              onForgetJob={this.props.onForgetJob}
+            />
+          ))}
+        </ul>
+      </div>
+    )
+  }
+}
