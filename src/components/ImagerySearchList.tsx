@@ -121,9 +121,7 @@ export class ImagerySearchList extends React.Component<Props, State> {
     return (
       <div className={styles.results}>
         <h2 onClick={() => this.setState({ open: !this.state.open })}>
-          <i
-            className={`fa fa-chevron-${this.state.open ? 'down' : 'right'}`}
-          /> {scenes.length} {this.sourceName} {`${scenes.length === 1 ? 'Image' : 'Images'}`} Found
+          {scenes.length} {this.sourceName} {`${scenes.length === 1 ? 'Image' : 'Images'}`} Found
         </h2>
 
         {this.state.open && <table>
