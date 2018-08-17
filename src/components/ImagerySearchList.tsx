@@ -31,7 +31,6 @@ interface Props {
 
 interface State {
   hoveredIds?: string[]
-  open?: boolean
   selectedIds?: string[]
   sortBy?: string
   sortReverse?: boolean
@@ -45,7 +44,6 @@ export class ImagerySearchList extends React.Component<Props, State> {
 
     this.state = {
       hoveredIds: [],
-      open: true,
       selectedIds: [],
       sortBy: 'acquiredDate',
       sortReverse: false,
@@ -120,11 +118,11 @@ export class ImagerySearchList extends React.Component<Props, State> {
 
     return (
       <div className={styles.results}>
-        <h2 onClick={() => this.setState({ open: !this.state.open })}>
+        <h2>
           {scenes.length} {this.sourceName} {`${scenes.length === 1 ? 'Image' : 'Images'}`} Found
         </h2>
 
-        {this.state.open && <table>
+        <table>
           <thead>
             <tr>
               <TableHeader name="sensorName" label="Sensor Name"/>
@@ -159,7 +157,7 @@ export class ImagerySearchList extends React.Component<Props, State> {
               )
             })}
           </tbody>
-        </table>}
+        </table>
       </div>
     )
   }
