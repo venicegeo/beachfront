@@ -19,7 +19,6 @@ const jobStatusStyles: any = require('./JobStatus.css')
 import * as React from 'react'
 import {JobStatus} from './JobStatus'
 import * as moment from 'moment'
-//import Select from 'ol/interaction/select'
 
 interface Props {
   activeIds: string[]
