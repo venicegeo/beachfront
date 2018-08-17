@@ -14,10 +14,12 @@
  * limitations under the License.
  **/
 const styles: any = require('./JobStatusList.css')
+const jobStatusStyles: any = require('./JobStatus.css')
 
 import * as React from 'react'
 import {JobStatus} from './JobStatus'
 import * as moment from 'moment'
+//import Select from 'ol/interaction/select'
 
 interface Props {
   activeIds: string[]
@@ -29,6 +31,14 @@ interface Props {
 }
 
 export class JobStatusList extends React.Component<Props, void> {
+  constructor(props: Props) {
+    super(props)
+  }
+
+  componentDidUpdate() {
+    this.scrollToSelectedJob()
+  }
+
   render() {
     return (
       <div className={`${styles.root} ${!this.props.jobs.length ? styles.isEmpty : ''}`}>
@@ -62,4 +72,10 @@ export class JobStatusList extends React.Component<Props, void> {
       </div>
     )
   }
+
+  private scrollToSelectedJob() {
+    const row = document.querySelector(`.${jobStatusStyles.isActive}`)
+    if (row) { row.scrollIntoView({ behavior: 'smooth' }) }
+  }
+
 }
