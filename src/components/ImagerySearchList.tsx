@@ -130,15 +130,12 @@ export class ImagerySearchList extends React.Component<Props, State> {
           <thead>
             <tr>
               <TableHeader name="sensorName" label="Sensor Name"/>
-              <TableHeader name="bbox" label="Location"/>
               <TableHeader name="acquiredDate" label="Date Captured (UTC)"/>
               <TableHeader name="cloudCover" label="Cloud Cover"/>
             </tr>
           </thead>
           <tbody onMouseEnter={() => this.props.collections.hovered.clear()}>
             {scenes.map(f => {
-              const loc = [f.bbox[0], f.bbox[3]].map(n => n.toFixed(6))
-
               return (
                 <tr
                   className={[
@@ -154,7 +151,6 @@ export class ImagerySearchList extends React.Component<Props, State> {
                   onMouseLeave={() => this.props.collections.hovered.clear()}
                 >
                   <td>{f.properties.sensorName}</td>
-                  <td>{loc.join(', ')}</td>
                   <td>{moment.utc(f.properties.acquiredDate).format(DATETIME_FORMAT)}</td>
                   <td>{f.properties.cloudCover.toFixed(1)}%</td>
                 </tr>
