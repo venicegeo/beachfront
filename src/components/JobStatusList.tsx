@@ -25,6 +25,7 @@ interface Props {
   activeIds: string[]
   error: any
   jobs: beachfront.Job[]
+  selectedFeature: beachfront.Job | beachfront.Scene
   onDismissError()
   onForgetJob(jobId: string)
   onNavigateToJob(loc: { pathname: string, search: string, hash: string })
@@ -35,8 +36,10 @@ export class JobStatusList extends React.Component<Props, void> {
     super(props)
   }
 
-  componentDidUpdate() {
-    this.scrollToSelectedJob()
+  componentDidUpdate(prevProps) {
+    if (this.props.selectedFeature !== prevProps.selectedFeature) {
+      this.scrollToSelectedJob()
+    }
   }
 
   render() {

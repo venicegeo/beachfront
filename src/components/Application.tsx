@@ -307,6 +307,7 @@ export class Application extends React.Component<Props, State> {
             onDismissError={this.handleDismissJobError}
             onForgetJob={this.handleForgetJob}
             onNavigateToJob={this.handleNavigateToJob}
+            selectedFeature={this.state.selectedFeature}
           />
         )
       case '/product-lines':
