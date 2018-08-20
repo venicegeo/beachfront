@@ -85,7 +85,7 @@ export class JobStatus extends React.Component<Props, State> {
 
         <div className={styles.wrapper}>
           <div className={styles.details} onClick={this.handleExpansionToggle}>
-            <h3 className={styles.title}>
+            <h3 className={styles.title} onClick=${this.>
               <i className={`fa fa-chevron-right ${styles.caret}`}/>
               <span>{segmentIfNeeded(properties.name)}</span>
             </h3>
