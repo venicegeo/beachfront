@@ -907,9 +907,9 @@ export class PrimaryMap extends React.Component<Props, State> {
       dataProjection: WGS84,
       featureProjection: WEB_MERCATOR,
     })
-    const center = extent.getCenter(calculateExtent(feature.getGeometry()))
+    const anchor = extent.getTopRight(calculateExtent(feature.getGeometry()))
     features.push(feature)
-    this.featureDetailsOverlay.setPosition(center)
+    this.featureDetailsOverlay.setPosition(anchor)
   }
 }
 
