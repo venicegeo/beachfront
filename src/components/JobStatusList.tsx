@@ -58,7 +58,7 @@ export class JobStatusList extends React.Component<Props, void> {
           )}
 
           {!this.props.jobs.length ? (
-            <li className={styles.placeholder}>You haven't started any this.props.jobs yet</li>
+            <li className={styles.placeholder}>You haven't started any Jobs yet</li>
           ) : this.props.jobs.sort((job1, job2) => {
             return moment(job1.properties.created_on).isBefore(job2.properties.created_on) ? 1 : -1
           }).map(job => (
