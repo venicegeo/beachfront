@@ -17,7 +17,6 @@
 @import '../styles/constants.css';
 
 .results > h2 {
-  font-size: 1em;
 }
 
 .results table {
