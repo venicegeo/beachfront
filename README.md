@@ -11,7 +11,7 @@ Before building and/or running the pz-search-query service, please ensure that t
 ### Setup
 Create the directory the repository must live in, and clone the git repository:
 
-    $ mkdir -p $GOPATH/src/github.com/venicegeo<br/>
+    $ mkdir -p $GOPATH/src/github.com/venicegeo
     $ cd $GOPATH/src/github.com/venicegeo
     $ git clone git@github.com:venicegeo/bf-ui.git
 
