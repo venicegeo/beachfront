@@ -26,7 +26,8 @@ interface Props {
   jobs: beachfront.Job[]
   selectedFeature: beachfront.Job | beachfront.Scene
   onDismissError()
-  onForgetJob(jobId: string)
+  onSelectJob(job: beachfront.Job)
+  onForgetJob(job: beachfront.Job)
   onNavigateToJob(loc: { pathname: string, search: string, hash: string })
 }
 
@@ -68,6 +69,7 @@ export class JobStatusList extends React.Component<Props, void> {
               job={job}
               onNavigate={this.props.onNavigateToJob}
               onForgetJob={this.props.onForgetJob}
+              onSelectJob={this.props.onSelectJob}
             />
           ))}
         </ul>

@@ -307,6 +307,7 @@ export class Application extends React.Component<Props, State> {
             onDismissError={this.handleDismissJobError}
             onForgetJob={this.handleForgetJob}
             onNavigateToJob={this.handleNavigateToJob}
+            onSelectJob={this.handleSelectFeature}
             selectedFeature={this.state.selectedFeature}
           />
         )
@@ -467,18 +468,17 @@ export class Application extends React.Component<Props, State> {
     setTimeout(() => this.fetchProductLines())
   }
 
-  private handleForgetJob(id) {
-    const job = this.state.jobs.records.find(j => j.id === id)
+  private handleForgetJob(job: beachfront.Job) {
     this.setState({
-      jobs: this.state.jobs.$filter(j => j.id !== id),
+      jobs: this.state.jobs.$filter(j => j.id !== job.id),
     })
-    if (this.state.route.jobIds.includes(id)) {
+    if (this.state.route.jobIds.includes(job.id)) {
       this.navigateTo({
         pathname: this.state.route.pathname,
-        search: this.state.route.search.replace(new RegExp('\\??jobId=' + id), ''),
+        search: this.state.route.search.replace(new RegExp('\\??jobId=' + job.id), ''),
       })
     }
-    jobsService.forgetJob(id)
+    jobsService.forgetJob(job.id)
       .catch(() => {
         this.setState({
           jobs: this.state.jobs.$append(job),
