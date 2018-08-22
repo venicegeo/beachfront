@@ -16,10 +16,6 @@
 
 @import '../styles/constants.css';
 
-.root > h2 {
-  cursor: pointer;
-}
-
 .controls {
   margin: 15px 0;
   padding: 5px 15px 0;

@@ -484,12 +484,13 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.map.forEachFeatureAtPixel(event.pixel, (feature) => {
       switch (feature.get(KEY_TYPE)) {
         case TYPE_DIVOT_INBOARD:
+        case TYPE_DIVOT_OUTBOARD:
         case TYPE_JOB:
         case TYPE_SCENE:
           foundFeature = true
           return true
       }
-    }, { layerFilter: l => l === this.frameLayer || l === this.imageryLayer })
+    }, { layerFilter: l => l === this.frameLayer || l === this.imageryLayer || l === this.pinLayer })
 
     if (foundFeature) {
       this.refs.container.classList.add(styles.isHoveringFeature)
@@ -907,9 +908,9 @@ export class PrimaryMap extends React.Component<Props, State> {
       dataProjection: WGS84,
       featureProjection: WEB_MERCATOR,
     })
-    const center = extent.getCenter(calculateExtent(feature.getGeometry()))
+    const anchor = extent.getTopRight(calculateExtent(feature.getGeometry()))
     features.push(feature)
-    this.featureDetailsOverlay.setPosition(center)
+    this.featureDetailsOverlay.setPosition(anchor)
   }
 }
 
