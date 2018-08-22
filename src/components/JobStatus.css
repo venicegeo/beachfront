@@ -138,7 +138,7 @@
 }
 
 .title span:hover {
-  text-decoration: underline;
+  filter: brightness(150%);
 }
 
 /* Details: Header
