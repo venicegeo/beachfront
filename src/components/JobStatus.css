@@ -19,7 +19,7 @@
 :root {
   --border-radius: 6px;
   --padding-size: 15px;
-  --bgcolor-active: #f2faff;
+  --bgcolor-active: hsl(203, 100%, 94%);
   --bgcolor-failed: var(--COLOR_RED);
   --bgcolor-cancelled: var(--COLOR_GREY);
   --bordercolor-active: hsla(201, 100%, 50%, 0.27);
