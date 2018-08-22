@@ -68,8 +68,6 @@
 .running {}
 
 .failed {
-  background-color: var(--bgcolor-failed);
-  color: white;
   border-color: var(--bordercolor-failed);
 }
 
@@ -155,6 +153,10 @@
 
 .timer {
   opacity: .4;
+}
+
+.failed .status, .failed .title {
+  color: red;
 }
 
 /* Details: Metadata
