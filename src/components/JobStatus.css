@@ -20,11 +20,7 @@
   --border-radius: 6px;
   --padding-size: 15px;
   --bgcolor-active: hsl(203, 100%, 94%);
-  --bgcolor-failed: var(--COLOR_RED);
-  --bgcolor-cancelled: var(--COLOR_GREY);
   --bordercolor-active: hsla(201, 100%, 50%, 0.27);
-  --bordercolor-cancelled: var(--COLOR_GREY);
-  --bordercolor-failed: hsla(344, 100%, 34%, 0.46);
   --control-bgcolor: var(--COLOR_CONTROL);
   --control-bgcolor-hover: var(--COLOR_BRAND_DARK);
   /* --header-bgcolor-hover: color(var(--COLOR_CONTROL_LIGHT) alpha(4%)); */
@@ -63,31 +59,55 @@
   color: var(--control-bgcolor-hover);
 }
 
-.succeeded {}
-
-.running {}
-
-.failed {
-  background-color: var(--bgcolor-failed);
-  color: white;
-  border-color: var(--bordercolor-failed);
+.status {
+  font-size: 12px;
+  color: black;
+  border-radius: 1px;
+  padding: 0 6px;
+  border: 1px solid;
+  margin-bottom: 4px;
 }
 
-.failed h3 {
-  color: inherit;
+.submitted .status,
+.activating .status {
+  border-color: hsl(300, 100%, 74%);
+  background-color: hsla(300, 100%, 74%, 0.3);
+}
+
+.active .status {
+  border-color: hsl(200, 94%, 54%);
+  background-color: hsla(200, 94%, 54%, 0.3);
+}
+
+.inactive .status {
+  border-color: hsl(0, 0%, 50%);
+  background-color: hsla(0, 0%, 50%, 0.3);
+}
+
+.pending .status,
+.running .status {
+  border-color: hsl(48, 94%, 54%);
+  background-color: hsla(48, 94%, 54%, 0.3);
+}
+
+.succeeded .status {
+  border: none;
+}
+
+.timedOut .status,
+.failed .status,
+.error .status {
+  border-color: hsl(349, 100%, 60%);
+  background-color: hsla(349, 100%, 60%, 0.3);
+}
+
+.cancelled .status {
+  border-color: hsl(0, 0%, 70%);
+  background-color: hsla(0, 0%, 70%, 0.3);
 }
 
 .timedOut {
   composes: failed;
-}
-
-.cancelled {
-  background-color: var(--bgcolor-cancelled);
-  border-color: var(--bordercolor-cancelled);
-}
-
-.activating {
-  border-color: var(--bordercolor-active);
 }
 
 /* =========================================================================

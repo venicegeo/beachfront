@@ -24,6 +24,7 @@ export const STATUS_PENDING = 'Pending'
 export const STATUS_INACTIVE = 'Inactive'
 export const STATUS_CANCELLED = 'Cancelled'
 export const STATUS_ACTIVATING = 'Activating'
+export const STATUS_SUBMITTED = 'Submitted'
 
 export const SOURCE_DEFAULT = 'rapideye'
 
