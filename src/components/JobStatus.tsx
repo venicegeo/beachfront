@@ -35,7 +35,8 @@ interface Props {
   className?: string
   isActive: boolean
   job: beachfront.Job
-  onForgetJob(jobId: string)
+  onSelectJob(job: beachfront.Job)
+  onForgetJob(job: beachfront.Job)
   onNavigate(loc: { pathname: string, search: string, hash: string })
 }
 
@@ -59,6 +60,7 @@ export class JobStatus extends React.Component<Props, State> {
       isRemoving: false,
     }
 
+    this.emitOnSelectJob        = this.emitOnSelectJob.bind(this)
     this.emitOnForgetJob        = this.emitOnForgetJob.bind(this)
     this.handleDownloadComplete = this.handleDownloadComplete.bind(this)
     this.handleDownloadError    = this.handleDownloadError.bind(this)
@@ -84,10 +86,15 @@ export class JobStatus extends React.Component<Props, State> {
         </div>
 
         <div className={styles.wrapper}>
-          <div className={styles.details} onClick={this.handleExpansionToggle}>
+          <div className={styles.details}>
             <h3 className={styles.title}>
-              <i className={`fa fa-chevron-right ${styles.caret}`}/>
-              <span>{segmentIfNeeded(properties.name)}</span>
+              <i
+                className={`fa fa-chevron-right ${styles.caret}`}
+                onClick={this.handleExpansionToggle}
+              />
+              <span onClick={this.emitOnSelectJob}>
+                {segmentIfNeeded(properties.name)}
+              </span>
             </h3>
 
             <div className={styles.summary}>
@@ -201,8 +208,12 @@ export class JobStatus extends React.Component<Props, State> {
     }
   }
 
+  private emitOnSelectJob() {
+    this.props.onSelectJob(this.props.job)
+  }
+
   private emitOnForgetJob() {
-    this.props.onForgetJob(this.props.job.id)
+    this.props.onForgetJob(this.props.job)
   }
 
   private handleDownloadProgress(loaded, total) {

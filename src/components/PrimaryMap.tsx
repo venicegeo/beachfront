@@ -1077,7 +1077,6 @@ function generateBboxDrawInteraction(drawLayer) {
 
 function generateFeatureDetailsOverlay(componentRef) {
   return new Overlay({
-    autoPan:     true,
     element:     findDOMNode(componentRef),
     id:          'featureDetails',
     positioning: 'top-left',
