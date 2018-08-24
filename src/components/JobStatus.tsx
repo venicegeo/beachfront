@@ -113,9 +113,9 @@ export class JobStatus extends React.Component<Props, State> {
                 <dd>{properties.algorithm_name}</dd>
                 <dt>Scene ID</dt>
                 <dd>{normalizeSceneId(properties.scene_id)}</dd>
-                {properties.errorDetails && (
+                { properties.errorDetails && (
                   <div>
-                    <dt>Error</dt>
+                    <dt className={styles.errorDetails}>Error</dt>
                     <dd>{properties.errorDetails}</dd>
                   </div>
                 )}
