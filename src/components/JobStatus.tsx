@@ -116,10 +116,6 @@ export class JobStatus extends React.Component<Props, State> {
                 <dd>{normalizeSceneId(properties.scene_id)}</dd>
                 {hasError && (<dt>Error</dt>)}
                 {hasError && (<dd className={styles.errorDetails}>{properties.errorDetails}</dd>)}
-                {/*<dt>Captured On</dt>
-                <dd>{moment(properties.captured_on).utc().format('MM/DD/YYYY HH:mm z')}</dd>
-                <dt>Sensor</dt>
-                <dd>{properties.scene_sensor_name}</dd>*/}
               </dl>
               <div className={styles.removeToggle}>
                 <button onClick={this.handleForgetToggle}>
