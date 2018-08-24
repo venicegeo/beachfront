@@ -113,6 +113,12 @@ export class JobStatus extends React.Component<Props, State> {
                 <dd>{properties.algorithm_name}</dd>
                 <dt>Scene ID</dt>
                 <dd>{normalizeSceneId(properties.scene_id)}</dd>
+                {properties.errorDetails && (
+                  <div>
+                    <dt>Error</dt>
+                    <dd>{properties.errorDetails}</dd>
+                  </div>
+                )}
                 {/*<dt>Captured On</dt>
                 <dd>{moment(properties.captured_on).utc().format('MM/DD/YYYY HH:mm z')}</dd>
                 <dt>Sensor</dt>
