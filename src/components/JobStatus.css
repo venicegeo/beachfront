@@ -100,10 +100,6 @@
   background-color: hsla(349, 100%, 60%, 0.3);
 }
 
-.errorDetails {
-  color: hsl(349, 100%, 60%);
-}
-
 .cancelled .status {
   border-color: hsl(0, 0%, 70%);
   background-color: hsla(0, 0%, 70%, 0.3);
@@ -213,6 +209,10 @@
 .metadata dd {
   flex: 1 calc(70% - 14px); /* Not working, but not harming? */
   word-break: break-all;
+}
+
+.errorDetails {
+  color: hsl(349, 100%, 60%);
 }
 
 .isExpanded .metadata {
