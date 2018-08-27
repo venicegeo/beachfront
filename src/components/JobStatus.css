@@ -21,6 +21,10 @@
   --padding-size: 15px;
   --bgcolor-active: hsl(203, 100%, 94%);
   --bordercolor-active: hsla(201, 100%, 50%, 0.27);
+  --bordercolor-submitted: hsla(300, 100%, 74%, 0.3);
+  --bordercolor-running: hsla(48, 94%, 54%, 0.3);
+  --bordercolor-failed: hsla(349, 100%, 60%, 0.3);
+  --bordercolor-timedOut: hsla(0, 0%, 70%, 0.3);
   --control-bgcolor: var(--COLOR_CONTROL);
   --control-bgcolor-hover: var(--COLOR_BRAND_DARK);
   /* --header-bgcolor-hover: color(var(--COLOR_CONTROL_LIGHT) alpha(4%)); */
@@ -57,6 +61,22 @@
   border-left: 10px solid var(--bordercolor-active);
   background-color: var(--bgcolor-active);
   color: var(--control-bgcolor-hover);
+}
+
+.isActive.failed,
+.isActive.error,
+.isActive.timedOut {
+  border-left: 10px solid var(--bordercolor-failed);
+}
+
+.isActive.running,
+.isActive.pending {
+  border-left: 10px solid var(--bordercolor-running);
+}
+
+.isActive.submitted,
+.isActive.activating {
+  border-left: 10px solid var(--bordercolor-submitted);
 }
 
 .status {
