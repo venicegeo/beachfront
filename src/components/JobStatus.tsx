@@ -74,6 +74,7 @@ export class JobStatus extends React.Component<Props, State> {
 
   render() {
     const { id, properties } = this.props.job
+    const hasError = properties.errorDetails ? true : false
 
     return (
       <li className={`${styles.root} ${this.aggregatedClassNames}`}>
@@ -113,10 +114,8 @@ export class JobStatus extends React.Component<Props, State> {
                 <dd>{properties.algorithm_name}</dd>
                 <dt>Scene ID</dt>
                 <dd>{normalizeSceneId(properties.scene_id)}</dd>
-                {/*<dt>Captured On</dt>
-                <dd>{moment(properties.captured_on).utc().format('MM/DD/YYYY HH:mm z')}</dd>
-                <dt>Sensor</dt>
-                <dd>{properties.scene_sensor_name}</dd>*/}
+                {hasError && (<dt>Error</dt>)}
+                {hasError && (<dd className={styles.errorDetails}>{properties.errorDetails}</dd>)}
               </dl>
               <div className={styles.removeToggle}>
                 <button onClick={this.handleForgetToggle}>

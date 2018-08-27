@@ -211,6 +211,10 @@
   word-break: break-all;
 }
 
+.errorDetails {
+  color: hsl(349, 100%, 60%);
+}
+
 .isExpanded .metadata {
   max-height: 400px;
 }

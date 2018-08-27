@@ -47,6 +47,7 @@ declare namespace beachfront {
       extras: any
       compute_mask: boolean
       type: 'JOB'
+      errorDetails: string
     }
 
   }
