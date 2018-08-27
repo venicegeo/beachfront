@@ -960,11 +960,11 @@ export class PrimaryMap extends React.Component<Props, State> {
             return new Style({
               image: new RegularShape({
                 angle: Math.PI / 4,
-                points: isSelected ? 32 : 4,
-                radius: 10,
+                points: 4,
+                radius: isSelected ? 14 : 10,
                 stroke: new Stroke({
                   color: 'black',
-                  width: isSelected ? 1.5 : 1,
+                  width: isSelected ? 2 : 1,
                 }),
                 fill: new Fill({
                   color: getColorForStatus(feature.get(KEY_STATUS)),
@@ -983,7 +983,7 @@ export class PrimaryMap extends React.Component<Props, State> {
             return new Style({
               text: new Text({
                 fill: new Fill({
-                  color: isClose ? 'black' : 'transparent',
+                  color: isClose || isSelected ? 'black' : 'transparent',
                 }),
                 offsetX: 13,
                 offsetY: 1,
