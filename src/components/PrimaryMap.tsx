@@ -961,7 +961,7 @@ export class PrimaryMap extends React.Component<Props, State> {
               image: new RegularShape({
                 angle: Math.PI / 4,
                 points: 4,
-                radius: isSelected ? 14 : 10,
+                radius: isSelected ? 15 : 10,
                 stroke: new Stroke({
                   color: 'black',
                   width: isSelected ? 2 : 1,
