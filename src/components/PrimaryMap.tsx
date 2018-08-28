@@ -124,6 +124,7 @@ interface Props {
   imagery:            beachfront.ImageryCatalogPage
   isSearching:        boolean
   mode:               string
+  jobs:               beachfront.Job[]
   selectedFeature:    beachfront.Job | beachfront.Scene
   view:               MapView
   wmsUrl:             string
@@ -236,6 +237,17 @@ export class PrimaryMap extends React.Component<Props, State> {
 
     if (previousProps.detections !== this.props.detections) {
       this.renderDetections()
+    }
+
+    const selectedJob = (this.props.selectedFeature as beachfront.Job)
+    if (selectedJob) {
+      const oldJob = previousProps.jobs.filter(j => j.properties.job_id == selectedJob.properties.job_id)[0]
+      const currentJob = this.props.jobs.filter(j => j.properties.job_id == selectedJob.properties.job_id)[0]
+      if (oldJob && currentJob) {
+        if ((oldJob.properties.status !== STATUS_SUCCESS) && (currentJob.properties.status === STATUS_SUCCESS)) {
+          this.refreshDetections()
+        }
+      }
     }
 
     if (previousProps.highlightedFeature !== this.props.highlightedFeature) {
@@ -606,6 +618,14 @@ export class PrimaryMap extends React.Component<Props, State> {
         duration,
       })
     }
+  }
+
+  private refreshDetections() {
+    Object.keys(this.detectionsLayers).forEach(layerId => {
+      const layer = this.detectionsLayers[layerId]
+      const source = layer.getSource()
+      source.refresh()
+    })
   }
 
   private renderDetections() {
