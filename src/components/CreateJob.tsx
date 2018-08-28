@@ -174,7 +174,10 @@ export class CreateJob extends React.Component<Props, State> {
   }
 
   private handleCreateJob(algorithm) {
-    this.setState({ isCreating: true })
+    this.setState({
+      isCreating: true,
+      algorithmError: '',
+    })
 
     createJob({
       algorithmId: algorithm.id,
