@@ -137,12 +137,11 @@
   flex: 1;
   cursor: default;
   word-break: break-all;
-  padding: .25em 0;
 }
 
 .title {
   composes: buffered-container;
-  margin: .3em 0 .5em;
+  margin: .5em 0 .5em;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -190,6 +189,7 @@
   justify-content: space-between;
   align-items: center;
   font-size: 14px;
+  margin-bottom: .25em;
 }
 
 .timer {
