@@ -185,6 +185,8 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.handleMouseMove = throttle(this.handleMouseMove.bind(this), 15)
     this.handleSelect = this.handleSelect.bind(this)
     this.handleSelectFeature = this.handleSelectFeature.bind(this)
+    this.generateFrameLayer = this.generateFrameLayer.bind(this)
+    this.generatePinLayer = this.generatePinLayer.bind(this)
     this.renderImagerySearchBbox = debounce(this.renderImagerySearchBbox.bind(this))
     this.updateView = debounce(this.updateView.bind(this), 100)
   }
@@ -240,11 +242,6 @@ export class PrimaryMap extends React.Component<Props, State> {
       this.renderHighlight()
     }
 
-    if (previousProps.frames !== this.props.frames) {
-      this.renderFrames()
-      this.renderPins()
-    }
-
     if (previousProps.imagery !== this.props.imagery) {
       this.renderImagery()
     }
@@ -274,6 +271,9 @@ export class PrimaryMap extends React.Component<Props, State> {
       (previousState.isMeasuring !== this.state.isMeasuring)) {
       this.updateInteractions()
     }
+
+    this.renderFrames()
+    this.renderPins()
   }
 
   render() {
@@ -516,8 +516,8 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.basemapLayers = generateBasemapLayers(BASEMAP_TILE_PROVIDERS)
     this.drawLayer = generateDrawLayer()
     this.highlightLayer = generateHighlightLayer()
-    this.frameLayer = generateFrameLayer()
-    this.pinLayer = generatePinLayer()
+    this.frameLayer = this.generateFrameLayer()
+    this.pinLayer = this.generatePinLayer()
     this.imageryLayer = generateImageryLayer()
     this.detectionsLayers = {}
     this.previewLayers = {}
@@ -913,6 +913,116 @@ export class PrimaryMap extends React.Component<Props, State> {
     features.push(feature)
     this.featureDetailsOverlay.setPosition(anchor)
   }
+
+  private generateFrameLayer() {
+    const layer = new VectorLayer({
+      source: new VectorSource(),
+      style: (feature: Feature, resolution: number) => {
+        const isClose = resolution < RESOLUTION_CLOSE
+        const isSelected = (this.props.selectedFeature && this.props.selectedFeature.id === feature.getId())
+
+        return new Style({
+          stroke: new Stroke({
+            color: isSelected ? 'black' : 'rgba(0, 0, 0, .4)',
+            lineDash: isSelected ? undefined : [10, 10],
+            width: isSelected ? 2 : 1,
+          }),
+          fill: new Fill({
+            color: isClose || isSelected ? 'transparent' : 'hsla(202, 100%, 85%, 0.5)',
+          }),
+        })
+      },
+    })
+
+    layer.setZIndex(3)
+
+    return layer
+  }
+
+  private generatePinLayer() {
+    const layer = new VectorLayer({
+      source: new VectorSource(),
+      style: (feature: Feature, resolution: number) => {
+        const isClose = resolution < RESOLUTION_CLOSE
+        const isSelected = (this.props.selectedFeature && this.props.selectedFeature.id === feature.get(KEY_OWNER_ID))
+
+        switch (feature.get(KEY_TYPE)) {
+          case TYPE_DIVOT_INBOARD:
+            return new Style({
+              image: new RegularShape({
+                angle: Math.PI / 4,
+                points: 4,
+                radius: 5,
+                fill: new Fill({
+                  color: 'black',
+                }),
+              }),
+            })
+          case TYPE_DIVOT_OUTBOARD:
+            return new Style({
+              image: new RegularShape({
+                angle: Math.PI / 4,
+                points: 4,
+                radius: isSelected ? 15 : 10,
+                stroke: new Stroke({
+                  color: 'black',
+                  width: isSelected ? 2 : 1,
+                }),
+                fill: new Fill({
+                  color: getColorForStatus(feature.get(KEY_STATUS)),
+                }),
+              }),
+              zIndex: isSelected ? 1 : undefined,
+            })
+          case TYPE_STEM:
+            return new Style({
+              stroke: new Stroke({
+                color: 'black',
+                width: 1,
+              }),
+            })
+          case TYPE_LABEL_MAJOR:
+            return new Style({
+              text: new Text({
+                fill: new Fill({
+                  color: isClose || isSelected ? 'black' : 'transparent',
+                }),
+                offsetX: 13,
+                offsetY: 1,
+                font: 'bold 17px Catamaran, Verdana, sans-serif',
+                text: feature.get(KEY_NAME).toUpperCase(),
+                textAlign: 'left',
+                textBaseline: 'middle',
+              }),
+            })
+          case TYPE_LABEL_MINOR:
+            const name = feature.get(KEY_NAME)
+            const sceneId = normalizeSceneId(feature.get(KEY_SCENE_ID))
+
+            return new Style({
+              text: new Text({
+                fill: new Fill({
+                  color: isClose ? 'rgba(0,0,0,.6)' : 'transparent',
+                }),
+                offsetX: 13,
+                offsetY: 15,
+                font: '11px Verdana, sans-serif',
+                text: ([
+                  feature.get(KEY_STATUS),
+                  sceneId !== name ? sceneId : null,
+                ].filter(Boolean)).join(' // ').toUpperCase(),
+                textAlign: 'left',
+                textBaseline: 'middle',
+              }),
+            })
+        }
+      },
+    })
+
+    layer.setZIndex(4)
+
+    return layer
+  }
 }
 
 function animateLayerExit(layer) {
@@ -1084,108 +1194,6 @@ function generateFeatureDetailsOverlay(componentRef) {
   })
 }
 
-function generatePinLayer() {
-  const layer = new VectorLayer({
-    source: new VectorSource(),
-    style(feature: Feature, resolution: number) {
-      const isClose = resolution < RESOLUTION_CLOSE
-
-      switch (feature.get(KEY_TYPE)) {
-        case TYPE_DIVOT_INBOARD:
-          return new Style({
-            image: new RegularShape({
-              angle: Math.PI / 4,
-              points: 4,
-              radius: 5,
-              fill: new Fill({
-                color: 'black',
-              }),
-            }),
-          })
-        case TYPE_DIVOT_OUTBOARD:
-          return new Style({
-            image: new RegularShape({
-              angle: Math.PI / 4,
-              points: 4,
-              radius: 10,
-              stroke: new Stroke({
-                color: 'black',
-                width: 1,
-              }),
-              fill: new Fill({
-                color: getColorForStatus(feature.get(KEY_STATUS)),
-              }),
-            }),
-          })
-        case TYPE_STEM:
-          return new Style({
-            stroke: new Stroke({
-              color: 'black',
-              width: 1,
-            }),
-          })
-        case TYPE_LABEL_MAJOR:
-          return new Style({
-            text: new Text({
-              fill: new Fill({
-                color: isClose ? 'black' : 'transparent',
-              }),
-              offsetX: 13,
-              offsetY: 1,
-              font: 'bold 17px Catamaran, Verdana, sans-serif',
-              text: feature.get(KEY_NAME).toUpperCase(),
-              textAlign: 'left',
-              textBaseline: 'middle',
-            }),
-          })
-        case TYPE_LABEL_MINOR:
-          const name = feature.get(KEY_NAME)
-          const sceneId = normalizeSceneId(feature.get(KEY_SCENE_ID))
-
-          return new Style({
-            text: new Text({
-              fill: new Fill({
-                color: isClose ? 'rgba(0,0,0,.6)' : 'transparent',
-              }),
-              offsetX: 13,
-              offsetY: 15,
-              font: '11px Verdana, sans-serif',
-              text: ([
-                feature.get(KEY_STATUS),
-                sceneId !== name ? sceneId : null,
-              ].filter(Boolean)).join(' // ').toUpperCase(),
-              textAlign: 'left',
-              textBaseline: 'middle',
-            }),
-          })
-      }
-    },
-  })
-
-  layer.setZIndex(3)
-
-  return layer
-}
-
-function generateFrameLayer() {
-  return new VectorLayer({
-    source: new VectorSource(),
-    style(feature: Feature, resolution: number) {
-      feature = feature // HACK HACK HACK HACK HACK
-      const isClose = resolution < RESOLUTION_CLOSE
-      return new Style({
-        stroke: new Stroke({
-          color: 'rgba(0, 0, 0, .4)',
-          lineDash: [10, 10],
-        }),
-        fill: new Fill({
-          color: isClose ? 'transparent' : 'hsla(202, 100%, 85%, 0.5)',
-        }),
-      })
-    },
-  })
-}
-
 function generateHighlightLayer() {
   return new VectorLayer({
     source: new VectorSource(),
@@ -1263,12 +1271,23 @@ function generateSelectInteraction(...layers) {
     condition: e => condition.click(e) && (
       condition.noModifierKeys(e) || condition.shiftKeyOnly(e)
     ),
-    style: new Style({
-      stroke: new Stroke({
-        color: 'black',
-        width: 2,
-      }),
-    }),
+    style: (feature: Feature) => {
+      switch (feature.get(KEY_TYPE)) {
+        case TYPE_JOB:
+          /*
+            Don't render the selection for jobs, since they render on top of the divots. We'll render
+            their outlines in the frame layer instead.
+          */
+          return new Style()
+        default:
+          return new Style({
+            stroke: new Stroke({
+              color: 'black',
+              width: 2,
+            }),
+          })
+      }
+    },
     toggleCondition: condition.never,
   })
 }
