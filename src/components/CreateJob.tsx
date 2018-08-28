@@ -58,7 +58,6 @@ interface State {
   isCreating?: boolean
   computeMask?: boolean
   name?: string
-  shouldAutogenerateName?: boolean
   algorithmError?: any
 }
 
@@ -77,7 +76,6 @@ export class CreateJob extends React.Component<Props, State> {
       isCreating: false,
       computeMask: true,
       name: props.selectedScene ? normalizeSceneId(props.selectedScene.id) : '',
-      shouldAutogenerateName: true,
       algorithmError: '',
     }
 
@@ -89,12 +87,17 @@ export class CreateJob extends React.Component<Props, State> {
     this.handleSearchSourceChange = this.handleSearchSourceChange.bind(this)
   }
 
-  componentWillReceiveProps(nextProps: Props) {
-    if (this.state.shouldAutogenerateName
-      && nextProps.selectedScene
-      && nextProps.selectedScene !== this.props.selectedScene
-    ) {
-      this.setState({ name: normalizeSceneId(nextProps.selectedScene.id) })
+  componentDidUpdate(prevProps: Props) {
+    if (this.props.selectedScene !== prevProps.selectedScene) {
+      // Set the default name using the scene id.
+      if (this.props.selectedScene && !this.state.name) {
+        this.setState({ name: normalizeSceneId(this.props.selectedScene.id) })
+      }
+
+      // Reset the algorithm error.
+      if (this.state.algorithmError) {
+        this.setState({ algorithmError: '' })
+      }
     }
   }
 
@@ -209,6 +212,6 @@ export class CreateJob extends React.Component<Props, State> {
   }
 
   private handleNameChange(name) {
-    this.setState({ name, shouldAutogenerateName: !name })
+    this.setState({ name })
   }
 }
