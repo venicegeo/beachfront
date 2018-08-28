@@ -241,10 +241,10 @@ export class PrimaryMap extends React.Component<Props, State> {
 
     const selectedJob = (this.props.selectedFeature as beachfront.Job)
     if (selectedJob) {
-      const oldJob = previousProps.jobs.filter(j => j.properties.job_id == selectedJob.properties.job_id)[0]
+      const previousJob = previousProps.jobs.filter(j => j.properties.job_id == selectedJob.properties.job_id)[0]
       const currentJob = this.props.jobs.filter(j => j.properties.job_id == selectedJob.properties.job_id)[0]
-      if (oldJob && currentJob) {
-        if ((oldJob.properties.status !== STATUS_SUCCESS) && (currentJob.properties.status === STATUS_SUCCESS)) {
+      if (previousJob && currentJob) {
+        if ((previousJob.properties.status !== STATUS_SUCCESS) && (currentJob.properties.status === STATUS_SUCCESS)) {
           this.refreshDetections()
         }
       }
@@ -623,8 +623,7 @@ export class PrimaryMap extends React.Component<Props, State> {
   private refreshDetections() {
     Object.keys(this.detectionsLayers).forEach(layerId => {
       const layer = this.detectionsLayers[layerId]
-      const source = layer.getSource()
-      source.refresh()
+      layer.getSource().refresh()
     })
   }
 
