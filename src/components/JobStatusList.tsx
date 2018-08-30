@@ -90,7 +90,7 @@ export class JobStatusList extends React.Component<Props, void> {
       const height = window.innerHeight || document.documentElement.clientHeight
 
       if (Math.floor(box.top) <= offset || box.bottom > height - row.clientHeight) {
-        row.scrollIntoView({ behavior: 'smooth' })
+        row.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
       }
     }
   }
