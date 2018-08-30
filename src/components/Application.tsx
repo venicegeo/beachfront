@@ -198,6 +198,7 @@ export class Application extends React.Component<Props, State> {
           startTour={this.startTour}
         />
         <PrimaryMap
+          activeRoute={this.state.route}
           bbox={this.state.bbox}
           catalogApiKey={this.state.catalogApiKey}
           detections={this.detectionsForCurrentMode}
@@ -578,12 +579,16 @@ export class Application extends React.Component<Props, State> {
     history.pushState(null, null, route.href)
 
     // Update selected feature if needed.
-    let selectedFeature = 'selectedFeature' in loc
-      ? loc.selectedFeature
-      : this.state.selectedFeature
-
+    let selectedFeature = this.state.selectedFeature
     if (route.jobIds.length) {
       selectedFeature = this.state.jobs.records.find(j => route.jobIds.includes(j.id))
+    } else if ('selectedFeature' in loc) {
+      selectedFeature = loc.selectedFeature
+    } else if (this.state.route.pathname === '/create-job' && route.pathname !== '/create-job') {
+      // If we're navigating away from Create Job and have search imagery selected, clear the selection.
+      if (selectedFeature && selectedFeature.properties.type !== TYPE_JOB) {
+        selectedFeature = null
+      }
     }
 
     /* TODO: Okay?

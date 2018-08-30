@@ -116,6 +116,7 @@ export const MODE_PRODUCT_LINES = 'MODE_PRODUCT_LINES'
 export const MODE_SELECT_IMAGERY = 'MODE_SELECT_IMAGERY'
 
 interface Props {
+  activeRoute: { pathname: string, search: string, hash: string }
   bbox: number[]
   catalogApiKey:      string
   detections:         (beachfront.Job | beachfront.ProductLine)[]
@@ -225,6 +226,8 @@ export class PrimaryMap extends React.Component<Props, State> {
   }
 
   componentDidUpdate(previousProps: Props, previousState: State) {
+    const routeChanged = previousProps.activeRoute !== this.props.activeRoute
+
     if (!this.props.selectedFeature) {
       this.clearSelection()
     }
@@ -242,7 +245,7 @@ export class PrimaryMap extends React.Component<Props, State> {
       this.renderHighlight()
     }
 
-    if (previousProps.imagery !== this.props.imagery) {
+    if (previousProps.imagery !== this.props.imagery || routeChanged) {
       this.renderImagery()
     }
 
@@ -255,7 +258,7 @@ export class PrimaryMap extends React.Component<Props, State> {
       this.updateMapSize()
     }
 
-    if (previousProps.bbox !== this.props.bbox) {
+    if (previousProps.bbox !== this.props.bbox || routeChanged) {
       this.renderImagerySearchBbox()
     }
 
@@ -739,6 +742,10 @@ export class PrimaryMap extends React.Component<Props, State> {
     source.setAttributions(undefined)
     source.clear()
 
+    if (this.props.activeRoute.pathname !== '/create-job') {
+      return
+    }
+
     if (imagery) {
       const features = reader.readFeatures(imagery.images, {
         dataProjection: WGS84,
@@ -780,7 +787,7 @@ export class PrimaryMap extends React.Component<Props, State> {
   private renderImagerySearchBbox() {
     this.clearDraw()
     const bbox = deserializeBbox(this.props.bbox)
-    if (!bbox) {
+    if (!bbox || this.props.activeRoute.pathname !== '/create-job') {
       return
     }
 
