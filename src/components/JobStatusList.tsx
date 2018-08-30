@@ -70,6 +70,7 @@ export class JobStatusList extends React.Component<Props, void> {
               onNavigate={this.props.onNavigateToJob}
               onForgetJob={this.props.onForgetJob}
               onSelectJob={this.props.onSelectJob}
+              selectedFeature={this.props.selectedFeature}
             />
           ))}
         </ul>
