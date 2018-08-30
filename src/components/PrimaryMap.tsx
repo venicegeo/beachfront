@@ -245,6 +245,11 @@ export class PrimaryMap extends React.Component<Props, State> {
       this.renderHighlight()
     }
 
+    if (previousProps.frames !== this.props.frames) {
+      this.renderFrames()
+      this.renderPins()
+    }
+
     if (previousProps.imagery !== this.props.imagery || routeChanged) {
       this.renderImagery()
     }
@@ -274,9 +279,6 @@ export class PrimaryMap extends React.Component<Props, State> {
       (previousState.isMeasuring !== this.state.isMeasuring)) {
       this.updateInteractions()
     }
-
-    this.renderFrames()
-    this.renderPins()
   }
 
   render() {
@@ -941,8 +943,6 @@ export class PrimaryMap extends React.Component<Props, State> {
       },
     })
 
-    layer.setZIndex(3)
-
     return layer
   }
 
@@ -1026,7 +1026,7 @@ export class PrimaryMap extends React.Component<Props, State> {
       },
     })
 
-    layer.setZIndex(4)
+    layer.setZIndex(3)
 
     return layer
   }
@@ -1280,12 +1280,6 @@ function generateSelectInteraction(...layers) {
     ),
     style: (feature: Feature) => {
       switch (feature.get(KEY_TYPE)) {
-        case TYPE_JOB:
-          /*
-            Don't render the selection for jobs, since they render on top of the divots. We'll render
-            their outlines in the frame layer instead.
-          */
-          return new Style()
         default:
           return new Style({
             stroke: new Stroke({
