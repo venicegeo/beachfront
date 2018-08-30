@@ -438,7 +438,10 @@ export class Application extends React.Component<Props, State> {
   }
 
   private handleBoundingBoxChange(bbox) {
-    this.setState({ bbox })
+    this.setState({
+      bbox,
+      searchError: null,
+    })
   }
 
   private handleCatalogApiKeyChange(catalogApiKey) {
