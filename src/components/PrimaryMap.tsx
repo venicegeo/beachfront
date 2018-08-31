@@ -248,7 +248,6 @@ export class PrimaryMap extends React.Component<Props, State> {
     if (previousProps.frames !== this.props.frames) {
       this.renderFrames()
       this.renderPins()
-      this.updateStyles()
     }
 
     if (previousProps.imagery !== this.props.imagery || routeChanged) {
