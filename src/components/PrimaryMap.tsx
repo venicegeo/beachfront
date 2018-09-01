@@ -226,7 +226,7 @@ export class PrimaryMap extends React.Component<Props, State> {
   }
 
   componentDidUpdate(previousProps: Props, previousState: State) {
-    const routeChanged = previousProps.activeRoute !== this.props.activeRoute
+    const routeChanged = previousProps.activeRoute.pathname !== this.props.activeRoute.pathname
 
     if (!this.props.selectedFeature) {
       this.clearSelection()
