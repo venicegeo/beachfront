@@ -37,6 +37,7 @@ interface Props {
   className?: string
   isActive: boolean
   job: beachfront.Job
+  selectedFeature: beachfront.Job | beachfront.Scene
   onSelectJob(job: beachfront.Job)
   onForgetJob(job: beachfront.Job)
   onNavigate(loc: { pathname: string, search: string, hash: string })
@@ -62,14 +63,14 @@ export class JobStatus extends React.Component<Props, State> {
       isRemoving: false,
     }
 
-    this.emitOnSelectJob        = this.emitOnSelectJob.bind(this)
+    this.jobTitleClick          = this.jobTitleClick.bind(this)
     this.emitOnForgetJob        = this.emitOnForgetJob.bind(this)
     this.handleDownloadComplete = this.handleDownloadComplete.bind(this)
     this.handleDownloadError    = this.handleDownloadError.bind(this)
     this.handleDownloadProgress = this.handleDownloadProgress.bind(this)
     this.handleDownloadStart    = this.handleDownloadStart.bind(this)
-    this.handleExpansionToggle  = this.handleExpansionToggle.bind(this)
     this.handleForgetToggle     = this.handleForgetToggle.bind(this)
+    this.toggleExpansion        = this.toggleExpansion.bind(this)
   }
 
   render() {
@@ -93,9 +94,9 @@ export class JobStatus extends React.Component<Props, State> {
             <h3 className={styles.title}>
               <i
                 className={`fa fa-chevron-right ${styles.caret}`}
-                onClick={this.handleExpansionToggle}
+                onClick={this.toggleExpansion}
               />
-              <span onClick={this.emitOnSelectJob}>
+              <span onClick={this.jobTitleClick}>
                 {segmentIfNeeded(properties.name)}
               </span>
             </h3>
@@ -211,7 +212,11 @@ export class JobStatus extends React.Component<Props, State> {
     }
   }
 
-  private emitOnSelectJob() {
+  private jobTitleClick() {
+    if (this.props.selectedFeature === this.props.job) {
+      this.toggleExpansion()
+    }
+
     this.props.onSelectJob(this.props.job)
   }
 
@@ -235,15 +240,15 @@ export class JobStatus extends React.Component<Props, State> {
     this.setState({ isDownloading: false })
   }
 
-  private handleExpansionToggle() {
+  private handleForgetToggle() {
+    this.setState({ isRemoving: !this.state.isRemoving })
+  }
+
+  private toggleExpansion() {
     this.setState({
       isExpanded: !this.state.isExpanded,
       isRemoving: false,
     })
-  }
-
-  private handleForgetToggle() {
-    this.setState({ isRemoving: !this.state.isRemoving })
   }
 }
 

@@ -152,9 +152,9 @@
 .caret {
   width: 1em;
   color: rgba(0,0,0, .3);
-  margin-top: 2px;
+  padding: 3px;
   transform: rotate(0deg);
-  transform-origin: .4em .5em;
+  transform-origin: .5em .65em;
   transition: transform .15s ease-in-out;
   cursor: pointer;
 }

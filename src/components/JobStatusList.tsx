@@ -70,6 +70,7 @@ export class JobStatusList extends React.Component<Props, void> {
               onNavigate={this.props.onNavigateToJob}
               onForgetJob={this.props.onForgetJob}
               onSelectJob={this.props.onSelectJob}
+              selectedFeature={this.props.selectedFeature}
             />
           ))}
         </ul>
@@ -79,7 +80,19 @@ export class JobStatusList extends React.Component<Props, void> {
 
   private scrollToSelectedJob() {
     const row = document.querySelector(`.${jobStatusStyles.isActive}`)
-    if (row) { row.scrollIntoView({ behavior: 'smooth' }) }
+    if (row) { 
+      const offset = [
+        '.JobStatusList-root header',
+        '.ClassificationBanner-root',
+      ].reduce((rc, s) => rc + document.querySelector(s).clientHeight, 0)
+
+      const box = row.getBoundingClientRect()
+      const height = window.innerHeight || document.documentElement.clientHeight
+
+      if (Math.floor(box.top) <= offset || box.bottom > height - row.clientHeight) {
+        row.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+      }
+    }
   }
 
 }
