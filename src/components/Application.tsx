@@ -633,7 +633,6 @@ export class Application extends React.Component<Props, State> {
   }
 
   private refreshRecords() {
-    console.log('(application:refreshRecords) fetching latest jobs and product lines')
     return Promise.all([
       this.fetchJobs(),
       /*
