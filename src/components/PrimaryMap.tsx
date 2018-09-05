@@ -403,11 +403,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.hoverInteraction.setActive(false)
   }
 
-  private deactivateSelectInteraction(skipReset = false) {
-    if (!skipReset) {
-      this.clearSelection()
-      this.emitDeselectAll()
-    }
+  private deactivateSelectInteraction() {
     this.selectInteraction.setActive(false)
   }
 
@@ -868,7 +864,7 @@ export class PrimaryMap extends React.Component<Props, State> {
   private updateInteractions() {
     if (this.state.isMeasuring) {
       this.deactivateBboxDrawInteraction()
-      this.deactivateSelectInteraction(true)
+      this.deactivateSelectInteraction()
       this.deactivateHoverInteraction(false)
       return
     }

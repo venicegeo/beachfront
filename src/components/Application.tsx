@@ -450,11 +450,17 @@ export class Application extends React.Component<Props, State> {
   }
 
   private handleClearBbox() {
+    // Only deselect if the selected feature is not a job.
+    let selectedFeature = this.state.selectedFeature
+    if (selectedFeature && selectedFeature.properties.type !== TYPE_JOB) {
+      selectedFeature = null
+    }
+
     this.setState({
       bbox: null,
       searchResults: null,
       searchError: null,
-      selectedFeature: null,
+      selectedFeature,
     })
   }
 
@@ -538,9 +544,15 @@ export class Application extends React.Component<Props, State> {
   }
 
   private handleSearchSubmit({startIndex = 0, count = 100} = {}) {
+    // Only deselect if the selected feature is not a job.
+    let selectedFeature = this.state.selectedFeature
+    if (selectedFeature && selectedFeature.properties.type !== TYPE_JOB) {
+      selectedFeature = null
+    }
+
     this.setState({
       isSearching: true,
-      selectedFeature: null,
+      selectedFeature,
     })
 
     catalogService.search({
@@ -584,28 +596,16 @@ export class Application extends React.Component<Props, State> {
       selectedFeature = this.state.jobs.records.find(j => route.jobIds.includes(j.id))
     } else if ('selectedFeature' in loc) {
       selectedFeature = loc.selectedFeature
-    } else if (this.state.route.pathname === '/create-job' && route.pathname !== '/create-job') {
-      // If we're navigating away from Create Job and have search imagery selected, clear the selection.
+    } else if (this.state.route.pathname !== route.pathname) {
+      // Only deselect if the selected feature is not a job.
       if (selectedFeature && selectedFeature.properties.type !== TYPE_JOB) {
         selectedFeature = null
       }
     }
 
-    /* TODO: Okay?
-    if (!route.jobIds.length && selectedFeature && selectedFeature.properties.type === TYPE_JOB) {
-      selectedFeature = null
-    } else if (route.pathname !== this.state.route.pathname && selectedFeature && selectedFeature.properties.type === TYPE_SCENE) {
-      selectedFeature = null
-    }
-    */
-
     this.setState({
       route,
       selectedFeature,
-      /* TODO: Okay?
-      bbox: this.state.route.pathname === route.pathname ? this.state.bbox : null,
-      searchResults: this.state.route.pathname === route.pathname ? this.state.searchResults : null,
-      */
       searchError: this.state.route.pathname === route.pathname ? this.state.searchError : null,
     })
   }
