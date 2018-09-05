@@ -483,7 +483,7 @@ export class PrimaryMap extends React.Component<Props, State> {
   }
 
   private handleMouseMove(event) {
-    if (this.state.isMeasuring) {
+    if (this.state.isMeasuring || this.props.mode === MODE_DRAW_BBOX) {
       this.refs.container.classList.remove(styles.isHoveringFeature)
       return
     }
