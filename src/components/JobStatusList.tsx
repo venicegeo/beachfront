@@ -80,7 +80,7 @@ export class JobStatusList extends React.Component<Props, void> {
 
   private scrollToSelectedJob() {
     const row = document.querySelector(`.${jobStatusStyles.isActive}`)
-    if (row) { 
+    if (row) {
       const offset = [
         '.JobStatusList-root header',
         '.ClassificationBanner-root',
