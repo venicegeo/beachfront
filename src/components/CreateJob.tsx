@@ -90,7 +90,7 @@ export class CreateJob extends React.Component<Props, State> {
   componentDidUpdate(prevProps: Props) {
     if (this.props.selectedScene !== prevProps.selectedScene) {
       // Set the default name using the scene id.
-      if (this.props.selectedScene && !this.state.name) {
+      if (this.props.selectedScene) {
         this.setState({ name: normalizeSceneId(this.props.selectedScene.id) })
       }
 

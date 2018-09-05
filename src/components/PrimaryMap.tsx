@@ -187,8 +187,6 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.handleMouseMove = throttle(this.handleMouseMove.bind(this), 15)
     this.handleSelect = this.handleSelect.bind(this)
     this.handleSelectFeature = this.handleSelectFeature.bind(this)
-    this.generateFrameLayer = this.generateFrameLayer.bind(this)
-    this.generatePinLayer = this.generatePinLayer.bind(this)
     this.renderImagerySearchBbox = debounce(this.renderImagerySearchBbox.bind(this))
     this.updateView = debounce(this.updateView.bind(this), 100)
   }
@@ -327,19 +325,6 @@ export class PrimaryMap extends React.Component<Props, State> {
         />
       </main>
     )
-  }
-
-  handleHoverScene(feature_or_id: string | beachfront.Scene) {
-    const feature: any = typeof feature_or_id === 'string'
-      ? this.imageryLayer.getSource().getFeatureById(feature_or_id)
-      : feature_or_id
-    const collection = this.hoverInteraction.getFeatures()
-
-    collection.clear()
-
-    if (feature) {
-      collection.push(feature)
-    }
   }
 
   handleSelectFeature(feature_or_id) {
@@ -498,7 +483,7 @@ export class PrimaryMap extends React.Component<Props, State> {
   }
 
   private handleMouseMove(event) {
-    if (this.state.isMeasuring) {
+    if (this.state.isMeasuring || this.props.mode === MODE_DRAW_BBOX) {
       this.refs.container.classList.remove(styles.isHoveringFeature)
       return
     }
@@ -538,8 +523,8 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.basemapLayers = generateBasemapLayers(BASEMAP_TILE_PROVIDERS)
     this.drawLayer = generateDrawLayer()
     this.highlightLayer = generateHighlightLayer()
-    this.frameLayer = this.generateFrameLayer()
-    this.pinLayer = this.generatePinLayer()
+    this.frameLayer = generateFrameLayer()
+    this.pinLayer = generatePinLayer()
     this.imageryLayer = generateImageryLayer()
     this.detectionsLayers = {}
     this.previewLayers = {}
@@ -1007,13 +992,11 @@ export class PrimaryMap extends React.Component<Props, State> {
         this.deactivateHoverInteraction()
         break
       case MODE_NORMAL:
-        /* this.clearDraw() TODO: Okay? */
         this.deactivateBboxDrawInteraction()
         this.activateSelectInteraction()
         this.deactivateHoverInteraction()
         break
       case MODE_PRODUCT_LINES:
-        /* this.clearDraw() TODO: Okay? */
         this.deactivateBboxDrawInteraction()
         this.activateSelectInteraction()
         this.deactivateHoverInteraction()
@@ -1041,24 +1024,6 @@ export class PrimaryMap extends React.Component<Props, State> {
     const anchor = extent.getTopRight(calculateExtent(feature.getGeometry()))
     features.push(feature)
     this.featureDetailsOverlay.setPosition(anchor)
-  }
-
-  private generateFrameLayer() {
-    const layer = new VectorLayer({
-      source: new VectorSource(),
-    })
-
-    return layer
-  }
-
-  private generatePinLayer() {
-    const layer = new VectorLayer({
-      source: new VectorSource(),
-    })
-
-    layer.setZIndex(3)
-
-    return layer
   }
 }
 
@@ -1259,6 +1224,22 @@ function generateHoverInteraction(...layers) {
   })
 }
 
+function generateFrameLayer() {
+  return new VectorLayer({
+    source: new VectorSource(),
+  })
+}
+
+function generatePinLayer() {
+  const layer = new VectorLayer({
+    source: new VectorSource(),
+  })
+
+  layer.setZIndex(3)
+
+  return layer
+}
+
 function generateImageryLayer() {
   return new VectorLayer({
     source: new VectorSource({ features: new Collection() }),
@@ -1383,8 +1364,7 @@ function detectionTileLoadFunction(imageTile, src) {
       const arrayBufferView = new Uint8Array(client.response)
       const blob = new Blob([arrayBufferView], { type: 'image/png' })
       const urlCreator = window.URL
-      const imageUrl = urlCreator.createObjectURL(blob)
-      imageTile.getImage().src = imageUrl
+      imageTile.getImage().src = urlCreator.createObjectURL(blob)
     }
     client.send()
   }
