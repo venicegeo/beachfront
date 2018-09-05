@@ -233,6 +233,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     if (previousProps.selectedFeature !== this.props.selectedFeature) {
       this.renderSelectionPreview()
       this.updateSelectedFeature()
+      this.updateStyles()
     }
 
     if (previousProps.detections !== this.props.detections) {
@@ -246,6 +247,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     if (previousProps.frames !== this.props.frames) {
       this.renderFrames()
       this.renderPins()
+      this.updateStyles()
     }
 
     if (previousProps.imagery !== this.props.imagery || routeChanged) {
@@ -278,7 +280,7 @@ export class PrimaryMap extends React.Component<Props, State> {
       this.updateInteractions()
     }
 
-    this.updateStyles()
+
   }
 
   render() {
