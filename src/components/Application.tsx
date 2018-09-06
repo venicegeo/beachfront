@@ -209,6 +209,7 @@ export class Application extends React.Component<Props, State> {
           logout={this.logout}
           mode={this.mapMode}
           ref="map"
+          jobs={this.state.jobs.records}
           selectedFeature={this.state.selectedFeature}
           shrunk={shrunk}
           view={this.state.mapView}
@@ -632,7 +633,6 @@ export class Application extends React.Component<Props, State> {
   }
 
   private refreshRecords() {
-    console.log('(application:refreshRecords) fetching latest jobs and product lines')
     return Promise.all([
       this.fetchJobs(),
       /*

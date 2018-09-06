@@ -125,6 +125,7 @@ interface Props {
   imagery:            beachfront.ImageryCatalogPage
   isSearching:        boolean
   mode:               string
+  jobs:               beachfront.Job[]
   selectedFeature:    beachfront.Job | beachfront.Scene
   view:               MapView
   wmsUrl:             string
@@ -238,6 +239,22 @@ export class PrimaryMap extends React.Component<Props, State> {
 
     if (previousProps.detections !== this.props.detections) {
       this.renderDetections()
+    }
+
+    /*
+     This block will attempt to determine if a Job is currently selected, and has had it's status changed to a SUCCESS,
+     in which case the detections layer in OpenLayers should be refreshed. Only perform this check on Jobs, and only
+     refresh the layer if the Job's status has changed to success.
+    */
+    const selectedJob = (this.props.selectedFeature as beachfront.Job)
+    if (selectedJob) {
+      const previousJob = previousProps.jobs.filter(j => j.properties.job_id === selectedJob.properties.job_id)[0]
+      const currentJob = this.props.jobs.filter(j => j.properties.job_id === selectedJob.properties.job_id)[0]
+      if (previousJob && currentJob) {
+        if ((previousJob.properties.status !== STATUS_SUCCESS) && (currentJob.properties.status === STATUS_SUCCESS)) {
+          this.refreshDetections()
+        }
+      }
     }
 
     if (previousProps.highlightedFeature !== this.props.highlightedFeature) {
@@ -602,6 +619,13 @@ export class PrimaryMap extends React.Component<Props, State> {
     }
   }
 
+  private refreshDetections() {
+    Object.keys(this.detectionsLayers).forEach(layerId => {
+      const layer = this.detectionsLayers[layerId]
+      layer.getSource().refresh()
+    })
+  }
+
   private renderDetections() {
     const {detections, wmsUrl} = this.props
     const shouldRender = {}
@@ -934,7 +958,6 @@ export class PrimaryMap extends React.Component<Props, State> {
         }
 
         layer.setZIndex(1)
-        console.log('Created preview layer', layer)
 
         this.subscribeToLoadEvents(layer)
         this.previewLayers[f.sceneId] = layer
