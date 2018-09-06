@@ -240,13 +240,15 @@ export class PrimaryMap extends React.Component<Props, State> {
       this.renderDetections()
     }
 
-    // This block will attempt to determine if a Job is currently selected, and has had it's status changed to a SUCCESS,
-    // in which case the detections layer in OpenLayers should be refreshed. Only perform this check on Jobs, and only
-    // refresh the layer if the Job's status has changed to success.
+    /*
+     This block will attempt to determine if a Job is currently selected, and has had it's status changed to a SUCCESS,
+     in which case the detections layer in OpenLayers should be refreshed. Only perform this check on Jobs, and only
+     refresh the layer if the Job's status has changed to success.
+    */
     const selectedJob = (this.props.selectedFeature as beachfront.Job)
     if (selectedJob) {
-      const previousJob = previousProps.jobs.filter(j => j.properties.job_id == selectedJob.properties.job_id)[0]
-      const currentJob = this.props.jobs.filter(j => j.properties.job_id == selectedJob.properties.job_id)[0]
+      const previousJob = previousProps.jobs.filter(j => j.properties.job_id === selectedJob.properties.job_id)[0]
+      const currentJob = this.props.jobs.filter(j => j.properties.job_id === selectedJob.properties.job_id)[0]
       if (previousJob && currentJob) {
         if ((previousJob.properties.status !== STATUS_SUCCESS) && (currentJob.properties.status === STATUS_SUCCESS)) {
           this.refreshDetections()
