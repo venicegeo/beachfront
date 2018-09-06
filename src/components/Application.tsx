@@ -131,7 +131,7 @@ export class Application extends React.Component<Props, State> {
     this.handleSearchCriteriaChange = this.handleSearchCriteriaChange.bind(this)
     this.handleSearchSubmit = this.handleSearchSubmit.bind(this)
     this.handleSelectFeature = this.handleSelectFeature.bind(this)
-    this.deselectFeature = this.deselectFeature.bind(this)
+    this.deselectSelectedFeature = this.deselectSelectedFeature.bind(this)
     this.navigateTo = this.navigateTo.bind(this)
     this.panTo = this.panTo.bind(this)
     this.panToExtent = this.panToExtent.bind(this)
@@ -451,7 +451,7 @@ export class Application extends React.Component<Props, State> {
   }
 
   private handleClearBbox() {
-    this.deselectFeature({ ignoreTypes: [TYPE_JOB] })
+    this.deselectSelectedFeature({ ignoreTypes: [TYPE_JOB] })
 
     this.setState({
       bbox: null,
@@ -540,7 +540,7 @@ export class Application extends React.Component<Props, State> {
   }
 
   private handleSearchSubmit({startIndex = 0, count = 100} = {}) {
-    this.deselectFeature({ ignoreTypes: [TYPE_JOB] })
+    this.deselectSelectedFeature({ ignoreTypes: [TYPE_JOB] })
 
     this.setState({ isSearching: true })
 
@@ -575,7 +575,7 @@ export class Application extends React.Component<Props, State> {
     })
   }
 
-  private deselectFeature(args: { ignoreTypes?: string[] } = {}) {
+  private deselectSelectedFeature(args: { ignoreTypes?: string[] } = {}) {
     args.ignoreTypes = args.ignoreTypes || []
 
     if (this.state.selectedFeature) {
@@ -599,7 +599,7 @@ export class Application extends React.Component<Props, State> {
     } else if ('selectedFeature' in loc) {
       this.setState({ selectedFeature: loc.selectedFeature })
     } else if (this.state.route.pathname !== route.pathname) {
-      this.deselectFeature({ ignoreTypes: [TYPE_JOB] })
+      this.deselectSelectedFeature({ ignoreTypes: [TYPE_JOB] })
     }
 
     this.setState({
