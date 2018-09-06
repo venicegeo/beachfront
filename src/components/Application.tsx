@@ -131,6 +131,7 @@ export class Application extends React.Component<Props, State> {
     this.handleSearchCriteriaChange = this.handleSearchCriteriaChange.bind(this)
     this.handleSearchSubmit = this.handleSearchSubmit.bind(this)
     this.handleSelectFeature = this.handleSelectFeature.bind(this)
+    this.deselectSelectedFeature = this.deselectSelectedFeature.bind(this)
     this.navigateTo = this.navigateTo.bind(this)
     this.panTo = this.panTo.bind(this)
     this.panToExtent = this.panToExtent.bind(this)
@@ -451,11 +452,12 @@ export class Application extends React.Component<Props, State> {
   }
 
   private handleClearBbox() {
+    this.deselectSelectedFeature({ ignoreTypes: [TYPE_JOB] })
+
     this.setState({
       bbox: null,
       searchResults: null,
       searchError: null,
-      selectedFeature: null,
     })
   }
 
@@ -539,10 +541,9 @@ export class Application extends React.Component<Props, State> {
   }
 
   private handleSearchSubmit({startIndex = 0, count = 100} = {}) {
-    this.setState({
-      isSearching: true,
-      selectedFeature: null,
-    })
+    this.deselectSelectedFeature({ ignoreTypes: [TYPE_JOB] })
+
+    this.setState({ isSearching: true })
 
     catalogService.search({
       count,
@@ -575,38 +576,35 @@ export class Application extends React.Component<Props, State> {
     })
   }
 
+  private deselectSelectedFeature(args: { ignoreTypes?: string[] } = {}) {
+    args.ignoreTypes = args.ignoreTypes || []
+
+    if (this.state.selectedFeature) {
+      for (const type of args.ignoreTypes) {
+        if (this.state.selectedFeature.properties.type === type) {
+          return // Don't deselect ignored types.
+        }
+      }
+    }
+
+    this.setState({ selectedFeature: null })
+  }
+
   private navigateTo(loc) {
     const route = generateRoute(loc)
     history.pushState(null, null, route.href)
 
     // Update selected feature if needed.
-    let selectedFeature = this.state.selectedFeature
     if (route.jobIds.length) {
-      selectedFeature = this.state.jobs.records.find(j => route.jobIds.includes(j.id))
+      this.setState({ selectedFeature: this.state.jobs.records.find(j => route.jobIds.includes(j.id)) })
     } else if ('selectedFeature' in loc) {
-      selectedFeature = loc.selectedFeature
-    } else if (this.state.route.pathname === '/create-job' && route.pathname !== '/create-job') {
-      // If we're navigating away from Create Job and have search imagery selected, clear the selection.
-      if (selectedFeature && selectedFeature.properties.type !== TYPE_JOB) {
-        selectedFeature = null
-      }
+      this.setState({ selectedFeature: loc.selectedFeature })
+    } else if (this.state.route.pathname !== route.pathname) {
+      this.deselectSelectedFeature({ ignoreTypes: [TYPE_JOB] })
     }
-
-    /* TODO: Okay?
-    if (!route.jobIds.length && selectedFeature && selectedFeature.properties.type === TYPE_JOB) {
-      selectedFeature = null
-    } else if (route.pathname !== this.state.route.pathname && selectedFeature && selectedFeature.properties.type === TYPE_SCENE) {
-      selectedFeature = null
-    }
-    */
 
     this.setState({
       route,
-      selectedFeature,
-      /* TODO: Okay?
-      bbox: this.state.route.pathname === route.pathname ? this.state.bbox : null,
-      searchResults: this.state.route.pathname === route.pathname ? this.state.searchResults : null,
-      */
       searchError: this.state.route.pathname === route.pathname ? this.state.searchError : null,
     })
   }
