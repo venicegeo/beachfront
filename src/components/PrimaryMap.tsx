@@ -855,6 +855,16 @@ export class PrimaryMap extends React.Component<Props, State> {
     }
 
     if (imagery) {
+      /*
+        Features that straddles the meridian will be multipolygons containing an extraneous polygon. We'll only
+        have imagery for the first polygon, so discard any others.
+      */
+      imagery.images.features.forEach(feature => {
+        if (feature.geometry.type === 'MultiPolygon') {
+          feature.geometry.coordinates = feature.geometry.coordinates.slice(0, 1)
+        }
+      })
+
       const features = reader.readFeatures(imagery.images, {
         dataProjection: WGS84,
         featureProjection: WEB_MERCATOR,
