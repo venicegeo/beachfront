@@ -1269,6 +1269,7 @@ function generateXYZScenePreviewSource(provider, imageId, apiKey) {
     crossOrigin: 'anonymous',
     tileLoadFunction,
     url: provider.url.replace('__SCENE_ID__', imageId).replace('__API_KEY__', apiKey),
+    maxZoom: 12,
   }))
 }
 
