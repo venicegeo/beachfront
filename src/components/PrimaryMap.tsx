@@ -297,7 +297,6 @@ export class PrimaryMap extends React.Component<Props, State> {
       this.updateInteractions()
     }
 
-
   }
 
   render() {
