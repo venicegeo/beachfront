@@ -234,7 +234,6 @@ export class PrimaryMap extends React.Component<Props, State> {
     if (previousProps.selectedFeature !== this.props.selectedFeature) {
       this.renderSelectionPreview()
       this.updateSelectedFeature()
-      this.updateStyles()
     }
 
     if (previousProps.detections !== this.props.detections) {
@@ -264,7 +263,6 @@ export class PrimaryMap extends React.Component<Props, State> {
     if (previousProps.frames !== this.props.frames) {
       this.renderFrames()
       this.renderPins()
-      this.updateStyles()
     }
 
     if (previousProps.imagery !== this.props.imagery || routeChanged) {
@@ -292,7 +290,8 @@ export class PrimaryMap extends React.Component<Props, State> {
       this.updateView()
     }
 
-    if ((previousProps.view.zoom !== this.props.view.zoom) ||
+    if ((!previousProps.view) || 
+      (previousProps.view.zoom !== this.props.view.zoom && this.props.view) ||
       (previousProps.selectedFeature !== this.props.selectedFeature) ||
       (previousProps.frames !== this.props.frames)) {
       this.updateStyles();
