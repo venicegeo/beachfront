@@ -131,7 +131,7 @@ export class Application extends React.Component<Props, State> {
     this.handleSearchCriteriaChange = this.handleSearchCriteriaChange.bind(this)
     this.handleSearchSubmit = this.handleSearchSubmit.bind(this)
     this.handleSelectFeature = this.handleSelectFeature.bind(this)
-    this.isSelectedFeatureIgnorable = this.isSelectedFeatureIgnorable.bind(this)
+    this.shouldSelectedFeatureAutoDeselect = this.shouldSelectedFeatureAutoDeselect.bind(this)
     this.navigateTo = this.navigateTo.bind(this)
     this.panTo = this.panTo.bind(this)
     this.panToExtent = this.panToExtent.bind(this)
@@ -457,8 +457,8 @@ export class Application extends React.Component<Props, State> {
       searchResults: null,
       searchError: null,
     }
-    const doIgnore = this.isSelectedFeatureIgnorable({ ignoreTypes: [TYPE_JOB] })
-    if (!doIgnore) {
+    const shouldDeselect = this.shouldSelectedFeatureAutoDeselect({ ignoreTypes: [TYPE_JOB] })
+    if (shouldDeselect) {
       const selectedFeatureKey = 'selectedFeature'
       newState[selectedFeatureKey] = null
     }
@@ -547,8 +547,8 @@ export class Application extends React.Component<Props, State> {
 
   private handleSearchSubmit({startIndex = 0, count = 100} = {}) {
     let newState = { isSearching: true }
-    const doIgnore = this.isSelectedFeatureIgnorable({ ignoreTypes: [TYPE_JOB] })
-    if (!doIgnore) {
+    const shouldDeselect = this.shouldSelectedFeatureAutoDeselect({ ignoreTypes: [TYPE_JOB] })
+    if (shouldDeselect) {
       const selectedFeatureKey = 'selectedFeature'
       newState[selectedFeatureKey] = null
     }
@@ -585,19 +585,19 @@ export class Application extends React.Component<Props, State> {
     })
   }
 
-  // Determine if the selected feature is an ignorable type
-  private isSelectedFeatureIgnorable(args: { ignoreTypes?: string[] } = {}) {
+  // Determine if the selected feature is an ignorable type that should not be auto-deselected on certain route changes
+  private shouldSelectedFeatureAutoDeselect(args: { ignoreTypes?: string[] } = {}) {
     args.ignoreTypes = args.ignoreTypes || []
 
     if (this.state.selectedFeature) {
       for (const type of args.ignoreTypes) {
         if (this.state.selectedFeature.properties.type === type) {
-          return true
+          return false
         }
       }
     };
 
-    return false
+    return true
   }
 
   private navigateTo(loc) {
@@ -611,7 +611,8 @@ export class Application extends React.Component<Props, State> {
     } else if ('selectedFeature' in loc) {
       selectedFeature = loc.selectedFeature
     } else if (this.state.route.pathname !== route.pathname) {
-      if (selectedFeature && selectedFeature.properties.type !== TYPE_JOB) {
+      const shouldDeselect = this.shouldSelectedFeatureAutoDeselect({ ignoreTypes: [TYPE_JOB] })
+      if (shouldDeselect) {
         selectedFeature = null
       }
     }
