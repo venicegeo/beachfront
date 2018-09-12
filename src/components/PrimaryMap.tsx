@@ -68,7 +68,7 @@ import {FeatureDetails} from './FeatureDetails'
 import {LoadingAnimation} from './LoadingAnimation'
 import {ImagerySearchResults} from './ImagerySearchResults'
 import {normalizeSceneId} from './SceneFeatureDetails'
-import {featureToExtent, deserializeBbox, serializeBbox, toGeoJSON} from '../utils/geometries'
+import {featureToExtent, deserializeBbox, serializeBbox, toGeoJSON, readFeatureGeometry} from '../utils/geometries'
 import {
   BASEMAP_TILE_PROVIDERS,
   SCENE_TILE_PROVIDERS,
@@ -647,15 +647,30 @@ export class PrimaryMap extends React.Component<Props, State> {
     // Additions/Updates
     const insertionIndex = this.map.getLayers().getArray().indexOf(this.frameLayer)
     detections.filter(d => shouldRender[d.id] && !alreadyRendered[d.id]).forEach(detection => {
-      const layer = new Tile({
-        extent: featureToExtent(detection),
-        source: generateDetectionsSource(wmsUrl, detection),
-      })
+      const layers: Tile[] = []
 
-      layer.setZIndex(2)
-      this.subscribeToLoadEvents(layer)
-      this.detectionsLayers[detection.id] = layer
-      this.map.getLayers().insertAt(insertionIndex, layer)
+      const geometry = readFeatureGeometry(detection)
+      let extent = calculateExtent(geometry)
+      layers.push(new Tile({
+        source: generateDetectionsSource(wmsUrl, detection),
+        extent,
+      }))
+
+      // If this feature crosses the meridian then render it again on the opposite side of the map.
+      if (crossesMeridian(geometry)) {
+        extent = moveExtent(extent, [-360, 0])
+        layers.push(new Tile({
+          source: generateDetectionsSource(wmsUrl, detection),
+          extent,
+        }))
+      }
+
+      layers.forEach((layer, index) => {
+        layer.setZIndex(2)
+        this.subscribeToLoadEvents(layer)
+        this.detectionsLayers[detection.id + index] = layer
+        this.map.getLayers().insertAt(insertionIndex + index, layer)
+      })
     })
   }
 
@@ -943,24 +958,45 @@ export class PrimaryMap extends React.Component<Props, State> {
         }
 
         const {catalogApiKey} = this.props
-        let layer: Tile
+        let layers: Tile[] = []
 
         if (provider.isXYZProvider) {
-          layer = new Tile({
-            extent: f.extent,
+          let extent = calculateExtent(f.geometry)
+          layers.push(new Tile({
             source: generateXYZScenePreviewSource(provider, externalId, catalogApiKey),
-          })
+            extent,
+          }))
+
+          // If this feature crosses the meridian then render it again on the opposite side of the map.
+          if (crossesMeridian(f.geometry)) {
+            extent = moveExtent(extent, [-360, 0])
+            layers.push(new Tile({
+              source: generateXYZScenePreviewSource(provider, externalId, catalogApiKey),
+              extent,
+            }))
+          }
         } else {
-          layer = new Image({
-            source: generateImageStaticScenePreviewSource(provider, externalId, f.extent, catalogApiKey),
-          })
+          let extent = calculateExtent(f.geometry)
+          layers.push(new Image({
+            source: generateImageStaticScenePreviewSource(provider, externalId, extent, catalogApiKey),
+          }))
+
+          // If this feature crosses the meridian then render it again on the opposite side of the map.
+          if (crossesMeridian(f.geometry)) {
+            extent = moveExtent(extent, [-360, 0])
+            layers.push(new Image({
+              source: generateImageStaticScenePreviewSource(provider, externalId, extent, catalogApiKey),
+            }))
+          }
         }
 
-        layer.setZIndex(1)
+        layers.forEach((layer, index) => {
+          layer.setZIndex(1)
 
-        this.subscribeToLoadEvents(layer)
-        this.previewLayers[f.sceneId] = layer
-        this.map.getLayers().insertAt(insertionIndex, layer)
+          this.subscribeToLoadEvents(layer)
+          this.previewLayers[f.sceneId + index] = layer
+          this.map.getLayers().insertAt(insertionIndex + index, layer)
+        })
       })
     }
 
@@ -1050,7 +1086,7 @@ function animateLayerExit(layer) {
 }
 
 function calculateExtent(geometry: Geometry) {
-  if (geometry instanceof MultiPolygon && crossesDateline(geometry)) {
+  if (geometry instanceof MultiPolygon && crossesMeridian(geometry)) {
     const extents = geometry.getPolygons().map(g => proj.transformExtent(g.getExtent(), WEB_MERCATOR, WGS84))
     let [, minY, , maxY] = proj.transformExtent(geometry.getExtent(), WEB_MERCATOR, WGS84)
     let width = 0
@@ -1070,9 +1106,19 @@ function calculateExtent(geometry: Geometry) {
   return geometry.getExtent()  // Use as-is
 }
 
-function crossesDateline(geometry: Geometry) {
+function crossesMeridian(geometry: Geometry) {
   const [minX, , maxX] = proj.transformExtent(geometry.getExtent(), WEB_MERCATOR, WGS84)
   return minX === -180 && maxX === 180
+}
+
+function moveExtent(extent: ol.Extent, lonLatDistance: [number, number]) {
+  let newExtent = proj.transformExtent(extent, WEB_MERCATOR, WGS84)
+  newExtent[0] += lonLatDistance[0]
+  newExtent[1] += lonLatDistance[1]
+  newExtent[2] += lonLatDistance[0]
+  newExtent[3] += lonLatDistance[1]
+  newExtent = proj.transformExtent(newExtent, WGS84, WEB_MERCATOR)
+  return newExtent
 }
 
 function generateBasemapLayers(providers) {
@@ -1326,10 +1372,13 @@ function getColorForStatus(status) {
 }
 
 function toPreviewable(features: Array<beachfront.Job|beachfront.Scene>) {
-  return features.map(f => ({
-    sceneId: f.properties.type === TYPE_JOB ? f.properties.scene_id : f.id,
-    extent: featureToExtent(f),
-  }))
+  return features.map(f => {
+    return {
+      sceneId: f.properties.type === TYPE_JOB ? f.properties.scene_id : f.id,
+      extent: featureToExtent(f),
+      geometry: readFeatureGeometry(f),
+    }
+  })
 }
 
 function getPlaceholder() {
