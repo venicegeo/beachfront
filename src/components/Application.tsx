@@ -131,7 +131,7 @@ export class Application extends React.Component<Props, State> {
     this.handleSearchCriteriaChange = this.handleSearchCriteriaChange.bind(this)
     this.handleSearchSubmit = this.handleSearchSubmit.bind(this)
     this.handleSelectFeature = this.handleSelectFeature.bind(this)
-    this.deselectSelectedFeature = this.deselectSelectedFeature.bind(this)
+    this.isSelectedFeatureIgnorable = this.isSelectedFeatureIgnorable.bind(this)
     this.navigateTo = this.navigateTo.bind(this)
     this.panTo = this.panTo.bind(this)
     this.panToExtent = this.panToExtent.bind(this)
@@ -452,13 +452,17 @@ export class Application extends React.Component<Props, State> {
   }
 
   private handleClearBbox() {
-    this.deselectSelectedFeature({ ignoreTypes: [TYPE_JOB] })
-
-    this.setState({
+    let newState = {
       bbox: null,
       searchResults: null,
       searchError: null,
-    })
+    }
+    const doIgnore = this.isSelectedFeatureIgnorable({ ignoreTypes: [TYPE_JOB] })
+    if (!doIgnore) {
+      newState['selectedFeature'] = null
+    }
+
+    this.setState(newState)
   }
 
   private handleDismissJobError() {
@@ -541,9 +545,12 @@ export class Application extends React.Component<Props, State> {
   }
 
   private handleSearchSubmit({startIndex = 0, count = 100} = {}) {
-    this.deselectSelectedFeature({ ignoreTypes: [TYPE_JOB] })
-
-    this.setState({ isSearching: true })
+    let newState = { isSearching: true }
+    const doIgnore = this.isSelectedFeatureIgnorable({ ignoreTypes: [TYPE_JOB] })
+    if (!doIgnore) {
+      newState['selectedFeature'] = null
+    }
+    this.setState(newState)
 
     catalogService.search({
       count,
@@ -576,35 +583,40 @@ export class Application extends React.Component<Props, State> {
     })
   }
 
-  private deselectSelectedFeature(args: { ignoreTypes?: string[] } = {}) {
+  // Determine if the selected feature is an ignorable type
+  private isSelectedFeatureIgnorable(args: { ignoreTypes?: string[] } = {}) {
     args.ignoreTypes = args.ignoreTypes || []
 
     if (this.state.selectedFeature) {
       for (const type of args.ignoreTypes) {
         if (this.state.selectedFeature.properties.type === type) {
-          return // Don't deselect ignored types.
+          return true
         }
       }
-    }
+    };
 
-    this.setState({ selectedFeature: null })
+    return false
   }
 
   private navigateTo(loc) {
     const route = generateRoute(loc)
     history.pushState(null, null, route.href)
+    let selectedFeature = this.state.selectedFeature
 
     // Update selected feature if needed.
     if (route.jobIds.length) {
-      this.setState({ selectedFeature: this.state.jobs.records.find(j => route.jobIds.includes(j.id)) })
+      selectedFeature = this.state.jobs.records.find(j => route.jobIds.includes(j.id))
     } else if ('selectedFeature' in loc) {
-      this.setState({ selectedFeature: loc.selectedFeature })
+      selectedFeature = loc.selectedFeature
     } else if (this.state.route.pathname !== route.pathname) {
-      this.deselectSelectedFeature({ ignoreTypes: [TYPE_JOB] })
+      if (selectedFeature && selectedFeature.properties.type !== TYPE_JOB) {
+        selectedFeature = null
+      }
     }
 
     this.setState({
       route,
+      selectedFeature,
       searchError: this.state.route.pathname === route.pathname ? this.state.searchError : null,
     })
   }
