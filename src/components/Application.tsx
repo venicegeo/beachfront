@@ -452,15 +452,14 @@ export class Application extends React.Component<Props, State> {
   }
 
   private handleClearBbox() {
-    let newState = {
+    let newState: any = {
       bbox: null,
       searchResults: null,
       searchError: null,
     }
     const shouldDeselect = this.shouldSelectedFeatureAutoDeselect({ ignoreTypes: [TYPE_JOB] })
     if (shouldDeselect) {
-      const selectedFeatureKey = 'selectedFeature'
-      newState[selectedFeatureKey] = null
+      newState.selectedFeature = null
     }
 
     this.setState(newState)
@@ -546,11 +545,10 @@ export class Application extends React.Component<Props, State> {
   }
 
   private handleSearchSubmit({startIndex = 0, count = 100} = {}) {
-    let newState = { isSearching: true }
+    let newState: any = { isSearching: true }
     const shouldDeselect = this.shouldSelectedFeatureAutoDeselect({ ignoreTypes: [TYPE_JOB] })
     if (shouldDeselect) {
-      const selectedFeatureKey = 'selectedFeature'
-      newState[selectedFeatureKey] = null
+      newState.selectedFeature = null
     }
     this.setState(newState)
 
