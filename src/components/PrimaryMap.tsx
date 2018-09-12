@@ -292,11 +292,16 @@ export class PrimaryMap extends React.Component<Props, State> {
       this.updateView()
     }
 
+    if ((previousProps.view.zoom !== this.props.view.zoom) ||
+      (previousProps.selectedFeature !== this.props.selectedFeature) ||
+      (previousProps.frames !== this.props.frames)) {
+      this.updateStyles();
+    }
+
     if ((previousProps.mode !== this.props.mode) ||
       (previousState.isMeasuring !== this.state.isMeasuring)) {
       this.updateInteractions()
     }
-
   }
 
   render() {
