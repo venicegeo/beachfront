@@ -72,6 +72,14 @@ export function search({
 
       images.features.forEach(f => {
         f.id = source + ':' + f.id
+
+        /*
+          Features that straddle the meridian will contain multipolygons that have an extraneous polygon. However,
+          only one id exists per feature which corresponds to the first polygon, so discard any extra polygons.
+        */
+        if (f.geometry.type === 'MultiPolygon') {
+          f.geometry.coordinates = f.geometry.coordinates.slice(0, 1)
+        }
       })
 
       return {
