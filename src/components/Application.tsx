@@ -459,7 +459,8 @@ export class Application extends React.Component<Props, State> {
     }
     const doIgnore = this.isSelectedFeatureIgnorable({ ignoreTypes: [TYPE_JOB] })
     if (!doIgnore) {
-      newState['selectedFeature'] = null
+      const selectedFeatureKey = 'selectedFeature'
+      newState[selectedFeatureKey] = null
     }
 
     this.setState(newState)
@@ -548,7 +549,8 @@ export class Application extends React.Component<Props, State> {
     let newState = { isSearching: true }
     const doIgnore = this.isSelectedFeatureIgnorable({ ignoreTypes: [TYPE_JOB] })
     if (!doIgnore) {
-      newState['selectedFeature'] = null
+      const selectedFeatureKey = 'selectedFeature'
+      newState[selectedFeatureKey] = null
     }
     this.setState(newState)
 
