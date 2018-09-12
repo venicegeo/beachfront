@@ -117,7 +117,7 @@ export class JobStatus extends React.Component<Props, State> {
                 <dd>{properties.algorithm_name}</dd>
                 <dt>Scene ID</dt>
                 <dd>{normalizeSceneId(properties.scene_id)}</dd>
-                <dt>Captured On</dt>
+                <dt>Captured</dt>
                 <dd>{timeOfCollect}</dd>
                 {hasError && (<dt>Error</dt>)}
                 {hasError && (<dd className={styles.errorDetails}>{properties.errorDetails}</dd>)}
