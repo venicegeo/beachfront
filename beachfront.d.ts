@@ -48,6 +48,7 @@ declare namespace beachfront {
       compute_mask: boolean
       type: 'JOB'
       errorDetails: string
+      time_of_collect: string
     }
 
   }
