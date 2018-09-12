@@ -17,6 +17,7 @@
 const styles: any = require('./JobStatus.css')
 
 import * as React from 'react'
+import * as moment from 'moment'
 import {Link} from './Link'
 import {Timestamp} from './Timestamp'
 import {JobDownload} from './JobDownload'
@@ -76,6 +77,7 @@ export class JobStatus extends React.Component<Props, State> {
   render() {
     const { id, properties } = this.props.job
     const hasError = properties.errorDetails ? true : false
+    const timeOfCollect = moment.utc(properties.time_of_collect).local().format('llll')
 
     return (
       <li className={`${styles.root} ${this.aggregatedClassNames}`}>
@@ -115,6 +117,8 @@ export class JobStatus extends React.Component<Props, State> {
                 <dd>{properties.algorithm_name}</dd>
                 <dt>Scene ID</dt>
                 <dd>{normalizeSceneId(properties.scene_id)}</dd>
+                <dt>Captured</dt>
+                <dd>{timeOfCollect}</dd>
                 {hasError && (<dt>Error</dt>)}
                 {hasError && (<dd className={styles.errorDetails}>{properties.errorDetails}</dd>)}
               </dl>
