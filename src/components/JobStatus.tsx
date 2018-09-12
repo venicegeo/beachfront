@@ -75,6 +75,14 @@ export class JobStatus extends React.Component<Props, State> {
     this.toggleExpansion        = this.toggleExpansion.bind(this)
   }
 
+  shouldComponentUpdate(nextProps, nextState) {
+    return ((this.props.isActive !== nextProps.isActive) ||
+      (this.props.className !== nextProps.className) ||
+      (this.state.isExpanded !== nextState.isExpanded) ||
+      (this.state.isDownloading !== nextState.isDownloading) ||
+      (this.state.isControlHover !== nextState.isControlHover))
+  }
+
   render() {
     const { id, properties } = this.props.job
     const hasError = properties.errorDetails ? true : false

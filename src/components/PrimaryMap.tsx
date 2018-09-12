@@ -296,7 +296,6 @@ export class PrimaryMap extends React.Component<Props, State> {
       (previousState.isMeasuring !== this.state.isMeasuring)) {
       this.updateInteractions()
     }
-
   }
 
   render() {
