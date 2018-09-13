@@ -340,7 +340,9 @@ export class PrimaryMap extends React.Component<Props, State> {
       : feature_or_id
 
     switch (feature ? feature.get(KEY_TYPE) : null) {
+      case TYPE_DIVOT_INBOARD:
       case TYPE_DIVOT_OUTBOARD:
+      case TYPE_STEM:
         // Proxy clicks on "inner" decorations out to the job frame itself
         this.featureId = feature.ol_uid
         const jobId = feature.get(KEY_OWNER_ID)
