@@ -290,11 +290,11 @@ export class PrimaryMap extends React.Component<Props, State> {
       this.updateView()
     }
 
-    if ((!previousProps.view) || 
+    if ((!previousProps.view) ||
       (previousProps.view.zoom !== this.props.view.zoom && this.props.view) ||
       (previousProps.selectedFeature !== this.props.selectedFeature) ||
       (previousProps.frames !== this.props.frames)) {
-      this.updateStyles();
+      this.updateStyles()
     }
 
     if ((previousProps.mode !== this.props.mode) ||
@@ -340,9 +340,7 @@ export class PrimaryMap extends React.Component<Props, State> {
       : feature_or_id
 
     switch (feature ? feature.get(KEY_TYPE) : null) {
-      case TYPE_DIVOT_INBOARD:
       case TYPE_DIVOT_OUTBOARD:
-      case TYPE_STEM:
         // Proxy clicks on "inner" decorations out to the job frame itself
         this.featureId = feature.ol_uid
         const jobId = feature.get(KEY_OWNER_ID)
@@ -512,13 +510,14 @@ export class PrimaryMap extends React.Component<Props, State> {
 
   private handleSelect(event) {
     if (event.selected.length || event.deselected.length) {
-      let index = event.selected.findIndex(f => f.ol_uid === this.featureId) + 1
+      let validSelections = event.selected.filter(f => !ignoreFeatureInSelection(f))
+      let index = validSelections.findIndex(f => f.ol_uid === this.featureId) + 1
 
       if (!event.mapBrowserEvent.pointerEvent.shiftKey) {
-        index += event.selected.length - (index ? 2 : 1)
+        index += validSelections.length - (index ? 2 : 1)
       }
 
-      this.handleSelectFeature(event.selected[index % event.selected.length])
+      this.handleSelectFeature(validSelections[index % validSelections.length])
     }
   }
 
@@ -1322,6 +1321,17 @@ function getColorForStatus(status) {
     case STATUS_ERROR: return 'hsl(349, 100%, 60%)'
     case STATUS_CANCELLED: return 'hsl(0, 0%, 70%)'
     default: return 'magenta'
+  }
+}
+
+function ignoreFeatureInSelection(feature) {
+  switch (feature.get(KEY_TYPE)) {
+    // Ignore the selection events for inboard divots and stems
+    case TYPE_DIVOT_INBOARD:
+    case TYPE_STEM:
+      return true
+    default:
+      return false
   }
 }
 
