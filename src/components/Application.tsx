@@ -392,7 +392,22 @@ export class Application extends React.Component<Props, State> {
         detections = this.state.jobs.records.filter(j => this.state.route.jobIds.includes(j.id))
     }
 
-    this.setState({ detections })
+    // Only update state if detections have changed so that we can avoid unnecessary redrawing.
+    let detectionsChanged = false
+    if (detections.length !== this.state.detections.length) {
+      detectionsChanged = true
+    } else {
+      for (let i = 0; i < detections.length; i++) {
+        if (detections[i] !== this.state.detections[i]) {
+          detectionsChanged = true
+          break
+        }
+      }
+    }
+
+    if (detectionsChanged) {
+      this.setState({ detections })
+    }
   }
 
   private updateFrames() {
@@ -406,7 +421,22 @@ export class Application extends React.Component<Props, State> {
         frames = this.state.jobs.records
     }
 
-    this.setState({ frames })
+    // Only update state if frames have changed so that we can avoid unnecessary redrawing.
+    let framesChanged = false
+    if (frames.length !== this.state.frames.length) {
+      framesChanged = true
+    } else {
+      for (let i = 0; i < frames.length; i++) {
+        if (frames[i] !== this.state.frames[i]) {
+          framesChanged = true
+          break
+        }
+      }
+    }
+
+    if (framesChanged) {
+      this.setState({ frames })
+    }
   }
 
   private importJobsIfNeeded() {
