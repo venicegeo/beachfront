@@ -162,6 +162,7 @@ export class PrimaryMap extends React.Component<Props, State> {
   private featureDetailsOverlay: Overlay
   private featureId?: number | string
   private frameLayer: VectorLayer
+  private frameFillLayer: VectorLayer
   private pinLayer: VectorLayer
   private highlightLayer: VectorLayer
   private hoverInteraction: Select
@@ -262,6 +263,7 @@ export class PrimaryMap extends React.Component<Props, State> {
 
     if (previousProps.frames !== this.props.frames) {
       this.renderFrames()
+      this.renderFrameFills()
       this.renderPins()
     }
 
@@ -388,6 +390,10 @@ export class PrimaryMap extends React.Component<Props, State> {
 
   private clearFrames() {
     this.frameLayer.getSource().clear()
+  }
+
+  private clearFrameFills() {
+    this.frameFillLayer.getSource().clear()
   }
 
   private clearPins() {
@@ -527,6 +533,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.drawLayer = generateDrawLayer()
     this.highlightLayer = generateHighlightLayer()
     this.frameLayer = generateFrameLayer()
+    this.frameFillLayer = generateFrameFillLayer()
     this.pinLayer = generatePinLayer()
     this.imageryLayer = generateImageryLayer()
     this.detectionsLayers = {}
@@ -554,6 +561,7 @@ export class PrimaryMap extends React.Component<Props, State> {
       layers: [
         // Order matters here
         ...this.basemapLayers,
+        this.frameFillLayer,
         this.frameLayer,
         this.drawLayer,
         this.imageryLayer,
@@ -730,6 +738,22 @@ export class PrimaryMap extends React.Component<Props, State> {
     })
   }
 
+  private renderFrameFills() {
+    this.clearFrameFills()
+
+    const source = this.frameFillLayer.getSource()
+    const reader = new GeoJSON()
+
+    this.props.frames.forEach(raw => {
+      const frame = reader.readFeature(raw, {
+        dataProjection: WGS84,
+        featureProjection: WEB_MERCATOR,
+      })
+
+      source.addFeature(frame)
+    })
+  }
+
   private updateStyles() {
     const isClose = this.map.getView().getResolution() < RESOLUTION_CLOSE
 
@@ -739,12 +763,24 @@ export class PrimaryMap extends React.Component<Props, State> {
 
       feature.setStyle(new Style({
         stroke: new Stroke({
-          color: isSelected ? 'black' : 'rgba(0, 0, 0, .4)',
+          color: isSelected ? 'black' : 'transparent',
+          width: 2,
+        }),
+      }))
+    })
+
+    const framesFills = this.frameFillLayer.getSource().getFeatures()
+    framesFills.forEach(feature => {
+      const isSelected = (this.props.selectedFeature && this.props.selectedFeature.id === feature.getId())
+
+      feature.setStyle(new Style({
+        stroke: new Stroke({
+          color: isSelected ? 'transparent' : 'rgba(0, 0, 0, .4)',
           lineDash: isSelected ? undefined : [10, 10],
-          width: isSelected ? 2 : 1,
+          width: 1,
         }),
         fill: new Fill({
-          color: isClose || isSelected ? 'transparent' : 'hsla(202, 100%, 85%, 0.5)',
+          color: (isClose || isSelected) ? 'transparent' : 'hsla(202, 100%, 85%, 0.5)',
         }),
       }))
     })
@@ -1228,6 +1264,16 @@ function generateHoverInteraction(...layers) {
 }
 
 function generateFrameLayer() {
+  const layer = new VectorLayer({
+    source: new VectorSource(),
+  })
+
+  layer.setZIndex(2)
+
+  return layer
+}
+
+function generateFrameFillLayer() {
   return new VectorLayer({
     source: new VectorSource(),
   })
@@ -1295,6 +1341,8 @@ function generateSelectInteraction(...layers) {
     ),
     style: (feature: Feature) => {
       switch (feature.get(KEY_TYPE)) {
+        case TYPE_JOB:
+          return new Style()
         default:
           return new Style({
             stroke: new Stroke({
