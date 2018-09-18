@@ -143,6 +143,7 @@ interface State {
   isMeasuring?: boolean
   loadingRefCount?: number
   tileLoadError?: boolean
+  mapHalfLoopIndex?: number
 }
 
 export interface MapView {
@@ -174,8 +175,13 @@ export class PrimaryMap extends React.Component<Props, State> {
 
   constructor() {
     super()
-    this.state = {basemapIndex: 0, loadingRefCount: 0}
+    this.state = {
+      basemapIndex: 0,
+      loadingRefCount: 0,
+      mapHalfLoopIndex: 0,
+    }
     this.emitViewChange = debounce(this.emitViewChange.bind(this), 100)
+    this.handleMapMoveEnd = this.handleMapMoveEnd.bind(this)
     this.handleBasemapChange = this.handleBasemapChange.bind(this)
     this.handleDrawEnd = this.handleDrawEnd.bind(this)
     this.handleDrawStart = this.handleDrawStart.bind(this)
@@ -231,12 +237,14 @@ export class PrimaryMap extends React.Component<Props, State> {
       this.clearSelection()
     }
 
-    if (previousProps.selectedFeature !== this.props.selectedFeature) {
+    if (previousProps.selectedFeature !== this.props.selectedFeature ||
+        previousState.mapHalfLoopIndex !== this.state.mapHalfLoopIndex) {
       this.renderSelectionPreview()
       this.updateSelectedFeature()
     }
 
-    if (previousProps.detections !== this.props.detections) {
+    if (previousProps.detections !== this.props.detections ||
+        previousState.mapHalfLoopIndex !== this.state.mapHalfLoopIndex) {
       this.renderDetections()
     }
 
@@ -290,11 +298,11 @@ export class PrimaryMap extends React.Component<Props, State> {
       this.updateView()
     }
 
-    if ((!previousProps.view) || 
+    if ((!previousProps.view) ||
       (previousProps.view.zoom !== this.props.view.zoom && this.props.view) ||
       (previousProps.selectedFeature !== this.props.selectedFeature) ||
       (previousProps.frames !== this.props.frames)) {
-      this.updateStyles();
+      this.updateStyles()
     }
 
     if ((previousProps.mode !== this.props.mode) ||
@@ -435,6 +443,17 @@ export class PrimaryMap extends React.Component<Props, State> {
 
     this.skipNextViewUpdate = true
     this.props.onViewChange({ basemapIndex, center, zoom })
+  }
+
+  private handleMapMoveEnd() {
+    // Check if we've passed from one half of the map to another.
+    const center = proj.transform(this.map.getView().getCenter(), WEB_MERCATOR, WGS84)
+    const mapHalfLoopIndex = Math.floor(center[0] / 180)
+    if (mapHalfLoopIndex !== this.state.mapHalfLoopIndex) {
+      this.setState({ mapHalfLoopIndex })
+    }
+
+    this.emitViewChange()
   }
 
   private emitDeselectAll() {
@@ -583,7 +602,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.map.addOverlay(this.featureDetailsOverlay)
 
     this.map.on('pointermove', this.handleMouseMove)
-    this.map.on('moveend', this.emitViewChange)
+    this.map.on('moveend', this.handleMapMoveEnd)
 
     this.map.on('measure:start', this.handleMeasureStart)
     this.map.on('measure:end', this.handleMeasureEnd)
@@ -626,51 +645,29 @@ export class PrimaryMap extends React.Component<Props, State> {
   }
 
   private renderDetections() {
-    const {detections, wmsUrl} = this.props
-    const shouldRender = {}
-    const alreadyRendered = {}
-
-    detections.forEach(d => shouldRender[d.id] = true)
-
-    // Removals
+    // Remove currently rendered detections.
     Object.keys(this.detectionsLayers).forEach(layerId => {
       const layer = this.detectionsLayers[layerId]
-
-      alreadyRendered[layerId] = true
-
-      if (!shouldRender[layerId]) {
-        delete this.detectionsLayers[layerId]
-        animateLayerExit(layer).then(() => { this.map.removeLayer(layer) })
-      }
+      delete this.detectionsLayers[layerId]
+      animateLayerExit(layer).then(() => { this.map.removeLayer(layer) })
     })
 
-    // Additions/Updates
+    // Render detections.
     const insertionIndex = this.map.getLayers().getArray().indexOf(this.frameLayer)
-    detections.filter(d => shouldRender[d.id] && !alreadyRendered[d.id]).forEach(detection => {
-      const layers: Tile[] = []
+    this.props.detections.forEach(detection => {
+      let layer: Tile
 
       const geometry = readFeatureGeometry(detection)
-      let extent = calculateExtent(geometry)
-      layers.push(new Tile({
-        source: generateDetectionsSource(wmsUrl, detection),
+      let extent = this.calculateLoopedExtent(geometry)
+      layer = new Tile({
+        source: generateDetectionsSource(this.props.wmsUrl, detection),
         extent,
-      }))
-
-      // If this feature crosses the meridian then render it again on the opposite side of the map.
-      if (crossesMeridian(geometry)) {
-        extent = moveExtent(extent, [-360, 0])
-        layers.push(new Tile({
-          source: generateDetectionsSource(wmsUrl, detection),
-          extent,
-        }))
-      }
-
-      layers.forEach((layer, index) => {
-        layer.setZIndex(2)
-        this.subscribeToLoadEvents(layer)
-        this.detectionsLayers[detection.id + index] = layer
-        this.map.getLayers().insertAt(insertionIndex + index, layer)
       })
+
+      layer.setZIndex(2)
+      this.subscribeToLoadEvents(layer)
+      this.detectionsLayers[detection.id] = layer
+      this.map.getLayers().insertAt(insertionIndex, layer)
     })
   }
 
@@ -923,82 +920,83 @@ export class PrimaryMap extends React.Component<Props, State> {
 
   private renderSelectionPreview() {
     const previewables = toPreviewable([this.props.selectedFeature].filter(Boolean))
-    const shouldRender = {}
-    const alreadyRendered = {}
 
-    previewables.forEach(i => shouldRender[i.sceneId] = true)
-
-    // Removals
+    // Remove currently rendered selection previews.
     Object.keys(this.previewLayers).forEach(imageId => {
       const layer = this.previewLayers[imageId]
-
-      alreadyRendered[imageId] = true
-      if (!shouldRender[imageId]) {
-        delete this.previewLayers[imageId]
-        animateLayerExit(layer).then(() => { this.map.removeLayer(layer) })
-      }
+      delete this.previewLayers[imageId]
+      animateLayerExit(layer).then(() => { this.map.removeLayer(layer) })
     })
 
-    // Additions
+    // Render selection previews.
     const insertionIndex = this.basemapLayers.length
-    previewables
-      .filter(f => shouldRender[f.sceneId] && !alreadyRendered[f.sceneId])
-      .forEach(f => {
-        const chunks = f.sceneId.match(/^(\w+):(.*)$/)
-        if (!chunks) {
-          console.warn('(@primaryMap._renderSelectionPreview) Invalid scene ID: `%s`', f.sceneId)
-          return
-        }
+    previewables.forEach(f => {
+      const chunks = f.sceneId.match(/^(\w+):(.*)$/)
+      if (!chunks) {
+        console.warn('(@primaryMap._renderSelectionPreview) Invalid scene ID: `%s`', f.sceneId)
+        return
+      }
 
-        const [, prefix, externalId] = chunks
-        const provider = SCENE_TILE_PROVIDERS.find(p => p.prefix === prefix)
-        if (!provider) {
-          console.warn('(@primaryMap._renderSelectionPreview) No provider available for scene `%s`', f.sceneId)
-          return
-        }
+      const [, prefix, externalId] = chunks
+      const provider = SCENE_TILE_PROVIDERS.find(p => p.prefix === prefix)
+      if (!provider) {
+        console.warn('(@primaryMap._renderSelectionPreview) No provider available for scene `%s`', f.sceneId)
+        return
+      }
 
-        const {catalogApiKey} = this.props
-        let layers: Tile[] = []
+      const {catalogApiKey} = this.props
+      let layer: Tile
 
-        if (provider.isXYZProvider) {
-          let extent = calculateExtent(f.geometry)
-          layers.push(new Tile({
-            source: generateXYZScenePreviewSource(provider, externalId, catalogApiKey),
-            extent,
-          }))
+      if (provider.isXYZProvider) {
+        const extent = this.calculateLoopedExtent(f.geometry)
 
-          // If this feature crosses the meridian then render it again on the opposite side of the map.
-          if (crossesMeridian(f.geometry)) {
-            extent = moveExtent(extent, [-360, 0])
-            layers.push(new Tile({
-              source: generateXYZScenePreviewSource(provider, externalId, catalogApiKey),
-              extent,
-            }))
-          }
-        } else {
-          let extent = calculateExtent(f.geometry)
-          layers.push(new Image({
-            source: generateImageStaticScenePreviewSource(provider, externalId, extent, catalogApiKey),
-          }))
-
-          // If this feature crosses the meridian then render it again on the opposite side of the map.
-          if (crossesMeridian(f.geometry)) {
-            extent = moveExtent(extent, [-360, 0])
-            layers.push(new Image({
-              source: generateImageStaticScenePreviewSource(provider, externalId, extent, catalogApiKey),
-            }))
-          }
-        }
-
-        layers.forEach((layer, index) => {
-          layer.setZIndex(1)
-
-          this.subscribeToLoadEvents(layer)
-          this.previewLayers[f.sceneId + index] = layer
-          this.map.getLayers().insertAt(insertionIndex + index, layer)
+        layer = new Tile({
+          source: generateXYZScenePreviewSource(provider, externalId, catalogApiKey),
+          extent,
         })
-      })
+      } else {
+        const extent = this.calculateLoopedExtent(f.geometry)
+
+        layer = new Image({
+          source: generateImageStaticScenePreviewSource(provider, externalId, extent, catalogApiKey),
+        })
+      }
+
+      layer.setZIndex(1)
+
+      this.subscribeToLoadEvents(layer)
+      this.previewLayers[f.sceneId] = layer
+      this.map.getLayers().insertAt(insertionIndex, layer)
+    })
+  }
+
+  private calculateLoopedExtent(geometry: Geometry) {
+    // Calculate the centroid of the geometry's extent.
+    let extentProjected = calculateExtent(geometry)
+    let extent = proj.transformExtent(extentProjected, WEB_MERCATOR, WGS84)
+    const centroid = [
+      (extent[0] + extent[2]) / 2,
+      (extent[1] + extent[3]) / 2,
+    ]
+
+    // Calculate the distance from the extent centroid to the map center.
+    const mapCenterProjected = this.map.getView().getCenter()
+    const mapCenter = proj.transform(mapCenterProjected, WEB_MERCATOR, WGS84)
+    const centroidXToMapCenterX = mapCenter[0] - centroid[0]
+
+    // Offset the extent by the full map width for each loop.
+    let loopIndex
+    if (centroidXToMapCenterX < 0) {
+      loopIndex = Math.ceil((centroidXToMapCenterX - 180) / 360)
+    } else {
+      loopIndex = Math.floor((centroidXToMapCenterX + 180) / 360)
     }
+
+    extent[0] += loopIndex * 360
+    extent[2] += loopIndex * 360
+
+    return proj.transformExtent(extent, WGS84, WEB_MERCATOR)
+  }
 
   private subscribeToLoadEvents(layer) {
     const source = layer.getSource()
@@ -1060,7 +1058,7 @@ export class PrimaryMap extends React.Component<Props, State> {
       dataProjection: WGS84,
       featureProjection: WEB_MERCATOR,
     })
-    const anchor = extent.getTopRight(calculateExtent(feature.getGeometry()))
+    const anchor = extent.getTopRight(this.calculateLoopedExtent(feature.getGeometry()))
     features.push(feature)
     this.featureDetailsOverlay.setPosition(anchor)
   }
@@ -1109,16 +1107,6 @@ function calculateExtent(geometry: Geometry) {
 function crossesMeridian(geometry: Geometry) {
   const [minX, , maxX] = proj.transformExtent(geometry.getExtent(), WEB_MERCATOR, WGS84)
   return minX === -180 && maxX === 180
-}
-
-function moveExtent(extent: ol.Extent, lonLatDistance: [number, number]) {
-  let newExtent = proj.transformExtent(extent, WEB_MERCATOR, WGS84)
-  newExtent[0] += lonLatDistance[0]
-  newExtent[1] += lonLatDistance[1]
-  newExtent[2] += lonLatDistance[0]
-  newExtent[3] += lonLatDistance[1]
-  newExtent = proj.transformExtent(newExtent, WGS84, WEB_MERCATOR)
-  return newExtent
 }
 
 function generateBasemapLayers(providers) {
