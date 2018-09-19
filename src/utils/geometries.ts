@@ -38,9 +38,13 @@ export function bboxToExtent(bbox: number[], featureProjection = WEB_MERCATOR, d
 }
 
 export function featureToExtent(feature, featureProjection = WEB_MERCATOR, dataProjection = WGS84) {
-  const reader = new GeoJSON()
-  const geometry = reader.readGeometry(feature.geometry, {featureProjection, dataProjection})
+  const geometry = readFeatureGeometry(feature, featureProjection, dataProjection)
   return geometry.getExtent()
+}
+
+export function readFeatureGeometry(feature, featureProjection = WEB_MERCATOR, dataProjection = WGS84) {
+  const reader = new GeoJSON()
+  return reader.readGeometry(feature.geometry, {featureProjection, dataProjection})
 }
 
 export function deserializeBbox(serialized) {

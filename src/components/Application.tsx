@@ -85,6 +85,9 @@ interface State {
   productLines?: Collection<beachfront.ProductLine>
 
   // Map state
+  mapMode?: string
+  detections?: (beachfront.Job | beachfront.ProductLine)[]
+  frames?: (beachfront.Job | beachfront.ProductLine)[]
   bbox?: [number, number, number, number]
   mapView?: MapView
   hoveredFeature?: beachfront.Job
@@ -149,12 +152,28 @@ export class Application extends React.Component<Props, State> {
       this.startBackgroundTasks()
       this.refreshRecords()
     }
+
     if (!prevState.isSessionExpired && this.state.isSessionExpired || prevState.isLoggedIn && !this.state.isLoggedIn) {
       this.stopBackgroundTasks()
     }
+
+    if (prevState.route.pathname !== this.state.route.pathname ||
+        prevState.bbox !== this.state.bbox ||
+        prevState.searchResults !== this.state.searchResults) {
+      this.updateMapMode()
+    }
+
     if (prevState.route.jobIds.join(',') !== this.state.route.jobIds.join(',')) {
       this.importJobsIfNeeded()
     }
+
+    if (prevState.mapMode !== this.state.mapMode ||
+        prevState.selectedFeature !== this.state.selectedFeature ||
+        prevState.jobs !== this.state.jobs) {
+      this.updateDetections()
+      this.updateFrames()
+    }
+
     this.props.serialize(this.state)
   }
 
@@ -178,6 +197,8 @@ export class Application extends React.Component<Props, State> {
   componentDidMount() {
     document.addEventListener('mousemove', this.resetTimer)
     document.addEventListener('keyup', this.resetTimer)
+
+    this.updateMapMode()
   }
 
   render() {
@@ -202,13 +223,13 @@ export class Application extends React.Component<Props, State> {
           activeRoute={this.state.route}
           bbox={this.state.bbox}
           catalogApiKey={this.state.catalogApiKey}
-          detections={this.detectionsForCurrentMode}
-          frames={this.framesForCurrentMode}
+          detections={this.state.detections}
+          frames={this.state.frames}
           highlightedFeature={this.state.hoveredFeature}
           imagery={this.state.searchResults}
           isSearching={this.state.isSearching}
           logout={this.logout}
-          mode={this.mapMode}
+          mode={this.state.mapMode}
           ref="map"
           jobs={this.state.jobs.records}
           selectedFeature={this.state.selectedFeature}
@@ -304,7 +325,7 @@ export class Application extends React.Component<Props, State> {
       case '/jobs':
         return (
           <JobStatusList
-            activeIds={this.detectionsForCurrentMode.map(d => d.id)}
+            activeIds={this.state.detections.map(d => d.id)}
             error={this.state.jobs.error}
             jobs={this.state.jobs.records}
             onDismissError={this.handleDismissJobError}
@@ -341,36 +362,80 @@ export class Application extends React.Component<Props, State> {
   // Internals
   //
 
-  private get detectionsForCurrentMode(): (beachfront.Job|beachfront.ProductLine)[] {
-    switch (this.state.route.pathname) {
-      case '/create-product-line':
-      case '/product-lines':
-        return this.state.selectedFeature ? [this.state.selectedFeature as any] : this.state.productLines.records
-      default:
-        return this.state.jobs.records.filter(j => this.state.route.jobIds.includes(j.id))
-    }
-  }
-
-  private get framesForCurrentMode(): (beachfront.Job | beachfront.ProductLine)[] {
-    switch (this.state.route.pathname) {
-      case '/create-product-line':
-      case '/product-lines':
-        return [this.state.selectedFeature as any, ...this.state.productLines.records].filter(Boolean)
-      default:
-        return this.state.jobs.records
-    }
-  }
-
-  private get mapMode() {
+  private updateMapMode() {
+    let mapMode: string
     switch (this.state.route.pathname) {
       case '/create-job':
-        return this.state.bbox && this.state.searchResults ? MODE_SELECT_IMAGERY : MODE_DRAW_BBOX
+        mapMode = this.state.bbox && this.state.searchResults ? MODE_SELECT_IMAGERY : MODE_DRAW_BBOX
+        break
       case '/create-product-line':
-        return MODE_DRAW_BBOX
+        mapMode = MODE_DRAW_BBOX
+        break
       case '/product-lines':
-        return MODE_PRODUCT_LINES
+        mapMode = MODE_PRODUCT_LINES
+        break
       default:
-        return MODE_NORMAL
+        mapMode = MODE_NORMAL
+    }
+
+    this.setState({ mapMode })
+  }
+
+  private updateDetections() {
+    let detections: beachfront.Job[] | beachfront.ProductLine[]
+    switch (this.state.route.pathname) {
+      case '/create-product-line':
+      case '/product-lines':
+        detections = this.state.selectedFeature ? [this.state.selectedFeature as any] : this.state.productLines.records
+        break
+      default:
+        detections = this.state.jobs.records.filter(j => this.state.route.jobIds.includes(j.id))
+    }
+
+    // Only update state if detections have changed so that we can avoid unnecessary redrawing.
+    let detectionsChanged = false
+    if (detections.length !== this.state.detections.length) {
+      detectionsChanged = true
+    } else {
+      for (let i = 0; i < detections.length; i++) {
+        if (detections[i] !== this.state.detections[i]) {
+          detectionsChanged = true
+          break
+        }
+      }
+    }
+
+    if (detectionsChanged) {
+      this.setState({ detections })
+    }
+  }
+
+  private updateFrames() {
+    let frames: beachfront.Job[] | beachfront.ProductLine[]
+    switch (this.state.route.pathname) {
+      case '/create-product-line':
+      case '/product-lines':
+        frames = [this.state.selectedFeature as any, ...this.state.productLines.records].filter(Boolean)
+        break
+      default:
+        frames = this.state.jobs.records
+    }
+
+    // Only update state if frames have changed so that we can avoid unnecessary redrawing.
+    let framesChanged = false
+    if (frames.length !== this.state.frames.length) {
+      framesChanged = true
+    } else {
+      for (let i = 0; i < frames.length; i++) {
+        if (frames[i] !== this.state.frames[i]) {
+          framesChanged = true
+          break
+        }
+      }
+    }
+
+    if (framesChanged) {
+      this.setState({ frames })
     }
   }
 
@@ -758,6 +823,9 @@ function generateInitialState(): State {
     productLines: createCollection(),
 
     // Map state
+    mapMode: MODE_NORMAL,
+    detections: [],
+    frames: [],
     bbox: null,
     mapView: null,
     selectedFeature: null,
