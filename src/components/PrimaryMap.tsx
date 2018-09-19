@@ -350,9 +350,7 @@ export class PrimaryMap extends React.Component<Props, State> {
       : feature_or_id
 
     switch (feature ? feature.get(KEY_TYPE) : null) {
-      case TYPE_DIVOT_INBOARD:
       case TYPE_DIVOT_OUTBOARD:
-      case TYPE_STEM:
         // Proxy clicks on "inner" decorations out to the job frame itself
         this.featureId = feature.ol_uid
         const jobId = feature.get(KEY_OWNER_ID)
@@ -1387,6 +1385,9 @@ function generateSelectInteraction(...layers) {
       }
     },
     toggleCondition: condition.never,
+    filter: (feature: Feature) => {
+      return isFeatureTypeSelectable(feature)
+    },
   })
 }
 
@@ -1404,6 +1405,17 @@ function getColorForStatus(status) {
     case STATUS_ERROR: return 'hsl(349, 100%, 60%)'
     case STATUS_CANCELLED: return 'hsl(0, 0%, 70%)'
     default: return 'magenta'
+  }
+}
+
+function isFeatureTypeSelectable(feature) {
+  switch (feature.get(KEY_TYPE)) {
+    // Ignore the selection events for inboard divots and stems
+    case TYPE_DIVOT_INBOARD:
+    case TYPE_STEM:
+      return false
+    default:
+      return true
   }
 }
 
