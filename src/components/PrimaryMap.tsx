@@ -510,14 +510,13 @@ export class PrimaryMap extends React.Component<Props, State> {
 
   private handleSelect(event) {
     if (event.selected.length || event.deselected.length) {
-      let validSelections = event.selected.filter(f => !ignoreFeatureInSelection(f))
-      let index = validSelections.findIndex(f => f.ol_uid === this.featureId) + 1
+      let index = event.selected.findIndex(f => f.ol_uid === this.featureId) + 1
 
       if (!event.mapBrowserEvent.pointerEvent.shiftKey) {
-        index += validSelections.length - (index ? 2 : 1)
+        index += event.selected.length - (index ? 2 : 1)
       }
 
-      this.handleSelectFeature(validSelections[index % validSelections.length])
+      this.handleSelectFeature(event.selected[index % event.selected.length])
     }
   }
 
@@ -784,7 +783,7 @@ export class PrimaryMap extends React.Component<Props, State> {
             return new Style({
               stroke: new Stroke({
                 color: 'black',
-                width: 1,
+                width: 10,
               }),
             })
           case TYPE_LABEL_MAJOR:
@@ -1304,6 +1303,9 @@ function generateSelectInteraction(...layers) {
       }
     },
     toggleCondition: condition.never,
+    filter: (feature: Feature) => {
+      return isFeatureTypeSelectable(feature)
+    },
   })
 }
 
@@ -1324,14 +1326,14 @@ function getColorForStatus(status) {
   }
 }
 
-function ignoreFeatureInSelection(feature) {
+function isFeatureTypeSelectable(feature) {
   switch (feature.get(KEY_TYPE)) {
     // Ignore the selection events for inboard divots and stems
     case TYPE_DIVOT_INBOARD:
     case TYPE_STEM:
-      return true
-    default:
       return false
+    default:
+      return true
   }
 }
 
