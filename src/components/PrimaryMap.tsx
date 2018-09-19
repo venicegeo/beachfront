@@ -783,7 +783,7 @@ export class PrimaryMap extends React.Component<Props, State> {
             return new Style({
               stroke: new Stroke({
                 color: 'black',
-                width: 10,
+                width: 1,
               }),
             })
           case TYPE_LABEL_MAJOR:
