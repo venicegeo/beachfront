@@ -56,9 +56,9 @@ export function deserializeBbox(serialized) {
 
 export function serializeBbox(extent) {
   const bbox = proj.transformExtent(extent, WEB_MERCATOR, WGS84)
-  const p1 = unwrapPoint(bbox.slice(0, 2))
-  const p2 = unwrapPoint(bbox.slice(2, 4))
-  return p1.concat(p2).map(truncate)
+  const p1 = bbox.slice(0, 2)
+  const p2 = bbox.slice(2, 4)
+  return p1.concat(p2).map(truncate) as [number, number, number, number]
 }
 
 export function toGeoJSON(feature) {

@@ -73,6 +73,7 @@ export class StaticMinimap extends React.Component<Props, {}> {
         }),
         new VectorLayer({
           source: new VectorSource({
+            wrapX: false,
             features: [
               new Feature({
                 geometry: bboxGeometry,

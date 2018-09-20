@@ -197,9 +197,7 @@ function generateInteraction(drawLayer) {
 
 function generateLayer() {
   return new VectorLayer({
-    source: new VectorSource({
-      wrapX: false,
-    }),
+    source: new VectorSource(),
     style: new Style({
       stroke: new Stroke({
         color: '#c03',

@@ -56,6 +56,7 @@ import {
   SESSION_IDLE_UNITS,
 } from '../config'
 import {UserTour} from './Tour'
+import {wrap} from '../utils/math'
 
 import {
   TYPE_JOB,
@@ -866,12 +867,27 @@ function deserialize(): State {
 }
 
 function serialize(state: State) {
+  /*
+    Wrap map center to keep it within the -180/180 range. Otherwise the map may scroll awkardly on initial load to get
+    back to a far away location. Do the same for the bbox so that it's in the same starting location as the map.
+   */
+  const mapView = {...state.mapView}
+  mapView.center[0] = wrap(mapView.center[0], -180, 180)
+
+  let bbox = null
+  if (state.bbox) {
+    bbox = [...state.bbox]
+    const bboxWidth = bbox[2] - bbox[0]
+    bbox[0] = wrap(bbox[0], -180, 180)
+    bbox[2] = bbox[0] + bboxWidth
+  }
+
   sessionStorage.setItem('enabled_platforms_records', JSON.stringify(state.enabledPlatforms.records))
   sessionStorage.setItem('algorithms_records', JSON.stringify(state.algorithms.records))
-  sessionStorage.setItem('bbox', JSON.stringify(state.bbox))
+  sessionStorage.setItem('bbox', JSON.stringify(bbox))
   sessionStorage.setItem('geoserver', JSON.stringify(state.geoserver))
   sessionStorage.setItem('isSessionExpired', JSON.stringify(state.isSessionExpired))
-  sessionStorage.setItem('mapView', JSON.stringify(state.mapView))
+  sessionStorage.setItem('mapView', JSON.stringify(mapView))
   sessionStorage.setItem('searchCriteria', JSON.stringify(state.searchCriteria))
   sessionStorage.setItem('searchResults', JSON.stringify(state.searchResults))
   localStorage.setItem('catalog_apiKey', state.catalogApiKey)  // HACK

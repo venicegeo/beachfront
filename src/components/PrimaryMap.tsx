@@ -93,7 +93,6 @@ const DEFAULT_CENTER: [number, number] = [-10, 0]
 const MIN_ZOOM = 2.5
 const MAX_ZOOM = 22
 const RESOLUTION_CLOSE = 850
-const VIEW_BOUNDS: [number, number, number, number] = [-180, -90, 180, 90]
 const STEM_OFFSET = 10000
 const IDENTIFIER_DETECTIONS = 'piazza:bfdetections'
 const KEY_SCENE_ID = 'SCENE_ID'
@@ -143,7 +142,8 @@ interface State {
   isMeasuring?: boolean
   loadingRefCount?: number
   tileLoadError?: boolean
-  mapHalfLoopIndex?: number
+  selectedFeatureHalfWrapIndex?: number
+  bboxHalfWrapIndex?: number
 }
 
 export interface MapView {
@@ -179,7 +179,8 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.state = {
       basemapIndex: 0,
       loadingRefCount: 0,
-      mapHalfLoopIndex: 0,
+      selectedFeatureHalfWrapIndex: 0,
+      bboxHalfWrapIndex: 0,
     }
     this.emitViewChange = debounce(this.emitViewChange.bind(this), 100)
     this.handleMapMoveEnd = this.handleMapMoveEnd.bind(this)
@@ -239,13 +240,13 @@ export class PrimaryMap extends React.Component<Props, State> {
     }
 
     if (previousProps.selectedFeature !== this.props.selectedFeature ||
-        previousState.mapHalfLoopIndex !== this.state.mapHalfLoopIndex) {
+        previousState.selectedFeatureHalfWrapIndex !== this.state.selectedFeatureHalfWrapIndex) {
       this.renderSelectionPreview()
       this.updateSelectedFeature()
     }
 
     if (previousProps.detections !== this.props.detections ||
-        previousState.mapHalfLoopIndex !== this.state.mapHalfLoopIndex) {
+        previousState.selectedFeatureHalfWrapIndex !== this.state.selectedFeatureHalfWrapIndex) {
       this.renderDetections()
     }
 
@@ -281,14 +282,19 @@ export class PrimaryMap extends React.Component<Props, State> {
 
     if (previousProps.isSearching !== this.props.isSearching) {
       this.clearSelection()
-      this.renderImagerySearchResultsOverlay()
+    }
+
+    if (previousProps.isSearching !== this.props.isSearching ||
+      previousState.bboxHalfWrapIndex !== this.state.bboxHalfWrapIndex) {
+      this.renderImagerySearchResultsOverlay({ autoPan: previousProps.isSearching !== this.props.isSearching })
     }
 
     if (previousProps.shrunk !== this.props.shrunk) {
       this.updateMapSize()
     }
 
-    if (previousProps.bbox !== this.props.bbox || routeChanged) {
+    if (previousProps.bbox !== this.props.bbox || routeChanged ||
+        previousState.bboxHalfWrapIndex !== this.state.bboxHalfWrapIndex) {
       this.renderImagerySearchBbox()
     }
 
@@ -450,11 +456,26 @@ export class PrimaryMap extends React.Component<Props, State> {
   }
 
   private handleMapMoveEnd() {
-    // Check if we've passed from one half of the map to another.
-    const center = proj.transform(this.map.getView().getCenter(), WEB_MERCATOR, WGS84)
-    const mapHalfLoopIndex = Math.floor(center[0] / 180)
-    if (mapHalfLoopIndex !== this.state.mapHalfLoopIndex) {
-      this.setState({ mapHalfLoopIndex })
+    let {selectedFeatureHalfWrapIndex, bboxHalfWrapIndex} = this.state
+
+    // Check if we should re-render any manually looped elements.
+    if (this.props.selectedFeature) {
+      let selectedFeatureCenter = extent.getCenter(featureToExtent(this.props.selectedFeature))
+      selectedFeatureCenter = proj.transform(selectedFeatureCenter, WEB_MERCATOR, WGS84)
+      selectedFeatureHalfWrapIndex = this.getWrapIndex(selectedFeatureCenter)
+    }
+
+    if (this.props.bbox) {
+      let bboxCenter = extent.getCenter(this.props.bbox)
+      bboxHalfWrapIndex = this.getWrapIndex(bboxCenter)
+    }
+
+    if (selectedFeatureHalfWrapIndex !== this.state.selectedFeatureHalfWrapIndex ||
+        bboxHalfWrapIndex !== this.state.bboxHalfWrapIndex) {
+      this.setState({
+        selectedFeatureHalfWrapIndex,
+        bboxHalfWrapIndex,
+      })
     }
 
     this.emitViewChange()
@@ -471,7 +492,7 @@ export class PrimaryMap extends React.Component<Props, State> {
 
   private handleDrawEnd(event) {
     const geometry = event.feature.getGeometry()
-    const bbox = serializeBbox(geometry.getExtent())
+    let bbox = serializeBbox(geometry.getExtent())
 
     this.props.onBoundingBoxChange(bbox)
   }
@@ -588,7 +609,6 @@ export class PrimaryMap extends React.Component<Props, State> {
       target: this.refs.container,
       view: new View({
         center: proj.fromLonLat(DEFAULT_CENTER, WEB_MERCATOR),
-        extent: proj.transformExtent(VIEW_BOUNDS, WGS84, WEB_MERCATOR),
         minZoom: MIN_ZOOM,
         maxZoom: MAX_ZOOM,
         zoom: MIN_ZOOM,
@@ -664,7 +684,7 @@ export class PrimaryMap extends React.Component<Props, State> {
       let layer: Tile
 
       const geometry = readFeatureGeometry(detection)
-      let extent = this.calculateLoopedExtent(geometry)
+      let extent = this.geometryToExtentWrapped(geometry)
       layer = new Tile({
         source: generateDetectionsSource(this.props.wmsUrl, detection),
         extent,
@@ -916,11 +936,11 @@ export class PrimaryMap extends React.Component<Props, State> {
     }
   }
 
-  private renderImagerySearchResultsOverlay() {
+  private renderImagerySearchResultsOverlay({ autoPan = false } = {}) {
     this.imageSearchResultsOverlay.setPosition(undefined)
 
     // HACK HACK HACK HACK HACK HACK HACK HACK
-    const bbox = deserializeBbox(this.props.bbox)
+    let bbox = deserializeBbox(this.props.bbox)
     if (!bbox) {
       return  // Nothing to pin the overlay to
     }
@@ -929,24 +949,42 @@ export class PrimaryMap extends React.Component<Props, State> {
       return  // No results are in
     }
 
+    bbox = this.extentWrapped(bbox)
+
+    let position
     if (this.props.imagery.count) {
       // Pager
-      this.imageSearchResultsOverlay.setPosition(extent.getBottomRight(bbox))
+      position = extent.getBottomRight(bbox)
+      this.imageSearchResultsOverlay.setPosition(position)
       this.imageSearchResultsOverlay.setPositioning('top-right')
     } else {
       // No results
-      this.imageSearchResultsOverlay.setPosition(extent.getCenter(bbox))
+      position = extent.getCenter(bbox)
+      this.imageSearchResultsOverlay.setPosition(position)
       this.imageSearchResultsOverlay.setPositioning('center-center')
     }
     // HACK HACK HACK HACK HACK HACK HACK HACK
+
+    if (autoPan) {
+      // Only auto-pan if the overlay is outside of the view.
+      const viewExtent = this.map.getView().calculateExtent(this.map.getSize())
+      if (!extent.containsCoordinate(viewExtent, position)) {
+        this.map.getView().animate({
+          center: position,
+          duration: 1000,
+        })
+      }
+    }
   }
 
   private renderImagerySearchBbox() {
     this.clearDraw()
-    const bbox = deserializeBbox(this.props.bbox)
+    let bbox = deserializeBbox(this.props.bbox)
     if (!bbox || this.props.activeRoute.pathname !== '/create-job') {
       return
     }
+
+    bbox = this.extentWrapped(bbox)
 
     const feature = new Feature({ geometry: Polygon.fromExtent(bbox) })
     this.drawLayer.getSource().addFeature(feature)
@@ -982,14 +1020,14 @@ export class PrimaryMap extends React.Component<Props, State> {
       let layer: Tile
 
       if (provider.isXYZProvider) {
-        const extent = this.calculateLoopedExtent(f.geometry)
+        const extent = this.geometryToExtentWrapped(f.geometry)
 
         layer = new Tile({
           source: generateXYZScenePreviewSource(provider, externalId, catalogApiKey),
           extent,
         })
       } else {
-        const extent = this.calculateLoopedExtent(f.geometry)
+        const extent = this.geometryToExtentWrapped(f.geometry)
 
         layer = new Image({
           source: generateImageStaticScenePreviewSource(provider, externalId, extent, catalogApiKey),
@@ -1004,32 +1042,23 @@ export class PrimaryMap extends React.Component<Props, State> {
     })
   }
 
-  private calculateLoopedExtent(geometry: Geometry) {
-    // Calculate the centroid of the geometry's extent.
-    let extentProjected = calculateExtent(geometry)
-    let extent = proj.transformExtent(extentProjected, WEB_MERCATOR, WGS84)
+  private extentWrapped(extent: [number, number, number, number]) {
+    // Return an extent that's wrapped so that it follows the camera as it pans across a looping map.
+    let extentWgs = proj.transformExtent(extent, WEB_MERCATOR, WGS84)
     const centroid = [
-      (extent[0] + extent[2]) / 2,
-      (extent[1] + extent[3]) / 2,
-    ]
+      (extentWgs[0] + extentWgs[2]) / 2,
+      (extentWgs[1] + extentWgs[3]) / 2,
+    ] as [number, number]
 
-    // Calculate the distance from the extent centroid to the map center.
-    const mapCenterProjected = this.map.getView().getCenter()
-    const mapCenter = proj.transform(mapCenterProjected, WEB_MERCATOR, WGS84)
-    const centroidXToMapCenterX = mapCenter[0] - centroid[0]
+    const wrapIndex = this.getWrapIndex(centroid)
+    extentWgs[0] += wrapIndex * 360
+    extentWgs[2] += wrapIndex * 360
 
-    // Offset the extent by the full map width for each loop.
-    let loopIndex
-    if (centroidXToMapCenterX < 0) {
-      loopIndex = Math.ceil((centroidXToMapCenterX - 180) / 360)
-    } else {
-      loopIndex = Math.floor((centroidXToMapCenterX + 180) / 360)
-    }
+    return proj.transformExtent(extentWgs, WGS84, WEB_MERCATOR)
+  }
 
-    extent[0] += loopIndex * 360
-    extent[2] += loopIndex * 360
-
-    return proj.transformExtent(extent, WGS84, WEB_MERCATOR)
+  private geometryToExtentWrapped(geometry: Geometry) {
+    return this.extentWrapped(calculateExtent(geometry))
   }
 
   private subscribeToLoadEvents(layer) {
@@ -1092,9 +1121,21 @@ export class PrimaryMap extends React.Component<Props, State> {
       dataProjection: WGS84,
       featureProjection: WEB_MERCATOR,
     })
-    const anchor = extent.getTopRight(this.calculateLoopedExtent(feature.getGeometry()))
+    const anchor = extent.getTopRight(this.geometryToExtentWrapped(feature.getGeometry()))
     features.push(feature)
     this.featureDetailsOverlay.setPosition(anchor)
+  }
+
+  private getWrapIndex(positionWgs: [number, number]) {
+    // Return an index that signifies how many full map distances the position is from the map center.
+    const mapCenter = proj.transform(this.map.getView().getCenter(), WEB_MERCATOR, WGS84)
+    const distanceToMapCenter = mapCenter[0] - positionWgs[0]
+
+    if (distanceToMapCenter < 0) {
+      return Math.ceil((distanceToMapCenter - 180) / 360)
+    } else {
+      return Math.floor((distanceToMapCenter + 180) / 360)
+    }
   }
 }
 
@@ -1338,7 +1379,6 @@ function generateImageryLayer() {
 
 function generateImageSearchResultsOverlay(componentRef) {
   return new Overlay({
-    autoPan:   true,
     element:   findDOMNode(componentRef),
     id:        'imageSearchResults',
     stopEvent: false,
