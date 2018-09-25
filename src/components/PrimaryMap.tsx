@@ -40,8 +40,6 @@ import condition from 'ol/events/condition'
 import extent from 'ol/extent'
 import Feature from 'ol/feature'
 import GeoJSON from 'ol/format/geojson'
-import Geometry from 'ol/geom/geometry'
-import MultiPolygon from 'ol/geom/multipolygon'
 import Point from 'ol/geom/point'
 import Polygon from 'ol/geom/polygon'
 import interaction from 'ol/interaction'
@@ -68,7 +66,15 @@ import {FeatureDetails} from './FeatureDetails'
 import {LoadingAnimation} from './LoadingAnimation'
 import {ImagerySearchResults} from './ImagerySearchResults'
 import {normalizeSceneId} from './SceneFeatureDetails'
-import {featureToExtent, deserializeBbox, serializeBbox, toGeoJSON, readFeatureGeometry} from '../utils/geometries'
+import {
+  featureToExtent,
+  deserializeBbox,
+  serializeBbox,
+  toGeoJSON,
+  getWrapIndex,
+  extentWrapped,
+  calculateExtent, featureToExtentWrapped,
+} from '../utils/geometries'
 import {
   BASEMAP_TILE_PROVIDERS,
   SCENE_TILE_PROVIDERS,
@@ -87,6 +93,8 @@ import {
   STATUS_CANCELLED,
   TYPE_SCENE,
   TYPE_JOB,
+  WEB_MERCATOR,
+  WGS84,
 } from '../constants'
 
 const DEFAULT_CENTER: [number, number] = [-10, 0]
@@ -107,8 +115,6 @@ const TYPE_DIVOT_OUTBOARD = 'DIVOT_OUTBOARD'
 const TYPE_LABEL_MAJOR = 'LABEL_MAJOR'
 const TYPE_LABEL_MINOR = 'LABEL_MINOR'
 const TYPE_STEM = 'STEM'
-const WGS84 = 'EPSG:4326'
-const WEB_MERCATOR = 'EPSG:3857'
 export const MODE_DRAW_BBOX = 'MODE_DRAW_BBOX'
 export const MODE_NORMAL = 'MODE_NORMAL'
 export const MODE_PRODUCT_LINES = 'MODE_PRODUCT_LINES'
@@ -130,7 +136,7 @@ interface Props {
   wmsUrl:             string
   shrunk:             boolean
   onBoundingBoxChange(bbox: number[])
-  onMapInitialization(collections: any)
+  onMapInitialization(map: Map, collections: any)
   onSearchPageChange(page: {count: number, startIndex: number})
   onSelectFeature(feature: beachfront.Job | beachfront.Scene)
   onViewChange(view: MapView)
@@ -223,7 +229,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     window['primaryMap'] = this  // tslint:disable-line
 
     if (this.props.onMapInitialization) {
-      this.props.onMapInitialization({
+      this.props.onMapInitialization(this.map, {
         hovered: this.hoverInteraction.getFeatures(),
         imagery: this.imageryLayer.getSource().getFeaturesCollection(),
         selected: this.selectInteraction.getFeatures(),
@@ -462,12 +468,12 @@ export class PrimaryMap extends React.Component<Props, State> {
     if (this.props.selectedFeature) {
       let selectedFeatureCenter = extent.getCenter(featureToExtent(this.props.selectedFeature))
       selectedFeatureCenter = proj.transform(selectedFeatureCenter, WEB_MERCATOR, WGS84)
-      selectedFeatureHalfWrapIndex = this.getWrapIndex(selectedFeatureCenter)
+      selectedFeatureHalfWrapIndex = getWrapIndex(this.map, selectedFeatureCenter)
     }
 
     if (this.props.bbox) {
       let bboxCenter = extent.getCenter(this.props.bbox)
-      bboxHalfWrapIndex = this.getWrapIndex(bboxCenter)
+      bboxHalfWrapIndex = getWrapIndex(this.map, bboxCenter)
     }
 
     if (selectedFeatureHalfWrapIndex !== this.state.selectedFeatureHalfWrapIndex ||
@@ -683,8 +689,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.props.detections.forEach(detection => {
       let layer: Tile
 
-      const geometry = readFeatureGeometry(detection)
-      let extent = this.geometryToExtentWrapped(geometry)
+      let extent = featureToExtentWrapped(this.map, detection)
       layer = new Tile({
         source: generateDetectionsSource(this.props.wmsUrl, detection),
         extent,
@@ -949,7 +954,7 @@ export class PrimaryMap extends React.Component<Props, State> {
       return  // No results are in
     }
 
-    bbox = this.extentWrapped(bbox)
+    bbox = extentWrapped(this.map, bbox)
 
     let position
     if (this.props.imagery.count) {
@@ -984,14 +989,14 @@ export class PrimaryMap extends React.Component<Props, State> {
       return
     }
 
-    bbox = this.extentWrapped(bbox)
+    bbox = extentWrapped(this.map, bbox)
 
     const feature = new Feature({ geometry: Polygon.fromExtent(bbox) })
     this.drawLayer.getSource().addFeature(feature)
   }
 
   private renderSelectionPreview() {
-    const previewables = toPreviewable([this.props.selectedFeature].filter(Boolean))
+    const previewables = this.toPreviewable([this.props.selectedFeature].filter(Boolean))
 
     // Remove currently rendered selection previews.
     Object.keys(this.previewLayers).forEach(imageId => {
@@ -1020,17 +1025,13 @@ export class PrimaryMap extends React.Component<Props, State> {
       let layer: Tile
 
       if (provider.isXYZProvider) {
-        const extent = this.geometryToExtentWrapped(f.geometry)
-
         layer = new Tile({
           source: generateXYZScenePreviewSource(provider, externalId, catalogApiKey),
-          extent,
+          extent: f.extentWrapped,
         })
       } else {
-        const extent = this.geometryToExtentWrapped(f.geometry)
-
         layer = new Image({
-          source: generateImageStaticScenePreviewSource(provider, externalId, extent, catalogApiKey),
+          source: generateImageStaticScenePreviewSource(provider, externalId, f.extentWrapped, catalogApiKey),
         })
       }
 
@@ -1042,23 +1043,14 @@ export class PrimaryMap extends React.Component<Props, State> {
     })
   }
 
-  private extentWrapped(extent: [number, number, number, number]) {
-    // Return an extent that's wrapped so that it follows the camera as it pans across a looping map.
-    let extentWgs = proj.transformExtent(extent, WEB_MERCATOR, WGS84)
-    const centroid = [
-      (extentWgs[0] + extentWgs[2]) / 2,
-      (extentWgs[1] + extentWgs[3]) / 2,
-    ] as [number, number]
-
-    const wrapIndex = this.getWrapIndex(centroid)
-    extentWgs[0] += wrapIndex * 360
-    extentWgs[2] += wrapIndex * 360
-
-    return proj.transformExtent(extentWgs, WGS84, WEB_MERCATOR)
-  }
-
-  private geometryToExtentWrapped(geometry: Geometry) {
-    return this.extentWrapped(calculateExtent(geometry))
+  private toPreviewable(features: Array<beachfront.Job|beachfront.Scene>) {
+    return features.map(f => {
+      return {
+        sceneId: f.properties.type === TYPE_JOB ? f.properties.scene_id : f.id,
+        extent: featureToExtent(f),
+        extentWrapped: featureToExtentWrapped(this.map, f),
+      }
+    })
   }
 
   private subscribeToLoadEvents(layer) {
@@ -1121,21 +1113,9 @@ export class PrimaryMap extends React.Component<Props, State> {
       dataProjection: WGS84,
       featureProjection: WEB_MERCATOR,
     })
-    const anchor = extent.getTopRight(this.geometryToExtentWrapped(feature.getGeometry()))
+    const anchor = extent.getTopRight(featureToExtentWrapped(this.map, selectedFeature))
     features.push(feature)
     this.featureDetailsOverlay.setPosition(anchor)
-  }
-
-  private getWrapIndex(positionWgs: [number, number]) {
-    // Return an index that signifies how many full map distances the position is from the map center.
-    const mapCenter = proj.transform(this.map.getView().getCenter(), WEB_MERCATOR, WGS84)
-    const distanceToMapCenter = mapCenter[0] - positionWgs[0]
-
-    if (distanceToMapCenter < 0) {
-      return Math.ceil((distanceToMapCenter - 180) / 360)
-    } else {
-      return Math.floor((distanceToMapCenter + 180) / 360)
-    }
   }
 }
 
@@ -1156,32 +1136,6 @@ function animateLayerExit(layer) {
 
     requestAnimationFrame(tick)
   })
-}
-
-function calculateExtent(geometry: Geometry) {
-  if (geometry instanceof MultiPolygon && crossesMeridian(geometry)) {
-    const extents = geometry.getPolygons().map(g => proj.transformExtent(g.getExtent(), WEB_MERCATOR, WGS84))
-    let [, minY, , maxY] = proj.transformExtent(geometry.getExtent(), WEB_MERCATOR, WGS84)
-    let width = 0
-    let minX = 180
-
-    for (const [polygonMinX, , polygonMaxX] of extents) {
-      width += polygonMaxX - polygonMinX
-
-      if (polygonMaxX > 0) {
-        minX -= polygonMaxX - polygonMinX
-      }
-    }
-
-    return proj.transformExtent([minX, minY, minX + width, maxY], WGS84, WEB_MERCATOR)
-  }
-
-  return geometry.getExtent()  // Use as-is
-}
-
-function crossesMeridian(geometry: Geometry) {
-  const [minX, , maxX] = proj.transformExtent(geometry.getExtent(), WEB_MERCATOR, WGS84)
-  return minX === -180 && maxX === 180
 }
 
 function generateBasemapLayers(providers) {
@@ -1457,16 +1411,6 @@ function isFeatureTypeSelectable(feature) {
     default:
       return true
   }
-}
-
-function toPreviewable(features: Array<beachfront.Job|beachfront.Scene>) {
-  return features.map(f => {
-    return {
-      sceneId: f.properties.type === TYPE_JOB ? f.properties.scene_id : f.id,
-      extent: featureToExtent(f),
-      geometry: readFeatureGeometry(f),
-    }
-  })
 }
 
 function getPlaceholder() {

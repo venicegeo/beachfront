@@ -36,6 +36,7 @@ import {
   MODE_SELECT_IMAGERY,
   MODE_PRODUCT_LINES,
 } from './PrimaryMap'
+import Map from 'ol/map'
 import {ProductLineList} from './ProductLineList'
 import {SessionExpired} from './SessionExpired'
 import {SessionLoggedOut} from './SessionLoggedOut'
@@ -47,7 +48,10 @@ import * as productLinesService from '../api/productLines'
 import * as sessionService from '../api/session'
 import * as statusService from '../api/status'
 import {createCollection, Collection} from '../utils/collections'
-import {featureToExtent, getFeatureCenter} from '../utils/geometries'
+import {
+  featureToExtentWrapped,
+  getFeatureCenter,
+} from '../utils/geometries'
 import {
   RECORD_POLLING_INTERVAL,
   SESSION_IDLE_INTERVAL,
@@ -86,6 +90,7 @@ interface State {
   productLines?: Collection<beachfront.ProductLine>
 
   // Map state
+  map?: Map
   mapMode?: string
   detections?: (beachfront.Job | beachfront.ProductLine)[]
   frames?: (beachfront.Job | beachfront.ProductLine)[]
@@ -118,6 +123,7 @@ export class Application extends React.Component<Props, State> {
   constructor(props) {
     super(props)
     this.state = props.deserialize()
+    this.handleMapInitialization = this.handleMapInitialization.bind(this)
     this.handleBoundingBoxChange = this.handleBoundingBoxChange.bind(this)
     this.handleCatalogApiKeyChange = this.handleCatalogApiKeyChange.bind(this)
     this.handleClearBbox = this.handleClearBbox.bind(this)
@@ -238,7 +244,7 @@ export class Application extends React.Component<Props, State> {
           view={this.state.mapView}
           wmsUrl={this.state.geoserver.wmsUrl}
           onBoundingBoxChange={this.handleBoundingBoxChange}
-          onMapInitialization={(collections: any) => this.setState({ collections })}
+          onMapInitialization={this.handleMapInitialization}
           onSearchPageChange={this.handleSearchSubmit}
           onSelectFeature={this.handleSelectFeature}
           onViewChange={mapView => this.setState({ mapView })}
@@ -506,6 +512,13 @@ export class Application extends React.Component<Props, State> {
       .catch(err => this.setState({ errors: [...this.state.errors, err] }))
   }
 
+  private handleMapInitialization(map: Map, collections: any) {
+    this.setState({
+      map,
+      collections,
+    })
+  }
+
   private handleBoundingBoxChange(bbox) {
     this.setState({
       bbox,
@@ -576,7 +589,7 @@ export class Application extends React.Component<Props, State> {
   private handleNavigateToJob(loc) {
     this.navigateTo(loc)
     const feature = this.state.jobs.records.find(j => loc.search.includes(j.id))
-    this.panToExtent(featureToExtent(feature))
+    this.panToExtent(featureToExtentWrapped(this.state.map, feature))
   }
 
   private handlePanToProductLine(productLine) {
