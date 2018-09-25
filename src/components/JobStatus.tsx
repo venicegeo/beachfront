@@ -81,7 +81,8 @@ export class JobStatus extends React.Component<Props, State> {
       (this.props.job.properties.status !== nextProps.job.properties.status) ||
       (this.state.isExpanded !== nextState.isExpanded) ||
       (this.state.isDownloading !== nextState.isDownloading) ||
-      (this.state.isControlHover !== nextState.isControlHover))
+      (this.state.isControlHover !== nextState.isControlHover) ||
+      (this.state.isRemoving !== nextState.isRemoving))
   }
 
   render() {
