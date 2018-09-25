@@ -78,6 +78,7 @@ export class JobStatus extends React.Component<Props, State> {
   shouldComponentUpdate(nextProps, nextState) {
     return ((this.props.isActive !== nextProps.isActive) ||
       (this.props.className !== nextProps.className) ||
+      (this.props.job.properties.status !== nextProps.job.properties.status) ||
       (this.state.isExpanded !== nextState.isExpanded) ||
       (this.state.isDownloading !== nextState.isDownloading) ||
       (this.state.isControlHover !== nextState.isControlHover))
