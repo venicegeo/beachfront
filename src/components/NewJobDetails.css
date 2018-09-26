@@ -20,6 +20,9 @@
   margin-bottom: 1em;
 }
 
+.computeMaskInput,
+.nameInput {}
+
 .hint {
   font-size: 12px;
   white-space: nowrap;

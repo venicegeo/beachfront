@@ -32,6 +32,7 @@ export const NewJobDetails = (props: Props) => (
     <label className={styles.field}>
       <span>Name</span>
       <input
+        className={styles.nameInput}
         onChange={event => props.onNameChange((event.target as HTMLInputElement).value)}
         value={props.name}
       />
@@ -40,6 +41,7 @@ export const NewJobDetails = (props: Props) => (
     <label className={styles.field}>
       <span>Compute Mask</span>
       <input
+        className={styles.computeMaskInput}
         checked={props.computeMask}
         onChange={event => {
           props.onComputeMaskChange((event.target as HTMLInputElement).checked)
