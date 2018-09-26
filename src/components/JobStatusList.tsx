@@ -79,7 +79,8 @@ export class JobStatusList extends React.Component<Props, void> {
   }
 
   private scrollToSelectedJob() {
-    const row = document.querySelector(`.${jobStatusStyles.isActive}`)
+    const job = this.props.selectedFeature as beachfront.Job
+    const row = document.querySelector(`.JobStatus-${job.properties.job_id}`)
     if (row) {
       const offset = [
         '.JobStatusList-root header',
