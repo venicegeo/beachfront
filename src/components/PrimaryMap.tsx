@@ -100,6 +100,7 @@ const DEFAULT_CENTER: [number, number] = [-10, 0]
 const MIN_ZOOM = 2.5
 const MAX_ZOOM = 22
 const RESOLUTION_CLOSE = 850
+const VIEW_BOUNDS: [number, number, number, number] = [-Number.MAX_SAFE_INTEGER, -90, Number.MAX_SAFE_INTEGER, 90]
 const STEM_OFFSET = 10000
 const IDENTIFIER_DETECTIONS = 'piazza:bfdetections'
 const KEY_SCENE_ID = 'SCENE_ID'
@@ -614,6 +615,7 @@ export class PrimaryMap extends React.Component<Props, State> {
       target: this.refs.container,
       view: new View({
         center: proj.fromLonLat(DEFAULT_CENTER, WEB_MERCATOR),
+        extent: proj.transformExtent(VIEW_BOUNDS, WGS84, WEB_MERCATOR),
         minZoom: MIN_ZOOM,
         maxZoom: MAX_ZOOM,
         zoom: MIN_ZOOM,
