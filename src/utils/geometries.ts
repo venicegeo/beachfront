@@ -17,9 +17,10 @@
 import proj from 'ol/proj'
 import GeoJSON from 'ol/format/geojson'
 import extent from 'ol/extent'
-
-const WGS84 = 'EPSG:4326'
-const WEB_MERCATOR = 'EPSG:3857'
+import Geometry from 'ol/geom/geometry'
+import MultiPolygon from 'ol/geom/multipolygon'
+import Map from 'ol/map'
+import {WEB_MERCATOR, WGS84} from '../constants'
 
 export function getFeatureCenter(feature, featureProjection = WGS84) {
   return extent.getCenter(featureToExtent(feature, featureProjection))
@@ -37,9 +38,19 @@ export function bboxToExtent(bbox: number[], featureProjection = WEB_MERCATOR, d
   }, {featureProjection, dataProjection}).getExtent()
 }
 
-export function featureToExtent(feature, featureProjection = WEB_MERCATOR, dataProjection = WGS84) {
+export function featureToExtent(feature: GeoJSON.Feature<GeoJSON.Polygon>,
+                                featureProjection = WEB_MERCATOR,
+                                dataProjection = WGS84) {
   const geometry = readFeatureGeometry(feature, featureProjection, dataProjection)
   return geometry.getExtent()
+}
+
+export function featureToExtentWrapped(map: Map,
+                                       feature: GeoJSON.Feature<GeoJSON.Polygon>,
+                                       featureProjection = WEB_MERCATOR,
+                                       dataProjection = WGS84) {
+  const geometry = readFeatureGeometry(feature, featureProjection, dataProjection)
+  return extentWrapped(map, calculateExtent(geometry))
 }
 
 export function readFeatureGeometry(feature, featureProjection = WEB_MERCATOR, dataProjection = WGS84) {
@@ -56,9 +67,9 @@ export function deserializeBbox(serialized) {
 
 export function serializeBbox(extent) {
   const bbox = proj.transformExtent(extent, WEB_MERCATOR, WGS84)
-  const p1 = unwrapPoint(bbox.slice(0, 2))
-  const p2 = unwrapPoint(bbox.slice(2, 4))
-  return p1.concat(p2).map(truncate)
+  const p1 = bbox.slice(0, 2)
+  const p2 = bbox.slice(2, 4)
+  return p1.concat(p2).map(truncate) as [number, number, number, number]
 }
 
 export function toGeoJSON(feature) {
@@ -66,6 +77,59 @@ export function toGeoJSON(feature) {
     dataProjection: WGS84,
     featureProjection: WEB_MERCATOR,
   })
+}
+
+export function getWrapIndex(map: Map, positionWgs: [number, number]) {
+  // Return an index that signifies how many full map distances the position is from the map center.
+  const mapCenter = proj.transform(map.getView().getCenter(), WEB_MERCATOR, WGS84)
+  const distanceToMapCenter = mapCenter[0] - positionWgs[0]
+
+  if (distanceToMapCenter < 0) {
+    return Math.ceil((distanceToMapCenter - 180) / 360)
+  } else {
+    return Math.floor((distanceToMapCenter + 180) / 360)
+  }
+}
+
+export function extentWrapped(map: Map, extent: [number, number, number, number]) {
+  // Return an extent that's wrapped so that it follows the camera as it pans across a looping map.
+  let extentWgs = proj.transformExtent(extent, WEB_MERCATOR, WGS84)
+  const centroid = [
+    (extentWgs[0] + extentWgs[2]) / 2,
+    (extentWgs[1] + extentWgs[3]) / 2,
+  ] as [number, number]
+
+  const wrapIndex = getWrapIndex(map, centroid)
+  extentWgs[0] += wrapIndex * 360
+  extentWgs[2] += wrapIndex * 360
+
+  return proj.transformExtent(extentWgs, WGS84, WEB_MERCATOR)
+}
+
+export function calculateExtent(geometry: Geometry) {
+  if (geometry instanceof MultiPolygon && crossesMeridian(geometry)) {
+    const extents = geometry.getPolygons().map(g => proj.transformExtent(g.getExtent(), WEB_MERCATOR, WGS84))
+    let [, minY, , maxY] = proj.transformExtent(geometry.getExtent(), WEB_MERCATOR, WGS84)
+    let width = 0
+    let minX = 180
+
+    for (const [polygonMinX, , polygonMaxX] of extents) {
+      width += polygonMaxX - polygonMinX
+
+      if (polygonMaxX > 0) {
+        minX -= polygonMaxX - polygonMinX
+      }
+    }
+
+    return proj.transformExtent([minX, minY, minX + width, maxY], WGS84, WEB_MERCATOR)
+  }
+
+  return geometry.getExtent()  // Use as-is
+}
+
+export function crossesMeridian(geometry: Geometry) {
+  const [minX, , maxX] = proj.transformExtent(geometry.getExtent(), WEB_MERCATOR, WGS84)
+  return minX === -180 && maxX === 180
 }
 
 //

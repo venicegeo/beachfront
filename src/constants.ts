@@ -32,3 +32,7 @@ export const SOURCE_DEFAULT = 'rapideye'
 export const TYPE_JOB = 'JOB'
 export const TYPE_PRODUCT_LINE = 'PRODUCT_LINE'
 export const TYPE_SCENE = 'SCENE'
+
+// Map Projections
+export const WGS84 = 'EPSG:4326'
+export const WEB_MERCATOR = 'EPSG:3857'

@@ -22,6 +22,7 @@ import {
   IMAGERY_ENDPOINT,
   USER_ENDPOINT,
 } from '../config'
+import {wrap} from '../utils/math'
 
 let _client: AxiosInstance
 
@@ -56,13 +57,19 @@ export function search({
 }): Promise<beachfront.ImageryCatalogPage> {
   console.warn('(catalog:search): Discarding parameters `count` (%s) and `startIndex` (%s)', count, startIndex)
 
+  // Wrap bbox X coordinates to stay within the -180/180 range. Some data sources won't return results otherwise.
+  const bboxWidth = bbox[2] - bbox[0]
+  const wrappedBbox = [...bbox]
+  wrappedBbox[0] = wrap(wrappedBbox[0], -180, 180)
+  wrappedBbox[2] = wrappedBbox[0] + bboxWidth
+
   let sceneTileProvider = SCENE_TILE_PROVIDERS.find(p => p.prefix === source)
   if (!!sceneTileProvider) {
     return _client.get(`${IMAGERY_ENDPOINT}/${sceneTileProvider.catalogSection}/discover/${source}`, {
       params: {
         cloudCover:      cloudCover + .05,
         PL_API_KEY:      catalogApiKey,
-        bbox:            bbox.join(','),
+        bbox:            wrappedBbox.join(','),
         acquiredDate:    new Date(dateFrom).toISOString(),
         maxAcquiredDate: new Date(dateTo).toISOString(),
       },
