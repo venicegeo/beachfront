@@ -80,18 +80,20 @@ export class JobStatusList extends React.Component<Props, void> {
 
   private scrollToSelectedJob() {
     const job = this.props.selectedFeature as beachfront.Job
-    const row = document.querySelector(`.JobStatus-${job.properties.job_id}`)
-    if (row) {
-      const offset = [
-        '.JobStatusList-root header',
-        '.ClassificationBanner-root',
-      ].reduce((rc, s) => rc + document.querySelector(s).clientHeight, 0)
+    if (job) {
+      const row = document.querySelector(`.JobStatus-${job.properties.job_id}`)
+      if (row) {
+        const offset = [
+          '.JobStatusList-root header',
+          '.ClassificationBanner-root',
+        ].reduce((rc, s) => rc + document.querySelector(s).clientHeight, 0)
 
-      const box = row.getBoundingClientRect()
-      const height = window.innerHeight || document.documentElement.clientHeight
+        const box = row.getBoundingClientRect()
+        const height = window.innerHeight || document.documentElement.clientHeight
 
-      if (Math.floor(box.top) <= offset || box.bottom > height - row.clientHeight) {
-        row.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+        if (Math.floor(box.top) <= offset || box.bottom > height - row.clientHeight) {
+          row.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+        }
       }
     }
   }
