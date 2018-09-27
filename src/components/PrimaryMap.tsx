@@ -1174,7 +1174,6 @@ function generateControls() {
       coordinateFormat: coordinate.toStringHDMS,
       projection: WGS84,
     }),
-    new FullScreen(),
     new ExportControl(styles.export),
     new SearchControl(styles.search),
     new MeasureControl(styles.measure),
