@@ -22,6 +22,9 @@ import MultiPolygon from 'ol/geom/multipolygon'
 import Map from 'ol/map'
 import {WEB_MERCATOR, WGS84} from '../constants'
 
+export const WEB_MERCATOR_MIN = proj.transform([-180, -90], WGS84, WEB_MERCATOR)
+export const WEB_MERCATOR_MAX = proj.transform([180, 90], WGS84, WEB_MERCATOR)
+
 export function getFeatureCenter(feature, featureProjection = WGS84) {
   return extent.getCenter(featureToExtent(feature, featureProjection))
 }
