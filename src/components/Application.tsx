@@ -884,8 +884,13 @@ function serialize(state: State) {
     Wrap map center to keep it within the -180/180 range. Otherwise the map may scroll awkardly on initial load to get
     back to a far away location. Do the same for the bbox so that it's in the same starting location as the map.
    */
-  const mapView = {...state.mapView}
-  mapView.center[0] = wrap(mapView.center[0], -180, 180)
+  let mapView = null
+  if (state.mapView) {
+    mapView = {...state.mapView}
+    if (mapView.center) {
+      mapView.center[0] = wrap(mapView.center[0], -180, 180)
+    }
+  }
 
   let bbox = null
   if (state.bbox) {
