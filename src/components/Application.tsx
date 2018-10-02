@@ -664,7 +664,7 @@ export class Application extends React.Component<Props, State> {
   }
 
   private handleSignOutClick() {
-    if (confirm('Are you sure? This will sign you out of Beachfront.')) {
+    if (confirm('Are you want to sign out of Beachfront?')) {
       this.logout()
     }
   }
