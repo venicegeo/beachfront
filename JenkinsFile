@@ -14,10 +14,10 @@ node {
     dir(configDir) {
       git url: "${env.CONFIGURATION_URL}", credentialsId: "${env.CONFIGURATION_CREDS}"
       sh "mv ${configDir}/${ENVIRONMENT}-config.json ${configFile}"
+      // read the Matomo snippet for later insertion
+      matomoSnippet = readFile("scripts/Matomo").trim()
       deleteDir()
     }
-    // read the Matomo snippet for later insertion
-    matomoSnippet = readFile("scripts/Matomo").trim()
     // read the current configuration
     def configJson = readJSON file: "${configFile}"
     for (param in configJson.credparams + configJson.jobparams) { 
