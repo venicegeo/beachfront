@@ -39,8 +39,12 @@ import {
   toGeoJSON,
   getWrapIndex,
   extentWrapped,
-  calculateExtent, featureToExtentWrapped,
+  calculateExtent,
+  featureToExtentWrapped,
+  WEB_MERCATOR_MIN,
+  WEB_MERCATOR_MAX,
 } from '../utils/geometries'
+import {wrap} from '../utils/math'
 import {
   BASEMAP_TILE_PROVIDERS,
   SCENE_TILE_PROVIDERS,
@@ -67,6 +71,7 @@ const DEFAULT_CENTER: [number, number] = [-10, 0]
 const MIN_ZOOM = 2.5
 const MAX_ZOOM = 22
 const RESOLUTION_CLOSE = 850
+const VIEW_BOUNDS: [number, number, number, number] = [-Number.MAX_SAFE_INTEGER, -90, Number.MAX_SAFE_INTEGER, 90]
 const STEM_OFFSET = 10000
 const IDENTIFIER_DETECTIONS = 'piazza:bfdetections'
 const KEY_SCENE_ID = 'SCENE_ID'
@@ -581,6 +586,7 @@ export class PrimaryMap extends React.Component<Props, State> {
       target: this.refs.container,
       view: new ol.View({
         center: ol.proj.fromLonLat(DEFAULT_CENTER, WEB_MERCATOR),
+        extent: ol.proj.transformExtent(VIEW_BOUNDS, WGS84, WEB_MERCATOR),
         minZoom: MIN_ZOOM,
         maxZoom: MAX_ZOOM,
         zoom: MIN_ZOOM,
@@ -701,11 +707,29 @@ export class PrimaryMap extends React.Component<Props, State> {
       divotInboard.set(KEY_OWNER_ID, id)
       source.addFeature(divotInboard)
 
-      const divotOutboard = new ol.Feature({ geometry: new ol.Point(topRight) })
-      divotOutboard.set(KEY_TYPE, TYPE_DIVOT_OUTBOARD)
-      divotOutboard.set(KEY_OWNER_ID, id)
-      divotOutboard.set(KEY_STATUS, raw.properties.status)
-      source.addFeature(divotOutboard)
+      /*
+       Any part of the outer divot that lies outside of -180/180 (WGS84) in the X will be unclickable. If the entire
+       divot is out of bounds, this is no problem as we can simply wrap it to the other side. But for any divot that
+       lies along the meridian, only part of it will be clickable. So, as a workaround, render wrapped divots twice -
+       once on each side of the map.
+      */
+      // HACK
+      const addDivotOutboard = (coordinates: [number, number]) => {
+        const divotOutboard = new ol.Feature({ geometry: new ol.Point(coordinates) })
+        divotOutboard.set(KEY_TYPE, TYPE_DIVOT_OUTBOARD)
+        divotOutboard.set(KEY_OWNER_ID, id)
+        divotOutboard.set(KEY_STATUS, raw.properties.status)
+        source.addFeature(divotOutboard)
+      }
+      addDivotOutboard(topRight)
+
+      if (topRight[0] < WEB_MERCATOR_MIN[0] || topRight[0] > WEB_MERCATOR_MAX[0]) {
+        const halfWidth = topRight[0] - center[0]
+        topRight[0] = wrap(topRight[0], WEB_MERCATOR_MIN[0], WEB_MERCATOR_MAX[0])
+        center[0] = topRight[0] - halfWidth
+        addDivotOutboard(topRight)
+      }
+      // END HACK
 
       const name = new ol.Feature({ geometry: new ol.Point(topRight) })
       name.set(KEY_TYPE, TYPE_LABEL_MAJOR)
@@ -1141,7 +1165,6 @@ function generateControls() {
       coordinateFormat: ol.coordinate.toStringHDMS,
       projection: WGS84,
     }),
-    new ol.FullScreen(),
     new ExportControl(styles.export),
     new SearchControl(styles.search),
     new MeasureControl(styles.measure),

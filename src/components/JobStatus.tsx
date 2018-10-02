@@ -91,7 +91,7 @@ export class JobStatus extends React.Component<Props, State> {
     const timeOfCollect = moment.utc(properties.time_of_collect).local().format('llll')
 
     return (
-      <li className={`${styles.root} ${this.aggregatedClassNames}`}>
+      <li className={`${styles.root} ${this.aggregatedClassNames} ${this.activeJobId}`}>
         <div
           className={styles.progressBar}
           title={`${isNaN(this.state.downloadProgress) ? '—' : this.state.downloadProgress}%`}
@@ -181,6 +181,10 @@ export class JobStatus extends React.Component<Props, State> {
   //
   // Internals
   //
+
+  private get activeJobId() {
+    return 'JobStatus-' + this.props.job.properties.job_id
+  }
 
   private get aggregatedClassNames() {
     return [

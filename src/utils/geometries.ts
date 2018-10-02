@@ -17,6 +17,9 @@
 import * as ol from '../utils/ol'
 import {WEB_MERCATOR, WGS84} from '../constants'
 
+export const WEB_MERCATOR_MIN = ol.proj.transform([-180, -90], WGS84, WEB_MERCATOR)
+export const WEB_MERCATOR_MAX = ol.proj.transform([180, 90], WGS84, WEB_MERCATOR)
+
 export function getFeatureCenter(feature, featureProjection = WGS84) {
   return ol.extent.getCenter(featureToExtent(feature, featureProjection))
 }
