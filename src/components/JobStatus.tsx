@@ -43,6 +43,7 @@ interface Props {
   onSelectJob(job: beachfront.Job)
   onForgetJob(job: beachfront.Job)
   onNavigate(loc: { pathname: string, search: string, hash: string })
+  onToggleExpansion(job: beachfront.Job, isExpanded: boolean)
 }
 
 interface State {
@@ -269,6 +270,8 @@ export class JobStatus extends React.Component<Props, State> {
       isExpanded: !this.state.isExpanded,
       isRemoving: false,
     })
+
+    this.props.onToggleExpansion(this.props.job, !this.state.isExpanded)
   }
 }
 

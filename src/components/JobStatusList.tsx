@@ -34,6 +34,8 @@ interface Props {
 export class JobStatusList extends React.Component<Props, void> {
   constructor(props: Props) {
     super(props)
+
+    this.handleToggleExpansion = this.handleToggleExpansion.bind(this)
   }
 
   componentDidUpdate(prevProps) {
@@ -70,6 +72,7 @@ export class JobStatusList extends React.Component<Props, void> {
               onNavigate={this.props.onNavigateToJob}
               onForgetJob={this.props.onForgetJob}
               onSelectJob={this.props.onSelectJob}
+              onToggleExpansion={this.handleToggleExpansion}
               selectedFeature={this.props.selectedFeature}
             />
           ))}
@@ -78,22 +81,38 @@ export class JobStatusList extends React.Component<Props, void> {
     )
   }
 
+  private handleToggleExpansion(job: beachfront.Job, isExpanded: boolean) {
+    if (isExpanded) {
+      // Fit the metadata into view once it finishes expanding.
+      const row = document.querySelector(`.JobStatus-${job.properties.job_id}`)
+      const handleTransitionEnd = (e) => {
+        this.scrollToJob(job)
+        row.removeEventListener(e.type, handleTransitionEnd)
+      }
+      row.addEventListener('transitionend', handleTransitionEnd)
+    }
+  }
+
   private scrollToSelectedJob() {
     const job = this.props.selectedFeature as beachfront.Job
     if (job) {
-      const row = document.querySelector(`.JobStatus-${job.properties.job_id}`)
-      if (row) {
-        const offset = [
-          '.JobStatusList-root header',
-          '.ClassificationBanner-root',
-        ].reduce((rc, s) => rc + document.querySelector(s).clientHeight, 0)
+      this.scrollToJob(job)
+    }
+  }
 
-        const box = row.getBoundingClientRect()
-        const height = window.innerHeight || document.documentElement.clientHeight
+  private scrollToJob(job) {
+    const row = document.querySelector(`.JobStatus-${job.properties.job_id}`)
+    if (row) {
+      const offset = [
+        '.JobStatusList-root header',
+        '.ClassificationBanner-root',
+      ].reduce((rc, s) => rc + document.querySelector(s).clientHeight, 0)
 
-        if (Math.floor(box.top) <= offset || box.bottom > height - row.clientHeight) {
-          row.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-        }
+      const box = row.getBoundingClientRect()
+      const height = window.innerHeight || document.documentElement.clientHeight
+
+      if (Math.floor(box.top) <= offset || box.bottom > height - row.clientHeight) {
+        row.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
       }
     }
   }
