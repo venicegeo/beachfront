@@ -20,8 +20,7 @@ const DATETIME_FORMAT = 'YYYY-MM-DD HH:mm'
 import * as React from 'react'
 import * as moment from 'moment'
 import * as debounce from 'lodash/debounce'
-import Collection from 'ol/collection'
-import Select from 'ol/interaction/select'
+import * as ol from '../utils/ol'
 import {SCENE_TILE_PROVIDERS} from '../config'
 
 interface Props {
@@ -171,7 +170,7 @@ export class ImagerySearchList extends React.Component<Props, State> {
     return provider ? provider.name : null
   }
 
-  private getFeatureIds(collection: Collection): string[] {
+  private getFeatureIds(collection: ol.Collection): string[] {
     return collection.getArray().map(f => f.getId())
   }
 
@@ -199,13 +198,13 @@ export class ImagerySearchList extends React.Component<Props, State> {
     }
   }
 
-  private setHoveredIds(event?: Select.Event): void {
+  private setHoveredIds(event?: ol.Select.Event): void {
     this.setState((_, props) => ({
       hoveredIds: this.getFeatureIds(event ? event.target : props.collections.hovered),
     }))
   }
 
-  private setSelectedIds(event?: Select.Event): void {
+  private setSelectedIds(event?: ol.Select.Event): void {
     this.setState((_, props) => ({
       selectedIds: this.getFeatureIds(event ? event.target : props.collections.selected),
     }), this.scrollToSelected)

@@ -14,24 +14,19 @@
  * limitations under the License.
  **/
 
-import proj from 'ol/proj'
-import GeoJSON from 'ol/format/geojson'
-import extent from 'ol/extent'
-import Geometry from 'ol/geom/geometry'
-import MultiPolygon from 'ol/geom/multipolygon'
-import Map from 'ol/map'
+import * as ol from '../utils/ol'
 import {WEB_MERCATOR, WGS84} from '../constants'
 
-export const WEB_MERCATOR_MIN = proj.transform([-180, -90], WGS84, WEB_MERCATOR)
-export const WEB_MERCATOR_MAX = proj.transform([180, 90], WGS84, WEB_MERCATOR)
+export const WEB_MERCATOR_MIN = ol.proj.transform([-180, -90], WGS84, WEB_MERCATOR)
+export const WEB_MERCATOR_MAX = ol.proj.transform([180, 90], WGS84, WEB_MERCATOR)
 
 export function getFeatureCenter(feature, featureProjection = WGS84) {
-  return extent.getCenter(featureToExtent(feature, featureProjection))
+  return ol.extent.getCenter(featureToExtent(feature, featureProjection))
 }
 
 export function bboxToExtent(bbox: number[], featureProjection = WEB_MERCATOR, dataProjection = WGS84) {
   let [minLon, minLat, maxLon, maxLat] = bbox
-  return new GeoJSON().readGeometry({type: 'Polygon', coordinates: [[
+  return new ol.GeoJSON().readGeometry({type: 'Polygon', coordinates: [[
       [minLon, minLat],
       [minLon, maxLat],
       [maxLon, maxLat],
@@ -48,7 +43,7 @@ export function featureToExtent(feature: GeoJSON.Feature<GeoJSON.Polygon>,
   return geometry.getExtent()
 }
 
-export function featureToExtentWrapped(map: Map,
+export function featureToExtentWrapped(map: ol.Map,
                                        feature: GeoJSON.Feature<GeoJSON.Polygon>,
                                        featureProjection = WEB_MERCATOR,
                                        dataProjection = WGS84) {
@@ -57,34 +52,34 @@ export function featureToExtentWrapped(map: Map,
 }
 
 export function readFeatureGeometry(feature, featureProjection = WEB_MERCATOR, dataProjection = WGS84) {
-  const reader = new GeoJSON()
+  const reader = new ol.GeoJSON()
   return reader.readGeometry(feature.geometry, {featureProjection, dataProjection})
 }
 
 export function deserializeBbox(serialized) {
   if (serialized && serialized.length === 4) {
-    return proj.transformExtent(serialized, WGS84, WEB_MERCATOR)
+    return ol.proj.transformExtent(serialized, WGS84, WEB_MERCATOR)
   }
   return null
 }
 
 export function serializeBbox(extent) {
-  const bbox = proj.transformExtent(extent, WEB_MERCATOR, WGS84)
+  const bbox = ol.proj.transformExtent(extent, WEB_MERCATOR, WGS84)
   const p1 = bbox.slice(0, 2)
   const p2 = bbox.slice(2, 4)
   return p1.concat(p2).map(truncate) as [number, number, number, number]
 }
 
 export function toGeoJSON(feature) {
-  return new GeoJSON().writeFeatureObject(feature, {
+  return new ol.GeoJSON().writeFeatureObject(feature, {
     dataProjection: WGS84,
     featureProjection: WEB_MERCATOR,
   })
 }
 
-export function getWrapIndex(map: Map, positionWgs: [number, number]) {
+export function getWrapIndex(map: ol.Map, positionWgs: [number, number]) {
   // Return an index that signifies how many full map distances the position is from the map center.
-  const mapCenter = proj.transform(map.getView().getCenter(), WEB_MERCATOR, WGS84)
+  const mapCenter = ol.proj.transform(map.getView().getCenter(), WEB_MERCATOR, WGS84)
   const distanceToMapCenter = mapCenter[0] - positionWgs[0]
 
   if (distanceToMapCenter < 0) {
@@ -94,9 +89,9 @@ export function getWrapIndex(map: Map, positionWgs: [number, number]) {
   }
 }
 
-export function extentWrapped(map: Map, extent: [number, number, number, number]) {
+export function extentWrapped(map: ol.Map, extent: [number, number, number, number]) {
   // Return an extent that's wrapped so that it follows the camera as it pans across a looping map.
-  let extentWgs = proj.transformExtent(extent, WEB_MERCATOR, WGS84)
+  let extentWgs = ol.proj.transformExtent(extent, WEB_MERCATOR, WGS84)
   const centroid = [
     (extentWgs[0] + extentWgs[2]) / 2,
     (extentWgs[1] + extentWgs[3]) / 2,
@@ -106,13 +101,13 @@ export function extentWrapped(map: Map, extent: [number, number, number, number]
   extentWgs[0] += wrapIndex * 360
   extentWgs[2] += wrapIndex * 360
 
-  return proj.transformExtent(extentWgs, WGS84, WEB_MERCATOR)
+  return ol.proj.transformExtent(extentWgs, WGS84, WEB_MERCATOR)
 }
 
-export function calculateExtent(geometry: Geometry) {
-  if (geometry instanceof MultiPolygon && crossesMeridian(geometry)) {
-    const extents = geometry.getPolygons().map(g => proj.transformExtent(g.getExtent(), WEB_MERCATOR, WGS84))
-    let [, minY, , maxY] = proj.transformExtent(geometry.getExtent(), WEB_MERCATOR, WGS84)
+export function calculateExtent(geometry: ol.Geometry) {
+  if (geometry instanceof ol.MultiPolygon && crossesMeridian(geometry)) {
+    const extents = geometry.getPolygons().map(g => ol.proj.transformExtent(g.getExtent(), WEB_MERCATOR, WGS84))
+    let [, minY, , maxY] = ol.proj.transformExtent(geometry.getExtent(), WEB_MERCATOR, WGS84)
     let width = 0
     let minX = 180
 
@@ -124,14 +119,14 @@ export function calculateExtent(geometry: Geometry) {
       }
     }
 
-    return proj.transformExtent([minX, minY, minX + width, maxY], WGS84, WEB_MERCATOR)
+    return ol.proj.transformExtent([minX, minY, minX + width, maxY], WGS84, WEB_MERCATOR)
   }
 
   return geometry.getExtent()  // Use as-is
 }
 
-export function crossesMeridian(geometry: Geometry) {
-  const [minX, , maxX] = proj.transformExtent(geometry.getExtent(), WEB_MERCATOR, WGS84)
+export function crossesMeridian(geometry: ol.Geometry) {
+  const [minX, , maxX] = ol.proj.transformExtent(geometry.getExtent(), WEB_MERCATOR, WGS84)
   return minX === -180 && maxX === 180
 }
 

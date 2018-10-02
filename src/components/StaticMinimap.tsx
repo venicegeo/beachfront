@@ -17,17 +17,7 @@
 const styles: any = require('./StaticMinimap.css')
 
 import * as React from 'react'
-import Map from 'ol/map'
-import Polygon from 'ol/geom/polygon'
-import Tile from 'ol/layer/tile'
-import VectorLayer from 'ol/layer/vector'
-import XYZ from 'ol/source/xyz'
-import VectorSource from 'ol/source/vector'
-import Feature from 'ol/feature'
-import Fill from 'ol/style/fill'
-import Stroke from 'ol/style/stroke'
-import Style from 'ol/style/style'
-import View from 'ol/view'
+import * as ol from '../utils/ol'
 
 import {BASEMAP_TILE_PROVIDERS} from '../config'
 import {deserializeBbox} from '../utils/geometries'
@@ -41,7 +31,7 @@ interface Props {
 export class StaticMinimap extends React.Component<Props, {}> {
   refs: any
 
-  private map: Map
+  private map: ol.Map
 
   componentDidMount() {
     this.initializeMap()
@@ -63,28 +53,28 @@ export class StaticMinimap extends React.Component<Props, {}> {
 
   private initializeMap() {
     const bbox = deserializeBbox(this.props.bbox)
-    const bboxGeometry = Polygon.fromExtent(bbox)
-    this.map = new Map({
+    const bboxGeometry = ol.Polygon.fromExtent(bbox)
+    this.map = new ol.Map({
       controls: [],
       interactions: [],
       layers: [
-        new Tile({
-          source: new XYZ(DEFAULT_TILE_PROVIDER),
+        new ol.Tile({
+          source: new ol.XYZ(DEFAULT_TILE_PROVIDER),
         }),
-        new VectorLayer({
-          source: new VectorSource({
+        new ol.VectorLayer({
+          source: new ol.VectorSource({
             wrapX: false,
             features: [
-              new Feature({
+              new ol.Feature({
                 geometry: bboxGeometry,
               }),
             ],
           }),
-          style: new Style({
-            fill: new Fill({
+          style: new ol.Style({
+            fill: new ol.Fill({
               color: 'hsla(202, 70%, 50%, .3)',
             }),
-            stroke: new Stroke({
+            stroke: new ol.Stroke({
               color: 'hsla(202, 70%, 50%, .7)',
               lineCap: 'square',
               lineJoin: 'square',
@@ -94,7 +84,7 @@ export class StaticMinimap extends React.Component<Props, {}> {
         }),
       ],
       target: this.refs.target,
-      view: new View({
+      view: new ol.View({
         center: [0, 0],
         zoom: 1,
         maxZoom: 6,

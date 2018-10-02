@@ -36,7 +36,6 @@ import {
   MODE_SELECT_IMAGERY,
   MODE_PRODUCT_LINES,
 } from './PrimaryMap'
-import Map from 'ol/map'
 import {ProductLineList} from './ProductLineList'
 import {SessionExpired} from './SessionExpired'
 import {SessionLoggedOut} from './SessionLoggedOut'
@@ -47,6 +46,7 @@ import * as jobsService from '../api/jobs'
 import * as productLinesService from '../api/productLines'
 import * as sessionService from '../api/session'
 import * as statusService from '../api/status'
+import * as ol from '../utils/ol'
 import {createCollection, Collection} from '../utils/collections'
 import {
   featureToExtentWrapped,
@@ -90,7 +90,7 @@ interface State {
   productLines?: Collection<beachfront.ProductLine>
 
   // Map state
-  map?: Map
+  map?: ol.Map
   mapMode?: string
   detections?: (beachfront.Job | beachfront.ProductLine)[]
   frames?: (beachfront.Job | beachfront.ProductLine)[]
@@ -512,7 +512,7 @@ export class Application extends React.Component<Props, State> {
       .catch(err => this.setState({ errors: [...this.state.errors, err] }))
   }
 
-  private handleMapInitialization(map: Map, collections: any) {
+  private handleMapInitialization(map: ol.Map, collections: any) {
     this.setState({
       map,
       collections,
@@ -711,7 +711,7 @@ export class Application extends React.Component<Props, State> {
     })
   }
 
-  private panToExtent(extent: ol.Extent) {
+  private panToExtent(extent: [number, number, number, number]) {
     this.setState({
       mapView: {
         ...this.state.mapView,
