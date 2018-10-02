@@ -141,6 +141,7 @@ export class Application extends React.Component<Props, State> {
     this.handleSearchCriteriaChange = this.handleSearchCriteriaChange.bind(this)
     this.handleSearchSubmit = this.handleSearchSubmit.bind(this)
     this.handleSelectFeature = this.handleSelectFeature.bind(this)
+    this.handleSignOutClick = this.handleSignOutClick.bind(this)
     this.shouldSelectedFeatureAutoDeselect = this.shouldSelectedFeatureAutoDeselect.bind(this)
     this.navigateTo = this.navigateTo.bind(this)
     this.panTo = this.panTo.bind(this)
@@ -235,7 +236,6 @@ export class Application extends React.Component<Props, State> {
           highlightedFeature={this.state.hoveredFeature}
           imagery={this.state.searchResults}
           isSearching={this.state.isSearching}
-          logout={this.logout}
           mode={this.state.mapMode}
           ref="map"
           jobs={this.state.jobs.records}
@@ -248,6 +248,7 @@ export class Application extends React.Component<Props, State> {
           onSearchPageChange={this.handleSearchSubmit}
           onSelectFeature={this.handleSelectFeature}
           onViewChange={mapView => this.setState({ mapView })}
+          onSignOutClick={this.handleSignOutClick}
         />
         {this.renderRoute()}
         {this.state.isSessionExpired && (
@@ -660,6 +661,12 @@ export class Application extends React.Component<Props, State> {
       search: feature && feature.properties.type === TYPE_JOB ? `?jobId=${feature.id}` : '',
       selectedFeature: feature,
     })
+  }
+
+  private handleSignOutClick() {
+    if (confirm('Are you sure you want to sign out of Beachfront?')) {
+      this.logout()
+    }
   }
 
   // Determine if the selected feature is an ignorable type that should not be auto-deselected on certain route changes
