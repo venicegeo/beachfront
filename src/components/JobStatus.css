@@ -282,6 +282,7 @@
   transition: opacity .3s ease;
   font-size: 1.3em;
   text-align: center;
+  word-break: break-word;
 }
 
 .isRemoving .removeWarning {
