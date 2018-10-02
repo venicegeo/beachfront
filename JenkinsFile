@@ -5,6 +5,7 @@ node {
     def mvn = tool 'M3'
     def zapHome = tool 'ZAProxy_v2_5_0'
     def nodejs = tool 'NodeJS_6'
+    def matomoSnippet = null // Populated from Jenkins repo
 	
   stage("Config") {
 	// clone the configuration repository and copy the current configuration
@@ -13,6 +14,8 @@ node {
 	dir(configDir) {
 	  git url: "${env.CONFIGURATION_URL}", credentialsId: "${env.CONFIGURATION_CREDS}"
 	  sh "mv ${configDir}/${ENVIRONMENT}-config.json ${configFile}"
+    // read the Matomo snippet for later insertion
+    matomoSnippet = readFile("scripts/Matomo").trim()
 	  deleteDir()
 	}
 	// read the current configuration
@@ -29,6 +32,12 @@ node {
         } else {
             git url: "${env.GIT_URL}", branch: "${env.GIT_BRANCH}"
         }
+        
+    if (env.ENABLE_MATOMO.toBoolean()) { // Insert Matomo snippet if enabled
+      sh """
+        sed -i "s:<!--Matomo-->:${matomoSnippet}:g" src/index.html
+      """
+    }
 
 	withCredentials([[$class: 'UsernamePasswordBinding', credentialsId: "${env.ARTIFACT_READ_ONLY_CREDS}", variable: 'NPM_AUTH']]) {
             def base64encoded = sh(script: "echo -n ${NPM_AUTH} | base64", returnStdout: true).trim()
