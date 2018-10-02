@@ -16,7 +16,6 @@
 
 .root {
   position: absolute;
-  pointer-events: none;
 }
 
 .sceneDetails {

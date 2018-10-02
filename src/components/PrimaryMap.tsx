@@ -1248,6 +1248,7 @@ function generateFeatureDetailsOverlay(componentRef) {
     element:     findDOMNode(componentRef),
     id:          'featureDetails',
     positioning: 'top-left',
+    stopEvent:   false,
   })
 }
 
