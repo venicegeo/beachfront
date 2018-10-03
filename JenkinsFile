@@ -51,11 +51,13 @@ node {
         sh "npm config set cafile \"${env.CA_CERT_BUNDLE_PATH}\""
       }
       
-      sh """
-        npm config list
-        npm install
-        ./node_modules/.bin/typings install
-      """
+      timeout(time: 10, unit: 'MINUTES') { // The npm install has the tentency to get blocked indefinitely on Jenkins
+        sh """
+          npm config list
+          npm install
+          ./node_modules/.bin/typings install
+        """
+      }
     }
   }
   
