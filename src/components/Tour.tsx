@@ -425,7 +425,7 @@ export class UserTour extends React.Component<any, any> {
       },
       {
         step: 13,
-        selector: '.AlgorithmList-root',
+        selector: '.AlgorithmList-root h2',
         position: 'right',
         horizontalOffset: 8,
         verticalOffset: -10,
