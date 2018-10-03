@@ -35,7 +35,7 @@ node {
         
     if (env.ENABLE_MATOMO.toBoolean()) { // Insert Matomo snippet if enabled
       sh """
-        sed -i "s:<!--Matomo-->:${matomoSnippet}:g" src/index.html
+        sed -i 's:<!--Matomo-->:${matomoSnippet}:g' src/index.html
       """
     }
 
