@@ -37,7 +37,7 @@ select {
 .field-normal {
   align-items: center;
   display: flex;
-  margin: 0.5em 0 0.25em;
+  margin: 0.5em 7rem 0.25em 0;
 }
 
 .field-normal span {
@@ -45,6 +45,13 @@ select {
   padding-right: .5em;
   line-height: 1em;
   text-align: right;
+}
+
+.field-normal input,
+.field-normal button,
+.field-normal textarea,
+.field-normal select {
+  flex: 1;
 }
 
 .field-error {

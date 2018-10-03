@@ -69,9 +69,12 @@ export const CatalogSearchCriteria = (props: Props) => (
     <label className={styles.apiKey}>
       <span>API Key</span>
       <input
+        className={styles.apiKeyInput}
         value={props.apiKey}
-        type="password"
         disabled={props.disabled}
+        autoCorrect="off"
+        autoCapitalize="off"
+        spellCheck={false}
         onChange={event => props.onApiKeyChange((event.target as HTMLInputElement).value)}
       />
     </label>}

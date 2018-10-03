@@ -79,3 +79,7 @@
   font-size: 20px;
   padding-right: 0 !important;
 }
+
+.apiKeyInput {
+  font-family: TextSecurityDisc, sans-serif;
+}
