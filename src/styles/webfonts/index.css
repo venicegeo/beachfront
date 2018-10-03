@@ -48,3 +48,9 @@
   font-weight: 700;
   src: url('./montserrat/Montserrat-Bold.ttf');
 }
+@font-face {
+  font-family: 'TextSecurityDisc';
+  font-style: normal;
+  font-weight: 400;
+  src: url('./text-security-disc/TextSecurityDisk-Regular.ttf');
+}
