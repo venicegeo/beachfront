@@ -34,9 +34,9 @@ node {
     }
 
     if (env.ENABLE_MATOMO.toBoolean()) { // Insert Matomo snippet if enabled
-      sh '''
-        sed -i "s:<!--Matomo-->:${matomoSnippet}:g" src/index.html
-      '''
+      sh """
+        sed -i 's:<!--Matomo-->:${matomoSnippet}:g' src/index.html
+      """
     }
     
     withCredentials([[$class: 'UsernamePasswordBinding', credentialsId: "${env.ARTIFACT_READ_ONLY_CREDS}", variable: 'NPM_AUTH']]) {
