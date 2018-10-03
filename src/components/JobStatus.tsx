@@ -29,6 +29,9 @@ import {
   STATUS_TIMED_OUT,
   STATUS_CANCELLED,
   STATUS_ACTIVATING,
+  STATUS_PENDING,
+  STATUS_SUBMITTED,
+  STATUS_FAIL,
 } from '../constants'
 
 interface Props {
@@ -192,10 +195,14 @@ export class JobStatus extends React.Component<Props, State> {
   private get _classForStatus() {
     switch (this.props.job.properties.status) {
       case STATUS_SUCCESS: return styles.succeeded
+      case STATUS_PENDING: return styles.pending
       case STATUS_RUNNING: return styles.running
       case STATUS_TIMED_OUT: return styles.timedOut
       case STATUS_ERROR: return styles.failed
+      case STATUS_FAIL: return styles.failed
       case STATUS_CANCELLED: return styles.cancelled
+      case STATUS_ACTIVATING: return styles.activating
+      case STATUS_SUBMITTED: return styles.submitted
       default: return ''
     }
   }
