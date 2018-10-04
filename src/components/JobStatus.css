@@ -239,16 +239,6 @@
   max-height: 400px;
 }
 
-.removeToggle button,
-.removeWarning button {
-  display: none;
-}
-
-.isExpanded .removeToggle button,
-.isRemoving .removeWarning button {
-  display: inline-block;
-}
-
 .removeToggle {
   margin-bottom: var(--padding-size);
 }
