@@ -21,3 +21,8 @@
   right: 0;
   bottom: 0;
 }
+
+.hidden {
+  opacity: 0;
+  pointer-events: none;
+}

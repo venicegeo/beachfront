@@ -21,6 +21,7 @@ import {JobStatus} from './JobStatus'
 import * as moment from 'moment'
 
 interface Props {
+  className?: string
   activeIds: string[]
   error: any
   jobs: beachfront.Job[]
@@ -46,7 +47,7 @@ export class JobStatusList extends React.Component<Props, void> {
 
   render() {
     return (
-      <div className={`${styles.root} ${!this.props.jobs.length ? styles.isEmpty : ''}`}>
+      <div className={`${styles.root} ${!this.props.jobs.length ? styles.isEmpty : ''} ${this.props.className}`}>
         <header>
           <h1>Jobs</h1>
         </header>

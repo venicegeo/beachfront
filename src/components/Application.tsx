@@ -216,6 +216,7 @@ export class Application extends React.Component<Props, State> {
       '/product-lines',
       '/create-product-line',
     ]
+    const showJobsStatusList = (this.state.route.pathname === '/jobs')
     const shrunk = allowedEndpoints.indexOf(this.state.route.pathname) > -1
     return (
       <div className={styles.root}>
@@ -249,6 +250,17 @@ export class Application extends React.Component<Props, State> {
           onSelectFeature={this.handleSelectFeature}
           onViewChange={mapView => this.setState({ mapView })}
           onSignOutClick={this.handleSignOutClick}
+        />
+        <JobStatusList
+          className={(showJobsStatusList) ? '' : styles.hidden}
+          activeIds={this.state.detections.map(d => d.id)}
+          error={this.state.jobs.error}
+          jobs={this.state.jobs.records}
+          onDismissError={this.handleDismissJobError}
+          onForgetJob={this.handleForgetJob}
+          onNavigateToJob={this.handleNavigateToJob}
+          onSelectJob={this.handleSelectFeature}
+          selectedFeature={this.state.selectedFeature}
         />
         {this.renderRoute()}
         {this.state.isSessionExpired && (
@@ -331,18 +343,11 @@ export class Application extends React.Component<Props, State> {
           />
         )
       case '/jobs':
-        return (
-          <JobStatusList
-            activeIds={this.state.detections.map(d => d.id)}
-            error={this.state.jobs.error}
-            jobs={this.state.jobs.records}
-            onDismissError={this.handleDismissJobError}
-            onForgetJob={this.handleForgetJob}
-            onNavigateToJob={this.handleNavigateToJob}
-            onSelectJob={this.handleSelectFeature}
-            selectedFeature={this.state.selectedFeature}
-          />
-        )
+        /*
+          JobsStatusList can take a long time to recreate with lots of jobs, so never destroy it. Instead, just modify
+          its visibility/events styling based on the current route.
+        */
+        return null
       case '/product-lines':
         return (
           <ProductLineList
