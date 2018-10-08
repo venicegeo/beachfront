@@ -93,6 +93,7 @@ interface State {
   map?: ol.Map
   mapMode?: string
   detections?: (beachfront.Job | beachfront.ProductLine)[]
+  activeIds?: {[id: string]: boolean}
   frames?: (beachfront.Job | beachfront.ProductLine)[]
   bbox?: [number, number, number, number]
   mapView?: MapView
@@ -251,17 +252,18 @@ export class Application extends React.Component<Props, State> {
           onViewChange={mapView => this.setState({ mapView })}
           onSignOutClick={this.handleSignOutClick}
         />
-        <JobStatusList
-          className={(showJobsStatusList) ? '' : styles.hidden}
-          activeIds={this.state.detections.map(d => d.id)}
-          error={this.state.jobs.error}
-          jobs={this.state.jobs.records}
-          onDismissError={this.handleDismissJobError}
-          onForgetJob={this.handleForgetJob}
-          onNavigateToJob={this.handleNavigateToJob}
-          onSelectJob={this.handleSelectFeature}
-          selectedFeature={this.state.selectedFeature}
-        />
+        <div className={(showJobsStatusList) ? '' : styles.hidden}>
+          <JobStatusList
+            activeIds={this.state.activeIds}
+            error={this.state.jobs.error}
+            jobs={this.state.jobs.records}
+            onDismissError={this.handleDismissJobError}
+            onForgetJob={this.handleForgetJob}
+            onNavigateToJob={this.handleNavigateToJob}
+            onSelectJob={this.handleSelectFeature}
+            selectedFeature={this.state.selectedFeature}
+          />
+        </div>
         {this.renderRoute()}
         {this.state.isSessionExpired && (
           <SessionExpired
@@ -395,7 +397,7 @@ export class Application extends React.Component<Props, State> {
   }
 
   private updateDetections() {
-    let detections: beachfront.Job[] | beachfront.ProductLine[]
+    let detections: (beachfront.Job | beachfront.ProductLine)[]
     switch (this.state.route.pathname) {
       case '/create-product-line':
       case '/product-lines':
@@ -419,7 +421,13 @@ export class Application extends React.Component<Props, State> {
     }
 
     if (detectionsChanged) {
-      this.setState({ detections })
+      const activeIds = {}
+      detections.forEach(d => activeIds[d.id] = true)
+
+      this.setState({
+        detections,
+        activeIds,
+      })
     }
   }
 
@@ -851,6 +859,7 @@ function generateInitialState(): State {
     // Map state
     mapMode: MODE_NORMAL,
     detections: [],
+    activeIds: {},
     frames: [],
     bbox: null,
     mapView: null,

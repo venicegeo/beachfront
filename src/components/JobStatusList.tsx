@@ -21,8 +21,7 @@ import {JobStatus} from './JobStatus'
 import * as moment from 'moment'
 
 interface Props {
-  className?: string
-  activeIds: string[]
+  activeIds: {[id: string]: boolean}
   error: any
   jobs: beachfront.Job[]
   selectedFeature: beachfront.Job | beachfront.Scene
@@ -39,6 +38,18 @@ export class JobStatusList extends React.Component<Props, void> {
     this.handleToggleExpansion = this.handleToggleExpansion.bind(this)
   }
 
+  shouldComponentUpdate(nextProps: Props) {
+    let shouldUpdate = false
+
+    Object.keys(this.props).forEach((key) => {
+      if (nextProps[key] !== this.props[key]) {
+        shouldUpdate = true
+      }
+    })
+
+    return shouldUpdate
+  }
+
   componentDidUpdate(prevProps) {
     if (this.props.selectedFeature !== prevProps.selectedFeature) {
       this.scrollToSelectedJob()
@@ -47,7 +58,7 @@ export class JobStatusList extends React.Component<Props, void> {
 
   render() {
     return (
-      <div className={`${styles.root} ${!this.props.jobs.length ? styles.isEmpty : ''} ${this.props.className}`}>
+      <div className={`${styles.root} ${!this.props.jobs.length ? styles.isEmpty : ''}`}>
         <header>
           <h1>Jobs</h1>
         </header>
@@ -68,7 +79,7 @@ export class JobStatusList extends React.Component<Props, void> {
           }).map(job => (
             <JobStatus
               key={job.id}
-              isActive={this.props.activeIds.includes(job.id)}
+              isActive={job.id in this.props.activeIds}
               job={job}
               onNavigate={this.props.onNavigateToJob}
               onForgetJob={this.props.onForgetJob}
