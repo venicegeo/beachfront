@@ -28,6 +28,7 @@ interface Props {
 export class Modal extends React.Component<Props, void> {
   constructor() {
     super()
+    this.handleClick = this.handleClick.bind(this)
     this.handleKeyPress = this.handleKeyPress.bind(this)
   }
 
@@ -35,12 +36,12 @@ export class Modal extends React.Component<Props, void> {
     if (typeof this.props.onInitialize === 'function') {
       this.props.onInitialize()
     }
-    document.addEventListener('click', this.props.onDismiss)
+    document.addEventListener('click', this.handleClick)
     document.addEventListener('keyup', this.handleKeyPress)
   }
 
   componentWillUnmount() {
-    document.removeEventListener('click', this.props.onDismiss)
+    document.removeEventListener('click', this.handleClick)
     document.removeEventListener('keyup', this.handleKeyPress)
   }
 
@@ -50,6 +51,10 @@ export class Modal extends React.Component<Props, void> {
         {this.props.children}
       </div>
     )
+  }
+
+  private handleClick() {
+    this.props.onDismiss()
   }
 
   private handleKeyPress(event) {
