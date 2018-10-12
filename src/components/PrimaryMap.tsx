@@ -1180,9 +1180,18 @@ function generateDetectionsSource(wmsUrl, feature: beachfront.Job|beachfront.Pro
     projection: WEB_MERCATOR,
     params: {
       [KEY_LAYERS]: IDENTIFIER_DETECTIONS,
-      [KEY_ENV]: (feature.properties.type === TYPE_JOB ? 'jobid:' : 'productlineid:') + feature.id,  // HACK
+      [KEY_ENV]: (feature.properties.type === TYPE_JOB ? 'jobid:' : 'productlineid:') + getIdForFeature(feature),  // HACK
     },
   })
+}
+
+function getIdForFeature(feature: beachfront.Job|beachfront.ProductLine) {
+  // If this is a Job that contains a Seed Job reference, use that Seed Job ID to get the detections
+  const job = (feature as beachfront.Job)
+  if ((job) && (job.properties.seed_job_id)) {
+    return job.properties.seed_job_id
+  }
+  return feature.id
 }
 
 function generateDrawLayer() {

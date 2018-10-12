@@ -33,6 +33,7 @@ declare namespace beachfront {
 
     interface JobProperties {
       job_id: string
+      seed_job_id: string
       name: string
       status: string
       created_by: string
