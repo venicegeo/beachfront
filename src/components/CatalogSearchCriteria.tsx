@@ -19,9 +19,11 @@ const DATE_FORMAT = 'YYYY-MM-DD'
 const date_format = DATE_FORMAT.toLowerCase()
 
 import * as React from 'react'
+import {connect} from 'react-redux'
 import {StaticMinimap} from './StaticMinimap'
 import * as moment from 'moment'
 import {SCENE_TILE_PROVIDERS} from '../config'
+import {catalogActions} from '../actions/catalogActions'
 
 interface Props {
   apiKey: string
@@ -33,116 +35,150 @@ interface Props {
   enabledPlatforms: string[]
   errorElement?: React.ReactElement<any>
   source: string
-  onApiKeyChange(apiKey: string)
+  setCatalogApiKey?: (catalogApiKey: string) => void
   onClearBbox()
   onCloudCoverChange(cloudCover: number)
   onDateChange?(dateFrom: string, dateTo: string)
   onSourceChange(source: string)
 }
 
-export const CatalogSearchCriteria = (props: Props) => (
-  <div className={styles.root}>
-    <div className={styles.minimap}>
-      <StaticMinimap bbox={props.bbox}/>
-      <div className={styles.clearBbox} onClick={props.onClearBbox}>
-        <i className="fa fa-times-circle"/> Clear
-      </div>
-    </div>
+export class CatalogSearchCriteria extends React.Component<Props, null> {
+  constructor(props) {
+    super(props)
 
-    {props.errorElement}
+    this.handleSourceChange = this.handleSourceChange.bind(this)
+    this.handleApiKeyChange = this.handleApiKeyChange.bind(this)
+    this.handleDateOfCaptureFromChange = this.handleDateOfCaptureFromChange.bind(this)
+    this.handleDateOfCaptureToChange = this.handleDateOfCaptureToChange.bind(this)
+    this.handleCloudCoverChange = this.handleCloudCoverChange.bind(this)
+  }
 
-    <h3>Catalog</h3>
-    <label className={styles.source}>
-      <span>Source</span>
-      <select
-        value={props.source}
-        onChange={event => props.onSourceChange((event.target as HTMLSelectElement).value)}
-      >
-        {SCENE_TILE_PROVIDERS
-          .filter(p => props.enabledPlatforms.some(platform => p.prefix === platform))
-          .map(p => (
-          <option key={p.prefix} value={p.prefix}>{p.name} ({p.provider})</option>
-        ))}
-      </select>
-    </label>
-    {(SCENE_TILE_PROVIDERS.find(p => p.prefix === props.source) || { hideApiKeyInput: false }).hideApiKeyInput ? '' :
-    <label className={styles.apiKey}>
-      <span>API Key</span>
-      <input
-        className={styles.apiKeyInput}
-        value={props.apiKey}
-        disabled={props.disabled}
-        autoCorrect="off"
-        autoCapitalize="off"
-        spellCheck={false}
-        onChange={event => props.onApiKeyChange((event.target as HTMLInputElement).value)}
-      />
-    </label>}
+  render() {
+    return (
+      <div className={styles.root}>
+        <div className={styles.minimap}>
+          <StaticMinimap bbox={this.props.bbox}/>
+          <div className={styles.clearBbox} onClick={this.props.onClearBbox}>
+            <i className="fa fa-times-circle"/> Clear
+          </div>
+        </div>
 
-    {(typeof props.dateFrom !== 'undefined' && typeof props.dateTo !== 'undefined') && (
-      <div>
-        <h3>Date of Capture</h3>
-        <label className={styles.captureDateFrom}>
-          <span>From</span>
-          <input
-            value={props.dateFrom}
-            type="text"
-            pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}"
-            placeholder={date_format}
-            title={date_format}
-            disabled={props.disabled}
-            onChange={event => props.onDateChange(
-              (event.target as HTMLInputElement).value,
-              props.dateTo
-            )}
-          />
+        {this.props.errorElement}
+
+        <h3>Catalog</h3>
+        <label className={styles.source}>
+          <span>Source</span>
+          <select
+            value={this.props.source}
+            onChange={this.handleSourceChange}
+          >
+            {SCENE_TILE_PROVIDERS
+              .filter(p => this.props.enabledPlatforms.some(platform => p.prefix === platform))
+              .map(p => (
+                <option key={p.prefix} value={p.prefix}>{p.name} ({p.provider})</option>
+              ))}
+          </select>
         </label>
-        {isValidDate(props.dateFrom) || <div className={styles.invalidDates}>
-          Invalid date ({date_format})
-        </div>}
-        <label className={styles.captureDateTo}>
-          <span>To</span>
-          <input
-            value={props.dateTo}
-            type="text"
-            pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}"
-            placeholder={date_format}
-            title={date_format}
-            disabled={props.disabled}
-            onChange={event => props.onDateChange(
-              props.dateFrom,
-              (event.target as HTMLInputElement).value
-            )}
-          />
-        </label>
-        {isValidDate(props.dateTo) || <div className={styles.invalidDates}>
-          Invalid date ({date_format})
-        </div>}
-        {isValidDateRange(props.dateFrom, props.dateTo) || <div className={styles.invalidDates}>
-          From date must be before To date.
-        </div>}
-      </div>
-    )}
+        {(SCENE_TILE_PROVIDERS.find(p => p.prefix === this.props.source) || { hideApiKeyInput: false }).hideApiKeyInput ? '' :
+          <label className={styles.apiKey}>
+            <span>API Key</span>
+            <input
+              className={styles.apiKeyInput}
+              value={this.props.apiKey}
+              disabled={this.props.disabled}
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck={false}
+              onChange={this.handleApiKeyChange}
+            />
+          </label>}
 
-    <h3>Filters</h3>
-    <label className={styles.cloudCover}>
-      <span>Cloud Cover</span>
-      <input
-        value={props.cloudCover.toString()}
-        type="range"
-        min="0"
-        max="100"
-        onChange={event => props.onCloudCoverChange(
-          parseInt((event.target as HTMLInputElement).value, 10)
+        {(typeof this.props.dateFrom !== 'undefined' && typeof this.props.dateTo !== 'undefined') && (
+          <div>
+            <h3>Date of Capture</h3>
+            <label className={styles.captureDateFrom}>
+              <span>From</span>
+              <input
+                value={this.props.dateFrom}
+                type="text"
+                pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}"
+                placeholder={date_format}
+                title={date_format}
+                disabled={this.props.disabled}
+                onChange={this.handleDateOfCaptureFromChange}
+              />
+            </label>
+            {isValidDate(this.props.dateFrom) || <div className={styles.invalidDates}>
+              Invalid date ({date_format})
+            </div>}
+            <label className={styles.captureDateTo}>
+              <span>To</span>
+              <input
+                value={this.props.dateTo}
+                type="text"
+                pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}"
+                placeholder={date_format}
+                title={date_format}
+                disabled={this.props.disabled}
+                onChange={this.handleDateOfCaptureToChange}
+              />
+            </label>
+            {isValidDate(this.props.dateTo) || <div className={styles.invalidDates}>
+              Invalid date ({date_format})
+            </div>}
+            {isValidDateRange(this.props.dateFrom, this.props.dateTo) || <div className={styles.invalidDates}>
+              From date must be before To date.
+            </div>}
+          </div>
         )}
-      />
-      <span className={styles.value}>
+
+        <h3>Filters</h3>
+        <label className={styles.cloudCover}>
+          <span>Cloud Cover</span>
+          <input
+            value={this.props.cloudCover.toString()}
+            type="range"
+            min="0"
+            max="100"
+            onChange={this.handleCloudCoverChange}
+          />
+          <span className={styles.value}>
         <span className={styles.leSign}>&le;&thinsp;</span>
-        {props.cloudCover}%
+            {this.props.cloudCover}%
       </span>
-    </label>
-  </div>
-)
+        </label>
+      </div>
+    )
+  }
+
+  private handleSourceChange(e) {
+    this.props.onSourceChange((e.target as HTMLSelectElement).value)
+  }
+
+  private handleApiKeyChange(e) {
+    this.props.setCatalogApiKey((e.target as HTMLInputElement).value)
+  }
+
+  private handleDateOfCaptureFromChange(e) {
+    this.props.onDateChange(
+      (e.target as HTMLInputElement).value,
+      this.props.dateTo,
+    )
+  }
+
+  private handleDateOfCaptureToChange(e) {
+    this.props.onDateChange(
+      this.props.dateFrom,
+      (e.target as HTMLInputElement).value,
+    )
+  }
+
+  private handleCloudCoverChange(e) {
+    this.props.onCloudCoverChange(
+      parseInt((e.target as HTMLInputElement).value, 10)
+    )
+  }
+}
 
 function isValidDate(date) {
   return moment.utc(date, DATE_FORMAT, true).isValid()
@@ -154,3 +190,14 @@ function isValidDateRange(from, to) {
 
   return !fromMoment.isValid() || !toMoment.isValid() || fromMoment.isSameOrBefore(toMoment)
 }
+
+function mapDispatchToProps(dispatch) {
+  return {
+    setCatalogApiKey: (catalogApiKey: string) => dispatch(catalogActions.setApiKey(catalogApiKey)),
+  }
+}
+
+export default connect(
+  null,
+  mapDispatchToProps,
+)(CatalogSearchCriteria)

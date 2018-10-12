@@ -17,22 +17,23 @@
 const styles = require('./CreateProductLine.css')
 
 import * as React from 'react'
+import {connect} from 'react-redux'
 import * as moment from 'moment'
 import {AlgorithmList} from './AlgorithmList'
-import {CatalogSearchCriteria} from './CatalogSearchCriteria'
+import CatalogSearchCriteria from './CatalogSearchCriteria'
 import {NewProductLineDetails} from './NewProductLineDetails'
 import {create} from '../api/productLines'
 import {
   SOURCE_DEFAULT,
 } from '../constants'
+import {CatalogState} from '../reducers/catalogReducer'
 
 interface Props {
+  catalog?: CatalogState
   algorithms:        beachfront.Algorithm[]
   bbox:              [number, number, number, number]
-  catalogApiKey:     string
   enabledPlatforms?: string[]
 
-  onCatalogApiKeyChange(apiKey: string)
   onClearBbox()
   onProductLineCreated(productLine: beachfront.ProductLine)
 }
@@ -82,12 +83,11 @@ export class CreateProductLine extends React.Component<Props, State> {
             <li>
               <h2>Source Imagery</h2>
               <CatalogSearchCriteria
-                apiKey={this.props.catalogApiKey}
+                apiKey={this.props.catalog.apiKey}
                 bbox={this.props.bbox}
                 cloudCover={this.state.cloudCover}
                 enabledPlatforms={this.props.enabledPlatforms}
                 source={this.state.source}
-                onApiKeyChange={this.props.onCatalogApiKeyChange}
                 onClearBbox={this.props.onClearBbox}
                 onCloudCoverChange={cloudCover => this.setState({ cloudCover })}
                 onSourceChange={this.handleSourceChange}
@@ -173,3 +173,14 @@ export class CreateProductLine extends React.Component<Props, State> {
 function generateName(source: string, algorithm: beachfront.Algorithm) {
   return algorithm ? `${source}_${algorithm.name}`.toUpperCase() : ''
 }
+
+function mapStateToProps(state) {
+  return {
+    catalog: state.catalog,
+  }
+}
+
+export default connect(
+  mapStateToProps,
+  null,
+)(CreateProductLine)

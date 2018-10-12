@@ -65,8 +65,11 @@
     "lodash": "4.17.4",
     "moment": "2.20.1",
     "ol": "4.1.1",
-    "react": "15.2.1",
-    "react-dom": "15.2.1",
-    "react-user-tour": "3.0.0"
+    "react": "16.5.0",
+    "react-dom": "16.5.0",
+    "react-redux": "5.0.7",
+    "react-user-tour": "3.0.0",
+    "redux": "3.6.0",
+    "redux-thunk": "2.1.0"
   }
 }

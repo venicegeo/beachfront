@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
+import {CatalogState} from '../reducers/catalogReducer'
 
 require('ol/ol.css')
 const styles: any = require('./PrimaryMap.css')
@@ -20,6 +21,7 @@ const tileErrorPlaceholder: string = require('../images/tile-error.png')
 
 import * as React from 'react'
 import {findDOMNode} from 'react-dom'
+import {connect} from 'react-redux'
 import * as debounce from 'lodash/debounce'
 import * as throttle from 'lodash/throttle'
 import * as ol from '../utils/ol'
@@ -66,6 +68,7 @@ import {
   WEB_MERCATOR,
   WGS84,
 } from '../constants'
+import {RouteState} from '../reducers/routeReducer'
 
 const DEFAULT_CENTER: [number, number] = [-10, 0]
 const MIN_ZOOM = 2.5
@@ -92,9 +95,9 @@ export const MODE_PRODUCT_LINES = 'MODE_PRODUCT_LINES'
 export const MODE_SELECT_IMAGERY = 'MODE_SELECT_IMAGERY'
 
 interface Props {
-  activeRoute: { pathname: string, search: string, hash: string }
+  route?: RouteState
+  catalog?: CatalogState
   bbox: number[]
-  catalogApiKey:      string
   detections:         (beachfront.Job | beachfront.ProductLine)[]
   frames:             (beachfront.Job | beachfront.ProductLine)[]
   highlightedFeature: beachfront.Job
@@ -210,7 +213,7 @@ export class PrimaryMap extends React.Component<Props, State> {
   }
 
   componentDidUpdate(previousProps: Props, previousState: State) {
-    const routeChanged = previousProps.activeRoute.pathname !== this.props.activeRoute.pathname
+    const routeChanged = previousProps.route.pathname !== this.props.route.pathname
 
     if (!this.props.selectedFeature) {
       this.clearSelection()
@@ -914,7 +917,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     source.setAttributions(undefined)
     source.clear()
 
-    if (this.props.activeRoute.pathname !== '/create-job') {
+    if (this.props.route.pathname !== '/create-job') {
       return
     }
 
@@ -975,7 +978,7 @@ export class PrimaryMap extends React.Component<Props, State> {
   private renderImagerySearchBbox() {
     this.clearDraw()
     let bbox = deserializeBbox(this.props.bbox)
-    if (!bbox || this.props.activeRoute.pathname !== '/create-job') {
+    if (!bbox || this.props.route.pathname !== '/create-job') {
       return
     }
 
@@ -1011,17 +1014,16 @@ export class PrimaryMap extends React.Component<Props, State> {
         return
       }
 
-      const {catalogApiKey} = this.props
       let layer: ol.Tile
 
       if (provider.isXYZProvider) {
         layer = new ol.Tile({
-          source: generateXYZScenePreviewSource(provider, externalId, catalogApiKey),
+          source: generateXYZScenePreviewSource(provider, externalId, this.props.catalog.apiKey),
           extent: f.extentWrapped,
         })
       } else {
         layer = new ol.Image({
-          source: generateImageStaticScenePreviewSource(provider, externalId, f.extentWrapped, catalogApiKey),
+          source: generateImageStaticScenePreviewSource(provider, externalId, f.extentWrapped, this.props.catalog.apiKey),
         })
       }
 
@@ -1451,3 +1453,15 @@ function getCookie(name) {
   }
   return null
 }
+
+function mapStateToProps(state) {
+  return {
+    route: state.route,
+    catalog: state.catalog,
+  }
+}
+
+export default connect(
+  mapStateToProps,
+  null,
+)(PrimaryMap)

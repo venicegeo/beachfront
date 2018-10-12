@@ -18,6 +18,7 @@ const styles: any = require('./CreateJob.css')
 const DATE_FORMAT = 'YYYY-MM-DD'
 
 import * as React from 'react'
+import {connect} from 'react-redux'
 import * as moment from 'moment'
 import {AlgorithmList} from './AlgorithmList'
 import {ImagerySearch} from './ImagerySearch'
@@ -27,6 +28,7 @@ import {PrimaryMap} from './PrimaryMap'
 import {createJob} from '../api/jobs'
 import {normalizeSceneId} from './SceneFeatureDetails'
 import {SOURCE_DEFAULT} from '../constants'
+import {CatalogState} from '../reducers/catalogReducer'
 
 export interface SearchCriteria {
   cloudCover: number
@@ -36,10 +38,10 @@ export interface SearchCriteria {
 }
 
 interface Props {
+  catalog?: CatalogState
   algorithms: beachfront.Algorithm[]
   enabledPlatforms: string[]
   bbox: number[]
-  catalogApiKey: string
   collections: any
   imagery: beachfront.ImageryCatalogPage
   isSearching: boolean
@@ -47,7 +49,6 @@ interface Props {
   searchError: any
   searchCriteria: SearchCriteria
   selectedScene: beachfront.Scene
-  onCatalogApiKeyChange(apiKey: string)
   onClearBbox()
   onJobCreated(job: beachfront.Job)
   onSearchCriteriaChange(criteria: SearchCriteria)
@@ -113,14 +114,13 @@ export class CreateJob extends React.Component<Props, State> {
               <ImagerySearch
                 enabledPlatforms={this.props.enabledPlatforms}
                 bbox={this.props.bbox}
-                catalogApiKey={this.props.catalogApiKey}
+                catalogApiKey={this.props.catalog.apiKey}
                 cloudCover={this.props.searchCriteria.cloudCover}
                 dateFrom={this.props.searchCriteria.dateFrom}
                 dateTo={this.props.searchCriteria.dateTo}
                 error={this.props.searchError}
                 isSearching={this.props.isSearching}
                 source={this.props.searchCriteria.source}
-                onApiKeyChange={this.props.onCatalogApiKeyChange}
                 onClearBbox={this.props.onClearBbox}
                 onCloudCoverChange={this.handleSearchCloudCoverChange}
                 onDateChange={this.handleSearchDateChange}
@@ -184,7 +184,7 @@ export class CreateJob extends React.Component<Props, State> {
       computeMask: this.state.computeMask,
       name: this.state.name,
       sceneId: this.props.selectedScene.id,
-      catalogApiKey: this.props.catalogApiKey,
+      catalogApiKey: this.props.catalog.apiKey,
     }).then(job => {
       this.setState({ isCreating: false })
       this.props.onJobCreated(job) // Release the job.
@@ -218,3 +218,14 @@ export class CreateJob extends React.Component<Props, State> {
     this.setState({ name })
   }
 }
+
+function mapStateToProps(state) {
+  return {
+    catalog: state.catalog,
+  }
+}
+
+export default connect(
+  mapStateToProps,
+  null,
+)(CreateJob)

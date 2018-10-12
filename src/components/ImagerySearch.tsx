@@ -20,7 +20,7 @@ const DATE_FORMAT = 'YYYY-MM-DD'
 import * as React from 'react'
 import * as moment from 'moment'
 import {AxiosError} from 'axios'
-import {CatalogSearchCriteria} from './CatalogSearchCriteria'
+import CatalogSearchCriteria from './CatalogSearchCriteria'
 import {LoadingAnimation} from './LoadingAnimation'
 import {SearchCriteria, createSearchCriteria} from './CreateJob'
 import { SCENE_TILE_PROVIDERS } from '../config'
@@ -35,7 +35,6 @@ interface Props {
   error?: any
   isSearching: boolean
   source: string
-  onApiKeyChange(value: string)
   onClearBbox()
   onCloudCoverChange(value: number)
   onDateChange(fromValue: string, toValue: string)
@@ -68,7 +67,6 @@ export class ImagerySearch extends React.Component<Props, {}> {
             disabled={this.props.isSearching}
             enabledPlatforms={this.props.enabledPlatforms}
             source={this.props.source}
-            onApiKeyChange={this.props.onApiKeyChange}
             onClearBbox={this.props.onClearBbox}
             onCloudCoverChange={this.props.onCloudCoverChange}
             onDateChange={this.props.onDateChange}

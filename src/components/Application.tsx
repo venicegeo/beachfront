@@ -13,23 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
+import {catalogActions} from '../actions/catalogActions'
 
 const styles: any = require('./Application.css')
 
 import * as React from 'react'
 import {render} from 'react-dom'
+import {connect} from 'react-redux'
 import * as debounce from 'lodash/debounce'
 import * as moment from 'moment'
-import {About} from './About'
+import About from './About'
 import {BrowserSupport} from './BrowserSupport'
 import {ClassificationBanner} from './ClassificationBanner'
-import {CreateJob, SearchCriteria, createSearchCriteria} from './CreateJob'
-import {CreateProductLine} from './CreateProductLine'
+import CreateJob, {SearchCriteria, createSearchCriteria} from './CreateJob'
+import CreateProductLine from './CreateProductLine'
 import {JobStatusList} from './JobStatusList'
 import {Login} from './Login'
-import {Navigation} from './Navigation'
-import {
-  PrimaryMap,
+import Navigation from './Navigation'
+import PrimaryMap, {
   MapView,
   MODE_DRAW_BBOX,
   MODE_NORMAL,
@@ -37,8 +38,8 @@ import {
   MODE_PRODUCT_LINES,
 } from './PrimaryMap'
 import {ProductLineList} from './ProductLineList'
-import {SessionExpired} from './SessionExpired'
-import {SessionLoggedOut} from './SessionLoggedOut'
+import SessionExpired from './SessionExpired'
+import SessionLoggedOut from './SessionLoggedOut'
 import * as algorithmsService from '../api/algorithms'
 import * as catalogService from '../api/catalog'
 import * as geoserverService from '../api/geoserver'
@@ -66,20 +67,23 @@ import {
   TYPE_JOB,
   TYPE_SCENE,
 } from '../constants'
+import {UserState} from '../reducers/userReducer'
+import {userActions} from '../actions/userActions'
+import {CatalogState} from '../reducers/catalogReducer'
+import {RouteState} from '../reducers/routeReducer'
+import {routeActions} from '../actions/routeActions'
 
 interface Props {
-  serialize(state: State)
-  deserialize(): State
+  user?: UserState
+  catalog?: CatalogState
+  route?: RouteState
+  login?(args): void
+  logout?(): void
+  navigateTo?(loc, pushHistory?: boolean): void
+  sessionExpired?(): void
 }
 
 interface State {
-  catalogApiKey?: string
-  errors?: any[]
-  isLoggedIn?: boolean
-  isSessionLoggedOut?: boolean
-  isSessionExpired?: boolean
-  route?: Route
-
   // Services
   geoserver?: geoserverService.Descriptor
 
@@ -107,14 +111,9 @@ interface State {
   searchResults?: beachfront.ImageryCatalogPage
 }
 
-export const createApplication = (element) => render(
-  <Application
-    deserialize={generateInitialState}
-    serialize={debounce(serialize, 500)}
-  />, element)
-
 export class Application extends React.Component<Props, State> {
   refs: any
+  readonly serialize: any
   private initializationPromise: Promise<any>
   private pollingInstance: number
   private idleInterval: any
@@ -122,10 +121,9 @@ export class Application extends React.Component<Props, State> {
 
   constructor(props) {
     super(props)
-    this.state = props.deserialize()
+    this.generateInitialState = this.generateInitialState.bind(this)
     this.handleMapInitialization = this.handleMapInitialization.bind(this)
     this.handleBoundingBoxChange = this.handleBoundingBoxChange.bind(this)
-    this.handleCatalogApiKeyChange = this.handleCatalogApiKeyChange.bind(this)
     this.handleClearBbox = this.handleClearBbox.bind(this)
     this.handleDismissJobError = this.handleDismissJobError.bind(this)
     this.handleDismissProductLineError = this.handleDismissProductLineError.bind(this)
@@ -143,36 +141,44 @@ export class Application extends React.Component<Props, State> {
     this.handleSelectFeature = this.handleSelectFeature.bind(this)
     this.handleSignOutClick = this.handleSignOutClick.bind(this)
     this.shouldSelectedFeatureAutoDeselect = this.shouldSelectedFeatureAutoDeselect.bind(this)
-    this.navigateTo = this.navigateTo.bind(this)
+    this.updateSelectedFeature = this.updateSelectedFeature.bind(this)
     this.panTo = this.panTo.bind(this)
     this.panToExtent = this.panToExtent.bind(this)
-    this.logout = this.logout.bind(this)
     this.startIdleTimer = this.startIdleTimer.bind(this)
     this.stopIdleTimer = this.stopIdleTimer.bind(this)
     this.startTour = this.startTour.bind(this)
     this.timerIncrement = this.timerIncrement.bind(this)
     this.resetTimer = this.resetTimer.bind(this)
+
+    this.state = this.generateInitialState()
+
+    this.serialize = debounce(serialize, 500)
   }
 
-  componentDidUpdate(_, prevState: State) {
-    if (!prevState.isLoggedIn && this.state.isLoggedIn) {
+  componentDidUpdate(prevProps: Props, prevState: State) {
+    if (!prevProps.user.isLoggedIn && this.props.user.isLoggedIn) {
       this.initializeServices()
       this.startBackgroundTasks()
       this.refreshRecords()
     }
 
-    if (!prevState.isSessionExpired && this.state.isSessionExpired || prevState.isLoggedIn && !this.state.isLoggedIn) {
+    if (!prevProps.user.isSessionExpired && this.props.user.isSessionExpired || prevProps.user.isLoggedIn && !this.props.user.isLoggedIn) {
       this.stopBackgroundTasks()
+      this.stopIdleTimer()
     }
 
-    if (prevState.route.pathname !== this.state.route.pathname ||
-        prevState.bbox !== this.state.bbox ||
-        prevState.searchResults !== this.state.searchResults) {
-      this.updateMapMode()
-    }
+    if (prevProps.route !== this.props.route) {
+      if (prevProps.route.pathname !== this.props.route.pathname ||
+          prevState.bbox !== this.state.bbox ||
+          prevState.searchResults !== this.state.searchResults) {
+        this.updateMapMode()
+      }
 
-    if (prevState.route.jobIds.join(',') !== this.state.route.jobIds.join(',')) {
-      this.importJobsIfNeeded()
+      if (prevProps.route.jobIds.join(',') !== this.props.route.jobIds.join(',')) {
+        this.importJobsIfNeeded()
+      }
+
+      this.updateSelectedFeature()
     }
 
     if (prevState.mapMode !== this.state.mapMode ||
@@ -182,17 +188,17 @@ export class Application extends React.Component<Props, State> {
       this.updateFrames()
     }
 
-    this.props.serialize(this.state)
+    this.serialize(this.state)
   }
 
   componentWillMount() {
     this.subscribeToHistoryEvents()
-    if (this.state.isLoggedIn && !this.state.isSessionExpired) {
+    if (this.props.user.isLoggedIn && !this.props.user.isSessionExpired) {
       this.initializeServices()
       this.startBackgroundTasks()
       this.refreshRecords().then(() => {
         // Load selected feature if it isn't already (e.g., page refresh w/ jobId).
-        let [jobId] = this.state.route.jobIds
+        let [jobId] = this.props.route.jobIds
 
         if (jobId && !this.state.selectedFeature) {
           this.setState({ selectedFeature: this.state.jobs.records.find(job => job.id === jobId) })
@@ -216,21 +222,17 @@ export class Application extends React.Component<Props, State> {
       '/product-lines',
       '/create-product-line',
     ]
-    const shrunk = allowedEndpoints.indexOf(this.state.route.pathname) > -1
+    const shrunk = allowedEndpoints.indexOf(this.props.route.pathname) > -1
     return (
       <div className={styles.root}>
         <ClassificationBanner anchor="top"/>
         <BrowserSupport/>
         <Navigation
-          activeRoute={this.state.route}
           shrunk={shrunk}
-          onClick={this.navigateTo}
           startTour={this.startTour}
         />
         <PrimaryMap
-          activeRoute={this.state.route}
           bbox={this.state.bbox}
-          catalogApiKey={this.state.catalogApiKey}
           detections={this.state.detections}
           frames={this.state.frames}
           highlightedFeature={this.state.hoveredFeature}
@@ -251,32 +253,11 @@ export class Application extends React.Component<Props, State> {
           onSignOutClick={this.handleSignOutClick}
         />
         {this.renderRoute()}
-        {this.state.isSessionExpired && (
-          <SessionExpired
-            onDismiss={() => {
-              sessionStorage.clear()
-              this.setState({
-                isLoggedIn: false,
-                isSessionExpired: false,
-              })
-            }}
-          />
+        {this.props.user.isSessionExpired && (
+          <SessionExpired />
         )}
-        {this.state.isSessionLoggedOut && (
-          <SessionLoggedOut
-            onDismiss={() => { /*  Do nothing */ }}
-            onInitialize={() => {
-              sessionStorage.clear()
-              this.setState({
-                isLoggedIn: false,
-                isSessionLoggedOut: false,
-              })
-              const client = sessionService.getClient()
-              client.get(`/oauth/logout`).then(response => {
-                window.location.href = response.data
-              })
-            }}
-          />
+        {this.props.user.isSessionLoggedOut && (
+          <SessionLoggedOut />
         )}
         <ClassificationBanner anchor="bottom"/>
       </div>
@@ -284,18 +265,16 @@ export class Application extends React.Component<Props, State> {
   }
 
   renderRoute() {
-    if (!this.state.isLoggedIn) {
+    if (!this.props.user.isLoggedIn) {
       return (
         <Login/>
       )
     }
 
-    switch (this.state.route.pathname) {
+    switch (this.props.route.pathname) {
       case '/about':
         return (
-          <About
-            onDismiss={() => this.navigateTo({ pathname: '/' })}
-          />
+          <About />
         )
       case '/create-job':
         return (
@@ -303,7 +282,6 @@ export class Application extends React.Component<Props, State> {
             algorithms={this.state.algorithms.records}
             enabledPlatforms={this.state.enabledPlatforms.records}
             bbox={this.state.bbox}
-            catalogApiKey={this.state.catalogApiKey}
             collections={this.state.collections}
             imagery={this.state.searchResults}
             isSearching={this.state.isSearching}
@@ -311,7 +289,6 @@ export class Application extends React.Component<Props, State> {
             searchCriteria={this.state.searchCriteria}
             searchError={this.state.searchError}
             selectedScene={this.state.selectedFeature && this.state.selectedFeature.properties.type === TYPE_SCENE ? this.state.selectedFeature as beachfront.Scene : null}
-            onCatalogApiKeyChange={this.handleCatalogApiKeyChange}
             onClearBbox={this.handleClearBbox}
             onJobCreated={this.handleJobCreated}
             onSearchCriteriaChange={this.handleSearchCriteriaChange}
@@ -323,9 +300,7 @@ export class Application extends React.Component<Props, State> {
           <CreateProductLine
             algorithms={this.state.algorithms.records}
             bbox={this.state.bbox}
-            catalogApiKey={this.state.catalogApiKey}
             enabledPlatforms={this.state.enabledPlatforms.records}
-            onCatalogApiKeyChange={this.handleCatalogApiKeyChange}
             onClearBbox={this.handleClearBbox}
             onProductLineCreated={this.handleProductLineCreated}
           />
@@ -372,7 +347,7 @@ export class Application extends React.Component<Props, State> {
 
   private updateMapMode() {
     let mapMode: string
-    switch (this.state.route.pathname) {
+    switch (this.props.route.pathname) {
       case '/create-job':
         mapMode = this.state.bbox && this.state.searchResults ? MODE_SELECT_IMAGERY : MODE_DRAW_BBOX
         break
@@ -391,13 +366,13 @@ export class Application extends React.Component<Props, State> {
 
   private updateDetections() {
     let detections: beachfront.Job[] | beachfront.ProductLine[]
-    switch (this.state.route.pathname) {
+    switch (this.props.route.pathname) {
       case '/create-product-line':
       case '/product-lines':
         detections = this.state.selectedFeature ? [this.state.selectedFeature as any] : this.state.productLines.records
         break
       default:
-        detections = this.state.jobs.records.filter(j => this.state.route.jobIds.includes(j.id))
+        detections = this.state.jobs.records.filter(j => this.props.route.jobIds.includes(j.id))
     }
 
     // Only update state if detections have changed so that we can avoid unnecessary redrawing.
@@ -420,7 +395,7 @@ export class Application extends React.Component<Props, State> {
 
   private updateFrames() {
     let frames: beachfront.Job[] | beachfront.ProductLine[]
-    switch (this.state.route.pathname) {
+    switch (this.props.route.pathname) {
       case '/create-product-line':
       case '/product-lines':
         frames = [this.state.selectedFeature as any, ...this.state.productLines.records].filter(Boolean)
@@ -448,7 +423,7 @@ export class Application extends React.Component<Props, State> {
   }
 
   private importJobsIfNeeded() {
-    this.state.route.jobIds.map(jobId => {
+    this.props.route.jobIds.map(jobId => {
       if (this.state.jobs.records.find(j => j.id === jobId)) {
         return
       }
@@ -491,7 +466,7 @@ export class Application extends React.Component<Props, State> {
   private fetchGeoserverConfig() {
     return geoserverService.lookup()
       .then(geoserver => this.setState({ geoserver }))
-      .catch(err => this.setState({ errors: [...this.state.errors, err] }))
+      // .catch(err => this.setState({ errors: [...this.props.errors, err] }))
   }
 
   private fetchJobs() {
@@ -510,7 +485,7 @@ export class Application extends React.Component<Props, State> {
 
   private initializeCatalog() {
     return catalogService.initialize()
-      .catch(err => this.setState({ errors: [...this.state.errors, err] }))
+      // .catch(err => this.setState({ errors: [...this.state.errors, err] }))
   }
 
   private handleMapInitialization(map: ol.Map, collections: any) {
@@ -525,10 +500,6 @@ export class Application extends React.Component<Props, State> {
       bbox,
       searchError: null,
     })
-  }
-
-  private handleCatalogApiKeyChange(catalogApiKey) {
-    this.setState({ catalogApiKey })
   }
 
   private handleClearBbox() {
@@ -563,10 +534,10 @@ export class Application extends React.Component<Props, State> {
     this.setState({
       jobs: this.state.jobs.$filter(j => j.id !== job.id),
     })
-    if (this.state.route.jobIds.includes(job.id)) {
-      this.navigateTo({
-        pathname: this.state.route.pathname,
-        search: this.state.route.search.replace(new RegExp('\\??jobId=' + job.id), ''),
+    if (this.props.route.jobIds.includes(job.id)) {
+      this.props.navigateTo({
+        pathname: this.props.route.pathname,
+        search: this.props.route.search.replace(new RegExp('\\??jobId=' + job.id), ''),
       })
     }
     jobsService.forgetJob(job.id)
@@ -581,14 +552,14 @@ export class Application extends React.Component<Props, State> {
     this.setState({
       jobs: this.state.jobs.$append(job),
     })
-    this.navigateTo({
+    this.props.navigateTo({
       pathname: '/jobs',
       search: '?jobId=' + job.id,
     })
   }
 
   private handleNavigateToJob(loc) {
-    this.navigateTo(loc)
+    this.props.navigateTo(loc)
     const feature = this.state.jobs.records.find(j => loc.search.includes(j.id))
     this.panToExtent(featureToExtentWrapped(this.state.map, feature))
   }
@@ -601,7 +572,7 @@ export class Application extends React.Component<Props, State> {
     this.setState({
       productLines: this.state.productLines.$append(productLine),
     })
-    this.navigateTo({ pathname: '/product-lines' })
+    this.props.navigateTo({ pathname: '/product-lines' })
   }
 
   private handleProductLineJobHoverIn(job) {
@@ -636,7 +607,7 @@ export class Application extends React.Component<Props, State> {
       count,
       startIndex,
       bbox: this.state.bbox,
-      catalogApiKey: this.state.catalogApiKey,
+      catalogApiKey: this.props.catalog.apiKey,
       ...this.state.searchCriteria,
     }).then(searchResults => {
       this.setState({
@@ -656,8 +627,8 @@ export class Application extends React.Component<Props, State> {
       return  // Nothing to do
     }
 
-    this.navigateTo({
-      pathname: this.state.route.pathname,
+    this.props.navigateTo({
+      pathname: this.props.route.pathname,
       search: feature && feature.properties.type === TYPE_JOB ? `?jobId=${feature.id}` : '',
       selectedFeature: feature,
     })
@@ -665,7 +636,7 @@ export class Application extends React.Component<Props, State> {
 
   private handleSignOutClick() {
     if (confirm('Are you sure you want to sign out of Beachfront?')) {
-      this.logout()
+      this.props.logout()
     }
   }
 
@@ -684,28 +655,22 @@ export class Application extends React.Component<Props, State> {
     return true
   }
 
-  private navigateTo(loc) {
-    const route = generateRoute(loc)
-    history.pushState(null, null, route.href)
+  private updateSelectedFeature() {
     let selectedFeature = this.state.selectedFeature
 
     // Update selected feature if needed.
-    if (route.jobIds.length) {
-      selectedFeature = this.state.jobs.records.find(j => route.jobIds.includes(j.id))
-    } else if ('selectedFeature' in loc) {
-      selectedFeature = loc.selectedFeature
-    } else if (this.state.route.pathname !== route.pathname) {
+    if (this.props.route.jobIds.length) {
+      selectedFeature = this.state.jobs.records.find(j => this.props.route.jobIds.includes(j.id))
+    } else if (this.props.route.selectedFeature) {
+      selectedFeature = this.props.route.selectedFeature
+    } else if (this.props.route.pathname !== this.props.route.pathname) {
       const shouldDeselect = this.shouldSelectedFeatureAutoDeselect({ ignoreTypes: [TYPE_JOB] })
       if (shouldDeselect) {
         selectedFeature = null
       }
     }
 
-    this.setState({
-      route,
-      selectedFeature,
-      searchError: this.state.route.pathname === route.pathname ? this.state.searchError : null,
-    })
+    this.setState({ selectedFeature })
   }
 
   private panTo(point, zoom = 10) {
@@ -752,11 +717,11 @@ export class Application extends React.Component<Props, State> {
   }
 
   private timerIncrement() {
-    if (this.state.isLoggedIn && !this.state.isSessionExpired) {
+    if (this.props.user.isLoggedIn && !this.props.user.isSessionExpired) {
       const lastActivity = moment(localStorage.getItem(SESSION_IDLE_STORE))
       const timeSinceLast = moment().utc().diff(lastActivity, SESSION_IDLE_UNITS)
       if (timeSinceLast >= SESSION_IDLE_TIMEOUT) {
-        this.logout()
+        this.props.logout()
       }
     }
   }
@@ -779,7 +744,7 @@ export class Application extends React.Component<Props, State> {
 
   private resetTimer() {
     // Only bother with resetting the timer if we're logged in
-    if (this.state.isLoggedIn && !this.state.isSessionExpired) {
+    if (this.props.user.isLoggedIn && !this.props.user.isSessionExpired) {
       const timeSinceLastActivity = moment().utc().diff(moment(localStorage.getItem(SESSION_IDLE_STORE)), SESSION_IDLE_UNITS)
       // Only reset the timer if we're more than a minute out of date
       if (timeSinceLastActivity > 0) {
@@ -788,16 +753,8 @@ export class Application extends React.Component<Props, State> {
     }
   }
 
-  private logout() {
-    this.setState({
-      isSessionLoggedOut: true,
-    })
-    this.stopIdleTimer()
-    return null
-  }
-
   private startBackgroundTasks() {
-    sessionService.onExpired(() => this.setState({ isSessionExpired: true }))
+    sessionService.onExpired(this.props.sessionExpired)
 
     console.log('(application:startBackgroundTasks) starting job/productline polling at %s second intervals', Math.ceil(RECORD_POLLING_INTERVAL / 1000))
     this.pollingInstance = setInterval(this.refreshRecords.bind(this), RECORD_POLLING_INTERVAL)
@@ -811,14 +768,49 @@ export class Application extends React.Component<Props, State> {
 
   private subscribeToHistoryEvents() {
     window.addEventListener('popstate', () => {
-      if (this.state.route.href !== location.pathname + location.search + location.hash) {
-        const route = generateRoute(location)
-        const nextJobIds = route.jobIds.join(',')
-        const prevJobIds = this.state.route.jobIds.join(',')
-        const selectedFeature = prevJobIds !== nextJobIds ? this.state.jobs.records.find(j => route.jobIds.includes(j.id)) : this.state.selectedFeature
-        this.setState({ route, selectedFeature })
+      if (this.props.route.href !== location.pathname + location.search + location.hash) {
+        this.props.navigateTo(location, false)
       }
     })
+  }
+
+  private generateInitialState(): State {
+    const state: State = {
+      // Services
+      geoserver: {},
+
+      // Data Collections
+      algorithms: createCollection(),
+      jobs: createCollection(),
+      productLines: createCollection(),
+
+      // Map state
+      mapMode: MODE_NORMAL,
+      detections: [],
+      frames: [],
+      bbox: null,
+      mapView: null,
+      selectedFeature: null,
+
+      // Search state
+      isSearching: false,
+      searchCriteria: createSearchCriteria(),
+      searchError: null,
+      searchResults: null,
+    }
+
+    const deserializedState = deserialize()
+    for (const key in deserializedState) {
+      state[key] = deserializedState[key] || state[key]
+    }
+
+    const [jobId] = this.props.route.jobIds
+    if (jobId) {
+      // This code should never find a selected feature since no jobs have been loaded.
+      state.selectedFeature = state.jobs.records.find(j => j.id === jobId) || null
+    }
+
+    return state
   }
 }
 
@@ -826,63 +818,15 @@ export class Application extends React.Component<Props, State> {
 // Helpers
 //
 
-function generateInitialState(): State {
-  const state: State = {
-    catalogApiKey: '',
-    errors: [],
-    route: generateRoute(location),
-    isLoggedIn: sessionService.initialize(),
-    isSessionExpired: false,
-    isSessionLoggedOut: false,
-
-    // Services
-    geoserver: {},
-
-    // Data Collections
-    algorithms: createCollection(),
-    jobs: createCollection(),
-    productLines: createCollection(),
-
-    // Map state
-    mapMode: MODE_NORMAL,
-    detections: [],
-    frames: [],
-    bbox: null,
-    mapView: null,
-    selectedFeature: null,
-
-    // Search state
-    isSearching: false,
-    searchCriteria: createSearchCriteria(),
-    searchError: null,
-    searchResults: null,
-  }
-
-  const deserializedState = deserialize()
-  for (const key in deserializedState) {
-    state[key] = deserializedState[key] || state[key]
-  }
-
-  const [jobId] = state.route.jobIds
-  if (jobId) {
-    // This code should never find a selected feature since no jobs have been loaded.
-    state.selectedFeature = state.jobs.records.find(j => j.id === jobId) || null
-  }
-
-  return state
-}
-
 function deserialize(): State {
   return {
     enabledPlatforms: createCollection(JSON.parse(sessionStorage.getItem('enabled_platforms_records')) || []),
     algorithms: createCollection(JSON.parse(sessionStorage.getItem('algorithms_records')) || []),
     bbox:             JSON.parse(sessionStorage.getItem('bbox')),
     geoserver:        JSON.parse(sessionStorage.getItem('geoserver')),
-    isSessionExpired: JSON.parse(sessionStorage.getItem('isSessionExpired')),
     mapView:          JSON.parse(sessionStorage.getItem('mapView')),
     searchCriteria:   JSON.parse(sessionStorage.getItem('searchCriteria')),
     searchResults:    JSON.parse(sessionStorage.getItem('searchResults')),
-    catalogApiKey:    localStorage.getItem('catalog_apiKey') || '',  // HACK
   }
 }
 
@@ -911,31 +855,12 @@ function serialize(state: State) {
   sessionStorage.setItem('algorithms_records', JSON.stringify(state.algorithms.records))
   sessionStorage.setItem('bbox', JSON.stringify(bbox))
   sessionStorage.setItem('geoserver', JSON.stringify(state.geoserver))
-  sessionStorage.setItem('isSessionExpired', JSON.stringify(state.isSessionExpired))
   sessionStorage.setItem('mapView', JSON.stringify(mapView))
   sessionStorage.setItem('searchCriteria', JSON.stringify(state.searchCriteria))
   sessionStorage.setItem('searchResults', JSON.stringify(state.searchResults))
-  localStorage.setItem('catalog_apiKey', state.catalogApiKey)  // HACK
-}
 
-interface Route {
-  hash: string
-  href: string
-  jobIds: string[]
-  pathname: string
-  search: string
-}
-
-function generateRoute({ pathname = '/', search = '', hash = '' }): Route {
-  return {
-    pathname,
-    search,
-    hash,
-
-    // Helpers
-    href: pathname + search + hash,
-    jobIds: search.substr(1).split('&').filter(s => s.startsWith('jobId')).map(s => s.replace('jobId=', '')),
-  }
+  this.props.serializeUser()
+  this.props.serializeCatalog()
 }
 
 function isElementInViewport(elem): boolean {
@@ -984,3 +909,27 @@ function scrollIntoView(selector: any): Promise<any> {
     }
   })
 }
+
+function mapStateToProps(state) {
+  return {
+    user: state.user,
+    catalog: state.catalog,
+    route: state.route,
+  }
+}
+
+function mapDispatchToProps(dispatch) {
+  return {
+    login: (args) => dispatch(userActions.login(args)),
+    logout: () => dispatch(userActions.logout()),
+    navigateTo: (loc, pushHistory?) => dispatch(routeActions.navigateTo(loc, pushHistory)),
+    sessionExpired: () => dispatch(userActions.sessionExpired()),
+    serializeUser: () => dispatch(userActions.serialize()),
+    serializeCatalog: () => dispatch(catalogActions.serialize()),
+  }
+}
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(Application)

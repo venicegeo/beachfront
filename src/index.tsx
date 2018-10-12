@@ -25,8 +25,17 @@ import './styles/menus.css'
 
 import './polyfills'
 
-import {createApplication} from './components/Application'
+import * as React from 'react'
+import {render} from 'react-dom'
+import {Provider} from 'react-redux'
+import Application from './components/Application'
+import store from './store'
 
 const root = document.createElement('div')
 document.body.appendChild(root)
-createApplication(root)
+render(
+  <Provider store={store}>
+    <Application />
+  </Provider>,
+  root,
+)

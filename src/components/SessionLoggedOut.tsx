@@ -17,21 +17,46 @@
 const styles = require('./SessionLoggedOut.css')
 
 import * as React from 'react'
+import {connect} from 'react-redux'
 import {Modal} from './Modal'
+import {userActions} from '../actions/userActions'
 
 interface Props {
-  onDismiss(),
-  onInitialize()
+  sessionLogout?: () => void
 }
 
-export const SessionLoggedOut = ({ onDismiss, onInitialize }: Props) => (
-  <Modal onDismiss={onDismiss} onInitialize={onInitialize}>
-    <div className={styles.root}>
-      <h1><i className="fa fa-lock"/> You have successfully signed out</h1>
-      <p>You are now signed out of Beachfront.</p>
-      <p className={styles.instructions}>
-        Click anywhere or press <kbd>ESC</kbd> to return to the login page
-      </p>
-    </div>
-  </Modal>
-)
+export class SessionLoggedOut extends React.Component<Props, null> {
+  constructor(props) {
+    super(props)
+    this.handleInitialize = this.handleInitialize.bind(this)
+  }
+
+  render() {
+    return (
+      <Modal onDismiss={() => { /*  Do nothing */ }} onInitialize={this.handleInitialize}>
+        <div className={styles.root}>
+          <h1><i className="fa fa-lock"/> You have successfully signed out</h1>
+          <p>You are now signed out of Beachfront.</p>
+          <p className={styles.instructions}>
+            Click anywhere or press <kbd>ESC</kbd> to return to the login page
+          </p>
+        </div>
+      </Modal>
+    )
+  }
+
+  private handleInitialize() {
+    this.props.sessionLogout()
+  }
+}
+
+function mapDispatchToProps(dispatch) {
+  return {
+    sessionLogout: () => dispatch(userActions.sessionLogout()),
+  }
+}
+
+export default connect(
+  null,
+  mapDispatchToProps,
+)(SessionLoggedOut)
