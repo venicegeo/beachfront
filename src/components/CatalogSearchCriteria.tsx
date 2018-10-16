@@ -200,6 +200,6 @@ function mapDispatchToProps(dispatch) {
 }
 
 export default connect(
-  null,
+  undefined,
   mapDispatchToProps,
 )(CatalogSearchCriteria)

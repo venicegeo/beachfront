@@ -21,16 +21,17 @@ const DATE_FORMAT = 'YYYY-MM-DD'
 import * as React from 'react'
 import {connect} from 'react-redux'
 import * as moment from 'moment'
-import {AlgorithmList} from './AlgorithmList'
+import AlgorithmList from './AlgorithmList'
 import {ImagerySearch} from './ImagerySearch'
 import {ImagerySearchList} from './ImagerySearchList'
 import {NewJobDetails} from './NewJobDetails'
 import {PrimaryMap} from './PrimaryMap'
-import {createJob} from '../api/jobs'
 import {normalizeSceneId} from './SceneFeatureDetails'
 import {SOURCE_DEFAULT, TYPE_SCENE} from '../constants'
 import {CatalogState} from '../reducers/catalogReducer'
 import {MapState} from '../reducers/mapReducer'
+import {jobsActions, ParamsCreateJob} from '../actions/jobsActions'
+import {JobsState} from '../reducers/jobsReducer'
 
 export interface SearchCriteria {
   cloudCover: number
@@ -42,6 +43,7 @@ export interface SearchCriteria {
 interface Props {
   catalog?: CatalogState
   map?: MapState
+  jobs?: JobsState
   algorithms: beachfront.Algorithm[]
   enabledPlatforms: string[]
   imagery: beachfront.ImageryCatalogPage
@@ -49,16 +51,15 @@ interface Props {
   mapRef: PrimaryMap
   searchError: any
   searchCriteria: SearchCriteria
-  onJobCreated(job: beachfront.Job)
   onSearchCriteriaChange(criteria: SearchCriteria)
   onSearchSubmit()
+  jobsCreateJob?(args: ParamsCreateJob): void
+  jobsDismissCreateJobError?(): void
 }
 
 interface State {
-  isCreating?: boolean
   computeMask?: boolean
   name?: string
-  algorithmError?: any
   selectedScene?: beachfront.Scene
 }
 
@@ -74,13 +75,11 @@ export class CreateJob extends React.Component<Props, State> {
     super(props)
 
     this.state = {
-      isCreating: false,
       computeMask: true,
       name: '',
-      algorithmError: '',
     }
 
-    this.handleCreateJob = this.handleCreateJob.bind(this)
+    this.handleSubmit = this.handleSubmit.bind(this)
     this.handleComputeMaskChange = this.handleComputeMaskChange.bind(this)
     this.handleNameChange = this.handleNameChange.bind(this)
     this.handleSearchCloudCoverChange = this.handleSearchCloudCoverChange.bind(this)
@@ -102,8 +101,8 @@ export class CreateJob extends React.Component<Props, State> {
         }
 
         // Reset the algorithm error.
-        if (this.state.algorithmError) {
-          this.setState({ algorithmError: '' })
+        if (this.props.jobs.createJobError) {
+          this.props.jobsDismissCreateJobError()
         }
       }
 
@@ -164,9 +163,7 @@ export class CreateJob extends React.Component<Props, State> {
               <AlgorithmList
                 algorithms={this.props.algorithms}
                 sceneMetadata={this.state.selectedScene.properties}
-                isSubmitting={this.state.isCreating}
-                error={this.state.algorithmError}
-                onSubmit={this.handleCreateJob}
+                onSubmit={this.handleSubmit}
               />
             </li>
           )}
@@ -181,23 +178,13 @@ export class CreateJob extends React.Component<Props, State> {
     )
   }
 
-  private handleCreateJob(algorithm) {
-    this.setState({
-      isCreating: true,
-      algorithmError: '',
-    })
-
-    createJob({
+  private handleSubmit(algorithm) {
+    this.props.jobsCreateJob({
       algorithmId: algorithm.id,
       computeMask: this.state.computeMask,
       name: this.state.name,
       sceneId: this.state.selectedScene.id,
       catalogApiKey: this.props.catalog.apiKey,
-    }).then(job => {
-      this.setState({ isCreating: false })
-      this.props.onJobCreated(job) // Release the job.
-    }).catch(algorithmError => {
-      this.setState({ algorithmError, isCreating: false })
     })
   }
 
@@ -231,10 +218,18 @@ function mapStateToProps(state: AppState) {
   return {
     catalog: state.catalog,
     map: state.map,
+    jobs: state.jobs,
+  }
+}
+
+function mapDispatchToProps(dispatch) {
+  return {
+    jobsCreateJob: (args: ParamsCreateJob) => dispatch(jobsActions.createJob(args)),
+    jobsDismissCreateJobError: () => dispatch(jobsActions.dismissCreateJobError()),
   }
 }
 
 export default connect(
   mapStateToProps,
-  null,
+  mapDispatchToProps,
 )(CreateJob)

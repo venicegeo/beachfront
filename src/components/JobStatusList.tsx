@@ -13,24 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-import {connect} from 'react-redux'
 
 const styles: any = require('./JobStatusList.css')
-const jobStatusStyles: any = require('./JobStatus.css')
 
 import * as React from 'react'
+import {connect} from 'react-redux'
 import JobStatus from './JobStatus'
 import * as moment from 'moment'
 import {AppState} from '../store'
 import {MapState} from '../reducers/mapReducer'
+import {JobsState} from '../reducers/jobsReducer'
+import {jobsActions} from '../actions/jobsActions'
 
 interface Props {
   map?: MapState
-  error: any
-  jobs: beachfront.Job[]
-  onDismissError()
-  onForgetJob(job: beachfront.Job)
+  jobs?: JobsState
   onNavigateToJob(loc: { pathname: string, search: string, hash: string })
+  jobsFetch?(): void
 }
 
 interface State {
@@ -56,23 +55,23 @@ export class JobStatusList extends React.Component<Props, State> {
 
   render() {
     return (
-      <div className={`${styles.root} ${!this.props.jobs.length ? styles.isEmpty : ''}`}>
+      <div className={`${styles.root} ${!this.props.jobs.records.length ? styles.isEmpty : ''}`}>
         <header>
           <h1>Jobs</h1>
         </header>
 
         <ul>
-          {this.props.error && (
+          {this.props.jobs.fetchError && (
             <li className={styles.communicationError}>
               <h4><i className="fa fa-warning"/> Communication Error</h4>
-              <p>Cannot communicate with the server. (<code>{this.props.error.toString()}</code>)</p>
-              <button onClick={this.props.onDismissError}>Retry</button>
+              <p>Cannot communicate with the server. (<code>{this.props.jobs.fetchError.toString()}</code>)</p>
+              <button onClick={this.props.jobsFetch}>Retry</button>
             </li>
           )}
 
-          {!this.props.jobs.length ? (
+          {!this.props.jobs.records.length ? (
             <li className={styles.placeholder}>You haven't started any Jobs yet</li>
-          ) : this.props.jobs.sort((job1, job2) => {
+          ) : this.props.jobs.records.sort((job1, job2) => {
             return moment(job1.properties.created_on).isBefore(job2.properties.created_on) ? 1 : -1
           }).map(job => (
             <JobStatus
@@ -80,9 +79,7 @@ export class JobStatusList extends React.Component<Props, State> {
               isActive={this.state.activeIds.includes(job.id)}
               job={job}
               onNavigate={this.props.onNavigateToJob}
-              onForgetJob={this.props.onForgetJob}
               onToggleExpansion={this.handleToggleExpansion}
-              selectedFeature={this.props.map.selectedFeature}
             />
           ))}
         </ul>
@@ -131,10 +128,17 @@ export class JobStatusList extends React.Component<Props, State> {
 function mapStateToProps(state: AppState) {
   return {
     map: state.map,
+    jobs: state.jobs,
+  }
+}
+
+function mapDispatchToProps(dispatch) {
+  return {
+    jobsFetch: () => dispatch(jobsActions.fetch()),
   }
 }
 
 export default connect(
   mapStateToProps,
-  null
+  mapDispatchToProps,
 )(JobStatusList)

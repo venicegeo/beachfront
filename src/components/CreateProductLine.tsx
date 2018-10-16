@@ -182,5 +182,5 @@ function mapStateToProps(state: AppState) {
 
 export default connect(
   mapStateToProps,
-  null,
+  undefined,
 )(CreateProductLine)

@@ -46,29 +46,3 @@ export function createJob({
       throw err
     })
 }
-
-export function forgetJob(jobId: string) {
-  return getClient().delete(`${JOB_ENDPOINT}/${jobId}`)
-}
-
-export function fetchJobs(): Promise<beachfront.Job[]> {
-  return getClient().get(JOB_ENDPOINT)
-    .then(
-      response => response.data.jobs.features,
-      err => {
-        console.error('(jobs:fetchJobs) failed:', err)
-        throw err
-      },
-    )
-}
-
-export function fetchJob(jobId: string): Promise<beachfront.Job> {
-  return getClient().get(`${JOB_ENDPOINT}/${jobId}`)
-    .then(
-      response => response.data.job,
-      err => {
-        console.error('(jobs:fetchJob) failed:', err)
-        throw err
-      },
-    )
-}

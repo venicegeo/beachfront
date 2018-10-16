@@ -13,16 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
+import {connect} from 'react-redux'
 
 const styles: any = require('./Algorithm.css')
 
 import * as React from 'react'
+import {AppState} from '../store'
+import {JobsState} from '../reducers/jobsReducer'
 
 interface Props {
+  jobs?: JobsState
   algorithm: beachfront.Algorithm
   sceneMetadata: beachfront.SceneMetadata
   isSelected?: boolean
-  isSubmitting?: boolean
   warningHeading?: string
   warningMessage?: string
   errorElement?: React.ReactElement<any>
@@ -30,60 +33,50 @@ interface Props {
   onSubmit?(algorithm: beachfront.Algorithm)
 }
 
-export const Algorithm = ({
-  algorithm,
-  sceneMetadata,
-  isSelected,
-  isSubmitting,
-  warningHeading,
-  warningMessage,
-  onSelect,
-  onSubmit,
-  errorElement,
-}: Props) => (
+export const Algorithm = (props: Props) => (
   <div className={[
     styles.root,
-    isSubmitting ? styles.isSubmitting : '',
-    meetsCloudCoverRequirement(algorithm, sceneMetadata) ? styles.isCompatible : styles.isNotCompatible,
-    isSelected ? styles.isSelected : '',
-    onSelect ? styles.isSelectable : '',
+    props.jobs.creatingJob ? styles.isSubmitting : '',
+    meetsCloudCoverRequirement(props.algorithm, props.sceneMetadata) ? styles.isCompatible : styles.isNotCompatible,
+    props.isSelected ? styles.isSelected : '',
+    props.onSelect ? styles.isSelectable : '',
   ].join(' ')}>
-    <section className={styles.header} onClick={onSelect && (() => !isSelected && onSelect(algorithm))}>
-      {onSelect && (
+    <section className={styles.header} onClick={props.onSelect && (() => !props.isSelected && props.onSelect(props.algorithm))}>
+      {props.onSelect && (
         <span className={styles.selectionIndicator}>
           <input
             type="radio"
             readOnly={true}
-            checked={isSelected}
+            checked={props.isSelected}
           />
         </span>
       )}
       <span className={styles.name}>
-        <span>{algorithm.name}</span>
+        <span>{props.algorithm.name}</span>
       </span>
       <span className={styles.warningIndicator}>
         <i className="fa fa-warning"/>
       </span>
     </section>
 
-    {errorElement}
+    {props.errorElement}
 
     <section className={styles.details}>
-      <div className={styles.description}>{algorithm.description}</div>
+      <div className={styles.description}>{props.algorithm.description}</div>
 
       <div className={styles.controls}>
         <div className={styles.compatibilityWarning}>
-          <h4><i className="fa fa-warning"/> {warningHeading || 'Incompatible Image Selected'}</h4>
-          <p>{warningMessage || "The image you've selected does not meet all of this algorithm's requirements.  You can run it anyway but it may not produce the expected results."}</p>
+          <h4><i className="fa fa-warning"/> {props.warningHeading || 'Incompatible Image Selected'}</h4>
+          <p>{props.warningMessage || "The image you've selected does not meet all of this algorithm's requirements.  You can run it anyway but it may not produce the expected results."}</p>
         </div>
 
-        {onSubmit && (
+        {props.onSubmit && (
           <button
             className={styles.startButton}
-            disabled={isSubmitting}
-            onClick={() => onSubmit(algorithm)}
+            disabled={props.jobs.creatingJob}
+            onClick={() => props.onSubmit(props.algorithm)}
             >
-            {isSubmitting ? 'Starting' : 'Run Algorithm'}
+            {props.jobs.creatingJob ? 'Starting' : 'Run Algorithm'}
           </button>
         )}
       </div>
@@ -92,9 +85,9 @@ export const Algorithm = ({
         <h4>Image Requirements</h4>
         <table>
           <tbody>
-            <tr className={meetsCloudCoverRequirement(algorithm, sceneMetadata) ? styles.met : styles.unmet}>
+            <tr className={meetsCloudCoverRequirement(props.algorithm, props.sceneMetadata) ? styles.met : styles.unmet}>
               <th>Maximum Cloud Cover</th>
-              <td>Less than or equal to {algorithm.maxCloudCover}%</td>
+              <td>Less than or equal to {props.algorithm.maxCloudCover}%</td>
             </tr>
           </tbody>
         </table>
@@ -110,3 +103,14 @@ export const Algorithm = ({
 function meetsCloudCoverRequirement(algorithm: beachfront.Algorithm, metadata: beachfront.SceneMetadata) {
   return algorithm.maxCloudCover >= metadata.cloudCover
 }
+
+function mapStateToProps(state: AppState) {
+  return {
+    jobs: state.jobs,
+  }
+}
+
+export default connect(
+  mapStateToProps,
+  undefined,
+)(Algorithm)

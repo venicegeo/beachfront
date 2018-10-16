@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-import JobStatusList from './JobStatusList'
+import {MapState} from '../reducers/mapReducer'
 
 const styles: any = require('./JobStatus.css')
 
@@ -36,18 +36,19 @@ import {
   STATUS_FAIL,
 } from '../constants'
 import {connect} from 'react-redux'
-import {AppState} from '../store'
 import {mapActions} from '../actions/mapActions'
+import {jobsActions} from '../actions/jobsActions'
+import {AppState} from '../store'
 
 interface Props {
+  map?: MapState
   className?: string
   isActive: boolean
   job: beachfront.Job
-  selectedFeature: beachfront.Job | beachfront.Scene
-  onForgetJob(job: beachfront.Job)
   onNavigate(loc: { pathname: string, search: string, hash: string })
   onToggleExpansion(job: beachfront.Job, isExpanded: boolean)
   mapSetSelectedFeature?(selectedFeature: beachfront.Job | beachfront.Scene | null): void
+  jobsDeleteJob?(job: beachfront.Job): void
 }
 
 interface State {
@@ -70,14 +71,14 @@ export class JobStatus extends React.Component<Props, State> {
       isRemoving: false,
     }
 
-    this.jobTitleClick          = this.jobTitleClick.bind(this)
-    this.emitOnForgetJob        = this.emitOnForgetJob.bind(this)
+    this.jobTitleClick = this.jobTitleClick.bind(this)
     this.handleDownloadComplete = this.handleDownloadComplete.bind(this)
-    this.handleDownloadError    = this.handleDownloadError.bind(this)
+    this.handleDownloadError = this.handleDownloadError.bind(this)
     this.handleDownloadProgress = this.handleDownloadProgress.bind(this)
-    this.handleDownloadStart    = this.handleDownloadStart.bind(this)
-    this.handleForgetToggle     = this.handleForgetToggle.bind(this)
-    this.toggleExpansion        = this.toggleExpansion.bind(this)
+    this.handleDownloadStart = this.handleDownloadStart.bind(this)
+    this.handleRemoveJob = this.handleRemoveJob.bind(this)
+    this.handleRemoveJobConfirm = this.handleRemoveJobConfirm.bind(this)
+    this.toggleExpansion = this.toggleExpansion.bind(this)
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -139,7 +140,7 @@ export class JobStatus extends React.Component<Props, State> {
                 {hasError && (<dd className={styles.errorDetails}>{properties.errorDetails}</dd>)}
               </dl>
               <div className={styles.removeToggle}>
-                <button onClick={this.handleForgetToggle}>
+                <button onClick={this.handleRemoveJob}>
                   Remove this Job
                 </button>
               </div>
@@ -147,8 +148,8 @@ export class JobStatus extends React.Component<Props, State> {
                 <h4>
                   <i className="fa fa-warning"/> Are you sure you want to remove this job from your list?
                 </h4>
-                <button onClick={this.emitOnForgetJob}>Remove this Job</button>
-                <button onClick={this.handleForgetToggle}>Cancel</button>
+                <button onClick={this.handleRemoveJobConfirm}>Remove this Job</button>
+                <button onClick={this.handleRemoveJob}>Cancel</button>
               </div>
             </div>
           </div>
@@ -238,15 +239,11 @@ export class JobStatus extends React.Component<Props, State> {
   }
 
   private jobTitleClick() {
-    if (this.props.selectedFeature === this.props.job) {
+    if (this.props.map.selectedFeature === this.props.job) {
       this.toggleExpansion()
     }
 
     this.props.mapSetSelectedFeature(this.props.job)
-  }
-
-  private emitOnForgetJob() {
-    this.props.onForgetJob(this.props.job)
   }
 
   private handleDownloadProgress(loaded, total) {
@@ -265,8 +262,12 @@ export class JobStatus extends React.Component<Props, State> {
     this.setState({ isDownloading: false })
   }
 
-  private handleForgetToggle() {
+  private handleRemoveJob() {
     this.setState({ isRemoving: !this.state.isRemoving })
+  }
+
+  private handleRemoveJobConfirm() {
+    this.props.jobsDeleteJob(this.props.job)
   }
 
   private toggleExpansion() {
@@ -287,15 +288,22 @@ function segmentIfNeeded(s: string) {
   return s.length > 30 ? s.replace(/(\W)/g, '$1 ') : s
 }
 
+function mapStateToProps(state: AppState) {
+  return {
+    map: state.map,
+  }
+}
+
 function mapDispatchToProps(dispatch) {
   return {
     mapSetSelectedFeature: (selectedFeature: beachfront.Job | beachfront.Scene | null) => (
       dispatch(mapActions.setSelectedFeature(selectedFeature))
     ),
+    jobsDeleteJob: (job: beachfront.Job) => dispatch(jobsActions.deleteJob(job)),
   }
 }
 
 export default connect(
-  null,
+  mapStateToProps,
   mapDispatchToProps,
-)(JobStatusList)
+)(JobStatus)

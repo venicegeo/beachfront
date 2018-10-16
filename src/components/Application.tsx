@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
+import {jobsActions} from '../actions/jobsActions'
 
 const styles: any = require('./Application.css')
 
@@ -92,6 +93,8 @@ interface Props {
   mapPanToExtent?(extent: [number, number, number, number]): void
   mapSerialize?(): void
   mapDeserialize?(): void
+  jobsFetch?(): void
+  jobsFetchOne?(jobId: string): void
 }
 
 interface State {
@@ -101,7 +104,6 @@ interface State {
   // Data Collections
   enabledPlatforms?: Collection<string>
   algorithms?: Collection<beachfront.Algorithm>
-  jobs?: Collection<beachfront.Job>
   productLines?: Collection<beachfront.ProductLine>
 
   // Search state
@@ -121,10 +123,8 @@ export class Application extends React.Component<Props, State> {
   constructor(props) {
     super(props)
     this.generateInitialState = this.generateInitialState.bind(this)
-    this.handleDismissJobError = this.handleDismissJobError.bind(this)
+    this.importJobsIfNeeded = this.importJobsIfNeeded.bind(this)
     this.handleDismissProductLineError = this.handleDismissProductLineError.bind(this)
-    this.handleForgetJob = this.handleForgetJob.bind(this)
-    this.handleJobCreated = this.handleJobCreated.bind(this)
     this.handleNavigateToJob = this.handleNavigateToJob.bind(this)
     this.handlePanToProductLine = this.handlePanToProductLine.bind(this)
     this.handleProductLineCreated = this.handleProductLineCreated.bind(this)
@@ -190,6 +190,45 @@ export class Application extends React.Component<Props, State> {
       })
     }
 
+    if (prevProps.jobs.fetching && !this.props.jobs.fetching) {
+      // Load selected feature if it isn't already (e.g., page refresh w/ jobId).
+      let [jobId] = this.props.route.jobIds
+
+      if (jobId && !this.props.map.selectedFeature) {
+        this.props.mapSetSelectedFeature(this.props.jobs.records.find(job => job.id === jobId))
+      }
+
+      this.importJobsIfNeeded()
+    }
+
+    if (prevProps.jobs.fetchingOne && !this.props.jobs.fetchingOne) {
+      if (this.props.jobs.fetchOneError) {
+        throw this.props.jobs.fetchOneError
+      }
+
+      this.props.mapPanToPoint(getFeatureCenter(this.props.jobs.lastOneFetched))
+    }
+
+    if (prevProps.jobs.creatingJob && !this.props.jobs.creatingJob) {
+      if (this.props.jobs.createJobError) {
+        throw this.props.jobs.createJobError
+      }
+
+      this.props.routeNavigateTo({
+        pathname: '/jobs',
+        search: '?jobId=' + this.props.jobs.createdJob.id,
+      })
+    }
+
+    if (prevProps.jobs.deletingJob && !this.props.jobs.deletingJob) {
+      if (this.props.route.jobIds.includes(this.props.jobs.deletedJob.id)) {
+        this.props.routeNavigateTo({
+          pathname: this.props.route.pathname,
+          search: this.props.route.search.replace(new RegExp('\\??jobId=' + this.props.jobs.deletedJob.id), ''),
+        })
+      }
+    }
+
     this.serialize()
   }
 
@@ -199,14 +238,7 @@ export class Application extends React.Component<Props, State> {
     if (this.props.user.isLoggedIn && !this.props.user.isSessionExpired) {
       this.initializeServices()
       this.startBackgroundTasks()
-      this.refreshRecords().then(() => {
-        // Load selected feature if it isn't already (e.g., page refresh w/ jobId).
-        let [jobId] = this.props.route.jobIds
-
-        if (jobId && !this.props.map.selectedFeature) {
-          this.props.mapSetSelectedFeature(this.state.jobs.records.find(job => job.id === jobId))
-        }
-      }).then(this.importJobsIfNeeded.bind(this))
+      this.refreshRecords()
       this.startIdleTimer()
     }
   }
@@ -238,7 +270,6 @@ export class Application extends React.Component<Props, State> {
           imagery={this.state.searchResults}
           isSearching={this.state.isSearching}
           ref="map"
-          jobs={this.state.jobs.records}
           shrunk={shrunk}
           wmsUrl={this.state.geoserver.wmsUrl}
           onSearchPageChange={this.handleSearchSubmit}
@@ -278,7 +309,6 @@ export class Application extends React.Component<Props, State> {
             mapRef={this.refs.map}
             searchCriteria={this.state.searchCriteria}
             searchError={this.state.searchError}
-            onJobCreated={this.handleJobCreated}
             onSearchCriteriaChange={this.handleSearchCriteriaChange}
             onSearchSubmit={this.handleSearchSubmit}
           />
@@ -294,10 +324,6 @@ export class Application extends React.Component<Props, State> {
       case '/jobs':
         return (
           <JobStatusList
-            error={this.state.jobs.error}
-            jobs={this.state.jobs.records}
-            onDismissError={this.handleDismissJobError}
-            onForgetJob={this.handleForgetJob}
             onNavigateToJob={this.handleNavigateToJob}
           />
         )
@@ -330,19 +356,10 @@ export class Application extends React.Component<Props, State> {
 
   private importJobsIfNeeded() {
     this.props.route.jobIds.map(jobId => {
-      if (this.state.jobs.records.find(j => j.id === jobId)) {
+      if (this.props.jobs.records.find(j => j.id === jobId)) {
         return
       }
-      console.log('(application:componentDidUpdate) fetching job %s', jobId)
-      jobsService.fetchJob(jobId)
-        .then(record => {
-          this.setState({ jobs: this.state.jobs.$append(record) })
-          this.props.mapPanToPoint(getFeatureCenter(record))
-        })
-        .catch(err => {
-          console.error('(application:fetch) failed:', err)
-          throw err
-        })
+      this.props.jobsFetchOne(jobId)
     })
   }
 
@@ -375,13 +392,6 @@ export class Application extends React.Component<Props, State> {
       // .catch(err => this.setState({ errors: [...this.props.errors, err] }))
   }
 
-  private fetchJobs() {
-    this.setState({ jobs: this.state.jobs.$fetching() })
-    return jobsService.fetchJobs()
-      .then(jobs => this.setState({ jobs: this.state.jobs.$records(jobs) }))
-      .catch(err => this.setState({ jobs: this.state.jobs.$error(err) }))
-  }
-
   private fetchProductLines() {
     this.setState({ productLines: this.state.productLines.$fetching() })
     return productLinesService.fetchProductLines()
@@ -394,13 +404,6 @@ export class Application extends React.Component<Props, State> {
       // .catch(err => this.setState({ errors: [...this.state.errors, err] }))
   }
 
-  private handleDismissJobError() {
-    this.setState({
-      jobs: this.state.jobs.$error(null),
-    })
-    setTimeout(() => this.fetchJobs())
-  }
-
   private handleDismissProductLineError() {
     this.setState({
       productLines: this.state.productLines.$error(null),
@@ -408,37 +411,9 @@ export class Application extends React.Component<Props, State> {
     setTimeout(() => this.fetchProductLines())
   }
 
-  private handleForgetJob(job: beachfront.Job) {
-    this.setState({
-      jobs: this.state.jobs.$filter(j => j.id !== job.id),
-    })
-    if (this.props.route.jobIds.includes(job.id)) {
-      this.props.routeNavigateTo({
-        pathname: this.props.route.pathname,
-        search: this.props.route.search.replace(new RegExp('\\??jobId=' + job.id), ''),
-      })
-    }
-    jobsService.forgetJob(job.id)
-      .catch(() => {
-        this.setState({
-          jobs: this.state.jobs.$append(job),
-        })
-      })
-  }
-
-  private handleJobCreated(job) {
-    this.setState({
-      jobs: this.state.jobs.$append(job),
-    })
-    this.props.routeNavigateTo({
-      pathname: '/jobs',
-      search: '?jobId=' + job.id,
-    })
-  }
-
   private handleNavigateToJob(loc) {
     this.props.routeNavigateTo(loc)
-    const feature = this.state.jobs.records.find(j => loc.search.includes(j.id))
+    const feature = this.props.jobs.records.find(j => loc.search.includes(j.id))
     this.props.mapPanToExtent(featureToExtentWrapped(this.props.map.map, feature))
   }
 
@@ -507,13 +482,7 @@ export class Application extends React.Component<Props, State> {
   }
 
   private refreshRecords() {
-    return Promise.all([
-      this.fetchJobs(),
-      /*
-       * No need to fetch product lines till we get them working.
-      this.fetchProductLines(),
-      */
-    ])
+    this.props.jobsFetch()
   }
 
   //
@@ -593,7 +562,6 @@ export class Application extends React.Component<Props, State> {
 
       // Data Collections
       algorithms: createCollection(),
-      jobs: createCollection(),
       productLines: createCollection(),
 
       // Search state
@@ -724,6 +692,8 @@ function mapDispatchToProps(dispatch) {
     mapPanToExtent: (extent: [number, number, number, number]) => dispatch(mapActions.panToExtent(extent)),
     mapSerialize: () => dispatch(mapActions.serialize()),
     mapDeserialize: () => dispatch(mapActions.deserialize()),
+    jobsFetch: () => dispatch(jobsActions.fetch()),
+    jobsFetchOne: (jobId: string) => dispatch(jobsActions.fetchOne(jobId)),
   }
 }
 

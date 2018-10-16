@@ -72,6 +72,7 @@ import {RouteState} from '../reducers/routeReducer'
 import {mapActions} from '../actions/mapActions'
 import {AppState} from '../store'
 import {MapState} from '../reducers/mapReducer'
+import {JobsState} from '../reducers/jobsReducer'
 
 const DEFAULT_CENTER: [number, number] = [-10, 0]
 const MIN_ZOOM = 2.5
@@ -101,9 +102,9 @@ interface Props {
   route?: RouteState
   catalog?: CatalogState
   map?: MapState
+  jobs?: JobsState
   imagery:            beachfront.ImageryCatalogPage
   isSearching:        boolean
-  jobs:               beachfront.Job[]
   wmsUrl:             string
   shrunk:             boolean
   onSearchPageChange(page: {count: number, startIndex: number})
@@ -232,8 +233,8 @@ export class PrimaryMap extends React.Component<Props, State> {
     */
     const selectedJob = (this.props.map.selectedFeature as beachfront.Job)
     if (selectedJob) {
-      const previousJob = previousProps.jobs.filter(j => j.properties.job_id === selectedJob.properties.job_id)[0]
-      const currentJob = this.props.jobs.filter(j => j.properties.job_id === selectedJob.properties.job_id)[0]
+      const previousJob = previousProps.jobs.records.filter(j => j.properties.job_id === selectedJob.properties.job_id)[0]
+      const currentJob = this.props.jobs.records.filter(j => j.properties.job_id === selectedJob.properties.job_id)[0]
       if (previousJob && currentJob) {
         if ((previousJob.properties.status !== STATUS_SUCCESS) && (currentJob.properties.status === STATUS_SUCCESS)) {
           this.refreshDetections()
@@ -1453,6 +1454,7 @@ function mapStateToProps(state: AppState) {
     route: state.route,
     catalog: state.catalog,
     map: state.map,
+    jobs: state.jobs,
   }
 }
 
