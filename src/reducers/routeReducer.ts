@@ -22,24 +22,20 @@ export interface RouteState {
   jobIds: string[]
   pathname: string
   search: string
-  selectedFeature?: beachfront.Job | beachfront.Scene
+  selectedFeature: beachfront.Job | beachfront.Scene | null
 }
 
-const initialState = generateRoute(location)
+export const routeInitialState: RouteState = generateRoute(location)
 
-export class RouteReducer {
-  static readonly initialState = initialState
-
-  static reduce(state = initialState, action: any): RouteState {
-    switch (action.type) {
-      case types.ROUTE_CHANGED:
-        console.log('ROUTE_CHANGED')
-        return {
-          ...state,
-          ...action.route,
-        }
-      default:
-        return state
-    }
+export function routeReducer(state = routeInitialState, action: any): RouteState {
+  switch (action.type) {
+    case types.ROUTE_CHANGED:
+      console.log('ROUTE_CHANGED')
+      return {
+        ...state,
+        ...action.route,
+      }
+    default:
+      return state
   }
 }

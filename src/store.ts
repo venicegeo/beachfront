@@ -16,22 +16,47 @@
 
 import {applyMiddleware, combineReducers, createStore} from 'redux'
 import reduxThunk from 'redux-thunk'
-import {UserReducer} from './reducers/userReducer'
-import {CatalogReducer} from './reducers/catalogReducer'
-import {RouteReducer} from './reducers/routeReducer'
+import reduxLogger from 'redux-logger'
+import {userInitialState, userReducer, UserState} from './reducers/userReducer'
+import {catalogInitialState, catalogReducer, CatalogState} from './reducers/catalogReducer'
+import {routeInitialState, routeReducer, RouteState} from './reducers/routeReducer'
+import {mapInitialState, mapReducer, MapState} from './reducers/mapReducer'
+import {jobsInitialState, jobsReducer, JobsState} from './reducers/jobsReducer'
+import {productLinesInitialState, productLinesReducer, ProductLinesState} from './reducers/productLinesReducer'
 
-const initialState = {
-  user: UserReducer.initialState,
-  catalog: CatalogReducer.initialState,
-  route: RouteReducer.initialState,
+const middleware = [reduxThunk]
+
+if (process.env.NODE_ENV !== 'production') {
+  middleware.push(reduxLogger)
+}
+
+export interface AppState {
+  user: UserState
+  catalog: CatalogState
+  route: RouteState
+  map: MapState
+  jobs: JobsState
+  productLines: ProductLinesState
+}
+
+const initialState: AppState = {
+  user: userInitialState,
+  catalog: catalogInitialState,
+  route: routeInitialState,
+  map: mapInitialState,
+  jobs: jobsInitialState,
+  productLines: productLinesInitialState,
 }
 
 export default createStore(
   combineReducers({
-    user: UserReducer.reduce,
-    catalog: CatalogReducer.reduce,
-    route: RouteReducer.reduce,
+    user: userReducer,
+    catalog: catalogReducer,
+    route: routeReducer,
+    map: mapReducer,
+    jobs: jobsReducer,
+    productLines: productLinesReducer,
   }),
-  initialState,  // TODO: Deserialize here.
-  applyMiddleware(reduxThunk),
+  initialState,
+  applyMiddleware(...middleware),
 )

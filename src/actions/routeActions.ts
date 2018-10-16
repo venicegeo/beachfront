@@ -25,7 +25,7 @@ export const routeActions = {
     const route = generateRoute(loc)
 
     if (pushHistory) {
-      history.pushState(null, null, route.href)
+      history.pushState(null, '', route.href)
     }
 
     return {

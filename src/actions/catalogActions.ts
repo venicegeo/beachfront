@@ -14,24 +14,38 @@
  * limitations under the License.
  **/
 
+import {AppState} from '../store'
+
 export const types = {
-  CATALOG_API_KEY_CHANGED: 'USER_CATALOG_API_KEY_CHANGED',
+  CATALOG_API_KEY_UPDATED: 'CATALOG_API_KEY_UPDATED',
   CATALOG_SERIALIZED: 'CATALOG_SERIALIZED',
+  CATALOG_DESERIALIZED: 'CATALOG_DESERIALIZED',
 }
 
 export const catalogActions = {
   setApiKey(apiKey: string) {
     return {
-      type: types.CATALOG_API_KEY_CHANGED,
+      type: types.CATALOG_API_KEY_UPDATED,
       apiKey,
     }
   },
 
   serialize() {
     return (dispatch, getState) => {
-      const catalog = getState().catalog
-      localStorage.setItem('catalog_apiKey', catalog.apiKey)  // HACK
+      const state: AppState = getState()
+
+      localStorage.setItem('catalog_apiKey', state.catalog.apiKey)  // HACK
+
       dispatch({ type: types.CATALOG_SERIALIZED })
+    }
+  },
+
+  deserialize() {
+    return {
+      type: types.CATALOG_DESERIALIZED,
+      state: {
+        apiKey: localStorage.getItem('catalog_apiKey'),
+      },
     }
   },
 }

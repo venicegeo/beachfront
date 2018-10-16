@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
+import {AppState} from '../store'
 
 const styles = require('./CreateProductLine.css')
 
@@ -27,14 +28,13 @@ import {
   SOURCE_DEFAULT,
 } from '../constants'
 import {CatalogState} from '../reducers/catalogReducer'
+import {MapState} from '../reducers/mapReducer'
 
 interface Props {
   catalog?: CatalogState
+  map?: MapState
   algorithms:        beachfront.Algorithm[]
-  bbox:              [number, number, number, number]
   enabledPlatforms?: string[]
-
-  onClearBbox()
   onProductLineCreated(productLine: beachfront.ProductLine)
 }
 
@@ -75,7 +75,7 @@ export class CreateProductLine extends React.Component<Props, State> {
           <h1>Create Product Line</h1>
         </header>
         <ul>
-          {!this.props.bbox ? (
+          {!this.props.map.bbox ? (
             <li className={styles.placeholder}>
               <h3>Draw bounding box to set AOI</h3>
             </li>
@@ -84,11 +84,10 @@ export class CreateProductLine extends React.Component<Props, State> {
               <h2>Source Imagery</h2>
               <CatalogSearchCriteria
                 apiKey={this.props.catalog.apiKey}
-                bbox={this.props.bbox}
+                bbox={this.props.map.bbox}
                 cloudCover={this.state.cloudCover}
                 enabledPlatforms={this.props.enabledPlatforms}
                 source={this.state.source}
-                onClearBbox={this.props.onClearBbox}
                 onCloudCoverChange={cloudCover => this.setState({ cloudCover })}
                 onSourceChange={this.handleSourceChange}
               />
@@ -128,7 +127,7 @@ export class CreateProductLine extends React.Component<Props, State> {
   }
 
   private get canSubmit() {
-    return this.props.bbox
+    return this.props.map.bbox
         && this.state.algorithm
         && this.state.dateStart
         && this.state.name
@@ -151,7 +150,7 @@ export class CreateProductLine extends React.Component<Props, State> {
   private handleSubmit() {
     create({
       algorithmId:   this.state.algorithm.id,
-      bbox:          this.props.bbox,
+      bbox:          this.props.map.bbox,
       category:      null,
       dateStart:     this.state.dateStart,
       dateStop:      this.state.dateStop,
@@ -174,9 +173,10 @@ function generateName(source: string, algorithm: beachfront.Algorithm) {
   return algorithm ? `${source}_${algorithm.name}`.toUpperCase() : ''
 }
 
-function mapStateToProps(state) {
+function mapStateToProps(state: AppState) {
   return {
     catalog: state.catalog,
+    map: state.map,
   }
 }
 

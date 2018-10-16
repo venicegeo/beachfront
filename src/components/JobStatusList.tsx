@@ -13,25 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
+import {connect} from 'react-redux'
+
 const styles: any = require('./JobStatusList.css')
 const jobStatusStyles: any = require('./JobStatus.css')
 
 import * as React from 'react'
-import {JobStatus} from './JobStatus'
+import JobStatus from './JobStatus'
 import * as moment from 'moment'
+import {AppState} from '../store'
+import {MapState} from '../reducers/mapReducer'
 
 interface Props {
-  activeIds: string[]
+  map?: MapState
   error: any
   jobs: beachfront.Job[]
-  selectedFeature: beachfront.Job | beachfront.Scene
   onDismissError()
-  onSelectJob(job: beachfront.Job)
   onForgetJob(job: beachfront.Job)
   onNavigateToJob(loc: { pathname: string, search: string, hash: string })
 }
 
-export class JobStatusList extends React.Component<Props, void> {
+interface State {
+  activeIds: string[]
+}
+
+export class JobStatusList extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props)
 
@@ -39,8 +45,12 @@ export class JobStatusList extends React.Component<Props, void> {
   }
 
   componentDidUpdate(prevProps) {
-    if (this.props.selectedFeature !== prevProps.selectedFeature) {
+    if (this.props.map.selectedFeature !== prevProps.selectedFeature) {
       this.scrollToSelectedJob()
+    }
+
+    if (this.props.map.detections !== prevProps.map.detections) {
+      this.setState({ activeIds: this.props.map.detections.map(d => d.id) })
     }
   }
 
@@ -67,13 +77,12 @@ export class JobStatusList extends React.Component<Props, void> {
           }).map(job => (
             <JobStatus
               key={job.id}
-              isActive={this.props.activeIds.includes(job.id)}
+              isActive={this.state.activeIds.includes(job.id)}
               job={job}
               onNavigate={this.props.onNavigateToJob}
               onForgetJob={this.props.onForgetJob}
-              onSelectJob={this.props.onSelectJob}
               onToggleExpansion={this.handleToggleExpansion}
-              selectedFeature={this.props.selectedFeature}
+              selectedFeature={this.props.map.selectedFeature}
             />
           ))}
         </ul>
@@ -94,7 +103,7 @@ export class JobStatusList extends React.Component<Props, void> {
   }
 
   private scrollToSelectedJob() {
-    const job = this.props.selectedFeature as beachfront.Job
+    const job = this.props.map.selectedFeature as beachfront.Job
     if (job) {
       this.scrollToJob(job)
     }
@@ -118,3 +127,14 @@ export class JobStatusList extends React.Component<Props, void> {
   }
 
 }
+
+function mapStateToProps(state: AppState) {
+  return {
+    map: state.map,
+  }
+}
+
+export default connect(
+  mapStateToProps,
+  null
+)(JobStatusList)

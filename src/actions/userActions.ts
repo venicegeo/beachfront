@@ -14,27 +14,19 @@
  * limitations under the License.
  **/
 
-import * as sessionService from '../api/session'
-import {UserState} from '../reducers/userReducer'
+import * as session from '../api/session'
+import {AppState} from '../store'
 
 export const types = {
-  USER_LOGGING_IN: 'USER_LOGGING_IN',
-  USER_LOGGED_IN: 'USER_LOGGED_IN',
   USER_LOGGED_OUT: 'USER_LOGGED_OUT',
   USER_SESSION_CLEARED: 'USER_SESSION_CLEARED',
   USER_SESSION_LOGGED_OUT: 'USER_SESSION_LOGGED_OUT',
   USER_SESSION_EXPIRED: 'USER_SESSION_EXPIRED',
   USER_SERIALIZED: 'USER_SERIALIZED',
+  USER_DESERIALIZED: 'USER_DESERIALIZED',
 }
 
 export const userActions = {
-  login(args) {
-    // TODO: Is this necessary? It seems like we're logging in via cookies or something with GeoAxis...
-    return dispatch => {
-      dispatch({ type: types.USER_LOGGING_IN })
-    }
-  },
-
   logout() {
     return { type: types.USER_LOGGED_OUT }
   },
@@ -46,7 +38,7 @@ export const userActions = {
 
   sessionLogout() {
     sessionStorage.clear()
-    const client = sessionService.getClient()
+    const client = session.getClient()
     client.get(`/oauth/logout`).then(response => {
       window.location.href = response.data
     })
@@ -59,11 +51,21 @@ export const userActions = {
   },
 
   serialize() {
-    // TODO: Figure out a better way to do this more natural to Redux.
     return (dispatch, getState) => {
-      const user: UserState = getState().user
-      sessionStorage.setItem('isSessionExpired', JSON.stringify(user.isSessionExpired))
+      const state: AppState = getState()
+
+      sessionStorage.setItem('isSessionExpired', JSON.stringify(state.user.isSessionExpired))
+
       dispatch({ type: types.USER_SERIALIZED })
+    }
+  },
+
+  deserialize() {
+    return {
+      type: types.USER_DESERIALIZED,
+      state: {
+        isSessionExpired: JSON.parse(sessionStorage.getItem('isSessionExpired')),
+      },
     }
   },
 }

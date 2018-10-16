@@ -69,6 +69,9 @@ import {
   WGS84,
 } from '../constants'
 import {RouteState} from '../reducers/routeReducer'
+import {mapActions} from '../actions/mapActions'
+import {AppState} from '../store'
+import {MapState} from '../reducers/mapReducer'
 
 const DEFAULT_CENTER: [number, number] = [-10, 0]
 const MIN_ZOOM = 2.5
@@ -97,24 +100,18 @@ export const MODE_SELECT_IMAGERY = 'MODE_SELECT_IMAGERY'
 interface Props {
   route?: RouteState
   catalog?: CatalogState
-  bbox: number[]
-  detections:         (beachfront.Job | beachfront.ProductLine)[]
-  frames:             (beachfront.Job | beachfront.ProductLine)[]
-  highlightedFeature: beachfront.Job
+  map?: MapState
   imagery:            beachfront.ImageryCatalogPage
   isSearching:        boolean
-  mode:               string
   jobs:               beachfront.Job[]
-  selectedFeature:    beachfront.Job | beachfront.Scene
-  view:               MapView
   wmsUrl:             string
   shrunk:             boolean
-  onBoundingBoxChange(bbox: number[])
-  onMapInitialization(map: ol.Map, collections: any)
   onSearchPageChange(page: {count: number, startIndex: number})
-  onSelectFeature(feature: beachfront.Job | beachfront.Scene)
-  onViewChange(view: MapView)
   onSignOutClick()
+  mapInitialized?(map: ol.Map, collections: any): void
+  mapUpdateBbox?(bbox: [number, number, number, number]): void
+  mapUpdateView?(view: MapView): void
+  mapSetSelectedFeature?(selectedFeature: beachfront.Job | beachfront.Scene): void
 }
 
 interface State {
@@ -189,43 +186,41 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.renderPins()
     this.updateView(2000)
 
-    if (this.props.bbox) {
+    if (this.props.map.bbox) {
       this.renderImagerySearchBbox()
     }
 
     this.updateInteractions()
 
-    if (this.props.selectedFeature) {
+    if (this.props.map.selectedFeature) {
       this.updateSelectedFeature()
     }
 
     // Used by tests
     window['primaryMap'] = this  // tslint:disable-line
 
-    if (this.props.onMapInitialization) {
-      this.props.onMapInitialization(this.map, {
-        hovered: this.hoverInteraction.getFeatures(),
-        imagery: this.imageryLayer.getSource().getFeaturesCollection(),
-        selected: this.selectInteraction.getFeatures(),
-        handleSelectFeature: this.handleSelectFeature,
-      })
-    }
+    this.props.mapInitialized(this.map, {
+      hovered: this.hoverInteraction.getFeatures(),
+      imagery: this.imageryLayer.getSource().getFeaturesCollection(),
+      selected: this.selectInteraction.getFeatures(),
+      handleSelectFeature: this.handleSelectFeature,
+    })
   }
 
   componentDidUpdate(previousProps: Props, previousState: State) {
     const routeChanged = previousProps.route.pathname !== this.props.route.pathname
 
-    if (!this.props.selectedFeature) {
+    if (!this.props.map.selectedFeature) {
       this.clearSelection()
     }
 
-    if (previousProps.selectedFeature !== this.props.selectedFeature ||
+    if (previousProps.map.selectedFeature !== this.props.map.selectedFeature ||
         previousState.selectedFeatureHalfWrapIndex !== this.state.selectedFeatureHalfWrapIndex) {
       this.renderSelectionPreview()
       this.updateSelectedFeature()
     }
 
-    if (previousProps.detections !== this.props.detections ||
+    if (previousProps.map.detections !== this.props.map.detections ||
         previousState.selectedFeatureHalfWrapIndex !== this.state.selectedFeatureHalfWrapIndex) {
       this.renderDetections()
     }
@@ -235,7 +230,7 @@ export class PrimaryMap extends React.Component<Props, State> {
      in which case the detections layer in OpenLayers should be refreshed. Only perform this check on Jobs, and only
      refresh the layer if the Job's status has changed to success.
     */
-    const selectedJob = (this.props.selectedFeature as beachfront.Job)
+    const selectedJob = (this.props.map.selectedFeature as beachfront.Job)
     if (selectedJob) {
       const previousJob = previousProps.jobs.filter(j => j.properties.job_id === selectedJob.properties.job_id)[0]
       const currentJob = this.props.jobs.filter(j => j.properties.job_id === selectedJob.properties.job_id)[0]
@@ -246,11 +241,11 @@ export class PrimaryMap extends React.Component<Props, State> {
       }
     }
 
-    if (previousProps.highlightedFeature !== this.props.highlightedFeature) {
+    if (previousProps.map.hoveredFeature !== this.props.map.hoveredFeature) {
       this.renderHighlight()
     }
 
-    if (previousProps.frames !== this.props.frames) {
+    if (previousProps.map.frames !== this.props.map.frames) {
       this.renderFrames()
       this.renderFrameFills()
       this.renderPins()
@@ -273,7 +268,7 @@ export class PrimaryMap extends React.Component<Props, State> {
       this.updateMapSize()
     }
 
-    if (previousProps.bbox !== this.props.bbox || routeChanged ||
+    if (previousProps.map.bbox !== this.props.map.bbox || routeChanged ||
         previousState.bboxHalfWrapIndex !== this.state.bboxHalfWrapIndex) {
       this.renderImagerySearchBbox()
     }
@@ -282,18 +277,18 @@ export class PrimaryMap extends React.Component<Props, State> {
       this.updateBasemap()
     }
 
-    if (previousProps.view !== this.props.view && this.props.view) {
+    if (previousProps.map.view !== this.props.map.view && this.props.map.view) {
       this.updateView()
     }
 
-    if ((!previousProps.view) ||
-      (previousProps.view.zoom !== this.props.view.zoom && this.props.view) ||
-      (previousProps.selectedFeature !== this.props.selectedFeature) ||
-      (previousProps.frames !== this.props.frames)) {
+    if ((!previousProps.map.view) ||
+      (previousProps.map.view.zoom !== this.props.map.view.zoom && this.props.map.view) ||
+      (previousProps.map.selectedFeature !== this.props.map.selectedFeature) ||
+      (previousProps.map.frames !== this.props.map.frames)) {
       this.updateStyles()
     }
 
-    if ((previousProps.mode !== this.props.mode) ||
+    if ((previousProps.map.mode !== this.props.map.mode) ||
       (previousState.isMeasuring !== this.state.isMeasuring)) {
       this.updateInteractions()
     }
@@ -315,7 +310,7 @@ export class PrimaryMap extends React.Component<Props, State> {
         />
         <FeatureDetails
           ref="featureDetails"
-          feature={this.props.selectedFeature}
+          feature={this.props.map.selectedFeature}
         />
         <ImagerySearchResults
           ref="imageSearchResults"
@@ -344,12 +339,12 @@ export class PrimaryMap extends React.Component<Props, State> {
         const selections = this.selectInteraction.getFeatures()
         selections.clear()
         selections.push(jobFeature)
-        this.props.onSelectFeature(toGeoJSON(jobFeature) as beachfront.Job)
+        this.props.mapSetSelectedFeature(toGeoJSON(jobFeature) as beachfront.Job)
         break
       case TYPE_JOB:
       case TYPE_SCENE:
         this.featureId = feature.ol_uid
-        this.props.onSelectFeature(toGeoJSON(feature) as beachfront.Scene)
+        this.props.mapSetSelectedFeature(toGeoJSON(feature) as beachfront.Scene)
         break
       default:
         // Not a valid "selectable" feature
@@ -423,30 +418,30 @@ export class PrimaryMap extends React.Component<Props, State> {
     const zoom = view.getZoom() || MIN_ZOOM  // HACK -- sometimes getZoom returns undefined...
 
     // Don't emit false positives
-    if (this.props.view
-      && this.props.view.center
-      && this.props.view.center[0] === center[0]
-      && this.props.view.zoom === zoom
-      && this.props.view.basemapIndex === basemapIndex) {
+    if (this.props.map.view
+      && this.props.map.view.center
+      && this.props.map.view.center[0] === center[0]
+      && this.props.map.view.zoom === zoom
+      && this.props.map.view.basemapIndex === basemapIndex) {
       return
     }
 
     this.skipNextViewUpdate = true
-    this.props.onViewChange({ basemapIndex, center, zoom })
+    this.props.mapUpdateView({ basemapIndex, center, zoom })
   }
 
   private handleMapMoveEnd() {
     let {selectedFeatureHalfWrapIndex, bboxHalfWrapIndex} = this.state
 
     // Check if we should re-render any manually looped elements.
-    if (this.props.selectedFeature) {
-      let selectedFeatureCenter = ol.extent.getCenter(featureToExtent(this.props.selectedFeature))
+    if (this.props.map.selectedFeature) {
+      let selectedFeatureCenter = ol.extent.getCenter(featureToExtent(this.props.map.selectedFeature))
       selectedFeatureCenter = ol.proj.transform(selectedFeatureCenter, WEB_MERCATOR, WGS84)
       selectedFeatureHalfWrapIndex = getWrapIndex(this.map, selectedFeatureCenter)
     }
 
-    if (this.props.bbox) {
-      let bboxCenter = ol.extent.getCenter(this.props.bbox)
+    if (this.props.map.bbox) {
+      let bboxCenter = ol.extent.getCenter(this.props.map.bbox)
       bboxHalfWrapIndex = getWrapIndex(this.map, bboxCenter)
     }
 
@@ -462,7 +457,7 @@ export class PrimaryMap extends React.Component<Props, State> {
   }
 
   private emitDeselectAll() {
-    this.props.onSelectFeature(null)
+    this.props.mapSetSelectedFeature(null)
   }
 
   private handleBasemapChange(index) {
@@ -474,12 +469,12 @@ export class PrimaryMap extends React.Component<Props, State> {
     const geometry = event.feature.getGeometry()
     let bbox = serializeBbox(geometry.getExtent())
 
-    this.props.onBoundingBoxChange(bbox)
+    this.props.mapUpdateBbox(bbox)
   }
 
   private handleDrawStart() {
     this.clearDraw()
-    this.props.onBoundingBoxChange(null)
+    this.props.mapUpdateBbox(null)
   }
 
   private handleMeasureEnd() {
@@ -510,7 +505,7 @@ export class PrimaryMap extends React.Component<Props, State> {
   }
 
   private handleMouseMove(event) {
-    if (this.state.isMeasuring || this.props.mode === MODE_DRAW_BBOX) {
+    if (this.state.isMeasuring || this.props.map.mode === MODE_DRAW_BBOX) {
       this.refs.container.classList.remove(styles.isHoveringFeature)
       return
     }
@@ -621,11 +616,11 @@ export class PrimaryMap extends React.Component<Props, State> {
       return
     }
 
-    if (!this.props.view) {
+    if (!this.props.map.view) {
       return
     }
 
-    const {basemapIndex, zoom, center, extent} = this.props.view
+    const {basemapIndex, zoom, center, extent} = this.props.map.view
     this.setState({ basemapIndex })
     const view = this.map.getView()
 
@@ -661,7 +656,7 @@ export class PrimaryMap extends React.Component<Props, State> {
 
     // Render detections.
     const insertionIndex = this.map.getLayers().getArray().indexOf(this.frameLayer)
-    this.props.detections.forEach(detection => {
+    this.props.map.detections.forEach(detection => {
       let layer: ol.Tile
 
       let extent = featureToExtentWrapped(this.map, detection)
@@ -683,7 +678,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     const source = this.pinLayer.getSource()
     const reader = new ol.GeoJSON()
 
-    this.props.frames.forEach(raw => {
+    this.props.map.frames.forEach(raw => {
       const frame = reader.readFeature(raw, {
         dataProjection: WGS84,
         featureProjection: WEB_MERCATOR,
@@ -756,7 +751,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     const source = this.frameLayer.getSource()
     const reader = new ol.GeoJSON()
 
-    this.props.frames.forEach(raw => {
+    this.props.map.frames.forEach(raw => {
       const frame = reader.readFeature(raw, {
         dataProjection: WGS84,
         featureProjection: WEB_MERCATOR,
@@ -772,7 +767,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     const source = this.frameFillLayer.getSource()
     const reader = new ol.GeoJSON()
 
-    this.props.frames.forEach(raw => {
+    this.props.map.frames.forEach(raw => {
       const frame = reader.readFeature(raw, {
         dataProjection: WGS84,
         featureProjection: WEB_MERCATOR,
@@ -787,7 +782,7 @@ export class PrimaryMap extends React.Component<Props, State> {
 
     const frames = this.frameLayer.getSource().getFeatures()
     frames.forEach(feature => {
-      const isSelected = (this.props.selectedFeature && this.props.selectedFeature.id === feature.getId())
+      const isSelected = (this.props.map.selectedFeature && this.props.map.selectedFeature.id === feature.getId())
 
       feature.setStyle(new ol.Style({
         stroke: new ol.Stroke({
@@ -799,7 +794,7 @@ export class PrimaryMap extends React.Component<Props, State> {
 
     const framesFills = this.frameFillLayer.getSource().getFeatures()
     framesFills.forEach(feature => {
-      const isSelected = (this.props.selectedFeature && this.props.selectedFeature.id === feature.getId())
+      const isSelected = (this.props.map.selectedFeature && this.props.map.selectedFeature.id === feature.getId())
 
       feature.setStyle(new ol.Style({
         stroke: new ol.Stroke({
@@ -815,7 +810,7 @@ export class PrimaryMap extends React.Component<Props, State> {
 
     const pins = this.pinLayer.getSource().getFeatures()
     pins.forEach(feature => {
-      const isSelected = (this.props.selectedFeature && this.props.selectedFeature.id === feature.get(KEY_OWNER_ID))
+      const isSelected = (this.props.map.selectedFeature && this.props.map.selectedFeature.id === feature.get(KEY_OWNER_ID))
       feature.setStyle(() => {
         switch (feature.get(KEY_TYPE)) {
           case TYPE_DIVOT_INBOARD:
@@ -895,7 +890,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     const source = this.highlightLayer.getSource()
     source.clear()
 
-    const geojson = this.props.highlightedFeature
+    const geojson = this.props.map.hoveredFeature
     if (!geojson) {
       return
     }
@@ -938,7 +933,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.imageSearchResultsOverlay.setPosition(undefined)
 
     // HACK HACK HACK HACK HACK HACK HACK HACK
-    let bbox = deserializeBbox(this.props.bbox)
+    let bbox = deserializeBbox(this.props.map.bbox)
     if (!bbox) {
       return  // Nothing to pin the overlay to
     }
@@ -977,7 +972,7 @@ export class PrimaryMap extends React.Component<Props, State> {
 
   private renderImagerySearchBbox() {
     this.clearDraw()
-    let bbox = deserializeBbox(this.props.bbox)
+    let bbox = deserializeBbox(this.props.map.bbox)
     if (!bbox || this.props.route.pathname !== '/create-job') {
       return
     }
@@ -989,7 +984,7 @@ export class PrimaryMap extends React.Component<Props, State> {
   }
 
   private renderSelectionPreview() {
-    const previewables = this.toPreviewable([this.props.selectedFeature].filter(Boolean))
+    const previewables = this.toPreviewable([this.props.map.selectedFeature].filter(Boolean))
 
     // Remove currently rendered selection previews.
     Object.keys(this.previewLayers).forEach(imageId => {
@@ -1064,7 +1059,7 @@ export class PrimaryMap extends React.Component<Props, State> {
       return
     }
 
-    switch (this.props.mode) {
+    switch (this.props.map.mode) {
       case MODE_SELECT_IMAGERY:
         this.deactivateBboxDrawInteraction()
         this.activateSelectInteraction()
@@ -1086,7 +1081,7 @@ export class PrimaryMap extends React.Component<Props, State> {
         this.deactivateHoverInteraction()
         break
       default:
-        console.warn('wat mode=%s', this.props.mode)
+        console.warn('wat mode=%s', this.props.map.mode)
         break
     }
   }
@@ -1095,17 +1090,16 @@ export class PrimaryMap extends React.Component<Props, State> {
     const features = this.selectInteraction.getFeatures()
     features.clear()
 
-    const {selectedFeature} = this.props
-    if (!selectedFeature) {
+    if (!this.props.map.selectedFeature) {
       return  // Nothing to do
     }
 
     const reader = new ol.GeoJSON()
-    const feature = reader.readFeature(selectedFeature, {
+    const feature = reader.readFeature(this.props.map.selectedFeature, {
       dataProjection: WGS84,
       featureProjection: WEB_MERCATOR,
     })
-    const anchor = ol.extent.getTopRight(featureToExtentWrapped(this.map, selectedFeature))
+    const anchor = ol.extent.getTopRight(featureToExtentWrapped(this.map, this.props.map.selectedFeature))
     features.push(feature)
     this.featureDetailsOverlay.setPosition(anchor)
   }
@@ -1454,14 +1448,26 @@ function getCookie(name) {
   return null
 }
 
-function mapStateToProps(state) {
+function mapStateToProps(state: AppState) {
   return {
     route: state.route,
     catalog: state.catalog,
+    map: state.map,
+  }
+}
+
+function mapDispatchToProps(dispatch) {
+  return {
+    mapInitialized: (map: ol.Map, collections: any) => dispatch(mapActions.initialized(map, collections)),
+    mapUpdateBbox: (bbox: [number, number, number, number]) => dispatch(mapActions.updateBbox(bbox)),
+    mapUpdateView: (view: MapView) => dispatch(mapActions.updateView(view)),
+    mapSetSelectedFeature: (selectedFeature: beachfront.Job | beachfront.Scene | null) => (
+      dispatch(mapActions.setSelectedFeature(selectedFeature))
+    ),
   }
 }
 
 export default connect(
   mapStateToProps,
-  null,
+  mapDispatchToProps,
 )(PrimaryMap)

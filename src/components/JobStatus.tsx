@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
+import JobStatusList from './JobStatusList'
 
 const styles: any = require('./JobStatus.css')
 
@@ -34,16 +35,19 @@ import {
   STATUS_SUBMITTED,
   STATUS_FAIL,
 } from '../constants'
+import {connect} from 'react-redux'
+import {AppState} from '../store'
+import {mapActions} from '../actions/mapActions'
 
 interface Props {
   className?: string
   isActive: boolean
   job: beachfront.Job
   selectedFeature: beachfront.Job | beachfront.Scene
-  onSelectJob(job: beachfront.Job)
   onForgetJob(job: beachfront.Job)
   onNavigate(loc: { pathname: string, search: string, hash: string })
   onToggleExpansion(job: beachfront.Job, isExpanded: boolean)
+  mapSetSelectedFeature?(selectedFeature: beachfront.Job | beachfront.Scene | null): void
 }
 
 interface State {
@@ -238,7 +242,7 @@ export class JobStatus extends React.Component<Props, State> {
       this.toggleExpansion()
     }
 
-    this.props.onSelectJob(this.props.job)
+    this.props.mapSetSelectedFeature(this.props.job)
   }
 
   private emitOnForgetJob() {
@@ -282,3 +286,16 @@ export class JobStatus extends React.Component<Props, State> {
 function segmentIfNeeded(s: string) {
   return s.length > 30 ? s.replace(/(\W)/g, '$1 ') : s
 }
+
+function mapDispatchToProps(dispatch) {
+  return {
+    mapSetSelectedFeature: (selectedFeature: beachfront.Job | beachfront.Scene | null) => (
+      dispatch(mapActions.setSelectedFeature(selectedFeature))
+    ),
+  }
+}
+
+export default connect(
+  null,
+  mapDispatchToProps,
+)(JobStatusList)

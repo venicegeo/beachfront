@@ -15,28 +15,37 @@
  **/
 
 import {types} from '../actions/catalogActions'
+import {createSearchCriteria, SearchCriteria} from '../components/CreateJob'
 
 export interface CatalogState {
   apiKey: string
+  isSearching: boolean
+  searchCriteria: SearchCriteria
+  searchError: any
+  searchResults: beachfront.ImageryCatalogPage | null
 }
 
-const initialState = {
-  apiKey: localStorage.getItem('catalog_apiKey') || '',
+export const catalogInitialState: CatalogState = {
+  apiKey: '',
+  isSearching: false,
+  searchCriteria: createSearchCriteria(),
+  searchError: null,
+  searchResults: null,
 }
 
-export class CatalogReducer {
-  static readonly initialState = initialState
-
-  static reduce(state = initialState, action: any): CatalogState {
-    switch (action.type) {
-      case types.CATALOG_API_KEY_CHANGED:
-        console.log('CATALOG_API_KEY_CHANGED')
-        return {
-          ...state,
-          apiKey: action.apiKey,
-        }
-      default:
-        return state
-    }
+export function catalogReducer(state = catalogInitialState, action: any): CatalogState {
+  switch (action.type) {
+    case types.CATALOG_DESERIALIZED:
+      return {
+        ...state,
+        ...action.state,
+      }
+    case types.CATALOG_API_KEY_UPDATED:
+      return {
+        ...state,
+        apiKey: action.apiKey,
+      }
+    default:
+      return state
   }
 }

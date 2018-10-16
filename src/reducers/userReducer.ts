@@ -14,8 +14,8 @@
  * limitations under the License.
  **/
 
-import * as session from '../api/session'
 import {types} from '../actions/userActions'
+import * as session from '../api/session'
 
 export interface UserState {
   isLoggedIn: boolean
@@ -25,48 +25,45 @@ export interface UserState {
   errors: any[]
 }
 
-const initialState = {
+export const userInitialState: UserState = {
   isLoggedIn: session.initialize(),
-  isSessionExpired: JSON.parse(sessionStorage.getItem('isSessionExpired')),
+  isSessionExpired: false,
   isSessionLoggedOut: false,
   catalogApiKey: '',
   errors: [],
 }
 
-export class UserReducer {
-  static readonly initialState = initialState
-
-  static reduce(state = initialState, action: any): UserState {
-    switch (action.type) {
-      case types.USER_LOGGED_OUT:
-        console.log('USER_LOGGED_OUT')
-        return {
-          ...state,
-          isLoggedIn: false,
-          isSessionLoggedOut: true,
-        }
-      case types.USER_SESSION_CLEARED:
-        console.log('USER_SESSION_CLEARED')
-        return {
-          ...state,
-          isLoggedIn: false,
-          isSessionExpired: false,
-        }
-      case types.USER_SESSION_LOGGED_OUT:
-        console.log('USER_SESSION_LOGGED_OUT')
-        return {
-          ...state,
-          isLoggedIn: false,
-          isSessionLoggedOut: false,
-        }
-      case types.USER_SESSION_EXPIRED:
-        console.log('USER_SESSION_EXPIRED')
-        return {
-          ...state,
-          isSessionExpired: true,
-        }
-      default:
-        return state
-    }
+export function userReducer(state = userInitialState, action: any): UserState {
+  switch (action.type) {
+    case types.USER_DESERIALIZED:
+      return {
+        ...state,
+        ...action.state,
+      }
+    case types.USER_LOGGED_OUT:
+      return {
+        ...state,
+        isLoggedIn: false,
+        isSessionLoggedOut: true,
+      }
+    case types.USER_SESSION_CLEARED:
+      return {
+        ...state,
+        isLoggedIn: false,
+        isSessionExpired: false,
+      }
+    case types.USER_SESSION_LOGGED_OUT:
+      return {
+        ...state,
+        isLoggedIn: false,
+        isSessionLoggedOut: false,
+      }
+    case types.USER_SESSION_EXPIRED:
+      return {
+        ...state,
+        isSessionExpired: true,
+      }
+    default:
+      return state
   }
 }

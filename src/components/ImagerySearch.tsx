@@ -35,7 +35,6 @@ interface Props {
   error?: any
   isSearching: boolean
   source: string
-  onClearBbox()
   onCloudCoverChange(value: number)
   onDateChange(fromValue: string, toValue: string)
   onSearchCriteriaChange(criteria: SearchCriteria)
@@ -67,7 +66,6 @@ export class ImagerySearch extends React.Component<Props, {}> {
             disabled={this.props.isSearching}
             enabledPlatforms={this.props.enabledPlatforms}
             source={this.props.source}
-            onClearBbox={this.props.onClearBbox}
             onCloudCoverChange={this.props.onCloudCoverChange}
             onDateChange={this.props.onDateChange}
             onSourceChange={this.props.onSourceChange}

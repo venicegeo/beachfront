@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
+import {mapActions} from '../actions/mapActions'
 
 const styles: any = require('./CatalogSearchCriteria.css')
 const DATE_FORMAT = 'YYYY-MM-DD'
@@ -35,11 +36,11 @@ interface Props {
   enabledPlatforms: string[]
   errorElement?: React.ReactElement<any>
   source: string
-  setCatalogApiKey?: (catalogApiKey: string) => void
-  onClearBbox()
+  catalogSetApiKey?: (catalogApiKey: string) => void
   onCloudCoverChange(cloudCover: number)
   onDateChange?(dateFrom: string, dateTo: string)
   onSourceChange(source: string)
+  mapClearBbox?(): void
 }
 
 export class CatalogSearchCriteria extends React.Component<Props, null> {
@@ -58,7 +59,7 @@ export class CatalogSearchCriteria extends React.Component<Props, null> {
       <div className={styles.root}>
         <div className={styles.minimap}>
           <StaticMinimap bbox={this.props.bbox}/>
-          <div className={styles.clearBbox} onClick={this.props.onClearBbox}>
+          <div className={styles.clearBbox} onClick={this.props.mapClearBbox}>
             <i className="fa fa-times-circle"/> Clear
           </div>
         </div>
@@ -156,7 +157,7 @@ export class CatalogSearchCriteria extends React.Component<Props, null> {
   }
 
   private handleApiKeyChange(e) {
-    this.props.setCatalogApiKey((e.target as HTMLInputElement).value)
+    this.props.catalogSetApiKey((e.target as HTMLInputElement).value)
   }
 
   private handleDateOfCaptureFromChange(e) {
@@ -193,7 +194,8 @@ function isValidDateRange(from, to) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    setCatalogApiKey: (catalogApiKey: string) => dispatch(catalogActions.setApiKey(catalogApiKey)),
+    catalogSetApiKey: (catalogApiKey: string) => dispatch(catalogActions.setApiKey(catalogApiKey)),
+    mapClearBbox: () => dispatch(mapActions.clearBbox()),
   }
 }
 
