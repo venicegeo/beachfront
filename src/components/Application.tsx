@@ -37,10 +37,8 @@ import SessionLoggedOut from './SessionLoggedOut'
 import * as algorithmsService from '../api/algorithms'
 import * as catalogService from '../api/catalog'
 import * as geoserverService from '../api/geoserver'
-import * as jobsService from '../api/jobs'
 import * as productLinesService from '../api/productLines'
 import * as sessionService from '../api/session'
-import * as statusService from '../api/status'
 import {createCollection, Collection} from '../utils/collections'
 import {
   featureToExtentWrapped,
@@ -68,6 +66,7 @@ import {mapActions, shouldSelectedFeatureAutoDeselect} from '../actions/mapActio
 import {MapState} from '../reducers/mapReducer'
 import {JobsState} from '../reducers/jobsReducer'
 import {AppState} from '../store'
+import {enabledPlatformsActions} from '../actions/enabledPlatformsActions'
 
 interface Props {
   user?: UserState
@@ -95,6 +94,9 @@ interface Props {
   mapDeserialize?(): void
   jobsFetch?(): void
   jobsFetchOne?(jobId: string): void
+  enabledPlatformsFetch?(): void
+  enabledPlatformsSerialize?(): void
+  enabledPlatformsDeserialize?(): void
 }
 
 interface State {
@@ -102,7 +104,6 @@ interface State {
   geoserver?: geoserverService.Descriptor
 
   // Data Collections
-  enabledPlatforms?: Collection<string>
   algorithms?: Collection<beachfront.Algorithm>
   productLines?: Collection<beachfront.ProductLine>
 
@@ -115,7 +116,6 @@ interface State {
 
 export class Application extends React.Component<Props, State> {
   refs: any
-  private initializationPromise: Promise<any>
   private pollingInstance: number
   private idleInterval: any
   private tour: any
@@ -303,7 +303,6 @@ export class Application extends React.Component<Props, State> {
         return (
           <CreateJob
             algorithms={this.state.algorithms.records}
-            enabledPlatforms={this.state.enabledPlatforms.records}
             imagery={this.state.searchResults}
             isSearching={this.state.isSearching}
             mapRef={this.refs.map}
@@ -317,7 +316,6 @@ export class Application extends React.Component<Props, State> {
         return (
           <CreateProductLine
             algorithms={this.state.algorithms.records}
-            enabledPlatforms={this.state.enabledPlatforms.records}
             onProductLineCreated={this.handleProductLineCreated}
           />
         )
@@ -364,19 +362,10 @@ export class Application extends React.Component<Props, State> {
   }
 
   private initializeServices() {
-    this.initializationPromise = Promise.all([
-      this.fetchEnabledPlatforms(),
-      this.fetchAlgorithms(),
-      this.fetchGeoserverConfig(),
-      this.initializeCatalog(),
-    ])
-  }
-
-  private fetchEnabledPlatforms() {
-    this.setState({enabledPlatforms: this.state.enabledPlatforms.$fetching()})
-    return statusService.getEnabledPlatforms()
-      .then(sources => this.setState({enabledPlatforms: this.state.enabledPlatforms.$records(sources)}))
-      .catch(err => this.setState({enabledPlatforms: this.state.enabledPlatforms.$error(err)}))
+    this.props.enabledPlatformsFetch()
+    this.fetchAlgorithms()
+    this.fetchGeoserverConfig()
+    this.initializeCatalog()
   }
 
   private fetchAlgorithms() {
@@ -580,7 +569,6 @@ export class Application extends React.Component<Props, State> {
   }
 
   private serialize() {
-    sessionStorage.setItem('enabled_platforms_records', JSON.stringify(this.state.enabledPlatforms.records))
     sessionStorage.setItem('algorithms_records', JSON.stringify(this.state.algorithms.records))
     sessionStorage.setItem('geoserver', JSON.stringify(this.state.geoserver))
     sessionStorage.setItem('searchCriteria', JSON.stringify(this.state.searchCriteria))
@@ -589,12 +577,14 @@ export class Application extends React.Component<Props, State> {
     this.props.userSerialize()
     this.props.catalogSerialize()
     this.props.mapSerialize()
+    this.props.enabledPlatformsSerialize()
   }
 
   private deserialize() {
     this.props.userDeserialize()
     this.props.catalogDeserialize()
     this.props.mapDeserialize()
+    this.props.enabledPlatformsDeserialize()
   }
 }
 
@@ -604,7 +594,6 @@ export class Application extends React.Component<Props, State> {
 
 function deserialize(): State {
   return {
-    enabledPlatforms: createCollection(JSON.parse(sessionStorage.getItem('enabled_platforms_records')) || []),
     algorithms: createCollection(JSON.parse(sessionStorage.getItem('algorithms_records')) || []),
     geoserver:        JSON.parse(sessionStorage.getItem('geoserver')),
     searchCriteria:   JSON.parse(sessionStorage.getItem('searchCriteria')),
@@ -694,6 +683,9 @@ function mapDispatchToProps(dispatch) {
     mapDeserialize: () => dispatch(mapActions.deserialize()),
     jobsFetch: () => dispatch(jobsActions.fetch()),
     jobsFetchOne: (jobId: string) => dispatch(jobsActions.fetchOne(jobId)),
+    enabledPlatformsFetch: () => dispatch(enabledPlatformsActions.fetch()),
+    enabledPlatformsSerialize: () => dispatch(enabledPlatformsActions.serialize()),
+    enabledPlatformsDeserialize: () => dispatch(enabledPlatformsActions.deserialize()),
   }
 }
 

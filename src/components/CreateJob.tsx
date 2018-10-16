@@ -45,7 +45,6 @@ interface Props {
   map?: MapState
   jobs?: JobsState
   algorithms: beachfront.Algorithm[]
-  enabledPlatforms: string[]
   imagery: beachfront.ImageryCatalogPage
   isSearching: boolean
   mapRef: PrimaryMap
@@ -120,7 +119,6 @@ export class CreateJob extends React.Component<Props, State> {
           {this.props.map.bbox && (
             <li className={styles.search}>
               <ImagerySearch
-                enabledPlatforms={this.props.enabledPlatforms}
                 bbox={this.props.map.bbox}
                 catalogApiKey={this.props.catalog.apiKey}
                 cloudCover={this.props.searchCriteria.cloudCover}

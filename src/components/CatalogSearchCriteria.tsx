@@ -25,15 +25,17 @@ import {StaticMinimap} from './StaticMinimap'
 import * as moment from 'moment'
 import {SCENE_TILE_PROVIDERS} from '../config'
 import {catalogActions} from '../actions/catalogActions'
+import {AppState} from '../store'
+import {EnabledPlatformsState} from '../reducers/enabledPlatformsReducer'
 
 interface Props {
+  enabledPlatforms?: EnabledPlatformsState
   apiKey: string
   bbox: number[]
   cloudCover: number
   dateFrom?: string
   dateTo?: string
   disabled?: boolean
-  enabledPlatforms: string[]
   errorElement?: React.ReactElement<any>
   source: string
   catalogSetApiKey?: (catalogApiKey: string) => void
@@ -74,7 +76,7 @@ export class CatalogSearchCriteria extends React.Component<Props, null> {
             onChange={this.handleSourceChange}
           >
             {SCENE_TILE_PROVIDERS
-              .filter(p => this.props.enabledPlatforms.some(platform => p.prefix === platform))
+              .filter(p => this.props.enabledPlatforms.records.some(platform => p.prefix === platform))
               .map(p => (
                 <option key={p.prefix} value={p.prefix}>{p.name} ({p.provider})</option>
               ))}
@@ -192,6 +194,12 @@ function isValidDateRange(from, to) {
   return !fromMoment.isValid() || !toMoment.isValid() || fromMoment.isSameOrBefore(toMoment)
 }
 
+function mapStateToProps(state: AppState) {
+  return {
+    enabledPlatforms: state.enabledPlatforms,
+  }
+}
+
 function mapDispatchToProps(dispatch) {
   return {
     catalogSetApiKey: (catalogApiKey: string) => dispatch(catalogActions.setApiKey(catalogApiKey)),
@@ -200,6 +208,6 @@ function mapDispatchToProps(dispatch) {
 }
 
 export default connect(
-  undefined,
+  mapStateToProps,
   mapDispatchToProps,
 )(CatalogSearchCriteria)

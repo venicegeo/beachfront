@@ -34,7 +34,6 @@ interface Props {
   catalog?: CatalogState
   map?: MapState
   algorithms:        beachfront.Algorithm[]
-  enabledPlatforms?: string[]
   onProductLineCreated(productLine: beachfront.ProductLine)
 }
 
@@ -86,7 +85,6 @@ export class CreateProductLine extends React.Component<Props, State> {
                 apiKey={this.props.catalog.apiKey}
                 bbox={this.props.map.bbox}
                 cloudCover={this.state.cloudCover}
-                enabledPlatforms={this.props.enabledPlatforms}
                 source={this.state.source}
                 onCloudCoverChange={cloudCover => this.setState({ cloudCover })}
                 onSourceChange={this.handleSourceChange}

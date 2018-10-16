@@ -23,6 +23,11 @@ import {routeInitialState, routeReducer, RouteState} from './reducers/routeReduc
 import {mapInitialState, mapReducer, MapState} from './reducers/mapReducer'
 import {jobsInitialState, jobsReducer, JobsState} from './reducers/jobsReducer'
 import {productLinesInitialState, productLinesReducer, ProductLinesState} from './reducers/productLinesReducer'
+import {
+  enabledPlatformsInitialState,
+  enabledPlatformsReducer,
+  EnabledPlatformsState,
+} from './reducers/enabledPlatformsReducer'
 
 const middleware = [reduxThunk]
 
@@ -37,6 +42,7 @@ export interface AppState {
   map: MapState
   jobs: JobsState
   productLines: ProductLinesState
+  enabledPlatforms: EnabledPlatformsState,
 }
 
 const initialState: AppState = {
@@ -46,6 +52,7 @@ const initialState: AppState = {
   map: mapInitialState,
   jobs: jobsInitialState,
   productLines: productLinesInitialState,
+  enabledPlatforms: enabledPlatformsInitialState,
 }
 
 export default createStore(
@@ -56,6 +63,7 @@ export default createStore(
     map: mapReducer,
     jobs: jobsReducer,
     productLines: productLinesReducer,
+    enabledPlatforms: enabledPlatformsReducer,
   }),
   initialState,
   applyMiddleware(...middleware),
