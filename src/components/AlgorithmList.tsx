@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
+import {AlgorithmsState} from '../reducers/algorithmsReducer'
 
 const styles: any = require('./AlgorithmList.css')
 
@@ -24,7 +25,7 @@ import {JobsState} from '../reducers/jobsReducer'
 
 interface Props {
   jobs?: JobsState
-  algorithms: beachfront.Algorithm[]
+  algorithms?: AlgorithmsState
   sceneMetadata: beachfront.SceneMetadata
   selectedId?: string
   warningHeading?: string
@@ -37,7 +38,7 @@ export const AlgorithmList = (props: Props) => (
   <div className={styles.root}>
     <h2>Select Algorithm</h2>
     <ul>
-      {props.algorithms.map(algorithm => (
+      {props.algorithms.records.map(algorithm => (
         <li key={algorithm.id}>
           <Algorithm
             algorithm={algorithm}
@@ -64,6 +65,7 @@ export const AlgorithmList = (props: Props) => (
 function mapStateToProps(state: AppState) {
   return {
     jobs: state.jobs,
+    algorithms: state.algorithms,
   }
 }
 

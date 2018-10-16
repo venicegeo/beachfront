@@ -44,7 +44,6 @@ interface Props {
   catalog?: CatalogState
   map?: MapState
   jobs?: JobsState
-  algorithms: beachfront.Algorithm[]
   imagery: beachfront.ImageryCatalogPage
   isSearching: boolean
   mapRef: PrimaryMap
@@ -159,7 +158,6 @@ export class CreateJob extends React.Component<Props, State> {
           {this.props.map.bbox && this.state.selectedScene && (
             <li className={styles.algorithms}>
               <AlgorithmList
-                algorithms={this.props.algorithms}
                 sceneMetadata={this.state.selectedScene.properties}
                 onSubmit={this.handleSubmit}
               />

@@ -34,7 +34,6 @@ import PrimaryMap from './PrimaryMap'
 import {ProductLineList} from './ProductLineList'
 import SessionExpired from './SessionExpired'
 import SessionLoggedOut from './SessionLoggedOut'
-import * as algorithmsService from '../api/algorithms'
 import * as catalogService from '../api/catalog'
 import * as geoserverService from '../api/geoserver'
 import * as productLinesService from '../api/productLines'
@@ -67,6 +66,8 @@ import {MapState} from '../reducers/mapReducer'
 import {JobsState} from '../reducers/jobsReducer'
 import {AppState} from '../store'
 import {enabledPlatformsActions} from '../actions/enabledPlatformsActions'
+import {EnabledPlatformsState} from '../reducers/enabledPlatformsReducer'
+import {algorithmsActions} from '../actions/algorithmsActions'
 
 interface Props {
   user?: UserState
@@ -74,6 +75,7 @@ interface Props {
   route?: RouteState
   map?: MapState
   jobs?: JobsState
+  enabledPlatforms?: EnabledPlatformsState
   userLogin?(args): void
   userLogout?(): void
   routeNavigateTo?(loc, pushHistory?: boolean): void
@@ -97,6 +99,9 @@ interface Props {
   enabledPlatformsFetch?(): void
   enabledPlatformsSerialize?(): void
   enabledPlatformsDeserialize?(): void
+  algorithmsFetch?(): void
+  algorithmsSerialize?(): void
+  algorithmsDeserialize?(): void
 }
 
 interface State {
@@ -104,7 +109,6 @@ interface State {
   geoserver?: geoserverService.Descriptor
 
   // Data Collections
-  algorithms?: Collection<beachfront.Algorithm>
   productLines?: Collection<beachfront.ProductLine>
 
   // Search state
@@ -202,18 +206,10 @@ export class Application extends React.Component<Props, State> {
     }
 
     if (prevProps.jobs.fetchingOne && !this.props.jobs.fetchingOne) {
-      if (this.props.jobs.fetchOneError) {
-        throw this.props.jobs.fetchOneError
-      }
-
       this.props.mapPanToPoint(getFeatureCenter(this.props.jobs.lastOneFetched))
     }
 
     if (prevProps.jobs.creatingJob && !this.props.jobs.creatingJob) {
-      if (this.props.jobs.createJobError) {
-        throw this.props.jobs.createJobError
-      }
-
       this.props.routeNavigateTo({
         pathname: '/jobs',
         search: '?jobId=' + this.props.jobs.createdJob.id,
@@ -302,7 +298,6 @@ export class Application extends React.Component<Props, State> {
       case '/create-job':
         return (
           <CreateJob
-            algorithms={this.state.algorithms.records}
             imagery={this.state.searchResults}
             isSearching={this.state.isSearching}
             mapRef={this.refs.map}
@@ -315,7 +310,6 @@ export class Application extends React.Component<Props, State> {
       case '/create-product-line':
         return (
           <CreateProductLine
-            algorithms={this.state.algorithms.records}
             onProductLineCreated={this.handleProductLineCreated}
           />
         )
@@ -363,16 +357,9 @@ export class Application extends React.Component<Props, State> {
 
   private initializeServices() {
     this.props.enabledPlatformsFetch()
-    this.fetchAlgorithms()
+    this.props.algorithmsFetch()
     this.fetchGeoserverConfig()
     this.initializeCatalog()
-  }
-
-  private fetchAlgorithms() {
-    this.setState({ algorithms: this.state.algorithms.$fetching() })
-    return algorithmsService.lookup()
-      .then(algorithms => this.setState({ algorithms: this.state.algorithms.$records(algorithms) }))
-      .catch(err => this.setState({ algorithms: this.state.algorithms.$error(err) }))
   }
 
   private fetchGeoserverConfig() {
@@ -550,7 +537,6 @@ export class Application extends React.Component<Props, State> {
       geoserver: {},
 
       // Data Collections
-      algorithms: createCollection(),
       productLines: createCollection(),
 
       // Search state
@@ -569,7 +555,6 @@ export class Application extends React.Component<Props, State> {
   }
 
   private serialize() {
-    sessionStorage.setItem('algorithms_records', JSON.stringify(this.state.algorithms.records))
     sessionStorage.setItem('geoserver', JSON.stringify(this.state.geoserver))
     sessionStorage.setItem('searchCriteria', JSON.stringify(this.state.searchCriteria))
     sessionStorage.setItem('searchResults', JSON.stringify(this.state.searchResults))
@@ -578,6 +563,7 @@ export class Application extends React.Component<Props, State> {
     this.props.catalogSerialize()
     this.props.mapSerialize()
     this.props.enabledPlatformsSerialize()
+    this.props.algorithmsSerialize()
   }
 
   private deserialize() {
@@ -585,6 +571,7 @@ export class Application extends React.Component<Props, State> {
     this.props.catalogDeserialize()
     this.props.mapDeserialize()
     this.props.enabledPlatformsDeserialize()
+    this.props.algorithmsDeserialize()
   }
 }
 
@@ -594,7 +581,6 @@ export class Application extends React.Component<Props, State> {
 
 function deserialize(): State {
   return {
-    algorithms: createCollection(JSON.parse(sessionStorage.getItem('algorithms_records')) || []),
     geoserver:        JSON.parse(sessionStorage.getItem('geoserver')),
     searchCriteria:   JSON.parse(sessionStorage.getItem('searchCriteria')),
     searchResults:    JSON.parse(sessionStorage.getItem('searchResults')),
@@ -655,6 +641,7 @@ function mapStateToProps(state: AppState) {
     route: state.route,
     map: state.map,
     jobs: state.jobs,
+    enabledPlatforms: state.enabledPlatforms,
   }
 }
 
@@ -686,6 +673,9 @@ function mapDispatchToProps(dispatch) {
     enabledPlatformsFetch: () => dispatch(enabledPlatformsActions.fetch()),
     enabledPlatformsSerialize: () => dispatch(enabledPlatformsActions.serialize()),
     enabledPlatformsDeserialize: () => dispatch(enabledPlatformsActions.deserialize()),
+    algorithmsFetch: () => dispatch(algorithmsActions.fetch()),
+    algorithmsSerialize: () => dispatch(algorithmsActions.serialize()),
+    algorithmsDeserialize: () => dispatch(algorithmsActions.deserialize()),
   }
 }
 

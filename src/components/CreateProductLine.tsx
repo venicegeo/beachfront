@@ -33,7 +33,6 @@ import {MapState} from '../reducers/mapReducer'
 interface Props {
   catalog?: CatalogState
   map?: MapState
-  algorithms:        beachfront.Algorithm[]
   onProductLineCreated(productLine: beachfront.ProductLine)
 }
 
@@ -97,7 +96,6 @@ export class CreateProductLine extends React.Component<Props, State> {
                 onNameChange={name => this.setState({ name, shouldAutogenerateName: !name })}
               />
               <AlgorithmList
-                algorithms={this.props.algorithms}
                 sceneMetadata={{
                   cloudCover: this.state.cloudCover,
                 } as any}
