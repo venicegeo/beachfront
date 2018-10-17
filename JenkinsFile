@@ -225,28 +225,11 @@ node {
   }
   
   if(!env.SKIP_INTEGRATION_TESTS.toBoolean()) {
-    stage("Phase One Integration Tests") {
-      if(!fileExists("integration-tests")) {
-        sh "mkdir -p integration-tests"
-      }
-      withCredentials([
-      [$class: 'UsernamePasswordMultiBinding', credentialsId: "${env.GX_TEST_USER}", usernameVariable: "bf_username", passwordVariable: "bf_password"],
-      [$class: 'StringBinding', credentialsId: "${env.PL_API_KEY}", variable: "PL_API_KEY"]
-      ]) {
-        withEnv([
-        "PCF_SPACE=${env.PHASE_ONE_PCF_SPACE}"
-        ]) {
-          dir ("integration-tests") {
-            if(env.INTEGRATION_GITLAB_CREDS) {
-              git url: "${env.INTEGRATION_GIT_URL}", branch: "${env.INTEGRATION_GIT_BRANCH}", credentialsId: "${env.INTEGRATION_GITLAB_CREDS}"
-            } else {
-              git url: "${env.INTEGRATION_GIT_URL}", branch: "${env.INTEGRATION_GIT_BRANCH}"
-            }
-            sh "chmod 700 ci/beachfront_ua_tests_int.sh"
-            sh "ci/beachfront_ua_tests_int.sh"
-          }
-        }
-      }
+    stage("Phase One Selenium Tests") {
+      build job: "bftest-selenium", parameters: [
+        [$class: 'StringParameterValue', name: "SPACE", value: "${env.PHASE_ONE_PCF_SPACE}"],
+        [$class: 'StringParameterValue', name: "DOMAIN", value: "${env.PHASE_ONE_PCF_DOMAIN}"],
+        [$class: 'StringParameterValue', name: "ENVIRONMENT", value: "${ENVIRONMENT}"]]
     }
   }
   
