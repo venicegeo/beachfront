@@ -26,10 +26,10 @@ import * as moment from 'moment'
 import {SCENE_TILE_PROVIDERS} from '../config'
 import {catalogActions} from '../actions/catalogActions'
 import {AppState} from '../store'
-import {EnabledPlatformsState} from '../reducers/enabledPlatformsReducer'
+import {ApiStatusState} from '../reducers/apiStatusReducer'
 
 interface Props {
-  enabledPlatforms?: EnabledPlatformsState
+  apiStatus?: ApiStatusState
   apiKey: string
   bbox: number[]
   cloudCover: number
@@ -76,7 +76,7 @@ export class CatalogSearchCriteria extends React.Component<Props, null> {
             onChange={this.handleSourceChange}
           >
             {SCENE_TILE_PROVIDERS
-              .filter(p => this.props.enabledPlatforms.records.some(platform => p.prefix === platform))
+              .filter(p => this.props.apiStatus.enabledPlatforms.some(platform => p.prefix === platform))
               .map(p => (
                 <option key={p.prefix} value={p.prefix}>{p.name} ({p.provider})</option>
               ))}
@@ -196,7 +196,7 @@ function isValidDateRange(from, to) {
 
 function mapStateToProps(state: AppState) {
   return {
-    enabledPlatforms: state.enabledPlatforms,
+    apiStatus: state.apiStatus,
   }
 }
 

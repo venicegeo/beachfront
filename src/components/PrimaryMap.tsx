@@ -73,6 +73,7 @@ import {mapActions} from '../actions/mapActions'
 import {AppState} from '../store'
 import {MapState} from '../reducers/mapReducer'
 import {JobsState} from '../reducers/jobsReducer'
+import {ApiStatusState} from '../reducers/apiStatusReducer'
 
 const DEFAULT_CENTER: [number, number] = [-10, 0]
 const MIN_ZOOM = 2.5
@@ -103,9 +104,9 @@ interface Props {
   catalog?: CatalogState
   map?: MapState
   jobs?: JobsState
+  apiStatus?: ApiStatusState
   imagery:            beachfront.ImageryCatalogPage
   isSearching:        boolean
-  wmsUrl:             string
   shrunk:             boolean
   onSearchPageChange(page: {count: number, startIndex: number})
   onSignOutClick()
@@ -662,7 +663,7 @@ export class PrimaryMap extends React.Component<Props, State> {
 
       let extent = featureToExtentWrapped(this.map, detection)
       layer = new ol.Tile({
-        source: generateDetectionsSource(this.props.wmsUrl, detection),
+        source: generateDetectionsSource(this.props.apiStatus.geoserver.wmsUrl, detection),
         extent,
       })
 
@@ -1455,6 +1456,7 @@ function mapStateToProps(state: AppState) {
     catalog: state.catalog,
     map: state.map,
     jobs: state.jobs,
+    apiStatus: state.apiStatus,
   }
 }
 

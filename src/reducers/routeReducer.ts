@@ -30,7 +30,6 @@ export const routeInitialState: RouteState = generateRoute(location)
 export function routeReducer(state = routeInitialState, action: any): RouteState {
   switch (action.type) {
     case types.ROUTE_CHANGED:
-      console.log('ROUTE_CHANGED')
       return {
         ...state,
         ...action.route,

@@ -35,7 +35,6 @@ import {ProductLineList} from './ProductLineList'
 import SessionExpired from './SessionExpired'
 import SessionLoggedOut from './SessionLoggedOut'
 import * as catalogService from '../api/catalog'
-import * as geoserverService from '../api/geoserver'
 import * as productLinesService from '../api/productLines'
 import * as sessionService from '../api/session'
 import {createCollection, Collection} from '../utils/collections'
@@ -65,9 +64,8 @@ import {mapActions, shouldSelectedFeatureAutoDeselect} from '../actions/mapActio
 import {MapState} from '../reducers/mapReducer'
 import {JobsState} from '../reducers/jobsReducer'
 import {AppState} from '../store'
-import {enabledPlatformsActions} from '../actions/enabledPlatformsActions'
-import {EnabledPlatformsState} from '../reducers/enabledPlatformsReducer'
 import {algorithmsActions} from '../actions/algorithmsActions'
+import {apiStatusActions} from '../actions/apiStatusActions'
 
 interface Props {
   user?: UserState
@@ -75,7 +73,6 @@ interface Props {
   route?: RouteState
   map?: MapState
   jobs?: JobsState
-  enabledPlatforms?: EnabledPlatformsState
   userLogin?(args): void
   userLogout?(): void
   routeNavigateTo?(loc, pushHistory?: boolean): void
@@ -96,18 +93,15 @@ interface Props {
   mapDeserialize?(): void
   jobsFetch?(): void
   jobsFetchOne?(jobId: string): void
-  enabledPlatformsFetch?(): void
-  enabledPlatformsSerialize?(): void
-  enabledPlatformsDeserialize?(): void
   algorithmsFetch?(): void
   algorithmsSerialize?(): void
   algorithmsDeserialize?(): void
+  apiStatusFetch?(): void
+  apiStatusSerialize?(): void
+  apiStatusDeserialize?(): void
 }
 
 interface State {
-  // Services
-  geoserver?: geoserverService.Descriptor
-
   // Data Collections
   productLines?: Collection<beachfront.ProductLine>
 
@@ -267,7 +261,6 @@ export class Application extends React.Component<Props, State> {
           isSearching={this.state.isSearching}
           ref="map"
           shrunk={shrunk}
-          wmsUrl={this.state.geoserver.wmsUrl}
           onSearchPageChange={this.handleSearchSubmit}
           onSignOutClick={this.handleSignOutClick}
         />
@@ -356,16 +349,9 @@ export class Application extends React.Component<Props, State> {
   }
 
   private initializeServices() {
-    this.props.enabledPlatformsFetch()
+    this.props.apiStatusFetch()
     this.props.algorithmsFetch()
-    this.fetchGeoserverConfig()
     this.initializeCatalog()
-  }
-
-  private fetchGeoserverConfig() {
-    return geoserverService.lookup()
-      .then(geoserver => this.setState({ geoserver }))
-      // .catch(err => this.setState({ errors: [...this.props.errors, err] }))
   }
 
   private fetchProductLines() {
@@ -533,9 +519,6 @@ export class Application extends React.Component<Props, State> {
 
   private generateInitialState(): State {
     const state: State = {
-      // Services
-      geoserver: {},
-
       // Data Collections
       productLines: createCollection(),
 
@@ -555,23 +538,22 @@ export class Application extends React.Component<Props, State> {
   }
 
   private serialize() {
-    sessionStorage.setItem('geoserver', JSON.stringify(this.state.geoserver))
     sessionStorage.setItem('searchCriteria', JSON.stringify(this.state.searchCriteria))
     sessionStorage.setItem('searchResults', JSON.stringify(this.state.searchResults))
 
     this.props.userSerialize()
     this.props.catalogSerialize()
     this.props.mapSerialize()
-    this.props.enabledPlatformsSerialize()
     this.props.algorithmsSerialize()
+    this.props.apiStatusSerialize()
   }
 
   private deserialize() {
     this.props.userDeserialize()
     this.props.catalogDeserialize()
     this.props.mapDeserialize()
-    this.props.enabledPlatformsDeserialize()
     this.props.algorithmsDeserialize()
+    this.props.apiStatusDeserialize()
   }
 }
 
@@ -581,7 +563,6 @@ export class Application extends React.Component<Props, State> {
 
 function deserialize(): State {
   return {
-    geoserver:        JSON.parse(sessionStorage.getItem('geoserver')),
     searchCriteria:   JSON.parse(sessionStorage.getItem('searchCriteria')),
     searchResults:    JSON.parse(sessionStorage.getItem('searchResults')),
   }
@@ -641,7 +622,6 @@ function mapStateToProps(state: AppState) {
     route: state.route,
     map: state.map,
     jobs: state.jobs,
-    enabledPlatforms: state.enabledPlatforms,
   }
 }
 
@@ -670,12 +650,12 @@ function mapDispatchToProps(dispatch) {
     mapDeserialize: () => dispatch(mapActions.deserialize()),
     jobsFetch: () => dispatch(jobsActions.fetch()),
     jobsFetchOne: (jobId: string) => dispatch(jobsActions.fetchOne(jobId)),
-    enabledPlatformsFetch: () => dispatch(enabledPlatformsActions.fetch()),
-    enabledPlatformsSerialize: () => dispatch(enabledPlatformsActions.serialize()),
-    enabledPlatformsDeserialize: () => dispatch(enabledPlatformsActions.deserialize()),
     algorithmsFetch: () => dispatch(algorithmsActions.fetch()),
     algorithmsSerialize: () => dispatch(algorithmsActions.serialize()),
     algorithmsDeserialize: () => dispatch(algorithmsActions.deserialize()),
+    apiStatusFetch: () => dispatch(apiStatusActions.fetch()),
+    apiStatusSerialize: () => dispatch(apiStatusActions.serialize()),
+    apiStatusDeserialize: () => dispatch(apiStatusActions.deserialize()),
   }
 }
 

@@ -26,10 +26,6 @@ export function getApiStatus(): Promise<ApiStatus> {
         })
 }
 
-export function getGeoserverUrl() {
-    return getApiStatus().then(status => status.geoserver)
-}
-
 export interface ApiStatus {
     geoserver: string
     'geoserver-upstream': string
