@@ -224,7 +224,7 @@ node {
     }
   }
   
-  if(!env.SKIP_INTEGRATION_TESTS.toBoolean()) {
+  if(!env.SKIP_SELENIUM_TESTS.toBoolean()) {
     stage("Phase One Selenium Tests") {
       build job: "bftest-selenium", parameters: [
         [$class: 'StringParameterValue', name: "SPACE", value: "${env.PHASE_ONE_PCF_SPACE}"],
