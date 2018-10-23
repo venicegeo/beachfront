@@ -183,7 +183,7 @@ export class Application extends React.Component<Props, State> {
       })
     }
 
-    if (prevProps.jobs.fetching && !this.props.jobs.fetching && !this.props.jobs.fetchError) {
+    if (prevProps.jobs.isFetching && !this.props.jobs.isFetching && !this.props.jobs.fetchError) {
       // Load selected feature if it isn't already (e.g., page refresh w/ jobId).
       let [jobId] = this.props.route.jobIds
 
@@ -194,18 +194,18 @@ export class Application extends React.Component<Props, State> {
       this.importJobsIfNeeded()
     }
 
-    if (prevProps.jobs.fetchingOne && !this.props.jobs.fetchingOne && !this.props.jobs.fetchOneError) {
+    if (prevProps.jobs.isFetchingOne && !this.props.jobs.isFetchingOne && !this.props.jobs.fetchOneError) {
       this.props.mapPanToPoint(getFeatureCenter(this.props.jobs.lastOneFetched))
     }
 
-    if (prevProps.jobs.creatingJob && !this.props.jobs.creatingJob && !this.props.jobs.createJobError) {
+    if (prevProps.jobs.isCreatingJob && !this.props.jobs.isCreatingJob && !this.props.jobs.createJobError) {
       this.props.routeNavigateTo({
         pathname: '/jobs',
         search: '?jobId=' + this.props.jobs.createdJob.id,
       })
     }
 
-    if (prevProps.jobs.deletingJob && !this.props.jobs.deletingJob && !this.props.jobs.deleteJobError) {
+    if (prevProps.jobs.isDeletingJob && !this.props.jobs.isDeletingJob && !this.props.jobs.deleteJobError) {
       if (this.props.route.jobIds.includes(this.props.jobs.deletedJob.id)) {
         this.props.routeNavigateTo({
           pathname: this.props.route.pathname,
@@ -214,8 +214,8 @@ export class Application extends React.Component<Props, State> {
       }
     }
 
-    if (prevProps.productLines.creatingProductLine &&
-        !this.props.productLines.creatingProductLine &&
+    if (prevProps.productLines.isCreatingProductLine &&
+        !this.props.productLines.isCreatingProductLine &&
         !this.props.productLines.createProductLineError) {
       this.props.routeNavigateTo({ pathname: '/product-lines' })
     }

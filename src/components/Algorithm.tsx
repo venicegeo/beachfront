@@ -36,7 +36,7 @@ interface Props {
 export const Algorithm = (props: Props) => (
   <div className={[
     styles.root,
-    props.jobs.creatingJob ? styles.isSubmitting : '',
+    props.jobs.isCreatingJob ? styles.isSubmitting : '',
     meetsCloudCoverRequirement(props.algorithm, props.sceneMetadata) ? styles.isCompatible : styles.isNotCompatible,
     props.isSelected ? styles.isSelected : '',
     props.onSelect ? styles.isSelectable : '',
@@ -73,10 +73,10 @@ export const Algorithm = (props: Props) => (
         {props.onSubmit && (
           <button
             className={styles.startButton}
-            disabled={props.jobs.creatingJob}
+            disabled={props.jobs.isCreatingJob}
             onClick={() => props.onSubmit(props.algorithm)}
             >
-            {props.jobs.creatingJob ? 'Starting' : 'Run Algorithm'}
+            {props.jobs.isCreatingJob ? 'Starting' : 'Run Algorithm'}
           </button>
         )}
       </div>

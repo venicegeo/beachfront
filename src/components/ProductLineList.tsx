@@ -38,7 +38,7 @@ export class ProductLineList extends React.Component<Props, {}> {
   render() {
     const isEmpty = (
       !this.props.productLines.records.length &&
-      !this.props.productLines.fetching &&
+      !this.props.productLines.isFetching &&
       !this.props.productLines.fetchError
     )
 
@@ -73,7 +73,7 @@ export class ProductLineList extends React.Component<Props, {}> {
           {isEmpty && (
             <li className={styles.placeholder}>No product lines currently exist</li>
           )}
-          {this.props.productLines.fetching && (
+          {this.props.productLines.isFetching && (
             <li className={styles.loadingMask}>
               <LoadingAnimation className={styles.loadingAnimation}/>
             </li>

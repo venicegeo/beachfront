@@ -39,7 +39,7 @@ interface Props {
 }
 
 export const ActivityTable = (props: Props) => (
-  <div className={`${styles.root} ${props.productLines.fetchingJobs ? styles.isLoading : ''} ${props.className}`}>
+  <div className={`${styles.root} ${props.productLines.isFetchingJobs ? styles.isLoading : ''} ${props.className}`}>
 
     <div className={styles.filter}>
       Activity:
@@ -89,12 +89,12 @@ export const ActivityTable = (props: Props) => (
               </td>
             </tr>
           ))}
-          {props.productLines.fetchingJobs && generatePlaceholderRows(10)}
+          {props.productLines.isFetchingJobs && generatePlaceholderRows(10)}
         </tbody>
       </table>
     </div>
     <div className={styles.shadowBottom}/>
-    {props.productLines.fetchingJobs && (
+    {props.productLines.isFetchingJobs && (
       <div className={styles.loadingMask}>
         <LoadingAnimation className={styles.loadingAnimation}/>
       </div>

@@ -18,30 +18,30 @@ import {types} from '../actions/jobsActions'
 
 export type JobsState = {
   records: beachfront.Job[]
-  fetching: boolean
+  isFetching: boolean
   fetchError: any
-  fetchingOne: boolean
+  isFetchingOne: boolean
   fetchOneError: any
   lastOneFetched: beachfront.Job | null
-  deletingJob: boolean
+  isDeletingJob: boolean
   deletedJob: beachfront.Job | null
   deleteJobError: any
-  creatingJob: boolean
+  isCreatingJob: boolean
   createdJob: beachfront.Job | null
   createJobError: any
 }
 
 export const jobsInitialState = {
   records: [],
-  fetching: false,
+  isFetching: false,
   fetchError: null,
-  fetchingOne: false,
+  isFetchingOne: false,
   fetchOneError: null,
   lastOneFetched: null,
-  deletingJob: false,
+  isDeletingJob: false,
   deletedJob: null,
   deleteJobError: null,
-  creatingJob: false,
+  isCreatingJob: false,
   createdJob: null,
   createJobError: null,
 }
@@ -51,57 +51,57 @@ export function jobsReducer(state = jobsInitialState, action: any) {
     case types.JOBS_FETCHING:
       return {
         ...state,
-        fetching: true,
+        isFetching: true,
         fetchError: null,
       }
     case types.JOBS_FETCH_SUCCESS:
       return {
         ...state,
-        fetching: false,
+        isFetching: false,
         records: action.records,
       }
     case types.JOBS_FETCH_ERROR:
       return {
         ...state,
-        fetching: false,
+        isFetching: false,
         fetchError: action.error,
       }
     case types.JOBS_FETCHING_ONE:
       return {
         ...state,
-        fetchingOne: true,
+        isFetchingOne: true,
         fetchOneError: null,
       }
     case types.JOBS_FETCH_ONE_SUCCESS:
       return {
         ...state,
-        fetchingOne: false,
+        isFetchingOne: false,
         records: [...state.records, action.record],
         lastOneFetched: action.record,
       }
     case types.JOBS_FETCH_ONE_ERROR:
       return {
         ...state,
-        fetchingOne: false,
+        isFetchingOne: false,
         fetchOneError: action.error,
       }
     case types.JOBS_CREATING_JOB:
       return {
         ...state,
-        creatingJob: true,
+        isCreatingJob: true,
         createdJob: null,
         createJobError: null,
       }
     case types.JOBS_CREATE_JOB_SUCCESS:
       return {
         ...state,
-        creatingJob: false,
+        isCreatingJob: false,
         createdJob: action.job,
       }
     case types.JOBS_CREATE_JOB_ERROR:
       return {
         ...state,
-        creatingJob: false,
+        isCreatingJob: false,
         createJobError: action.error,
       }
     case types.JOBS_DISMISS_CREATE_JOB_ERROR:
@@ -113,20 +113,20 @@ export function jobsReducer(state = jobsInitialState, action: any) {
       return {
         ...state,
         records: state.records.filter(job => job.id !== action.job.id),
-        deletingJob: true,
+        isDeletingJob: true,
         deletedJob: action.job,
         deleteJobError: null,
       }
     case types.JOBS_DELETE_JOB_SUCCESS:
       return {
         ...state,
-        deletingJob: false,
+        isDeletingJob: false,
       }
     case types.JOBS_DELETE_JOB_ERROR:
       return {
         ...state,
         records: [...state.records, state.deletedJob],
-        deletingJob: false,
+        isDeletingJob: false,
         deleteJobError: action.error,
       }
     default:

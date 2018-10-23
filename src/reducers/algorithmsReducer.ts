@@ -18,13 +18,13 @@ import {types} from '../actions/algorithmsActions'
 
 export interface AlgorithmsState {
   records: beachfront.Algorithm[]
-  fetching: boolean
+  isFetching: boolean
   fetchError: any
 }
 
 export const algorithmsInitialState: AlgorithmsState = {
   records: [],
-  fetching: false,
+  isFetching: false,
   fetchError: null,
 }
 
@@ -38,19 +38,19 @@ export function algorithmsReducer(state = algorithmsInitialState, action: any) {
     case types.ALGORITHMS_FETCHING:
       return {
         ...state,
-        fetching: true,
+        isFetching: true,
         fetchError: false,
       }
     case types.ALGORITHMS_FETCH_SUCCESS:
       return {
         ...state,
-        fetching: false,
+        isFetching: false,
         records: action.records,
       }
     case types.ALGORITHMS_FETCH_ERROR:
       return {
         ...state,
-        fetching: false,
+        isFetching: false,
         fetchError: action.error,
       }
     default:

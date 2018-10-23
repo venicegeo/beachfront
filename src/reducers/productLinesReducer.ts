@@ -18,24 +18,24 @@ import {types} from '../actions/productLinesActions'
 
 export interface ProductLinesState {
   records: beachfront.ProductLine[]
-  fetching: boolean
+  isFetching: boolean
   fetchError: any
   jobs: beachfront.Job[]
-  fetchingJobs: boolean
+  isFetchingJobs: boolean
   fetchJobsError: any
-  creatingProductLine: boolean
+  isCreatingProductLine: boolean
   createdProductLine: beachfront.ProductLine | null
   createProductLineError: any
 }
 
 export const productLinesInitialState: ProductLinesState = {
   records: [],
-  fetching: false,
+  isFetching: false,
   fetchError: null,
   jobs: [],
-  fetchingJobs: false,
+  isFetchingJobs: false,
   fetchJobsError: null,
-  creatingProductLine: false,
+  isCreatingProductLine: false,
   createdProductLine: null,
   createProductLineError: null,
 }
@@ -45,57 +45,57 @@ export function productLinesReducer(state = productLinesInitialState, action: an
     case types.PRODUCT_LINES_FETCHING:
       return {
         ...state,
-        fetching: true,
+        isFetching: true,
         fetchError: null,
       }
     case types.PRODUCT_LINES_FETCH_SUCCESS:
       return {
         ...state,
-        fetching: false,
+        isFetching: false,
         records: action.records,
       }
     case types.PRODUCT_LINES_FETCH_ERROR:
       return {
         ...state,
-        fetching: false,
+        isFetching: false,
         fetchError: action.error,
       }
     case types.PRODUCT_LINES_FETCHING_JOBS:
       return {
         ...state,
-        fetchingJobs: true,
+        isFetchingJobs: true,
         fetchJobsError: null,
       }
     case types.PRODUCT_LINES_FETCH_JOBS_SUCCESS:
       return {
         ...state,
-        fetchingJobs: false,
+        isFetchingJobs: false,
         jobs: action.jobs,
       }
     case types.PRODUCT_LINES_FETCH_JOBS_ERROR:
       return {
         ...state,
-        fetchingJobs: false,
+        isFetchingJobs: false,
         fetchJobsError: action.error,
       }
     case types.PRODUCT_LINES_CREATING:
       return {
         ...state,
-        creatingProductLine: true,
+        isCreatingProductLine: true,
         createdProductLine: null,
         createProductLineError: null,
       }
     case types.PRODUCT_LINES_CREATE_SUCCESS:
       return {
         ...state,
-        creatingProductLine: false,
+        isCreatingProductLine: false,
         createdProductLine: action.createdProductLine,
         records: [...state.records, action.createdProductLine],
       }
     case types.PRODUCT_LINES_CREATE_ERROR:
       return {
         ...state,
-        creatingProductLine: false,
+        isCreatingProductLine: false,
         createProductLineError: action.error,
       }
     default:

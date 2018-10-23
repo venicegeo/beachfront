@@ -21,7 +21,7 @@ export interface ApiStatusState {
     wmsUrl: string | null
   }
   enabledPlatforms: string[]
-  fetching: boolean
+  isFetching: boolean
   fetchError: any
 }
 
@@ -30,7 +30,7 @@ export const apiStatusInitialState: ApiStatusState = {
     wmsUrl: null,
   },
   enabledPlatforms: [],
-  fetching: false,
+  isFetching: false,
   fetchError: null,
 }
 
@@ -44,20 +44,20 @@ export function apiStatusReducer(state = apiStatusInitialState, action: any) {
     case types.API_STATUS_FETCHING:
       return {
         ...state,
-        fetching: true,
+        isFetching: true,
         fetchError: null,
       }
     case types.API_STATUS_FETCH_SUCCESS:
       return {
         ...state,
-        fetching: false,
+        isFetching: false,
         geoserver: action.geoserver,
         enabledPlatforms: action.enabledPlatforms,
       }
     case types.API_STATUS_FETCH_ERROR:
       return {
         ...state,
-        fetching: false,
+        isFetching: false,
         fetchError: action.error,
       }
     default:
