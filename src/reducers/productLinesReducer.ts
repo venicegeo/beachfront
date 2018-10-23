@@ -20,6 +20,9 @@ export interface ProductLinesState {
   records: beachfront.ProductLine[]
   fetching: boolean
   fetchError: any
+  jobs: beachfront.Job[]
+  fetchingJobs: boolean
+  fetchJobsError: any
   creatingProductLine: boolean
   createdProductLine: beachfront.ProductLine | null
   createProductLineError: any
@@ -29,6 +32,9 @@ export const productLinesInitialState: ProductLinesState = {
   records: [],
   fetching: false,
   fetchError: null,
+  jobs: [],
+  fetchingJobs: false,
+  fetchJobsError: null,
   creatingProductLine: false,
   createdProductLine: null,
   createProductLineError: null,
@@ -53,6 +59,24 @@ export function productLinesReducer(state = productLinesInitialState, action: an
         ...state,
         fetching: false,
         fetchError: action.error,
+      }
+    case types.PRODUCT_LINES_FETCHING_JOBS:
+      return {
+        ...state,
+        fetchingJobs: true,
+        fetchJobsError: null,
+      }
+    case types.PRODUCT_LINES_FETCH_JOBS_SUCCESS:
+      return {
+        ...state,
+        fetchingJobs: false,
+        jobs: action.jobs,
+      }
+    case types.PRODUCT_LINES_FETCH_JOBS_ERROR:
+      return {
+        ...state,
+        fetchingJobs: false,
+        fetchJobsError: action.error,
       }
     case types.PRODUCT_LINES_CREATING:
       return {

@@ -17,19 +17,20 @@
 const styles = require('./ActivityTable.css')
 
 import * as React from 'react'
+import {connect} from 'react-redux'
 import {Dropdown} from './Dropdown'
 import {FileDownloadLink} from './FileDownloadLink'
 import {LoadingAnimation} from './LoadingAnimation'
 import {normalizeSceneId} from './SceneFeatureDetails'
 import {JOB_ENDPOINT} from '../config'
+import {AppState} from '../store'
+import {ProductLinesState} from '../reducers/productLinesReducer'
 
 interface Props {
+  productLines?: ProductLinesState
   className?: string
   duration: string
   durations: {value: string, label: string}[]
-  error?: any
-  isLoading: boolean
-  jobs: beachfront.Job[]
   selectedJobIds: string[]
   onDurationChange(value: string)
   onHoverIn(job: beachfront.Job)
@@ -37,27 +38,16 @@ interface Props {
   onRowClick(job: beachfront.Job)
 }
 
-export const ActivityTable = ({
-  className,
-  duration,
-  durations,
-  isLoading,
-  jobs,
-  selectedJobIds,
-  onDurationChange,
-  onHoverIn,
-  onHoverOut,
-  onRowClick,
-}: Props) => (
-  <div className={`${styles.root} ${isLoading ? styles.isLoading : ''} ${className}`}>
+export const ActivityTable = (props: Props) => (
+  <div className={`${styles.root} ${props.productLines.fetchingJobs ? styles.isLoading : ''} ${props.className}`}>
 
     <div className={styles.filter}>
       Activity:
       <Dropdown
         className={styles.filterDropdown}
-        options={durations}
-        value={duration}
-        onChange={onDurationChange}
+        options={props.durations}
+        value={props.duration}
+        onChange={props.onDurationChange}
       />
     </div>
 
@@ -73,13 +63,13 @@ export const ActivityTable = ({
           </tr>
         </thead>
         <tbody>
-          {jobs.map(job => (
+          {props.productLines.jobs.map(job => (
             <tr
               key={job.id}
-              className={selectedJobIds.includes(job.id) ? styles.isActive : ''}
-              onClick={() => onRowClick(job)}
-              onMouseEnter={() => onHoverIn(job)}
-              onMouseLeave={() => onHoverOut(job)}
+              className={props.selectedJobIds.includes(job.id) ? styles.isActive : ''}
+              onClick={() => props.onRowClick(job)}
+              onMouseEnter={() => props.onHoverIn(job)}
+              onMouseLeave={() => props.onHoverOut(job)}
               >
               <td>{getSceneId(job)}</td>
               {/*<td>{getCapturedOn(job)}</td>
@@ -99,12 +89,12 @@ export const ActivityTable = ({
               </td>
             </tr>
           ))}
-          {isLoading && generatePlaceholderRows(10)}
+          {props.productLines.fetchingJobs && generatePlaceholderRows(10)}
         </tbody>
       </table>
     </div>
     <div className={styles.shadowBottom}/>
-    {isLoading && (
+    {props.productLines.fetchingJobs && (
       <div className={styles.loadingMask}>
         <LoadingAnimation className={styles.loadingAnimation}/>
       </div>
@@ -143,3 +133,14 @@ function getSceneId({ properties }: beachfront.Job) {
 /*function getImageSensor({ properties }: beachfront.Job) {
   return properties.scene_sensor_name
 }*/
+
+function mapStateToProps(state: AppState) {
+  return {
+    productLines: state.productLines,
+  }
+}
+
+export default connect(
+  mapStateToProps,
+  undefined,
+)(ActivityTable)

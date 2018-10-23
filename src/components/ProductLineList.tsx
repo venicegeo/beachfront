@@ -20,7 +20,7 @@ const styles = require('./ProductLineList.css')
 import * as React from 'react'
 import {connect} from 'react-redux'
 import {LoadingAnimation} from './LoadingAnimation'
-import {ProductLine} from './ProductLine'
+import ProductLine from './ProductLine'
 import {AppState} from '../store'
 import {ProductLinesState} from '../reducers/productLinesReducer'
 

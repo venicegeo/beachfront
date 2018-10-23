@@ -17,9 +17,10 @@
 const styles = require('./ProductLine.css')
 
 import * as React from 'react'
+import {connect} from 'react-redux'
 import * as moment from 'moment'
-import {ActivityTable} from './ActivityTable'
-import {fetchJobs} from '../api/productLines'
+import ActivityTable from './ActivityTable'
+import {ParamsProductLinesFetchJobs, productLinesActions} from '../actions/productLinesActions'
 
 const LAST_24_HOURS = {value: 'PT24H', label: 'Last 24 Hours'}
 const LAST_7_DAYS = {value: 'P7D', label: 'Last 7 Days'}
@@ -34,14 +35,12 @@ interface Props {
   onJobSelect(job: beachfront.Job)
   onJobDeselect()
   onPanTo(productLine: beachfront.ProductLine)
+  productLinesFetchJobs?(args: ParamsProductLinesFetchJobs): void
 }
 
 interface State {
   duration?: string
-  error?: any
   isExpanded?: boolean
-  isFetchingJobs?: boolean
-  jobs?: beachfront.Job[]
   selectedJobs?: beachfront.Job[]
   sinceDate?: string
 }
@@ -51,11 +50,8 @@ export class ProductLine extends React.Component<Props, State> {
     super()
     this.state = {
       duration: LAST_24_HOURS.value,
-      error: null,
       isExpanded: false,
-      isFetchingJobs: false,
       selectedJobs: [],
-      jobs: [],
     }
     this.handleDurationChange = this.handleDurationChange.bind(this)
     this.handleExpansionToggle = this.handleExpansionToggle.bind(this)
@@ -64,7 +60,10 @@ export class ProductLine extends React.Component<Props, State> {
 
   componentDidUpdate(_, prevState) {
     if (this.state.isExpanded && (prevState.isExpanded !== this.state.isExpanded || prevState.duration !== this.state.duration)) {
-      this.fetchJobs()
+      this.props.productLinesFetchJobs({
+        productLineId: this.props.productLine.id,
+        sinceDate: generateSinceDate(this.state.duration, this.props.productLine),
+      })
     }
     if (prevState.isExpanded && !this.state.isExpanded && this.state.selectedJobs.length) {
       this.props.onJobDeselect()
@@ -118,9 +117,6 @@ export class ProductLine extends React.Component<Props, State> {
               LAST_30_DAYS,
               SINCE_CREATION,
             ]}
-            error={this.state.error}
-            isLoading={this.state.isFetchingJobs}
-            jobs={this.state.jobs}
             selectedJobIds={this.state.selectedJobs.map(j => j.id)}
             onDurationChange={this.handleDurationChange}
             onHoverIn={this.props.onJobHoverIn}
@@ -130,16 +126,6 @@ export class ProductLine extends React.Component<Props, State> {
         </section>
       </li>
     )
-  }
-
-  private fetchJobs() {
-    this.setState({ isFetchingJobs: true })
-    fetchJobs({
-      productLineId: this.props.productLine.id,
-      sinceDate: generateSinceDate(this.state.duration, this.props.productLine),
-    })
-      .then(jobs => this.setState({ jobs, isFetchingJobs: false }))
-      .catch(error => this.setState({ error, isFetchingJobs: false }))
   }
 
   private handleDurationChange(duration) {
@@ -185,3 +171,14 @@ function generateSinceDate(offset: string, productLine: beachfront.ProductLine) 
     .startOf(offset === LAST_24_HOURS.value ? 'hour' : 'day')
     .toISOString()
 }
+
+function mapDispatchToProps(dispatch) {
+  return {
+    productLinesFetchJobs: (args: ParamsProductLinesFetchJobs) => dispatch(productLinesActions.fetchJobs(args)),
+  }
+}
+
+export default connect(
+  undefined,
+  mapDispatchToProps,
+)(ProductLine)

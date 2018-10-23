@@ -23,18 +23,17 @@ import * as moment from 'moment'
 import {AlgorithmList} from './AlgorithmList'
 import CatalogSearchCriteria from './CatalogSearchCriteria'
 import {NewProductLineDetails} from './NewProductLineDetails'
-import {create} from '../api/productLines'
 import {
   SOURCE_DEFAULT,
 } from '../constants'
 import {CatalogState} from '../reducers/catalogReducer'
 import {MapState} from '../reducers/mapReducer'
-import {ParamsCreateProductline, productLinesActions} from '../actions/productLinesActions'
+import {ParamsProductLinesCreate, productLinesActions} from '../actions/productLinesActions'
 
 interface Props {
   catalog?: CatalogState
   map?: MapState
-  productLinesCreate?(args: ParamsCreateProductline): void
+  productLinesCreate?(args: ParamsProductLinesCreate): void
 }
 
 interface State {
@@ -173,7 +172,7 @@ function mapStateToProps(state: AppState) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    productLinesCreate: (args: ParamsCreateProductline) => dispatch(productLinesActions.create(args)),
+    productLinesCreate: (args: ParamsProductLinesCreate) => dispatch(productLinesActions.create(args)),
   }
 }
 

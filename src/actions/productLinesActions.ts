@@ -15,18 +15,21 @@
  **/
 
 import {getClient} from '../api/session'
-import {PRODUCTLINE_ENDPOINT} from '../config'
+import {JOB_ENDPOINT, PRODUCTLINE_ENDPOINT} from '../config'
 
 export const types = {
   PRODUCT_LINES_FETCHING: 'PRODUCT_LINES_FETCHING',
   PRODUCT_LINES_FETCH_SUCCESS: 'PRODUCT_LINES_FETCH_SUCCESS',
   PRODUCT_LINES_FETCH_ERROR: 'PRODUCT_LINES_FETCH_ERROR',
+  PRODUCT_LINES_FETCHING_JOBS: 'PRODUCT_LINES_FETCHING_JOBS',
+  PRODUCT_LINES_FETCH_JOBS_SUCCESS: 'PRODUCT_LINES_FETCH_JOBS_SUCCESS',
+  PRODUCT_LINES_FETCH_JOBS_ERROR: 'PRODUCT_LINES_FETCH_JOBS_ERROR',
   PRODUCT_LINES_CREATING: 'PRODUCT_LINES_CREATING',
   PRODUCT_LINES_CREATE_SUCCESS: 'PRODUCT_LINES_CREATE_SUCCESS',
   PRODUCT_LINES_CREATE_ERROR: 'PRODUCT_LINES_CREATE_ERROR',
 }
 
-export interface ParamsCreateProductline {
+export interface ParamsProductLinesCreate {
   algorithmId: string
   bbox: [number, number, number, number]
   category: string | null
@@ -34,6 +37,11 @@ export interface ParamsCreateProductline {
   dateStop: string
   maxCloudCover: number
   name: string
+}
+
+export interface ParamsProductLinesFetchJobs {
+  productLineId: string
+  sinceDate: string
 }
 
 export const productLinesActions = {
@@ -56,7 +64,26 @@ export const productLinesActions = {
     }
   },
 
-  create(args: ParamsCreateProductline) {
+  fetchJobs(args: ParamsProductLinesFetchJobs) {
+    return async dispatch => {
+      dispatch({ type: types.PRODUCT_LINES_FETCHING_JOBS })
+
+      try {
+        const response = await getClient().get(`${JOB_ENDPOINT}/by_productline/${args.productLineId}?since=${args.sinceDate}`)
+        dispatch({
+          type: types.PRODUCT_LINES_FETCH_JOBS_SUCCESS,
+          jobs: response.data.jobs.features,
+        })
+      } catch (error) {
+        dispatch({
+          type: types.PRODUCT_LINES_FETCH_JOBS_ERROR,
+          error,
+        })
+      }
+    }
+  },
+
+  create(args: ParamsProductLinesCreate) {
     return async dispatch => {
       dispatch({ type: types.PRODUCT_LINES_CREATING })
 
