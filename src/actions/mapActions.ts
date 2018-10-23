@@ -168,31 +168,6 @@ export const mapActions = {
     }
   },
 
-  updateSelectedFeature() {
-    return (dispatch, getState) => {
-      const state: AppState = getState()
-
-      let selectedFeature = state.map.selectedFeature
-
-      // Update selected feature if needed.
-      if (state.route.jobIds.length) {
-        selectedFeature = state.jobs.records.find(j => state.route.jobIds.includes(j.id))
-      } else if (state.route.selectedFeature) {
-        selectedFeature = state.route.selectedFeature
-      } else if (state.route.pathname !== state.route.pathname) {
-        const shouldDeselect = shouldSelectedFeatureAutoDeselect(selectedFeature, { ignoreTypes: [TYPE_JOB] })
-        if (shouldDeselect) {
-          selectedFeature = null
-        }
-      }
-
-      dispatch({
-        type: types.MAP_SELECTED_FEATURE_UPDATED,
-        selectedFeature,
-      })
-    }
-  },
-
   setHoveredFeature(hoveredFeature: beachfront.Job | null) {
     return {
       type: types.MAP_HOVERED_FEATURE_UPDATED,

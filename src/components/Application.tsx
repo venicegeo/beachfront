@@ -85,7 +85,6 @@ interface Props {
   mapUpdateDetections?(): void
   mapUpdateFrames?(): void
   mapSetSelectedFeature?(selectedFeature: beachfront.Job | beachfront.Scene | null): void
-  mapUpdateSelectedFeature?(): void
   mapSetHoveredFeature?(hoveredFeature: beachfront.Job | null): void
   mapPanToPoint?(point: [number, number], zoom?: number): void
   mapPanToExtent?(extent: [number, number, number, number]): void
@@ -161,7 +160,20 @@ export class Application extends React.Component<Props, State> {
         this.importJobsIfNeeded()
       }
 
-      this.props.mapUpdateSelectedFeature()
+      // Update selected feature if needed.
+      let selectedFeature = this.props.map.selectedFeature
+      if (this.props.route.jobIds.length) {
+        selectedFeature = this.props.jobs.records.find(j => this.props.route.jobIds.includes(j.id))
+      } else if (this.props.route.selectedFeature) {
+        selectedFeature = this.props.route.selectedFeature
+      } else {
+        const shouldDeselect = this.shouldSelectedFeatureAutoDeselect({ ignoreTypes: [TYPE_JOB] })
+        if (shouldDeselect) {
+          selectedFeature = null
+        }
+      }
+
+      this.props.mapSetSelectedFeature(selectedFeature)
     }
 
     if (prevProps.map.mode !== this.props.map.mode ||
@@ -491,6 +503,21 @@ export class Application extends React.Component<Props, State> {
     })
   }
 
+  private shouldSelectedFeatureAutoDeselect(options?: { ignoreTypes?: string[] }) {
+    // Determine if the selected feature is an ignorable type that should not be auto-deselected on certain route changes
+    options = options || {}
+
+    if (this.props.map.selectedFeature) {
+      for (const type of options.ignoreTypes) {
+        if (this.props.map.selectedFeature.properties.type === type) {
+          return false
+        }
+      }
+    }
+
+    return true
+  }
+
   private generateInitialState(): State {
     const state: State = {
       // Search state
@@ -612,7 +639,6 @@ function mapDispatchToProps(dispatch) {
     mapSetSelectedFeature: (selectedFeature: beachfront.Job | beachfront.Scene | null) => (
       dispatch(mapActions.setSelectedFeature(selectedFeature))
     ),
-    mapUpdateSelectedFeature: () => dispatch(mapActions.updateSelectedFeature()),
     mapSetHoveredFeature: (hoveredFeature: beachfront.Job | null) => (
       dispatch(mapActions.setHoveredFeature(hoveredFeature))
     ),
