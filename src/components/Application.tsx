@@ -24,7 +24,7 @@ import * as moment from 'moment'
 import About from './About'
 import {BrowserSupport} from './BrowserSupport'
 import {ClassificationBanner} from './ClassificationBanner'
-import CreateJob, {SearchCriteria, createSearchCriteria} from './CreateJob'
+import CreateJob from './CreateJob'
 import CreateProductLine from './CreateProductLine'
 import JobStatusList from './JobStatusList'
 import {Login} from './Login'
@@ -33,7 +33,6 @@ import PrimaryMap from './PrimaryMap'
 import ProductLineList from './ProductLineList'
 import SessionExpired from './SessionExpired'
 import SessionLoggedOut from './SessionLoggedOut'
-import * as catalogService from '../api/catalog'
 import * as sessionService from '../api/session'
 import {
   featureToExtentWrapped,
@@ -54,10 +53,10 @@ import {
 import {UserState} from '../reducers/userReducer'
 import {userActions} from '../actions/userActions'
 import {CatalogState} from '../reducers/catalogReducer'
-import {catalogActions} from '../actions/catalogActions'
+import {catalogActions, ParamsCatalogSearch} from '../actions/catalogActions'
 import {RouteState} from '../reducers/routeReducer'
 import {routeActions} from '../actions/routeActions'
-import {mapActions, shouldSelectedFeatureAutoDeselect} from '../actions/mapActions'
+import {mapActions} from '../actions/mapActions'
 import {MapState} from '../reducers/mapReducer'
 import {JobsState} from '../reducers/jobsReducer'
 import {jobsActions} from '../actions/jobsActions'
@@ -65,21 +64,24 @@ import {AppState} from '../store'
 import {algorithmsActions} from '../actions/algorithmsActions'
 import {apiStatusActions} from '../actions/apiStatusActions'
 import {ProductLinesState} from '../reducers/productLinesReducer'
+import {shouldSelectedFeatureAutoDeselect} from '../utils/mapUtils'
 
 interface Props {
   user?: UserState
-  catalog?: CatalogState
   route?: RouteState
+  catalog?: CatalogState
   map?: MapState
   jobs?: JobsState
   productLines?: ProductLinesState
   userLogin?(args): void
   userLogout?(): void
-  routeNavigateTo?(loc, pushHistory?: boolean): void
   userSessionExpired?(): void
   userSerialize?(): void
-  catalogSerialize?(): void
   userDeserialize?(): void
+  routeNavigateTo?(loc, pushHistory?: boolean): void
+  catalogInitialize?(): void
+  catalogSearch?(): void
+  catalogSerialize?(): void
   catalogDeserialize?(): void
   mapUpdateMode?(): void
   mapUpdateDetections?(): void
@@ -100,15 +102,7 @@ interface Props {
   apiStatusDeserialize?(): void
 }
 
-interface State {
-  // Search state
-  isSearching?: boolean
-  searchCriteria?: SearchCriteria
-  searchError?: any
-  searchResults?: beachfront.ImageryCatalogPage
-}
-
-export class Application extends React.Component<Props, State> {
+export class Application extends React.Component<Props, null> {
   refs: any
   private pollingInstance: number
   private idleInterval: any
@@ -116,7 +110,6 @@ export class Application extends React.Component<Props, State> {
 
   constructor(props) {
     super(props)
-    this.generateInitialState = this.generateInitialState.bind(this)
     this.importJobsIfNeeded = this.importJobsIfNeeded.bind(this)
     this.handleNavigateToJob = this.handleNavigateToJob.bind(this)
     this.handlePanToProductLine = this.handlePanToProductLine.bind(this)
@@ -124,8 +117,6 @@ export class Application extends React.Component<Props, State> {
     this.handleProductLineJobHoverOut = this.handleProductLineJobHoverOut.bind(this)
     this.handleProductLineJobSelect = this.handleProductLineJobSelect.bind(this)
     this.handleProductLineJobDeselect = this.handleProductLineJobDeselect.bind(this)
-    this.handleSearchCriteriaChange = this.handleSearchCriteriaChange.bind(this)
-    this.handleSearchSubmit = this.handleSearchSubmit.bind(this)
     this.handleSignOutClick = this.handleSignOutClick.bind(this)
     this.startIdleTimer = this.startIdleTimer.bind(this)
     this.stopIdleTimer = this.stopIdleTimer.bind(this)
@@ -133,11 +124,9 @@ export class Application extends React.Component<Props, State> {
     this.timerIncrement = this.timerIncrement.bind(this)
     this.resetTimer = this.resetTimer.bind(this)
     this.serialize = debounce(this.serialize.bind(this), 500)
-
-    this.state = this.generateInitialState()
   }
 
-  componentDidUpdate(prevProps: Props, prevState: State) {
+  componentDidUpdate(prevProps: Props) {
     if (!prevProps.user.isLoggedIn && this.props.user.isLoggedIn) {
       this.initializeServices()
       this.startBackgroundTasks()
@@ -167,7 +156,7 @@ export class Application extends React.Component<Props, State> {
       } else if (this.props.route.selectedFeature) {
         selectedFeature = this.props.route.selectedFeature
       } else {
-        const shouldDeselect = this.shouldSelectedFeatureAutoDeselect({ ignoreTypes: [TYPE_JOB] })
+        const shouldDeselect = shouldSelectedFeatureAutoDeselect(this.props.map.selectedFeature, { ignoreTypes: [TYPE_JOB] })
         if (shouldDeselect) {
           selectedFeature = null
         }
@@ -232,6 +221,17 @@ export class Application extends React.Component<Props, State> {
       this.props.routeNavigateTo({ pathname: '/product-lines' })
     }
 
+    if (!prevProps.catalog.isSearching && this.props.catalog.isSearching) {
+      const shouldDeselect = shouldSelectedFeatureAutoDeselect(this.props.map.selectedFeature, { ignoreTypes: [TYPE_JOB] })
+      if (shouldDeselect) {
+        this.props.mapSetSelectedFeature(null)
+      }
+    }
+
+    if (prevProps.catalog.isSearching && !this.props.catalog.isSearching && !this.props.catalog.searchError) {
+      scrollIntoView('.ImagerySearchList-results')
+    }
+
     this.serialize()
   }
 
@@ -270,11 +270,8 @@ export class Application extends React.Component<Props, State> {
           startTour={this.startTour}
         />
         <PrimaryMap
-          imagery={this.state.searchResults}
-          isSearching={this.state.isSearching}
           ref="map"
           shrunk={shrunk}
-          onSearchPageChange={this.handleSearchSubmit}
           onSignOutClick={this.handleSignOutClick}
         />
         {this.renderRoute()}
@@ -304,13 +301,7 @@ export class Application extends React.Component<Props, State> {
       case '/create-job':
         return (
           <CreateJob
-            imagery={this.state.searchResults}
-            isSearching={this.state.isSearching}
             mapRef={this.refs.map}
-            searchCriteria={this.state.searchCriteria}
-            searchError={this.state.searchError}
-            onSearchCriteriaChange={this.handleSearchCriteriaChange}
-            onSearchSubmit={this.handleSearchSubmit}
           />
         )
       case '/create-product-line':
@@ -358,12 +349,7 @@ export class Application extends React.Component<Props, State> {
   private initializeServices() {
     this.props.apiStatusFetch()
     this.props.algorithmsFetch()
-    this.initializeCatalog()
-  }
-
-  private initializeCatalog() {
-    return catalogService.initialize()
-      // .catch(err => this.setState({ errors: [...this.state.errors, err] }))
+    this.props.catalogInitialize()
   }
 
   private handleNavigateToJob(loc) {
@@ -390,37 +376,6 @@ export class Application extends React.Component<Props, State> {
 
   private handleProductLineJobDeselect() {
     this.props.mapSetSelectedFeature(null)
-  }
-
-  private handleSearchCriteriaChange(searchCriteria) {
-    this.setState({ searchCriteria })
-  }
-
-  private handleSearchSubmit({startIndex = 0, count = 100} = {}) {
-    let newState: any = { isSearching: true }
-    const shouldDeselect = shouldSelectedFeatureAutoDeselect(this.props.map.selectedFeature, { ignoreTypes: [TYPE_JOB] })
-    if (shouldDeselect) {
-      newState.selectedFeature = null
-    }
-    this.setState(newState)
-
-    catalogService.search({
-      count,
-      startIndex,
-      bbox: this.props.map.bbox,
-      catalogApiKey: this.props.catalog.apiKey,
-      ...this.state.searchCriteria,
-    }).then(searchResults => {
-      this.setState({
-        searchResults,
-        searchError: null,
-        isSearching: false,
-      })
-      scrollIntoView('.ImagerySearchList-results')
-    }).catch(searchError => this.setState({
-      searchError,
-      isSearching: false,
-    }))
   }
 
   private handleSignOutClick() {
@@ -503,42 +458,7 @@ export class Application extends React.Component<Props, State> {
     })
   }
 
-  private shouldSelectedFeatureAutoDeselect(options?: { ignoreTypes?: string[] }) {
-    // Determine if the selected feature is an ignorable type that should not be auto-deselected on certain route changes
-    options = options || {}
-
-    if (this.props.map.selectedFeature) {
-      for (const type of options.ignoreTypes) {
-        if (this.props.map.selectedFeature.properties.type === type) {
-          return false
-        }
-      }
-    }
-
-    return true
-  }
-
-  private generateInitialState(): State {
-    const state: State = {
-      // Search state
-      isSearching: false,
-      searchCriteria: createSearchCriteria(),
-      searchError: null,
-      searchResults: null,
-    }
-
-    const deserializedState = deserialize()
-    for (const key in deserializedState) {
-      state[key] = deserializedState[key] || state[key]
-    }
-
-    return state
-  }
-
   private serialize() {
-    sessionStorage.setItem('searchCriteria', JSON.stringify(this.state.searchCriteria))
-    sessionStorage.setItem('searchResults', JSON.stringify(this.state.searchResults))
-
     this.props.userSerialize()
     this.props.catalogSerialize()
     this.props.mapSerialize()
@@ -558,13 +478,6 @@ export class Application extends React.Component<Props, State> {
 //
 // Helpers
 //
-
-function deserialize(): State {
-  return {
-    searchCriteria:   JSON.parse(sessionStorage.getItem('searchCriteria')),
-    searchResults:    JSON.parse(sessionStorage.getItem('searchResults')),
-  }
-}
 
 function isElementInViewport(elem): boolean {
   const box = elem.getBoundingClientRect()
@@ -631,6 +544,8 @@ function mapDispatchToProps(dispatch) {
     userSessionExpired: () => dispatch(userActions.sessionExpired()),
     userSerialize: () => dispatch(userActions.serialize()),
     userDeserialize: () => dispatch(userActions.deserialize()),
+    catalogInitialize: () => dispatch(catalogActions.initialize()),
+    catalogSearch: (args: ParamsCatalogSearch) => dispatch(catalogActions.search(args)),
     catalogSerialize: () => dispatch(catalogActions.serialize()),
     catalogDeserialize: () => dispatch(catalogActions.deserialize()),
     mapUpdateMode: () => dispatch(mapActions.updateMode()),

@@ -17,12 +17,14 @@
 const styles: any = require('./ImagerySearchResults.css')
 
 import * as React from 'react'
+import {connect} from 'react-redux'
 import {paginate} from '../utils/pagination'
+import {AppState} from '../store'
+import {CatalogState} from '../reducers/catalogReducer'
 
 interface Props {
+  catalog?: CatalogState
   className?: string
-  imagery: beachfront.ImageryCatalogPage
-  isSearching: boolean
   onPageChange(page: {count: number, startIndex: number})
 }
 
@@ -36,13 +38,13 @@ export class ImagerySearchResults extends React.Component<Props, void> {
   render() {
     return (
       <div className={`${styles.root} ${this.props.className || ''}`}>
-        {this.props.imagery && this.renderContent(this.props.imagery)}
+        {this.props.catalog.searchResults && this.renderContent(this.props.catalog.searchResults)}
       </div>
     )
   }
 
   private renderContent(imagery) {
-    if (this.props.isSearching) {
+    if (this.props.catalog.isSearching) {
       return <div className={styles.searching}>
         <span>Searching for Imagery&hellip;</span>
       </div>
@@ -72,7 +74,7 @@ export class ImagerySearchResults extends React.Component<Props, void> {
   }
 
   private emitPageBack() {
-    const {count, startIndex} = this.props.imagery
+    const {count, startIndex} = this.props.catalog.searchResults
     this.props.onPageChange({
       count,
       startIndex: startIndex - count,
@@ -80,10 +82,21 @@ export class ImagerySearchResults extends React.Component<Props, void> {
   }
 
   private emitPageForward() {
-    const {count, startIndex} = this.props.imagery
+    const {count, startIndex} = this.props.catalog.searchResults
     this.props.onPageChange({
       count,
       startIndex: startIndex + count,
     })
   }
 }
+
+function mapStateToProps(state: AppState) {
+  return {
+    catalog: state.catalog,
+  }
+}
+
+export default connect(
+  mapStateToProps,
+  undefined,
+)(ImagerySearchResults)

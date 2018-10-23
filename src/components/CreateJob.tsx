@@ -13,46 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-import {AppState} from '../store'
 
 const styles: any = require('./CreateJob.css')
-const DATE_FORMAT = 'YYYY-MM-DD'
 
 import * as React from 'react'
 import {connect} from 'react-redux'
-import * as moment from 'moment'
 import AlgorithmList from './AlgorithmList'
-import {ImagerySearch} from './ImagerySearch'
+import ImagerySearch from './ImagerySearch'
 import {ImagerySearchList} from './ImagerySearchList'
 import {NewJobDetails} from './NewJobDetails'
 import {PrimaryMap} from './PrimaryMap'
 import {normalizeSceneId} from './SceneFeatureDetails'
-import {SOURCE_DEFAULT, TYPE_SCENE} from '../constants'
+import {TYPE_SCENE} from '../constants'
+import {AppState} from '../store'
 import {CatalogState} from '../reducers/catalogReducer'
 import {MapState} from '../reducers/mapReducer'
 import {jobsActions, ParamsCreateJob} from '../actions/jobsActions'
 import {JobsState} from '../reducers/jobsReducer'
-
-export interface SearchCriteria {
-  cloudCover: number
-  dateFrom: string
-  dateTo: string
-  source: string
-}
+import {catalogActions, ParamsCatalogUpdateSearchCriteria} from '../actions/catalogActions'
 
 interface Props {
   catalog?: CatalogState
   map?: MapState
   jobs?: JobsState
-  imagery: beachfront.ImageryCatalogPage
-  isSearching: boolean
   mapRef: PrimaryMap
-  searchError: any
-  searchCriteria: SearchCriteria
-  onSearchCriteriaChange(criteria: SearchCriteria)
-  onSearchSubmit()
   jobsCreateJob?(args: ParamsCreateJob): void
   jobsDismissCreateJobError?(): void
+  catalogUpdateSearchCriteria?(args: ParamsCatalogUpdateSearchCriteria): void
 }
 
 interface State {
@@ -60,13 +47,6 @@ interface State {
   name?: string
   selectedScene?: beachfront.Scene
 }
-
-export const createSearchCriteria = (): SearchCriteria => ({
-  cloudCover: 10,
-  dateFrom: moment().subtract(30, 'days').format(DATE_FORMAT),
-  dateTo: moment().format(DATE_FORMAT),
-  source: SOURCE_DEFAULT,
-})
 
 export class CreateJob extends React.Component<Props, State> {
   constructor(props: Props) {
@@ -80,9 +60,6 @@ export class CreateJob extends React.Component<Props, State> {
     this.handleSubmit = this.handleSubmit.bind(this)
     this.handleComputeMaskChange = this.handleComputeMaskChange.bind(this)
     this.handleNameChange = this.handleNameChange.bind(this)
-    this.handleSearchCloudCoverChange = this.handleSearchCloudCoverChange.bind(this)
-    this.handleSearchDateChange = this.handleSearchDateChange.bind(this)
-    this.handleSearchSourceChange = this.handleSearchSourceChange.bind(this)
   }
 
   componentDidUpdate(prevProps: Props) {
@@ -117,29 +94,15 @@ export class CreateJob extends React.Component<Props, State> {
         <ul>
           {this.props.map.bbox && (
             <li className={styles.search}>
-              <ImagerySearch
-                bbox={this.props.map.bbox}
-                catalogApiKey={this.props.catalog.apiKey}
-                cloudCover={this.props.searchCriteria.cloudCover}
-                dateFrom={this.props.searchCriteria.dateFrom}
-                dateTo={this.props.searchCriteria.dateTo}
-                error={this.props.searchError}
-                isSearching={this.props.isSearching}
-                source={this.props.searchCriteria.source}
-                onCloudCoverChange={this.handleSearchCloudCoverChange}
-                onDateChange={this.handleSearchDateChange}
-                onSearchCriteriaChange={this.props.onSearchCriteriaChange}
-                onSourceChange={this.handleSearchSourceChange}
-                onSubmit={this.props.onSearchSubmit}
-              />
+              <ImagerySearch />
             </li>
           )}
 
-          {this.props.map.bbox && this.props.imagery && this.props.mapRef && (
+          {this.props.map.bbox && this.props.catalog.searchResults && this.props.mapRef && (
             <li className={styles.results}>
               <ImagerySearchList
                 collections={this.props.map.collections}
-                imagery={this.props.imagery}
+                imagery={this.props.catalog.searchResults}
               />
             </li>
           )}
@@ -184,23 +147,6 @@ export class CreateJob extends React.Component<Props, State> {
     })
   }
 
-  private handleSearchCloudCoverChange(cloudCover) {
-    this.props.onSearchCriteriaChange(Object.assign({}, this.props.searchCriteria, {
-      cloudCover: parseInt(cloudCover, 10),
-    }))
-  }
-
-  private handleSearchDateChange(dateFrom, dateTo) {
-    this.props.onSearchCriteriaChange(Object.assign({}, this.props.searchCriteria, {
-      dateFrom,
-      dateTo,
-    }))
-  }
-
-  private handleSearchSourceChange(source: string) {
-    this.props.onSearchCriteriaChange({ ...this.props.searchCriteria, source })
-  }
-
   private handleComputeMaskChange(computeMask: boolean) {
     this.setState({ computeMask })
   }
@@ -222,6 +168,9 @@ function mapDispatchToProps(dispatch) {
   return {
     jobsCreateJob: (args: ParamsCreateJob) => dispatch(jobsActions.createJob(args)),
     jobsDismissCreateJobError: () => dispatch(jobsActions.dismissCreateJobError()),
+    catalogUpdateSearchCriteria: (args: ParamsCatalogUpdateSearchCriteria) => (
+      dispatch(catalogActions.updateSearchCriteria(args))
+    ),
   }
 }
 

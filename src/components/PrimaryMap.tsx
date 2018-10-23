@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-import {CatalogState} from '../reducers/catalogReducer'
+import {catalogActions, ParamsCatalogSearch} from '../actions/catalogActions'
 
 require('ol/ol.css')
 const styles: any = require('./PrimaryMap.css')
@@ -32,7 +32,7 @@ import {ScaleControl} from '../utils/openlayers.ScaleControl'
 import {BasemapSelect} from './BasemapSelect'
 import {FeatureDetails} from './FeatureDetails'
 import {LoadingAnimation} from './LoadingAnimation'
-import {ImagerySearchResults} from './ImagerySearchResults'
+import ImagerySearchResults from './ImagerySearchResults'
 import {normalizeSceneId} from './SceneFeatureDetails'
 import {
   featureToExtent,
@@ -74,6 +74,7 @@ import {AppState} from '../store'
 import {MapState} from '../reducers/mapReducer'
 import {JobsState} from '../reducers/jobsReducer'
 import {ApiStatusState} from '../reducers/apiStatusReducer'
+import {CatalogState} from '../reducers/catalogReducer'
 
 const DEFAULT_CENTER: [number, number] = [-10, 0]
 const MIN_ZOOM = 2.5
@@ -105,15 +106,13 @@ interface Props {
   map?: MapState
   jobs?: JobsState
   apiStatus?: ApiStatusState
-  imagery:            beachfront.ImageryCatalogPage
-  isSearching:        boolean
-  shrunk:             boolean
-  onSearchPageChange(page: {count: number, startIndex: number})
+  shrunk: boolean
   onSignOutClick()
   mapInitialized?(map: ol.Map, collections: any): void
   mapUpdateBbox?(bbox: [number, number, number, number]): void
   mapUpdateView?(view: MapView): void
   mapSetSelectedFeature?(selectedFeature: beachfront.Job | beachfront.Scene): void
+  catalogSearch?(args?: ParamsCatalogSearch): void
 }
 
 interface State {
@@ -174,6 +173,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.handleMouseMove = throttle(this.handleMouseMove.bind(this), 15)
     this.handleSelect = this.handleSelect.bind(this)
     this.handleSelectFeature = this.handleSelectFeature.bind(this)
+    this.handlePageChange = this.handlePageChange.bind(this)
     this.renderImagerySearchBbox = debounce(this.renderImagerySearchBbox.bind(this))
     this.updateView = debounce(this.updateView.bind(this), 100)
   }
@@ -253,17 +253,17 @@ export class PrimaryMap extends React.Component<Props, State> {
       this.renderPins()
     }
 
-    if (previousProps.imagery !== this.props.imagery || routeChanged) {
+    if (previousProps.catalog.searchResults !== this.props.catalog.searchResults || routeChanged) {
       this.renderImagery()
     }
 
-    if (previousProps.isSearching !== this.props.isSearching) {
+    if (previousProps.catalog.isSearching !== this.props.catalog.isSearching) {
       this.clearSelection()
     }
 
-    if (previousProps.isSearching !== this.props.isSearching ||
+    if (previousProps.catalog.isSearching !== this.props.catalog.isSearching ||
       previousState.bboxHalfWrapIndex !== this.state.bboxHalfWrapIndex) {
-      this.renderImagerySearchResultsOverlay({ autoPan: previousProps.isSearching !== this.props.isSearching })
+      this.renderImagerySearchResultsOverlay({ autoPan: previousProps.catalog.isSearching !== this.props.catalog.isSearching })
     }
 
     if (previousProps.shrunk !== this.props.shrunk) {
@@ -316,9 +316,7 @@ export class PrimaryMap extends React.Component<Props, State> {
         />
         <ImagerySearchResults
           ref="imageSearchResults"
-          imagery={this.props.imagery}
-          isSearching={this.props.isSearching}
-          onPageChange={this.props.onSearchPageChange}
+          onPageChange={this.handlePageChange}
         />
         <LoadingAnimation
           className={styles.loadingIndicator}
@@ -355,6 +353,10 @@ export class PrimaryMap extends React.Component<Props, State> {
         this.emitDeselectAll()
         break
     }
+  }
+
+  private handlePageChange(args: {startIndex: number, count: number}) {
+    this.props.catalogSearch(args)
   }
 
   //
@@ -907,7 +909,6 @@ export class PrimaryMap extends React.Component<Props, State> {
   }
 
   private renderImagery() {
-    const {imagery} = this.props
     const reader = new ol.GeoJSON()
     const source = this.imageryLayer.getSource()
 
@@ -918,8 +919,8 @@ export class PrimaryMap extends React.Component<Props, State> {
       return
     }
 
-    if (imagery) {
-      const features = reader.readFeatures(imagery.images, {
+    if (this.props.catalog.searchResults) {
+      const features = reader.readFeatures(this.props.catalog.searchResults.images, {
         dataProjection: WGS84,
         featureProjection: WEB_MERCATOR,
       })
@@ -940,14 +941,14 @@ export class PrimaryMap extends React.Component<Props, State> {
       return  // Nothing to pin the overlay to
     }
 
-    if (!this.props.imagery || this.props.isSearching) {
+    if (!this.props.catalog.searchResults || this.props.catalog.isSearching) {
       return  // No results are in
     }
 
     bbox = extentWrapped(this.map, bbox)
 
     let position
-    if (this.props.imagery.count) {
+    if (this.props.catalog.searchResults.count) {
       // Pager
       position = ol.extent.getBottomRight(bbox)
       this.imageSearchResultsOverlay.setPosition(position)
@@ -1468,6 +1469,7 @@ function mapDispatchToProps(dispatch) {
     mapSetSelectedFeature: (selectedFeature: beachfront.Job | beachfront.Scene | null) => (
       dispatch(mapActions.setSelectedFeature(selectedFeature))
     ),
+    catalogSearch: (args?: ParamsCatalogSearch) => dispatch(catalogActions.search(args)),
   }
 }
 

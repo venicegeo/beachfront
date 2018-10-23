@@ -14,10 +14,11 @@
  * limitations under the License.
  **/
 
-import {shouldSelectedFeatureAutoDeselect, types} from '../actions/mapActions'
+import {types} from '../actions/mapActions'
 import {MapView, MODE_NORMAL} from '../components/PrimaryMap'
 import ol from '../utils/ol'
 import {TYPE_JOB} from '../constants'
+import {shouldSelectedFeatureAutoDeselect} from '../utils/mapUtils'
 
 export interface MapState {
   map: ol.Map | null

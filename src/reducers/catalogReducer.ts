@@ -15,22 +15,48 @@
  **/
 
 import {types} from '../actions/catalogActions'
-import {createSearchCriteria, SearchCriteria} from '../components/CreateJob'
+import {AxiosInstance} from 'axios'
+import * as moment from 'moment'
+import {SOURCE_DEFAULT} from '../constants'
+
+const DATE_FORMAT = 'YYYY-MM-DD'
 
 export interface CatalogState {
+  client: AxiosInstance | null
+  isInitializing: boolean
+  initializeError: any
   apiKey: string
   isSearching: boolean
-  searchCriteria: SearchCriteria
+  searchCriteria: {
+    cloudCover: number
+    dateFrom: string
+    dateTo: string
+    source: string
+  },
   searchError: any
   searchResults: beachfront.ImageryCatalogPage | null
+  count: number
+  startIndex: number
+  totalCount: number
 }
 
 export const catalogInitialState: CatalogState = {
+  client: null,
+  isInitializing: false,
+  initializeError: null,
   apiKey: '',
   isSearching: false,
-  searchCriteria: createSearchCriteria(),
+  searchCriteria: {
+    cloudCover: 10,
+    dateFrom: moment().subtract(30, 'days').format(DATE_FORMAT),
+    dateTo: moment().format(DATE_FORMAT),
+    source: SOURCE_DEFAULT,
+  },
   searchError: null,
   searchResults: null,
+  count: 0,
+  startIndex: 0,
+  totalCount: 0,
 }
 
 export function catalogReducer(state = catalogInitialState, action: any): CatalogState {
@@ -40,10 +66,61 @@ export function catalogReducer(state = catalogInitialState, action: any): Catalo
         ...state,
         ...action.state,
       }
+    case types.CATALOG_INITIALIZING:
+      return {
+        ...state,
+        isInitializing: true,
+      }
+    case types.CATALOG_INITIALIZE_SUCCESS:
+      return {
+        ...state,
+        isInitializing: false,
+        client: action.client,
+      }
+    case types.CATALOG_INITIALIZE_ERROR:
+      return {
+        ...state,
+        isInitializing: false,
+        initializeError: action.error,
+      }
     case types.CATALOG_API_KEY_UPDATED:
       return {
         ...state,
         apiKey: action.apiKey,
+      }
+    case types.CATALOG_SEARCH_CRITERIA_UPDATED:
+      return {
+        ...state,
+        searchCriteria: {
+          ...state.searchCriteria,
+          ...action.searchCriteria,
+        },
+      }
+    case types.CATALOG_SEARCH_CRITERIA_RESET:
+      return {
+        ...state,
+        searchCriteria: catalogInitialState.searchCriteria,
+      }
+    case types.CATALOG_SEARCHING:
+      return {
+        ...state,
+        isSearching: true,
+        searchError: null,
+      }
+    case types.CATALOG_SEARCH_SUCCESS:
+      return {
+        ...state,
+        isSearching: false,
+        searchResults: action.searchResults,
+        count: action.count,
+        startIndex: action.startIndex,
+        totalCount: action.totalCount,
+      }
+    case types.CATALOG_SEARCH_ERROR:
+      return {
+        ...state,
+        isSearching: false,
+        searchError: action.error,
       }
     default:
       return state
