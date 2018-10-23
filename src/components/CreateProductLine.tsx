@@ -29,11 +29,12 @@ import {
 } from '../constants'
 import {CatalogState} from '../reducers/catalogReducer'
 import {MapState} from '../reducers/mapReducer'
+import {ParamsCreateProductline, productLinesActions} from '../actions/productLinesActions'
 
 interface Props {
   catalog?: CatalogState
   map?: MapState
-  onProductLineCreated(productLine: beachfront.ProductLine)
+  productLinesCreate?(args: ParamsCreateProductline): void
 }
 
 interface State {
@@ -41,7 +42,6 @@ interface State {
   cloudCover?:             number
   dateStart?:              string
   dateStop?:               string
-  error?:                  any
   isCreating?:             boolean
   name?:                   string
   shouldAutogenerateName?: boolean
@@ -144,20 +144,15 @@ export class CreateProductLine extends React.Component<Props, State> {
   }
 
   private handleSubmit() {
-    create({
-      algorithmId:   this.state.algorithm.id,
-      bbox:          this.props.map.bbox,
-      category:      null,
-      dateStart:     this.state.dateStart,
-      dateStop:      this.state.dateStop,
+    this.props.productLinesCreate({
+      algorithmId: this.state.algorithm.id,
+      bbox: this.props.map.bbox,
+      category: null,
+      dateStart: this.state.dateStart,
+      dateStop: this.state.dateStop,
       maxCloudCover: this.state.cloudCover,
-      name:          this.state.name,
+      name: this.state.name,
     })
-      .then(this.props.onProductLineCreated)
-      .catch(error => {
-        this.setState({ error })
-        throw error
-      })
   }
 }
 
@@ -176,7 +171,13 @@ function mapStateToProps(state: AppState) {
   }
 }
 
+function mapDispatchToProps(dispatch) {
+  return {
+    productLinesCreate: (args: ParamsCreateProductline) => dispatch(productLinesActions.create(args)),
+  }
+}
+
 export default connect(
   mapStateToProps,
-  undefined,
+  mapDispatchToProps,
 )(CreateProductLine)

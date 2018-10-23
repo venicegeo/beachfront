@@ -13,45 +13,52 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
+import {productLinesActions} from '../actions/productLinesActions'
 
 const styles = require('./ProductLineList.css')
 
 import * as React from 'react'
+import {connect} from 'react-redux'
 import {LoadingAnimation} from './LoadingAnimation'
 import {ProductLine} from './ProductLine'
+import {AppState} from '../store'
+import {ProductLinesState} from '../reducers/productLinesReducer'
 
 interface Props {
-  error: { message: string, code?: number }
-  isFetching: boolean
-  productLines: beachfront.ProductLine[]
-  onDismissError()
+  productLines?: ProductLinesState
   onJobHoverIn(job: beachfront.Job)
   onJobHoverOut()
   onJobSelect(job: beachfront.Job)
   onJobDeselect()
   onPanTo(productLine: beachfront.ProductLine)
+  productLinesFetch?(): void
 }
 
 export class ProductLineList extends React.Component<Props, {}> {
   render() {
-    const isEmpty = !this.props.productLines.length && !this.props.isFetching && !this.props.error
+    const isEmpty = (
+      !this.props.productLines.records.length &&
+      !this.props.productLines.fetching &&
+      !this.props.productLines.fetchError
+    )
+
     return (
       <div className={`${styles.root} ${isEmpty ? styles.isEmpty : ''}`}>
         <header>
           <h1>Product Lines</h1>
         </header>
         <ul>
-          {this.props.error && (
+          {this.props.productLines.fetchError && (
             <li className={styles.error}>
-              <h4><i className="fa fa-warning"/> {this.props.error.code ? 'Communication' : 'Application'} Error</h4>
-              <p>{this.props.error.code
+              <h4><i className="fa fa-warning"/> {this.props.productLines.fetchError.code ? 'Communication' : 'Application'} Error</h4>
+              <p>{this.props.productLines.fetchError.code
                 ? 'Cannot communicate with the server'
                 : 'An error is preventing the display of product lines'
-              }. (<code>{this.props.error.message}</code>)</p>
-              <button onClick={this.props.onDismissError}>Retry</button>
+              }. (<code>{this.props.productLines.fetchError.message}</code>)</p>
+              <button onClick={this.props.productLinesFetch}>Retry</button>
             </li>
           )}
-          {this.props.productLines.map(productLine => (
+          {this.props.productLines.records.map(productLine => (
             <ProductLine
               className={styles.listItem}
               key={productLine.id}
@@ -66,7 +73,7 @@ export class ProductLineList extends React.Component<Props, {}> {
           {isEmpty && (
             <li className={styles.placeholder}>No product lines currently exist</li>
           )}
-          {this.props.isFetching && (
+          {this.props.productLines.fetching && (
             <li className={styles.loadingMask}>
               <LoadingAnimation className={styles.loadingAnimation}/>
             </li>
@@ -76,3 +83,20 @@ export class ProductLineList extends React.Component<Props, {}> {
     )
   }
 }
+
+function mapStateToProps(state: AppState) {
+  return {
+    productLines: state.productLines,
+  }
+}
+
+function mapDispatchToProps(dispatch) {
+  return {
+    productLinesFetch: () => dispatch(productLinesActions.fetch()),
+  }
+}
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(ProductLineList)

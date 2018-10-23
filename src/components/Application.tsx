@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-import {jobsActions} from '../actions/jobsActions'
 
 const styles: any = require('./Application.css')
 
@@ -31,13 +30,11 @@ import JobStatusList from './JobStatusList'
 import {Login} from './Login'
 import Navigation from './Navigation'
 import PrimaryMap from './PrimaryMap'
-import {ProductLineList} from './ProductLineList'
+import ProductLineList from './ProductLineList'
 import SessionExpired from './SessionExpired'
 import SessionLoggedOut from './SessionLoggedOut'
 import * as catalogService from '../api/catalog'
-import * as productLinesService from '../api/productLines'
 import * as sessionService from '../api/session'
-import {createCollection, Collection} from '../utils/collections'
 import {
   featureToExtentWrapped,
   getFeatureCenter,
@@ -63,9 +60,11 @@ import {routeActions} from '../actions/routeActions'
 import {mapActions, shouldSelectedFeatureAutoDeselect} from '../actions/mapActions'
 import {MapState} from '../reducers/mapReducer'
 import {JobsState} from '../reducers/jobsReducer'
+import {jobsActions} from '../actions/jobsActions'
 import {AppState} from '../store'
 import {algorithmsActions} from '../actions/algorithmsActions'
 import {apiStatusActions} from '../actions/apiStatusActions'
+import {ProductLinesState} from '../reducers/productLinesReducer'
 
 interface Props {
   user?: UserState
@@ -73,6 +72,7 @@ interface Props {
   route?: RouteState
   map?: MapState
   jobs?: JobsState
+  productLines?: ProductLinesState
   userLogin?(args): void
   userLogout?(): void
   routeNavigateTo?(loc, pushHistory?: boolean): void
@@ -102,9 +102,6 @@ interface Props {
 }
 
 interface State {
-  // Data Collections
-  productLines?: Collection<beachfront.ProductLine>
-
   // Search state
   isSearching?: boolean
   searchCriteria?: SearchCriteria
@@ -122,10 +119,8 @@ export class Application extends React.Component<Props, State> {
     super(props)
     this.generateInitialState = this.generateInitialState.bind(this)
     this.importJobsIfNeeded = this.importJobsIfNeeded.bind(this)
-    this.handleDismissProductLineError = this.handleDismissProductLineError.bind(this)
     this.handleNavigateToJob = this.handleNavigateToJob.bind(this)
     this.handlePanToProductLine = this.handlePanToProductLine.bind(this)
-    this.handleProductLineCreated = this.handleProductLineCreated.bind(this)
     this.handleProductLineJobHoverIn = this.handleProductLineJobHoverIn.bind(this)
     this.handleProductLineJobHoverOut = this.handleProductLineJobHoverOut.bind(this)
     this.handleProductLineJobSelect = this.handleProductLineJobSelect.bind(this)
@@ -188,7 +183,7 @@ export class Application extends React.Component<Props, State> {
       })
     }
 
-    if (prevProps.jobs.fetching && !this.props.jobs.fetching) {
+    if (prevProps.jobs.fetching && !this.props.jobs.fetching && !this.props.jobs.fetchError) {
       // Load selected feature if it isn't already (e.g., page refresh w/ jobId).
       let [jobId] = this.props.route.jobIds
 
@@ -199,24 +194,30 @@ export class Application extends React.Component<Props, State> {
       this.importJobsIfNeeded()
     }
 
-    if (prevProps.jobs.fetchingOne && !this.props.jobs.fetchingOne) {
+    if (prevProps.jobs.fetchingOne && !this.props.jobs.fetchingOne && !this.props.jobs.fetchOneError) {
       this.props.mapPanToPoint(getFeatureCenter(this.props.jobs.lastOneFetched))
     }
 
-    if (prevProps.jobs.creatingJob && !this.props.jobs.creatingJob) {
+    if (prevProps.jobs.creatingJob && !this.props.jobs.creatingJob && !this.props.jobs.createJobError) {
       this.props.routeNavigateTo({
         pathname: '/jobs',
         search: '?jobId=' + this.props.jobs.createdJob.id,
       })
     }
 
-    if (prevProps.jobs.deletingJob && !this.props.jobs.deletingJob) {
+    if (prevProps.jobs.deletingJob && !this.props.jobs.deletingJob && !this.props.jobs.deleteJobError) {
       if (this.props.route.jobIds.includes(this.props.jobs.deletedJob.id)) {
         this.props.routeNavigateTo({
           pathname: this.props.route.pathname,
           search: this.props.route.search.replace(new RegExp('\\??jobId=' + this.props.jobs.deletedJob.id), ''),
         })
       }
+    }
+
+    if (prevProps.productLines.creatingProductLine &&
+        !this.props.productLines.creatingProductLine &&
+        !this.props.productLines.createProductLineError) {
+      this.props.routeNavigateTo({ pathname: '/product-lines' })
     }
 
     this.serialize()
@@ -302,9 +303,7 @@ export class Application extends React.Component<Props, State> {
         )
       case '/create-product-line':
         return (
-          <CreateProductLine
-            onProductLineCreated={this.handleProductLineCreated}
-          />
+          <CreateProductLine />
         )
       case '/jobs':
         return (
@@ -315,10 +314,6 @@ export class Application extends React.Component<Props, State> {
       case '/product-lines':
         return (
           <ProductLineList
-            error={this.state.productLines.error}
-            isFetching={this.state.productLines.fetching}
-            productLines={this.state.productLines.records}
-            onDismissError={this.handleDismissProductLineError}
             onJobHoverIn={this.handleProductLineJobHoverIn}
             onJobHoverOut={this.handleProductLineJobHoverOut}
             onJobSelect={this.handleProductLineJobSelect}
@@ -354,23 +349,9 @@ export class Application extends React.Component<Props, State> {
     this.initializeCatalog()
   }
 
-  private fetchProductLines() {
-    this.setState({ productLines: this.state.productLines.$fetching() })
-    return productLinesService.fetchProductLines()
-      .then(records => this.setState({ productLines: this.state.productLines.$records(records) }))
-      .catch(err => this.setState({ productLines: this.state.productLines.$error(err) }))
-  }
-
   private initializeCatalog() {
     return catalogService.initialize()
       // .catch(err => this.setState({ errors: [...this.state.errors, err] }))
-  }
-
-  private handleDismissProductLineError() {
-    this.setState({
-      productLines: this.state.productLines.$error(null),
-    })
-    setTimeout(() => this.fetchProductLines())
   }
 
   private handleNavigateToJob(loc) {
@@ -381,13 +362,6 @@ export class Application extends React.Component<Props, State> {
 
   private handlePanToProductLine(productLine) {
     this.props.mapPanToPoint(getFeatureCenter(productLine), 3.5)
-  }
-
-  private handleProductLineCreated(productLine: beachfront.ProductLine) {
-    this.setState({
-      productLines: this.state.productLines.$append(productLine),
-    })
-    this.props.routeNavigateTo({ pathname: '/product-lines' })
   }
 
   private handleProductLineJobHoverIn(job) {
@@ -519,9 +493,6 @@ export class Application extends React.Component<Props, State> {
 
   private generateInitialState(): State {
     const state: State = {
-      // Data Collections
-      productLines: createCollection(),
-
       // Search state
       isSearching: false,
       searchCriteria: createSearchCriteria(),
@@ -622,6 +593,7 @@ function mapStateToProps(state: AppState) {
     route: state.route,
     map: state.map,
     jobs: state.jobs,
+    productLines: state.productLines,
   }
 }
 
