@@ -39,6 +39,10 @@ export class JobStatusList extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props)
 
+    this.state = {
+      activeIds: this.props.map.detections.map(d => d.id),
+    }
+
     this.handleToggleExpansion = this.handleToggleExpansion.bind(this)
   }
 
