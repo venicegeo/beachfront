@@ -46,8 +46,8 @@ export class JobStatusList extends React.Component<Props, State> {
     this.handleToggleExpansion = this.handleToggleExpansion.bind(this)
   }
 
-  componentDidUpdate(prevProps) {
-    if (this.props.map.selectedFeature !== prevProps.selectedFeature) {
+  componentDidUpdate(prevProps: Props) {
+    if (this.props.map.selectedFeature !== prevProps.map.selectedFeature) {
       this.scrollToSelectedJob()
     }
 
