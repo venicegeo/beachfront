@@ -35,7 +35,7 @@ export const types = {
   MAP_DESERIALIZED: 'MAP_DESERIALIZED',
 }
 
-export interface ParamsMapPanToPoint {
+export interface MapPanToPointArgs {
   point: [number, number]
   zoom?: number
 }
@@ -187,7 +187,7 @@ export const mapActions = {
     }
   },
 
-  panToPoint(args: ParamsMapPanToPoint) {
+  panToPoint(args: MapPanToPointArgs) {
     args.zoom = args.zoom || 10
 
     return {

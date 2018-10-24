@@ -24,7 +24,7 @@ import {connect} from 'react-redux'
 import {StaticMinimap} from './StaticMinimap'
 import * as moment from 'moment'
 import {SCENE_TILE_PROVIDERS} from '../config'
-import {catalogActions, ParamsCatalogUpdateSearchCriteria} from '../actions/catalogActions'
+import {catalogActions, CatalogUpdateSearchCriteriaArgs} from '../actions/catalogActions'
 import {AppState} from '../store'
 import {ApiStatusState} from '../reducers/apiStatusReducer'
 import {CatalogState} from '../reducers/catalogReducer'
@@ -38,7 +38,7 @@ interface Props {
   map?: MapState
   errorElement?: React.ReactElement<any>
   catalogSetApiKey?(apiKey: string): void
-  catalogUpdateSearchCriteria?(args: ParamsCatalogUpdateSearchCriteria): void
+  catalogUpdateSearchCriteria?(args: CatalogUpdateSearchCriteriaArgs): void
   mapClearBbox?(): void
 }
 
@@ -257,7 +257,7 @@ function mapStateToProps(state: AppState) {
 function mapDispatchToProps(dispatch) {
   return {
     catalogSetApiKey: (apiKey: string) => dispatch(catalogActions.setApiKey(apiKey)),
-    catalogUpdateSearchCriteria: (args: ParamsCatalogUpdateSearchCriteria) => (
+    catalogUpdateSearchCriteria: (args: CatalogUpdateSearchCriteriaArgs) => (
       dispatch(catalogActions.updateSearchCriteria(args))
     ),
     mapClearBbox: () => dispatch(mapActions.clearBbox()),

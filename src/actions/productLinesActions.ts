@@ -29,7 +29,7 @@ export const types = {
   PRODUCT_LINES_CREATE_ERROR: 'PRODUCT_LINES_CREATE_ERROR',
 }
 
-export interface ParamsProductLinesCreate {
+export interface ProductLinesCreateArgs {
   algorithmId: string
   bbox: [number, number, number, number]
   category: string | null
@@ -39,7 +39,7 @@ export interface ParamsProductLinesCreate {
   name: string
 }
 
-export interface ParamsProductLinesFetchJobs {
+export interface ProductLinesFetchJobsArgs {
   productLineId: string
   sinceDate: string
 }
@@ -64,7 +64,7 @@ export const productLinesActions = {
     }
   },
 
-  fetchJobs(args: ParamsProductLinesFetchJobs) {
+  fetchJobs(args: ProductLinesFetchJobsArgs) {
     return async dispatch => {
       dispatch({ type: types.PRODUCT_LINES_FETCHING_JOBS })
 
@@ -83,7 +83,7 @@ export const productLinesActions = {
     }
   },
 
-  create(args: ParamsProductLinesCreate) {
+  create(args: ProductLinesCreateArgs) {
     return async dispatch => {
       dispatch({ type: types.PRODUCT_LINES_CREATING })
 

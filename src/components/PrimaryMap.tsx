@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-import {catalogActions, ParamsCatalogSearch} from '../actions/catalogActions'
+import {catalogActions, CatalogSearchArgs} from '../actions/catalogActions'
 
 require('ol/ol.css')
 const styles: any = require('./PrimaryMap.css')
@@ -112,7 +112,7 @@ interface Props {
   mapUpdateBbox?(bbox: [number, number, number, number]): void
   mapUpdateView?(view: MapView): void
   mapSetSelectedFeature?(feature: GeoJSON.Feature<any> | null): void
-  catalogSearch?(args?: ParamsCatalogSearch): void
+  catalogSearch?(args?: CatalogSearchArgs): void
 }
 
 interface State {
@@ -1467,7 +1467,7 @@ function mapDispatchToProps(dispatch) {
     mapUpdateBbox: (bbox: [number, number, number, number]) => dispatch(mapActions.updateBbox(bbox)),
     mapUpdateView: (view: MapView) => dispatch(mapActions.updateView(view)),
     mapSetSelectedFeature: (feature: GeoJSON.Feature<any> | null) => dispatch(mapActions.setSelectedFeature(feature)),
-    catalogSearch: (args?: ParamsCatalogSearch) => dispatch(catalogActions.search(args)),
+    catalogSearch: (args?: CatalogSearchArgs) => dispatch(catalogActions.search(args)),
   }
 }
 

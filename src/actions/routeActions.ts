@@ -27,13 +27,13 @@ export interface RouteLocation {
   selectedFeature?: beachfront.Job | beachfront.Scene | null
 }
 
-export interface ParamsRouteNavigateTo {
+export interface RouteNavigateToArgs {
   location: RouteLocation
   pushHistory?: boolean
 }
 
 export const routeActions = {
-  navigateTo(args: ParamsRouteNavigateTo) {
+  navigateTo(args: RouteNavigateToArgs) {
     args.pushHistory = (args.pushHistory != null) ? args.pushHistory : true
 
     const route = generateRoute(args.location)

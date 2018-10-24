@@ -28,12 +28,12 @@ import {
 } from '../constants'
 import {CatalogState} from '../reducers/catalogReducer'
 import {MapState} from '../reducers/mapReducer'
-import {ParamsProductLinesCreate, productLinesActions} from '../actions/productLinesActions'
+import {ProductLinesCreateArgs, productLinesActions} from '../actions/productLinesActions'
 
 interface Props {
   catalog?: CatalogState
   map?: MapState
-  productLinesCreate?(args: ParamsProductLinesCreate): void
+  productLinesCreate?(args: ProductLinesCreateArgs): void
 }
 
 interface State {
@@ -172,7 +172,7 @@ function mapStateToProps(state: AppState) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    productLinesCreate: (args: ParamsProductLinesCreate) => dispatch(productLinesActions.create(args)),
+    productLinesCreate: (args: ProductLinesCreateArgs) => dispatch(productLinesActions.create(args)),
   }
 }
 

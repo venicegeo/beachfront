@@ -24,7 +24,7 @@ import CatalogSearchCriteria from './CatalogSearchCriteria'
 import {LoadingAnimation} from './LoadingAnimation'
 import { SCENE_TILE_PROVIDERS } from '../config'
 import {AppState} from '../store'
-import {catalogActions, ParamsCatalogSearch} from '../actions/catalogActions'
+import {catalogActions, CatalogSearchArgs} from '../actions/catalogActions'
 import {MapState} from '../reducers/mapReducer'
 import {CatalogState} from '../reducers/catalogReducer'
 
@@ -32,7 +32,7 @@ interface Props {
   map?: MapState
   catalog?: CatalogState
   catalogResetSearchCriteria?(): void
-  catalogSearch?(args?: ParamsCatalogSearch): void
+  catalogSearch?(args?: CatalogSearchArgs): void
 }
 
 export class ImagerySearch extends React.Component<Props, {}> {
@@ -109,7 +109,7 @@ function mapStateToProps(state: AppState) {
 function mapDispatchToProps(dispatch) {
   return {
     catalogResetSearchCriteria: () => dispatch(catalogActions.resetSearchCriteria()),
-    catalogSearch: (args?: ParamsCatalogSearch) => dispatch(catalogActions.search(args)),
+    catalogSearch: (args?: CatalogSearchArgs) => dispatch(catalogActions.search(args)),
   }
 }
 

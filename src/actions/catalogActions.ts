@@ -34,12 +34,12 @@ export const types = {
   CATALOG_DESERIALIZED: 'CATALOG_DESERIALIZED',
 }
 
-export interface ParamsCatalogSearch {
+export interface CatalogSearchArgs {
   startIndex: number
   count: number
 }
 
-export interface ParamsCatalogUpdateSearchCriteria {
+export interface CatalogUpdateSearchCriteriaArgs {
   cloudCover?: number
   dateFrom?: string
   dateTo?: string
@@ -82,7 +82,7 @@ export const catalogActions = {
     }
   },
 
-  updateSearchCriteria(searchCriteria: ParamsCatalogUpdateSearchCriteria) {
+  updateSearchCriteria(searchCriteria: CatalogUpdateSearchCriteriaArgs) {
     return {
       type: types.CATALOG_SEARCH_CRITERIA_UPDATED,
       searchCriteria,
@@ -93,7 +93,7 @@ export const catalogActions = {
     return { type: types.CATALOG_SEARCH_CRITERIA_RESET }
   },
 
-  search(args: ParamsCatalogSearch = {startIndex: 0, count: 100}) {
+  search(args: CatalogSearchArgs = {startIndex: 0, count: 100}) {
     return async (dispatch, getState) => {
       dispatch({ type: types.CATALOG_SEARCHING })
 

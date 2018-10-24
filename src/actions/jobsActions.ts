@@ -33,7 +33,7 @@ export const types = {
   JOBS_DELETE_JOB_ERROR: 'JOBS_DELETE_JOB_ERROR',
 }
 
-export interface ParamsCreateJob {
+export interface JobsCreateJobArgs {
   algorithmId: string
   computeMask: boolean
   name: string
@@ -80,7 +80,7 @@ export const jobsActions = {
     }
   },
 
-  createJob(args: ParamsCreateJob) {
+  createJob(args: JobsCreateJobArgs) {
     return async dispatch => {
       dispatch({ type: types.JOBS_CREATING_JOB })
 

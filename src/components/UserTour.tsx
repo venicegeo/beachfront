@@ -20,10 +20,10 @@ import Tour from 'react-user-tour'
 import {TOUR} from '../config'
 import {query, scrollIntoView} from '../utils/domUtils'
 import {connect} from 'react-redux'
-import {catalogActions, ParamsCatalogUpdateSearchCriteria} from '../actions/catalogActions'
-import {mapActions, ParamsMapPanToPoint} from '../actions/mapActions'
+import {catalogActions, CatalogUpdateSearchCriteriaArgs} from '../actions/catalogActions'
+import {mapActions, MapPanToPointArgs} from '../actions/mapActions'
 import {AppState} from '../store'
-import {ParamsRouteNavigateTo, routeActions} from '../actions/routeActions'
+import {RouteNavigateToArgs, routeActions} from '../actions/routeActions'
 import {RouteState} from '../reducers/routeReducer'
 import {CatalogState} from '../reducers/catalogReducer'
 import {MapState} from '../reducers/mapReducer'
@@ -67,13 +67,13 @@ interface Props {
   jobs?: JobsState
   catalogResetSearchCriteria?(): void
   catalogSerialize?(): void
-  catalogUpdateSearchCriteria?(args: ParamsCatalogUpdateSearchCriteria): void
+  catalogUpdateSearchCriteria?(args: CatalogUpdateSearchCriteriaArgs): void
   catalogSetApiKey?(apiKey: string): void
-  mapPanToPoint?(args: ParamsMapPanToPoint): void
+  mapPanToPoint?(args: MapPanToPointArgs): void
   mapUpdateBbox?(bbox: [number, number, number, number]): void
   mapClearBbox?(): void
   mapSetSelectedFeature?(feature: GeoJSON.Feature<any> | null): void
-  routeNavigateTo?(args: ParamsRouteNavigateTo): void
+  routeNavigateTo?(args: RouteNavigateToArgs): void
 }
 
 export class UserTour extends React.Component<Props, any> {
@@ -850,18 +850,18 @@ function mapStateToProps(state: AppState) {
 function mapDispatchToProps(dispatch) {
   return {
     catalogResetSearchCriteria: () => dispatch(catalogActions.resetSearchCriteria()),
-    catalogUpdateSearchCriteria: (args: ParamsCatalogUpdateSearchCriteria) => (
+    catalogUpdateSearchCriteria: (args: CatalogUpdateSearchCriteriaArgs) => (
       dispatch(catalogActions.updateSearchCriteria(args))
     ),
     catalogSetApiKey: (apiKey: string) => dispatch(catalogActions.setApiKey(apiKey)),
     catalogSerialize: () => dispatch(catalogActions.serialize()),
-    mapPanToPoint: (args: ParamsMapPanToPoint) => dispatch(mapActions.panToPoint(args)),
+    mapPanToPoint: (args: MapPanToPointArgs) => dispatch(mapActions.panToPoint(args)),
     mapUpdateBbox: (bbox: [number, number, number, number]) => dispatch(mapActions.updateBbox(bbox)),
     mapClearBbox: () => dispatch(mapActions.clearBbox()),
     mapSetSelectedFeature: (feature: GeoJSON.Feature<any> | null) => (
       dispatch(mapActions.setSelectedFeature(feature))
     ),
-    routeNavigateTo: (args: ParamsRouteNavigateTo) => dispatch(routeActions.navigateTo(args)),
+    routeNavigateTo: (args: RouteNavigateToArgs) => dispatch(routeActions.navigateTo(args)),
   }
 }
 

@@ -20,8 +20,8 @@ import * as React from 'react'
 import {connect} from 'react-redux'
 import * as moment from 'moment'
 import ActivityTable from './ActivityTable'
-import {ParamsProductLinesFetchJobs, productLinesActions} from '../actions/productLinesActions'
-import {mapActions, ParamsMapPanToPoint} from '../actions/mapActions'
+import {ProductLinesFetchJobsArgs, productLinesActions} from '../actions/productLinesActions'
+import {mapActions, MapPanToPointArgs} from '../actions/mapActions'
 import {getFeatureCenter} from '../utils/geometries'
 
 const LAST_24_HOURS = {value: 'PT24H', label: 'Last 24 Hours'}
@@ -32,9 +32,9 @@ const SINCE_CREATION = {value: 'P0D', label: 'All'}
 interface Props {
   className?: string
   productLine: beachfront.ProductLine
-  productLinesFetchJobs?(args: ParamsProductLinesFetchJobs): void
+  productLinesFetchJobs?(args: ProductLinesFetchJobsArgs): void
   mapSetSelectedFeature?(feature: GeoJSON.Feature<any> | null): void
-  mapPanToPoint?(args: ParamsMapPanToPoint): void
+  mapPanToPoint?(args: MapPanToPointArgs): void
 }
 
 interface State {
@@ -179,9 +179,9 @@ function generateSinceDate(offset: string, productLine: beachfront.ProductLine) 
 
 function mapDispatchToProps(dispatch) {
   return {
-    productLinesFetchJobs: (args: ParamsProductLinesFetchJobs) => dispatch(productLinesActions.fetchJobs(args)),
+    productLinesFetchJobs: (args: ProductLinesFetchJobsArgs) => dispatch(productLinesActions.fetchJobs(args)),
     mapSetSelectedFeature: (feature: GeoJSON.Feature<any> | null) => dispatch(mapActions.setSelectedFeature(feature)),
-    mapPanToPoint: (args: ParamsMapPanToPoint) => dispatch(mapActions.panToPoint(args)),
+    mapPanToPoint: (args: MapPanToPointArgs) => dispatch(mapActions.panToPoint(args)),
   }
 }
 

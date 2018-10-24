@@ -28,18 +28,18 @@ import {TYPE_SCENE} from '../constants'
 import {AppState} from '../store'
 import {CatalogState} from '../reducers/catalogReducer'
 import {MapState} from '../reducers/mapReducer'
-import {jobsActions, ParamsCreateJob} from '../actions/jobsActions'
+import {jobsActions, JobsCreateJobArgs} from '../actions/jobsActions'
 import {JobsState} from '../reducers/jobsReducer'
-import {catalogActions, ParamsCatalogUpdateSearchCriteria} from '../actions/catalogActions'
+import {catalogActions, CatalogUpdateSearchCriteriaArgs} from '../actions/catalogActions'
 
 interface Props {
   catalog?: CatalogState
   map?: MapState
   jobs?: JobsState
   mapRef: PrimaryMap
-  jobsCreateJob?(args: ParamsCreateJob): void
+  jobsCreateJob?(args: JobsCreateJobArgs): void
   jobsDismissCreateJobError?(): void
-  catalogUpdateSearchCriteria?(args: ParamsCatalogUpdateSearchCriteria): void
+  catalogUpdateSearchCriteria?(args: CatalogUpdateSearchCriteriaArgs): void
 }
 
 interface State {
@@ -166,9 +166,9 @@ function mapStateToProps(state: AppState) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    jobsCreateJob: (args: ParamsCreateJob) => dispatch(jobsActions.createJob(args)),
+    jobsCreateJob: (args: JobsCreateJobArgs) => dispatch(jobsActions.createJob(args)),
     jobsDismissCreateJobError: () => dispatch(jobsActions.dismissCreateJobError()),
-    catalogUpdateSearchCriteria: (args: ParamsCatalogUpdateSearchCriteria) => (
+    catalogUpdateSearchCriteria: (args: CatalogUpdateSearchCriteriaArgs) => (
       dispatch(catalogActions.updateSearchCriteria(args))
     ),
   }

@@ -53,10 +53,10 @@ import {
 import {UserState} from '../reducers/userReducer'
 import {userActions} from '../actions/userActions'
 import {CatalogState} from '../reducers/catalogReducer'
-import {catalogActions, ParamsCatalogSearch} from '../actions/catalogActions'
+import {catalogActions, CatalogSearchArgs} from '../actions/catalogActions'
 import {RouteState} from '../reducers/routeReducer'
-import {ParamsRouteNavigateTo, routeActions} from '../actions/routeActions'
-import {mapActions, ParamsMapPanToPoint} from '../actions/mapActions'
+import {RouteNavigateToArgs, routeActions} from '../actions/routeActions'
+import {mapActions, MapPanToPointArgs} from '../actions/mapActions'
 import {MapState} from '../reducers/mapReducer'
 import {JobsState} from '../reducers/jobsReducer'
 import {jobsActions} from '../actions/jobsActions'
@@ -79,7 +79,7 @@ interface Props {
   userSessionExpired?(): void
   userSerialize?(): void
   userDeserialize?(): void
-  routeNavigateTo?(args: ParamsRouteNavigateTo): void
+  routeNavigateTo?(args: RouteNavigateToArgs): void
   catalogInitialize?(): void
   catalogSearch?(): void
   catalogSerialize?(): void
@@ -88,7 +88,7 @@ interface Props {
   mapUpdateDetections?(): void
   mapUpdateFrames?(): void
   mapSetSelectedFeature?(feature: GeoJSON.Feature<any> | null): void
-  mapPanToPoint?(args: ParamsMapPanToPoint): void
+  mapPanToPoint?(args: MapPanToPointArgs): void
   mapPanToExtent?(extent: [number, number, number, number]): void
   mapSerialize?(): void
   mapDeserialize?(): void
@@ -476,20 +476,20 @@ function mapStateToProps(state: AppState) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    routeNavigateTo: (args: ParamsRouteNavigateTo) => dispatch(routeActions.navigateTo(args)),
+    routeNavigateTo: (args: RouteNavigateToArgs) => dispatch(routeActions.navigateTo(args)),
     userLogout: () => dispatch(userActions.logout()),
     userSessionExpired: () => dispatch(userActions.sessionExpired()),
     userSerialize: () => dispatch(userActions.serialize()),
     userDeserialize: () => dispatch(userActions.deserialize()),
     catalogInitialize: () => dispatch(catalogActions.initialize()),
-    catalogSearch: (args: ParamsCatalogSearch) => dispatch(catalogActions.search(args)),
+    catalogSearch: (args: CatalogSearchArgs) => dispatch(catalogActions.search(args)),
     catalogSerialize: () => dispatch(catalogActions.serialize()),
     catalogDeserialize: () => dispatch(catalogActions.deserialize()),
     mapUpdateMode: () => dispatch(mapActions.updateMode()),
     mapUpdateDetections: () => dispatch(mapActions.updateDetections()),
     mapUpdateFrames: () => dispatch(mapActions.updateFrames()),
     mapSetSelectedFeature: (feature: GeoJSON.Feature<any> | null) => dispatch(mapActions.setSelectedFeature(feature)),
-    mapPanToPoint: (args: ParamsMapPanToPoint) => dispatch(mapActions.panToPoint(args)),
+    mapPanToPoint: (args: MapPanToPointArgs) => dispatch(mapActions.panToPoint(args)),
     mapPanToExtent: (extent: [number, number, number, number]) => dispatch(mapActions.panToExtent(extent)),
     mapSerialize: () => dispatch(mapActions.serialize()),
     mapDeserialize: () => dispatch(mapActions.deserialize()),
