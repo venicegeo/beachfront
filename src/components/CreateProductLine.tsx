@@ -79,14 +79,7 @@ export class CreateProductLine extends React.Component<Props, State> {
           ) : (
             <li>
               <h2>Source Imagery</h2>
-              <CatalogSearchCriteria
-                apiKey={this.props.catalog.apiKey}
-                bbox={this.props.map.bbox}
-                cloudCover={this.state.cloudCover}
-                source={this.state.source}
-                onCloudCoverChange={cloudCover => this.setState({ cloudCover })}
-                onSourceChange={this.handleSourceChange}
-              />
+              <CatalogSearchCriteria />
               <NewProductLineDetails
                 name={this.state.name}
                 dateStart={this.state.dateStart}
