@@ -188,7 +188,10 @@ export const mapActions = {
   },
 
   panToPoint(args: MapPanToPointArgs) {
-    args.zoom = args.zoom || 10
+    args = {
+      ...args,
+      zoom: args.zoom || 10,
+    }
 
     return {
       type: types.MAP_PAN_TO_POINT,

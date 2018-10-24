@@ -18,10 +18,13 @@ import {RouteState} from '../reducers/routeReducer'
 import {RouteLocation} from '../actions/routeActions'
 
 export function generateRoute(args: RouteLocation): RouteState {
-  args.pathname = args.pathname || '/'
-  args.search = args.search || ''
-  args.hash = args.hash || ''
-  args.selectedFeature = args.selectedFeature || null
+  args = {
+    ...args,
+    pathname: args.pathname || '/',
+    search: args.search || '',
+    hash: args.hash || '',
+    selectedFeature: args.selectedFeature || null,
+  }
 
   return {
     pathname: args.pathname,
