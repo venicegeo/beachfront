@@ -26,7 +26,7 @@ export interface RouteState {
   selectedFeature: GeoJSON.Feature<any> | null
 }
 
-export const routeInitialState: RouteState = generateRoute(location)
+export const routeInitialState: RouteState = generateRoute({...location})
 
 export function routeReducer(state = routeInitialState, action: any): RouteState {
   switch (action.type) {
