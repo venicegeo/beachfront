@@ -25,6 +25,7 @@ import {normalizeSceneId} from './SceneFeatureDetails'
 import {JOB_ENDPOINT} from '../config'
 import {AppState} from '../store'
 import {ProductLinesState} from '../reducers/productLinesReducer'
+import {mapActions} from '../actions/mapActions'
 
 interface Props {
   productLines?: ProductLinesState
@@ -33,9 +34,8 @@ interface Props {
   durations: {value: string, label: string}[]
   selectedJobIds: string[]
   onDurationChange(value: string)
-  onHoverIn(job: beachfront.Job)
-  onHoverOut(job: beachfront.Job)
   onRowClick(job: beachfront.Job)
+  mapSetHoveredFeature?(hoveredFeature: beachfront.Job | null): void
 }
 
 export const ActivityTable = (props: Props) => (
@@ -55,41 +55,41 @@ export const ActivityTable = (props: Props) => (
     <div className={styles.tableContainer}>
       <table>
         <thead>
-          <tr>
-            <th>Scene ID</th>
-            {/*<th>Captured On</th>
-            <th>Sensor</th>*/}
-            <td></td>
-          </tr>
+        <tr>
+          <th>Scene ID</th>
+          {/*<th>Captured On</th>
+        <th>Sensor</th>*/}
+          <td></td>
+        </tr>
         </thead>
         <tbody>
-          {props.productLines.jobs.map(job => (
-            <tr
-              key={job.id}
-              className={props.selectedJobIds.includes(job.id) ? styles.isActive : ''}
-              onClick={() => props.onRowClick(job)}
-              onMouseEnter={() => props.onHoverIn(job)}
-              onMouseLeave={() => props.onHoverOut(job)}
-              >
-              <td>{getSceneId(job)}</td>
-              {/*<td>{getCapturedOn(job)}</td>
-              <td>{getImageSensor(job)}</td>*/}
-              <td className={styles.downloadCell} onClick={e => e.stopPropagation()}>
-                <FileDownloadLink
-                  className={styles.downloadButton}
-                  filename={job.properties.name + '.geojson'}
-                  jobId={job.id}
-                  apiUrl={JOB_ENDPOINT + '/' + job.id + '.geojson'}
-                  displayText="Download GeoJSON"
-                  onComplete={() => console.log('onComplete')}
-                  onError={() => console.log('onError')}
-                  onProgress={() => console.log('onProgress')}
-                  onStart={() => console.log('onStart')}
-                />
-              </td>
-            </tr>
-          ))}
-          {props.productLines.isFetchingJobs && generatePlaceholderRows(10)}
+        {props.productLines.jobs.map(job => (
+          <tr
+            key={job.id}
+            className={props.selectedJobIds.includes(job.id) ? styles.isActive : ''}
+            onClick={() => props.onRowClick(job)}
+            onMouseEnter={() => props.mapSetHoveredFeature(job)}
+            onMouseLeave={() => props.mapSetHoveredFeature(null)}
+          >
+            <td>{getSceneId(job)}</td>
+            {/*<td>{getCapturedOn(job)}</td>
+          <td>{getImageSensor(job)}</td>*/}
+            <td className={styles.downloadCell} onClick={e => e.stopPropagation()}>
+              <FileDownloadLink
+                className={styles.downloadButton}
+                filename={job.properties.name + '.geojson'}
+                jobId={job.id}
+                apiUrl={JOB_ENDPOINT + '/' + job.id + '.geojson'}
+                displayText="Download GeoJSON"
+                onComplete={() => console.log('onComplete')}
+                onError={() => console.log('onError')}
+                onProgress={() => console.log('onProgress')}
+                onStart={() => console.log('onStart')}
+              />
+            </td>
+          </tr>
+        ))}
+        {props.productLines.isFetchingJobs && generatePlaceholderRows(10)}
         </tbody>
       </table>
     </div>
@@ -140,7 +140,15 @@ function mapStateToProps(state: AppState) {
   }
 }
 
+function mapDispatchToProps(dispatch) {
+  return {
+    mapSetHoveredFeature: (hoveredFeature: beachfront.Job | null) => (
+      dispatch(mapActions.setHoveredFeature(hoveredFeature))
+    ),
+  }
+}
+
 export default connect(
   mapStateToProps,
-  undefined,
+  mapDispatchToProps,
 )(ActivityTable)

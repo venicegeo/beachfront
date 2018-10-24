@@ -87,7 +87,6 @@ interface Props {
   mapUpdateDetections?(): void
   mapUpdateFrames?(): void
   mapSetSelectedFeature?(selectedFeature: beachfront.Job | beachfront.Scene | null): void
-  mapSetHoveredFeature?(hoveredFeature: beachfront.Job | null): void
   mapPanToPoint?(point: [number, number], zoom?: number): void
   mapPanToExtent?(extent: [number, number, number, number]): void
   mapSerialize?(): void
@@ -112,11 +111,6 @@ export class Application extends React.Component<Props, null> {
     super(props)
     this.importJobsIfNeeded = this.importJobsIfNeeded.bind(this)
     this.handleNavigateToJob = this.handleNavigateToJob.bind(this)
-    this.handlePanToProductLine = this.handlePanToProductLine.bind(this)
-    this.handleProductLineJobHoverIn = this.handleProductLineJobHoverIn.bind(this)
-    this.handleProductLineJobHoverOut = this.handleProductLineJobHoverOut.bind(this)
-    this.handleProductLineJobSelect = this.handleProductLineJobSelect.bind(this)
-    this.handleProductLineJobDeselect = this.handleProductLineJobDeselect.bind(this)
     this.handleSignOutClick = this.handleSignOutClick.bind(this)
     this.startIdleTimer = this.startIdleTimer.bind(this)
     this.stopIdleTimer = this.stopIdleTimer.bind(this)
@@ -316,13 +310,7 @@ export class Application extends React.Component<Props, null> {
         )
       case '/product-lines':
         return (
-          <ProductLineList
-            onJobHoverIn={this.handleProductLineJobHoverIn}
-            onJobHoverOut={this.handleProductLineJobHoverOut}
-            onJobSelect={this.handleProductLineJobSelect}
-            onJobDeselect={this.handleProductLineJobDeselect}
-            onPanTo={this.handlePanToProductLine}
-          />
+          <ProductLineList />
         )
       default:
         return (
@@ -356,26 +344,6 @@ export class Application extends React.Component<Props, null> {
     this.props.routeNavigateTo(loc)
     const feature = this.props.jobs.records.find(j => loc.search.includes(j.id))
     this.props.mapPanToExtent(featureToExtentWrapped(this.props.map.map, feature))
-  }
-
-  private handlePanToProductLine(productLine) {
-    this.props.mapPanToPoint(getFeatureCenter(productLine), 3.5)
-  }
-
-  private handleProductLineJobHoverIn(job) {
-    this.props.mapSetHoveredFeature(job)
-  }
-
-  private handleProductLineJobHoverOut() {
-    this.props.mapSetHoveredFeature(null)
-  }
-
-  private handleProductLineJobSelect(job) {
-    this.props.mapSetSelectedFeature(job)
-  }
-
-  private handleProductLineJobDeselect() {
-    this.props.mapSetSelectedFeature(null)
   }
 
   private handleSignOutClick() {
@@ -553,9 +521,6 @@ function mapDispatchToProps(dispatch) {
     mapUpdateFrames: () => dispatch(mapActions.updateFrames()),
     mapSetSelectedFeature: (selectedFeature: beachfront.Job | beachfront.Scene | null) => (
       dispatch(mapActions.setSelectedFeature(selectedFeature))
-    ),
-    mapSetHoveredFeature: (hoveredFeature: beachfront.Job | null) => (
-      dispatch(mapActions.setHoveredFeature(hoveredFeature))
     ),
     mapPanToPoint: (point: [number, number], zoom?: number) => dispatch(mapActions.panToPoint(point, zoom)),
     mapPanToExtent: (extent: [number, number, number, number]) => dispatch(mapActions.panToExtent(extent)),

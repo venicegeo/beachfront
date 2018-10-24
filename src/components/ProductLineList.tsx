@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-import {productLinesActions} from '../actions/productLinesActions'
 
 const styles = require('./ProductLineList.css')
 
@@ -23,14 +22,10 @@ import {LoadingAnimation} from './LoadingAnimation'
 import ProductLine from './ProductLine'
 import {AppState} from '../store'
 import {ProductLinesState} from '../reducers/productLinesReducer'
+import {productLinesActions} from '../actions/productLinesActions'
 
 interface Props {
   productLines?: ProductLinesState
-  onJobHoverIn(job: beachfront.Job)
-  onJobHoverOut()
-  onJobSelect(job: beachfront.Job)
-  onJobDeselect()
-  onPanTo(productLine: beachfront.ProductLine)
   productLinesFetch?(): void
 }
 
@@ -63,11 +58,6 @@ export class ProductLineList extends React.Component<Props, {}> {
               className={styles.listItem}
               key={productLine.id}
               productLine={productLine}
-              onJobHoverIn={this.props.onJobHoverIn}
-              onJobHoverOut={this.props.onJobHoverOut}
-              onJobSelect={this.props.onJobSelect}
-              onJobDeselect={this.props.onJobDeselect}
-              onPanTo={this.props.onPanTo}
             />
           ))}
           {isEmpty && (

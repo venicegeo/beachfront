@@ -21,6 +21,8 @@ import {connect} from 'react-redux'
 import * as moment from 'moment'
 import ActivityTable from './ActivityTable'
 import {ParamsProductLinesFetchJobs, productLinesActions} from '../actions/productLinesActions'
+import {mapActions} from '../actions/mapActions'
+import {getFeatureCenter} from '../utils/geometries'
 
 const LAST_24_HOURS = {value: 'PT24H', label: 'Last 24 Hours'}
 const LAST_7_DAYS = {value: 'P7D', label: 'Last 7 Days'}
@@ -30,12 +32,9 @@ const SINCE_CREATION = {value: 'P0D', label: 'All'}
 interface Props {
   className?: string
   productLine: beachfront.ProductLine
-  onJobHoverIn(job: beachfront.Job)
-  onJobHoverOut(job: beachfront.Job)
-  onJobSelect(job: beachfront.Job)
-  onJobDeselect()
-  onPanTo(productLine: beachfront.ProductLine)
   productLinesFetchJobs?(args: ParamsProductLinesFetchJobs): void
+  mapSetSelectedFeature?(selectedFeature: beachfront.Job | beachfront.Scene | null): void
+  mapPanToPoint?(point: [number, number], zoom?: number): void
 }
 
 interface State {
@@ -56,6 +55,7 @@ export class ProductLine extends React.Component<Props, State> {
     this.handleDurationChange = this.handleDurationChange.bind(this)
     this.handleExpansionToggle = this.handleExpansionToggle.bind(this)
     this.handleJobRowClick = this.handleJobRowClick.bind(this)
+    this.handleViewOnMap = this.handleViewOnMap.bind(this)
   }
 
   componentDidUpdate(_, prevState) {
@@ -66,7 +66,7 @@ export class ProductLine extends React.Component<Props, State> {
       })
     }
     if (prevState.isExpanded && !this.state.isExpanded && this.state.selectedJobs.length) {
-      this.props.onJobDeselect()
+      this.props.mapSetSelectedFeature(null)
     }
   }
 
@@ -82,7 +82,7 @@ export class ProductLine extends React.Component<Props, State> {
             <span>{properties.name}</span>
           </h3>
           <div className={styles.controls}>
-            <a onClick={() => this.props.onPanTo(this.props.productLine)} title="View on Map">
+            <a onClick={this.handleViewOnMap} title="View on Map">
               <i className="fa fa-globe"/>
             </a>
           </div>
@@ -119,8 +119,6 @@ export class ProductLine extends React.Component<Props, State> {
             ]}
             selectedJobIds={this.state.selectedJobs.map(j => j.id)}
             onDurationChange={this.handleDurationChange}
-            onHoverIn={this.props.onJobHoverIn}
-            onHoverOut={this.props.onJobHoverOut}
             onRowClick={this.handleJobRowClick}
           />
         </section>
@@ -139,13 +137,17 @@ export class ProductLine extends React.Component<Props, State> {
 
   private handleJobRowClick(job) {
     if (this.state.selectedJobs.some(j => j.id === job.id)) {
-      this.props.onJobDeselect()
+      this.props.mapSetSelectedFeature(null)
       this.setState({ selectedJobs: [] })
     }
     else {
-      this.props.onJobSelect(job)
+      this.props.mapSetSelectedFeature(job)
       this.setState({ selectedJobs: [job] })
     }
+  }
+
+  private handleViewOnMap() {
+    this.props.mapPanToPoint(getFeatureCenter(this.props.productLine), 3.5)
   }
 }
 
@@ -175,6 +177,10 @@ function generateSinceDate(offset: string, productLine: beachfront.ProductLine) 
 function mapDispatchToProps(dispatch) {
   return {
     productLinesFetchJobs: (args: ParamsProductLinesFetchJobs) => dispatch(productLinesActions.fetchJobs(args)),
+    mapSetSelectedFeature: (selectedFeature: beachfront.Job | beachfront.Scene | null) => (
+      dispatch(mapActions.setSelectedFeature(selectedFeature))
+    ),
+    mapPanToPoint: (point: [number, number], zoom?: number) => dispatch(mapActions.panToPoint(point, zoom)),
   }
 }
 
