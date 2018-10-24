@@ -14,7 +14,8 @@
  * limitations under the License.
  **/
 
-import {types, generateRoute} from '../actions/routeActions'
+import {types} from '../actions/routeActions'
+import {generateRoute} from '../utils/routeUtils'
 
 export interface RouteState {
   hash: string
@@ -22,7 +23,7 @@ export interface RouteState {
   jobIds: string[]
   pathname: string
   search: string
-  selectedFeature: beachfront.Job | beachfront.Scene | null
+  selectedFeature: GeoJSON.Feature<any> | null
 }
 
 export const routeInitialState: RouteState = generateRoute(location)

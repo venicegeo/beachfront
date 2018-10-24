@@ -17,10 +17,19 @@
 import * as React from 'react'
 import {TYPE_SCENE} from '../constants'
 import Tour from 'react-user-tour'
-import {createSearchCriteria} from './CreateJob'
 import {TOUR} from '../config'
+import {query, scrollIntoView} from '../utils/domUtils'
+import {connect} from 'react-redux'
+import {catalogActions, ParamsCatalogUpdateSearchCriteria} from '../actions/catalogActions'
+import {mapActions, ParamsMapPanToPoint} from '../actions/mapActions'
+import {AppState} from '../store'
+import {ParamsRouteNavigateTo, routeActions} from '../actions/routeActions'
+import {RouteState} from '../reducers/routeReducer'
+import {CatalogState} from '../reducers/catalogReducer'
+import {MapState} from '../reducers/mapReducer'
+import {JobsState} from '../reducers/jobsReducer'
 
-const styles: any = require('./Tour.css')
+const styles: any = require('./UserTour.css')
 
 const Arrow = ({ position }) => {
   const classnames = {
@@ -51,7 +60,23 @@ const UserTourErrorMessage = (props: any) => {
   </div> : null
 }
 
-export class UserTour extends React.Component<any, any> {
+interface Props {
+  route?: RouteState
+  catalog?: CatalogState
+  map?: MapState
+  jobs?: JobsState
+  catalogResetSearchCriteria?(): void
+  catalogSerialize?(): void
+  catalogUpdateSearchCriteria?(args: ParamsCatalogUpdateSearchCriteria): void
+  catalogSetApiKey?(apiKey: string): void
+  mapPanToPoint?(args: ParamsMapPanToPoint): void
+  mapUpdateBbox?(bbox: [number, number, number, number]): void
+  mapClearBbox?(): void
+  mapSetSelectedFeature?(feature: GeoJSON.Feature<any> | null): void
+  routeNavigateTo?(args: ParamsRouteNavigateTo): void
+}
+
+export class UserTour extends React.Component<Props, any> {
   private algorithm: string
   private apiKeyInstructions: any
   private basemap: string
@@ -61,7 +86,7 @@ export class UserTour extends React.Component<any, any> {
   private steps: any[]
   private zoom: number
 
-  constructor(props: any) {
+  constructor(props: Props) {
     super(props)
 
     this.algorithm = TOUR.algorithm
@@ -97,13 +122,13 @@ export class UserTour extends React.Component<any, any> {
         body: <div className={styles.body}>
           You may choose a basemap here.  We&apos;ll use {this.basemap}.
         </div>,
-        async before() {
-          if (!this.query('.BasemapSelect-root.BasemapSelect-isOpen')) {
-            this.query('.BasemapSelect-button').click()
+        before: async () => {
+          if (!query('.BasemapSelect-root.BasemapSelect-isOpen')) {
+            query('.BasemapSelect-button').click()
           }
         },
-        async after() {
-          let basemaps: any = document.querySelectorAll('.BasemapSelect-options li')
+        after: async () => {
+          const basemaps: any = document.querySelectorAll('.BasemapSelect-options li')
 
           basemaps.forEach(basemap => {
             if (basemap.textContent === this.basemap) {
@@ -123,22 +148,22 @@ export class UserTour extends React.Component<any, any> {
           Then we need to pan to an area of interest.
           We&apos;ll look at {this.bboxName}.
         </div>,
-        before() {
+        before: () => {
           return this.navigateTo('/')
         },
-        after() {
-          let app = this.props.application
-          let searchCriteria = createSearchCriteria()
-
-          app.setState({ searchCriteria })
-          sessionStorage.setItem('searchCriteria', JSON.stringify(searchCriteria))
+        after: () => {
+          this.props.catalogResetSearchCriteria()
+          this.props.catalogSerialize()
 
           return this.navigateTo('/').then(() => {
             // Pan to the center of the bound box that we will highlight later.
-            app.panTo([
-              (this.bbox[0] + this.bbox[2]) / 2,
-              (this.bbox[1] + this.bbox[3]) / 2,
-            ], this.zoom)
+            this.props.mapPanToPoint({
+              point: [
+                (this.bbox[0] + this.bbox[2]) / 2,
+                (this.bbox[1] + this.bbox[3]) / 2,
+              ],
+              zoom: this.zoom,
+            })
           })
         },
       },
@@ -161,39 +186,39 @@ export class UserTour extends React.Component<any, any> {
           You click once to start the bounding box, then click again to end it.
           But we&apos;ll do it for you this time.
         </div>,
-        before() {
-          this.props.application.handleClearBbox()
+        before: () => {
+          this.props.mapClearBbox()
           return this.navigateTo('/create-job')
         },
-        after() {
+        after: () => {
           this.showArrow(false)
 
           return new Promise(resolve => {
-            let app = this.props.application
-            let bbox = app.state.bbox
+            const bbox = this.props.map.bbox
 
             if (!bbox || this.bbox.some((x, i) => x !== bbox[i])) {
-              let duration = 1000, i = 0, n = 20, interval = setInterval(() => {
+              const duration = 1000
+              const n = 20
+              let i = 0
+              const interval = setInterval(() => {
                 ++i
 
-                app.setState({
-                  bbox: [
-                    this.bbox[0],
-                    this.bbox[1],
-                    this.bbox[0] + i / n * (this.bbox[2] - this.bbox[0]),
-                    this.bbox[1] + i / n * (this.bbox[3] - this.bbox[1]),
-                  ],
-                })
+                this.props.mapUpdateBbox([
+                  this.bbox[0],
+                  this.bbox[1],
+                  this.bbox[0] + i / n * (this.bbox[2] - this.bbox[0]),
+                  this.bbox[1] + i / n * (this.bbox[3] - this.bbox[1]),
+                ])
 
                 if (i >= n) {
                   clearInterval(interval)
-                  app.setState({ bbox: this.bbox })
+                  this.props.mapUpdateBbox(this.bbox)
                   resolve()
                 }
               }, duration / n)
             }
 
-            app.setState({ bbox: this.bbox })
+            this.props.mapUpdateBbox(this.bbox)
           })
         },
       },
@@ -205,14 +230,10 @@ export class UserTour extends React.Component<any, any> {
         body: <div className={styles.body}>
           Select the imagery source.  We&apos;ll use <SourceName tour={this}/> for now.
         </div>,
-        async after() {
-          let app = this.props.application
-
-          if (app.state.searchCriteria.source !== this.searchCriteria.source) {
-            app.setState({
-              searchCriteria: Object.assign({}, app.state.searchCriteria, {
-                source: this.searchCriteria.source,
-              }),
+        after: async () => {
+          if (this.props.catalog.searchCriteria.source !== this.searchCriteria.source) {
+            this.props.catalogUpdateSearchCriteria({
+              source: this.searchCriteria.source,
             })
           }
         },
@@ -235,12 +256,9 @@ export class UserTour extends React.Component<any, any> {
           </div>
           {this.apiKeyInstructions}
         </div>,
-        async after() {
-          let input = this.query(`.${styles.apiKey} input`)
-
-          this.props.application.setState({
-            catalogApiKey: input.value,
-          })
+        after: async () => {
+          const input = query(`.${styles.apiKey} input`) as HTMLInputElement
+          this.props.catalogSetApiKey(input.value)
         },
       },
       {
@@ -251,37 +269,24 @@ export class UserTour extends React.Component<any, any> {
           Enter the date range that will be used to search for imagery.
           By default the last 30 days is searched, but your needs may vary.
         </div>,
-        after() {
-          return new Promise(resolve => {
-            let app = this.props.application
-            let search = this.searchCriteria
-            let fromElem = this.query('.CatalogSearchCriteria-captureDateFrom input')
-            let $from = fromElem && fromElem.value !== search.dateFrom
-              ? this.pace(search.dateFrom, (_, s) => fromElem.value = s)
-              : Promise.resolve()
+        after: async () => {
+          const search = this.searchCriteria
+          const fromElem = query('.CatalogSearchCriteria-captureDateFrom input') as HTMLInputElement
+          if (fromElem && fromElem.value !== search.dateFrom) {
+            await this.pace(search.dateFrom, (_, s) => fromElem.value = s)
+          }
 
-            $from.then(() => {
-              app.setState({
-                searchCriteria: Object.assign({}, app.state.searchCriteria, {
-                  dateFrom: search.dateFrom,
-                }),
-              })
+          this.props.catalogUpdateSearchCriteria({
+            dateFrom: search.dateFrom,
+          })
 
-              let toElem = this.query('.CatalogSearchCriteria-captureDateTo input')
-              let $to = toElem && toElem.value !== search.dateTo
-                ? this.pace(search.dateTo, (_, s) => toElem.value = s)
-                : Promise.resolve()
+          const toElem = query('.CatalogSearchCriteria-captureDateTo input') as HTMLInputElement
+          if (toElem && toElem.value !== search.dateTo) {
+            await this.pace(search.dateTo, (_, s) => toElem.value = s)
+          }
 
-              $to.then(() => {
-                app.setState({
-                  searchCriteria: Object.assign({}, app.state.searchCriteria, {
-                    dateTo: search.dateTo,
-                  }),
-                })
-
-                resolve()
-              })
-            })
+          this.props.catalogUpdateSearchCriteria({
+            dateTo: search.dateTo,
           })
         },
       },
@@ -293,10 +298,8 @@ export class UserTour extends React.Component<any, any> {
         body: <div className={styles.body}>
           Adjust the amount of cloud cover that you are willing to tolerate.
         </div>,
-        after() {
+        after: () => {
           return new Promise(resolve => {
-            let app = this.props.application
-
             function gen(from, to): number[] {
               const rc: number[] = []
               const sign = Math.sign(to - from)
@@ -310,20 +313,18 @@ export class UserTour extends React.Component<any, any> {
               return rc
             }
 
-            if (app.state.searchCriteria.cloudCover === this.searchCriteria.cloudCover) {
+            if (this.props.catalog.searchCriteria.cloudCover === this.searchCriteria.cloudCover) {
               resolve()
             } else {
-              let fn = (g) => {
+              const fn = (g) => {
                 const i = g.pop()
 
                 if (i == null) {
                   setTimeout(resolve, 100)
                 } else {
                   setTimeout(() => {
-                    app.setState({
-                      searchCriteria: Object.assign({}, app.state.searchCriteria, {
-                        cloudCover: i,
-                      }),
+                    this.props.catalogUpdateSearchCriteria({
+                      cloudCover: i,
                     })
 
                     fn(g)
@@ -331,7 +332,7 @@ export class UserTour extends React.Component<any, any> {
                 }
               }
 
-              fn(gen(app.state.searchCriteria.cloudCover, this.searchCriteria.cloudCover))
+              fn(gen(this.props.catalog.searchCriteria.cloudCover, this.searchCriteria.cloudCover))
             }
           })
         },
@@ -345,26 +346,25 @@ export class UserTour extends React.Component<any, any> {
         body: <div className={styles.body}>
           Just click the button to perform the search.
         </div>,
-        after() {
-          if (this.props.application.state.searchResults) {
+        after: () => {
+          if (this.props.catalog.searchResults) {
             return Promise.resolve()
           } else {
-            this.query('.ImagerySearch-controls button[type=submit]').click()
+            query('.ImagerySearch-controls button[type=submit]').click()
             this.showArrow(false)
 
             return new Promise((resolve, reject) => {
               const timeout = 60000
               const t0 = Date.now()
-              const app = this.props.application
               const interval = setInterval(() => {
-                if (app.state.searchResults) {
+                if (this.props.catalog.searchResults) {
                   clearInterval(interval)
                   resolve()
                 } else if (Date.now() - t0 > timeout) {
                   clearInterval(interval)
                   reject(`Timed out after ${timeout / 1000} seconds waiting for imagery results.`)
                 } else {
-                  const elem = this.query('.ImagerySearch-errorMessage')
+                  const elem = query('.ImagerySearch-errorMessage')
 
                   if (elem) {
                     const m = elem.querySelector('h4')
@@ -388,12 +388,10 @@ export class UserTour extends React.Component<any, any> {
           matching the search criteria.  Click on one to load the image
           itself&hellip; For now, we&apos;ll select one for you.
         </div>,
-        after() {
+        after: () => {
           return new Promise(resolve => {
-            let app = this.props.application
-
             // Get the feature with the least amount of cloud cover.
-            let feature = app.state.searchResults.images.features.filter(f => {
+            const feature = this.props.catalog.searchResults.images.features.filter(f => {
               // Eliminate images w/ zero cloud cover; that may mean a bad image.
               return f.properties.cloudCover
             }).sort((a, b) => {
@@ -406,8 +404,7 @@ export class UserTour extends React.Component<any, any> {
             the correct value in the normal course of events.
             */
             feature.properties.type = TYPE_SCENE
-            app.handleSelectFeature(feature)
-            app.setState({ selectedFeature: feature })
+            this.props.mapSetSelectedFeature(feature)
             setTimeout(resolve, 100)
           })
         },
@@ -443,16 +440,16 @@ export class UserTour extends React.Component<any, any> {
         body: <div className={styles.body}>
           We&apos;ll use this one.
         </div>,
-        after() {
-          const algorithm = this.query(`.AlgorithmList-root li${this.algorithm}`)
-          algorithm.querySelector('.Algorithm-startButton').click()
+        after: () => {
+          const algorithm = query(`.AlgorithmList-root li${this.algorithm}`)
+          const startButton = algorithm.querySelector('.Algorithm-startButton') as HTMLElement
+          startButton.click()
 
           return new Promise((resolve, reject) => {
             const timeout = 30000
             const t0 = Date.now()
-            const app = this.props.application
             const interval = setInterval(() => {
-              if (app.state.route.pathname === '/jobs') {
+              if (this.props.route.pathname === '/jobs') {
                 clearInterval(interval)
                 resolve()
               } else if (Date.now() - t0 > timeout) {
@@ -462,7 +459,7 @@ export class UserTour extends React.Component<any, any> {
                 const elem = algorithm.querySelector('.AlgorithmList-errorMessage')
 
                 if (elem) {
-                  let m = elem.querySelector('h4')
+                  const m = elem.querySelector('h4')
 
                   clearInterval(interval)
                   reject(m && m.textContent || 'Oops!')
@@ -492,12 +489,13 @@ export class UserTour extends React.Component<any, any> {
         body: <div className={styles.body}>
           The details will give you information about the job and its imagery.
         </div>,
-        before() {
+        before: () => {
           return this.expandJobStatus().then(() => {
-            const elem = this.query('.JobStatusList-root .JobStatus-isActive')
+            const elem = query('.JobStatusList-root .JobStatus-isActive')
 
             if (!elem.classList.contains('JobStatus-isExpanded')) {
-              elem.querySelector('.JobStatus-details').click()
+              const details = elem.querySelector('.JobStatus-details') as HTMLElement
+              details.click()
             }
           })
         },
@@ -523,9 +521,9 @@ export class UserTour extends React.Component<any, any> {
         body: <div className={styles.body}>
           Here we are zoomed in on the job.
         </div>,
-        async before() {
-          if (this.props.application.state.route.pathname === '/jobs') {
-            this.query(`.JobStatusList-root .JobStatus-isActive .JobStatus-controls a`).click()
+        before: async () => {
+          if (this.props.route.pathname === '/jobs') {
+            query(`.JobStatusList-root .JobStatus-isActive .JobStatus-controls a`).click()
           }
         },
       },
@@ -550,9 +548,9 @@ export class UserTour extends React.Component<any, any> {
         body: <div className={styles.body}>
           If you expand the job details, then you can click here to delete the job.
         </div>,
-        before() {
+        before: () => {
           return this.expandJobStatus().then(() => {
-            const elem = this.query('.JobStatusList-root .JobStatus-isActive')
+            const elem = query('.JobStatusList-root .JobStatus-isActive')
 
             if (!elem.classList.contains('JobStatus-isExpanded')) {
               (elem.querySelector('.JobStatus-details') as HTMLElement).click()
@@ -579,12 +577,9 @@ export class UserTour extends React.Component<any, any> {
     this.cancel = this.cancel.bind(this)
     this.expandJobStatus = this.expandJobStatus.bind(this)
     this.gotoStep = this.gotoStep.bind(this)
-    this.isElementInViewport = this.isElementInViewport.bind(this)
     this.navigateTo = this.navigateTo.bind(this)
     this.onKeyPress = this.onKeyPress.bind(this)
     this.pace = this.pace.bind(this)
-    this.query = this.query.bind(this)
-    this.scrollIntoView = this.scrollIntoView.bind(this)
     this.setTabIndices = this.setTabIndices.bind(this)
     this.showArrow = this.showArrow.bind(this)
     this.start = this.start.bind(this)
@@ -654,13 +649,12 @@ export class UserTour extends React.Component<any, any> {
 
   private expandJobStatus() {
     return new Promise((resolve, reject) => {
-      const app = this.props.application
-      const promise = app.state.route.pathname === '/jobs'
+      const promise = this.props.route.pathname === '/jobs'
         ? Promise.resolve()
-        : this.navigateTo({ pathname: '/jobs', search: app.state.route.search })
+        : this.navigateTo({ pathname: '/jobs', search: this.props.route.search })
 
       promise.then(() => {
-        const elem = this.query(`.JobStatusList-root .${styles.newJob}`)
+        const elem = query(`.JobStatusList-root .${styles.newJob}`)
 
         if (!elem || Array.from(elem.classList).find(n => n === 'JobStatus-isExpanded')) {
           resolve()
@@ -679,9 +673,9 @@ export class UserTour extends React.Component<any, any> {
       this.state.changing = true
     }
 
-    let functions = []
-    let lastStep = this.steps.find(i => i.step === this.state.tourStep)
-    let nextStep = this.steps.find(i => i.step === n)
+    const functions = []
+    const lastStep = this.steps.find(i => i.step === this.state.tourStep)
+    const nextStep = this.steps.find(i => i.step === n)
 
     if (lastStep && lastStep.after) {
       functions.push(lastStep.after.bind(this))
@@ -694,7 +688,7 @@ export class UserTour extends React.Component<any, any> {
 
       functions.push(() => {
         return new Promise((resolve, reject) => {
-          this.scrollIntoView(nextStep.selector).then(() => {
+          scrollIntoView(nextStep.selector).then(() => {
             this.showArrow(!nextStep.hideArrow)
             this.setState({ changing: false, tourStep: n })
             resolve()
@@ -710,7 +704,7 @@ export class UserTour extends React.Component<any, any> {
       })
     }
 
-    let rc = this.syncPromiseExec(functions)
+    const rc = this.syncPromiseExec(functions)
 
     rc.then(() => {
       this.setState({ changing: false })
@@ -725,34 +719,19 @@ export class UserTour extends React.Component<any, any> {
     return rc
   }
 
-  private isElementInViewport(elem): boolean {
-    const box = elem.getBoundingClientRect()
-    const bannerHeight = 25
-    const client = {
-      height: (window.innerHeight || document.documentElement.clientHeight),
-      width: (window.innerWidth || document.documentElement.clientWidth),
-    }
-
-    return box.top >= bannerHeight
-      && box.left >= 0
-      && parseInt(box.bottom) <= client.height - bannerHeight
-      && parseInt(box.right) <= client.width
-  }
-
   private navigateTo(props): Promise<any> {
-    const app = this.props.application
     const nav = typeof props === 'string' ? { pathname: props } : props
 
-    if (nav.pathname === app.state.route.pathname) {
+    if (nav.pathname === this.props.route.pathname) {
       return Promise.resolve(nav.pathname)
     } else {
       return new Promise((resolve, reject) => {
-        app.navigateTo(nav)
+        this.props.routeNavigateTo({ location: nav })
 
-        let timeout = 30000
-        let t0 = Date.now()
-        let interval = setInterval(() => {
-          if (nav.pathname === app.state.route.pathname) {
+        const timeout = 30000
+        const t0 = Date.now()
+        const interval = setInterval(() => {
+          if (nav.pathname === this.props.route.pathname) {
             clearInterval(interval)
             resolve(nav.pathname)
           } else if (Date.now() - t0 > timeout) {
@@ -769,7 +748,7 @@ export class UserTour extends React.Component<any, any> {
 
     switch (event.key) {
       case 'Enter': {
-        const button = this.query('.react-user-tour-button-container div:focus')
+        const button = query('.react-user-tour-button-container div:focus')
 
         if (button) {
           button.click()
@@ -787,7 +766,8 @@ export class UserTour extends React.Component<any, any> {
 
   private pace(text, cb, delay = 100): Promise<string> {
     return new Promise(resolve => {
-      let i = 0, interval = setInterval(() => {
+      let i = 0
+      const interval = setInterval(() => {
         if (i < text.length) {
           cb(text.charAt(i), text.substring(0, ++i))
         } else {
@@ -798,15 +778,11 @@ export class UserTour extends React.Component<any, any> {
     })
   }
 
-  private query(selector: string): HTMLElement {
-    return document.querySelector(selector) as HTMLElement
-  }
-
   private setTabIndices() {
     const buttons: any[] = [
-      this.query('.react-user-tour-button-container .react-user-tour-done-button'),
-      this.query('.react-user-tour-button-container .react-user-tour-next-button'),
-      this.query('.react-user-tour-button-container .react-user-tour-back-button'),
+      query('.react-user-tour-button-container .react-user-tour-done-button'),
+      query('.react-user-tour-button-container .react-user-tour-next-button'),
+      query('.react-user-tour-button-container .react-user-tour-back-button'),
     ].filter(b => b).map((button, i) => {
       button.setAttribute('tabindex', (i + 1).toString())
       return button
@@ -819,38 +795,8 @@ export class UserTour extends React.Component<any, any> {
     return buttons[0]
   }
 
-  private scrollIntoView(selector: any): Promise<any> {
-    return new Promise((resolve, reject) => {
-      let elem = typeof selector === 'string' ? this.query(selector) : selector
-
-      if (elem) {
-        if (this.isElementInViewport(elem)) {
-          resolve()
-        } else {
-          elem.scrollIntoView({ behavior: 'smooth' })
-
-          let timeout = 10000
-          let t0 = Date.now()
-          let interval = setInterval(() => {
-            if (this.isElementInViewport(elem)) {
-              clearInterval(interval)
-              setTimeout(resolve, 100)
-            } else if (Date.now() - t0 > timeout) {
-              clearInterval(interval)
-              reject(`Timed out after ${timeout / 1000} seconds scrolling ${selector} into view.`)
-            }
-          }, 100)
-        }
-      } else {
-        let message = `The DOM element, "${selector}", is not available.`
-        console.warn(message)
-        reject(message)
-      }
-    })
-  }
-
   private showArrow(show: boolean): void {
-    let arrow = this.query(`.${styles.arrow}`)
+    const arrow = query(`.${styles.arrow}`)
 
     if (arrow) {
       arrow.style.visibility = show ? 'visible' : 'hidden'
@@ -862,7 +808,7 @@ export class UserTour extends React.Component<any, any> {
   }
 
   private get imageCount(): string {
-    let results = this.props.application.state.searchResults
+    const results = this.props.catalog.searchResults
 
     switch (results && results.count) {
       case null:
@@ -876,18 +822,50 @@ export class UserTour extends React.Component<any, any> {
   }
 
   private get jobStatus(): string {
-    let jobs = this.props.application.state.jobs
-    let job = jobs && jobs.records && jobs.records[jobs.records.length - 1]
+    const jobs = this.props.jobs
+    const job = jobs && jobs.records && jobs.records[jobs.records.length - 1]
 
     return job && job.properties && job.properties.status || 'Unknown'
   }
 
   private get sourceName() {
-    let options = document.querySelectorAll('.CatalogSearchCriteria-source select option')
-    let option: any = options && Array.from(options).find((o: any) => {
+    const options = document.querySelectorAll('.CatalogSearchCriteria-source select option')
+    const option: any = options && Array.from(options).find((o: any) => {
       return o.value === this.searchCriteria.source
     })
 
     return option && option.text
   }
 }
+
+function mapStateToProps(state: AppState) {
+  return {
+    route: state.route,
+    catalog: state.catalog,
+    map: state.map,
+    job: state.jobs,
+  }
+}
+
+function mapDispatchToProps(dispatch) {
+  return {
+    catalogResetSearchCriteria: () => dispatch(catalogActions.resetSearchCriteria()),
+    catalogUpdateSearchCriteria: (args: ParamsCatalogUpdateSearchCriteria) => (
+      dispatch(catalogActions.updateSearchCriteria(args))
+    ),
+    catalogSetApiKey: (apiKey: string) => dispatch(catalogActions.setApiKey(apiKey)),
+    catalogSerialize: () => dispatch(catalogActions.serialize()),
+    mapPanToPoint: (args: ParamsMapPanToPoint) => dispatch(mapActions.panToPoint(args)),
+    mapUpdateBbox: (bbox: [number, number, number, number]) => dispatch(mapActions.updateBbox(bbox)),
+    mapClearBbox: () => dispatch(mapActions.clearBbox()),
+    mapSetSelectedFeature: (feature: GeoJSON.Feature<any> | null) => (
+      dispatch(mapActions.setSelectedFeature(feature))
+    ),
+    routeNavigateTo: (args: ParamsRouteNavigateTo) => dispatch(routeActions.navigateTo(args)),
+  }
+}
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(UserTour)

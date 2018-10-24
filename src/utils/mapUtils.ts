@@ -14,7 +14,7 @@
  * limitations under the License.
  **/
 
-export function shouldSelectedFeatureAutoDeselect(selectedFeature: beachfront.Job | beachfront.Scene, options?: { ignoreTypes?: string[] }) {
+export function shouldSelectedFeatureAutoDeselect(selectedFeature: GeoJSON.Feature<any>, options?: { ignoreTypes?: string[] }) {
   // Determine if the selected feature is an ignorable type that should not be auto-deselected on certain route changes
   options = options || {}
 

@@ -35,6 +35,11 @@ export const types = {
   MAP_DESERIALIZED: 'MAP_DESERIALIZED',
 }
 
+export interface ParamsMapPanToPoint {
+  point: [number, number]
+  zoom?: number
+}
+
 export const mapActions = {
   initialized(map: ol.Map, collections: any) {
     return {
@@ -153,17 +158,17 @@ export const mapActions = {
     }
   },
 
-  setSelectedFeature(selectedFeature: beachfront.Job | beachfront.Scene) {
+  setSelectedFeature(feature: GeoJSON.Feature<any> | null) {
     return (dispatch, getState) => {
       const state: AppState = getState()
 
-      if (state.map.selectedFeature === selectedFeature) {
+      if (state.map.selectedFeature === feature) {
         return  // Nothing to do
       }
 
       dispatch({
         type: types.MAP_SELECTED_FEATURE_UPDATED,
-        selectedFeature,
+        selectedFeature: feature,
       })
     }
   },
@@ -182,11 +187,13 @@ export const mapActions = {
     }
   },
 
-  panToPoint(point: [number, number], zoom: number = 10) {
+  panToPoint(args: ParamsMapPanToPoint) {
+    args.zoom = args.zoom || 10
+
     return {
       type: types.MAP_PAN_TO_POINT,
-      point,
-      zoom,
+      point: args.point,
+      zoom: args.zoom,
     }
   },
 

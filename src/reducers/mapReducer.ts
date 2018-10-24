@@ -29,7 +29,7 @@ export interface MapState {
   bbox: [number, number, number, number] | null
   hoveredFeature: beachfront.Job | null
   collections: any | null
-  selectedFeature: beachfront.Job | beachfront.Scene | null
+  selectedFeature: GeoJSON.Feature<any> | null
 }
 
 export const mapInitialState: MapState = {

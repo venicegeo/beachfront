@@ -45,7 +45,7 @@ import {
   SESSION_IDLE_STORE,
   SESSION_IDLE_UNITS,
 } from '../config'
-import {UserTour} from './Tour'
+import UserTour from './UserTour'
 
 import {
   TYPE_JOB,
@@ -55,8 +55,8 @@ import {userActions} from '../actions/userActions'
 import {CatalogState} from '../reducers/catalogReducer'
 import {catalogActions, ParamsCatalogSearch} from '../actions/catalogActions'
 import {RouteState} from '../reducers/routeReducer'
-import {routeActions} from '../actions/routeActions'
-import {mapActions} from '../actions/mapActions'
+import {ParamsRouteNavigateTo, routeActions} from '../actions/routeActions'
+import {mapActions, ParamsMapPanToPoint} from '../actions/mapActions'
 import {MapState} from '../reducers/mapReducer'
 import {JobsState} from '../reducers/jobsReducer'
 import {jobsActions} from '../actions/jobsActions'
@@ -65,6 +65,7 @@ import {algorithmsActions} from '../actions/algorithmsActions'
 import {apiStatusActions} from '../actions/apiStatusActions'
 import {ProductLinesState} from '../reducers/productLinesReducer'
 import {shouldSelectedFeatureAutoDeselect} from '../utils/mapUtils'
+import {scrollIntoView} from '../utils/domUtils'
 
 interface Props {
   user?: UserState
@@ -78,7 +79,7 @@ interface Props {
   userSessionExpired?(): void
   userSerialize?(): void
   userDeserialize?(): void
-  routeNavigateTo?(loc, pushHistory?: boolean): void
+  routeNavigateTo?(args: ParamsRouteNavigateTo): void
   catalogInitialize?(): void
   catalogSearch?(): void
   catalogSerialize?(): void
@@ -86,8 +87,8 @@ interface Props {
   mapUpdateMode?(): void
   mapUpdateDetections?(): void
   mapUpdateFrames?(): void
-  mapSetSelectedFeature?(selectedFeature: beachfront.Job | beachfront.Scene | null): void
-  mapPanToPoint?(point: [number, number], zoom?: number): void
+  mapSetSelectedFeature?(feature: GeoJSON.Feature<any> | null): void
+  mapPanToPoint?(args: ParamsMapPanToPoint): void
   mapPanToExtent?(extent: [number, number, number, number]): void
   mapSerialize?(): void
   mapDeserialize?(): void
@@ -173,8 +174,10 @@ export class Application extends React.Component<Props, null> {
       }
 
       this.props.routeNavigateTo({
-        pathname: this.props.route.pathname,
-        search,
+        location: {
+          pathname: this.props.route.pathname,
+          search,
+        },
       })
     }
 
@@ -190,21 +193,27 @@ export class Application extends React.Component<Props, null> {
     }
 
     if (prevProps.jobs.isFetchingOne && !this.props.jobs.isFetchingOne && !this.props.jobs.fetchOneError) {
-      this.props.mapPanToPoint(getFeatureCenter(this.props.jobs.lastOneFetched))
+      this.props.mapPanToPoint({
+        point: getFeatureCenter(this.props.jobs.lastOneFetched),
+      })
     }
 
     if (prevProps.jobs.isCreatingJob && !this.props.jobs.isCreatingJob && !this.props.jobs.createJobError) {
       this.props.routeNavigateTo({
-        pathname: '/jobs',
-        search: '?jobId=' + this.props.jobs.createdJob.id,
+        location: {
+          pathname: '/jobs',
+          search: '?jobId=' + this.props.jobs.createdJob.id,
+        },
       })
     }
 
     if (prevProps.jobs.isDeletingJob && !this.props.jobs.isDeletingJob && !this.props.jobs.deleteJobError) {
       if (this.props.route.jobIds.includes(this.props.jobs.deletedJob.id)) {
         this.props.routeNavigateTo({
-          pathname: this.props.route.pathname,
-          search: this.props.route.search.replace(new RegExp('\\??jobId=' + this.props.jobs.deletedJob.id), ''),
+          location: {
+            pathname: this.props.route.pathname,
+            search: this.props.route.search.replace(new RegExp('\\??jobId=' + this.props.jobs.deletedJob.id), ''),
+          },
         })
       }
     }
@@ -212,7 +221,11 @@ export class Application extends React.Component<Props, null> {
     if (prevProps.productLines.isCreatingProductLine &&
         !this.props.productLines.isCreatingProductLine &&
         !this.props.productLines.createProductLineError) {
-      this.props.routeNavigateTo({ pathname: '/product-lines' })
+      this.props.routeNavigateTo({
+        location: {
+          pathname: '/product-lines',
+        },
+      })
     }
 
     if (!prevProps.catalog.isSearching && this.props.catalog.isSearching) {
@@ -390,7 +403,7 @@ export class Application extends React.Component<Props, null> {
     } else {
       let root = document.createElement('div')
       document.body.appendChild(root)
-      this.tour = render(<UserTour application={this}/>, root)
+      this.tour = render(<UserTour />, root)
     }
   }
 
@@ -421,7 +434,10 @@ export class Application extends React.Component<Props, null> {
   private subscribeToHistoryEvents() {
     window.addEventListener('popstate', () => {
       if (this.props.route.href !== location.pathname + location.search + location.hash) {
-        this.props.routeNavigateTo(location, false)
+        this.props.routeNavigateTo({
+          location,
+          pushHistory: false,
+        })
       }
     })
   }
@@ -447,53 +463,6 @@ export class Application extends React.Component<Props, null> {
 // Helpers
 //
 
-function isElementInViewport(elem): boolean {
-  const box = elem.getBoundingClientRect()
-  const bannerHeight = 25
-  const minimumBoxHeight = 65
-  const client = {
-    height: (window.innerHeight || document.documentElement.clientHeight),
-    width: (window.innerWidth || document.documentElement.clientWidth),
-  }
-
-  return box.top >= bannerHeight
-    && box.top + minimumBoxHeight < client.height - bannerHeight
-}
-
-function query(selector: string): HTMLElement {
-  return document.querySelector(selector) as HTMLElement
-}
-
-function scrollIntoView(selector: any): Promise<any> {
-  return new Promise((resolve, reject) => {
-    let elem = typeof selector === 'string' ? query(selector) : selector
-
-    if (elem) {
-      if (isElementInViewport(elem)) {
-        resolve()
-      } else {
-        elem.scrollIntoView(true, { behavior: 'smooth' })
-
-        let timeout = 10000
-        let t0 = Date.now()
-        let interval = setInterval(() => {
-          if (isElementInViewport(elem)) {
-            clearInterval(interval)
-            setTimeout(resolve, 100)
-          } else if (Date.now() - t0 > timeout) {
-            clearInterval(interval)
-            reject(`Timed out after ${timeout / 1000} seconds scrolling ${selector} into view.`)
-          }
-        }, 100)
-      }
-    } else {
-      let message = `The DOM element, "${selector}", is not available.`
-      console.warn(message)
-      reject(message)
-    }
-  })
-}
-
 function mapStateToProps(state: AppState) {
   return {
     user: state.user,
@@ -507,7 +476,7 @@ function mapStateToProps(state: AppState) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    routeNavigateTo: (loc, pushHistory?) => dispatch(routeActions.navigateTo(loc, pushHistory)),
+    routeNavigateTo: (args: ParamsRouteNavigateTo) => dispatch(routeActions.navigateTo(args)),
     userLogout: () => dispatch(userActions.logout()),
     userSessionExpired: () => dispatch(userActions.sessionExpired()),
     userSerialize: () => dispatch(userActions.serialize()),
@@ -519,10 +488,8 @@ function mapDispatchToProps(dispatch) {
     mapUpdateMode: () => dispatch(mapActions.updateMode()),
     mapUpdateDetections: () => dispatch(mapActions.updateDetections()),
     mapUpdateFrames: () => dispatch(mapActions.updateFrames()),
-    mapSetSelectedFeature: (selectedFeature: beachfront.Job | beachfront.Scene | null) => (
-      dispatch(mapActions.setSelectedFeature(selectedFeature))
-    ),
-    mapPanToPoint: (point: [number, number], zoom?: number) => dispatch(mapActions.panToPoint(point, zoom)),
+    mapSetSelectedFeature: (feature: GeoJSON.Feature<any> | null) => dispatch(mapActions.setSelectedFeature(feature)),
+    mapPanToPoint: (args: ParamsMapPanToPoint) => dispatch(mapActions.panToPoint(args)),
     mapPanToExtent: (extent: [number, number, number, number]) => dispatch(mapActions.panToExtent(extent)),
     mapSerialize: () => dispatch(mapActions.serialize()),
     mapDeserialize: () => dispatch(mapActions.deserialize()),

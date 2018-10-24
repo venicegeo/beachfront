@@ -47,7 +47,7 @@ interface Props {
   job: beachfront.Job
   onNavigate(loc: { pathname: string, search: string, hash: string })
   onToggleExpansion(job: beachfront.Job, isExpanded: boolean)
-  mapSetSelectedFeature?(selectedFeature: beachfront.Job | beachfront.Scene | null): void
+  mapSetSelectedFeature?(feature: GeoJSON.Feature<any> | null): void
   jobsDeleteJob?(job: beachfront.Job): void
 }
 
@@ -296,9 +296,7 @@ function mapStateToProps(state: AppState) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    mapSetSelectedFeature: (selectedFeature: beachfront.Job | beachfront.Scene | null) => (
-      dispatch(mapActions.setSelectedFeature(selectedFeature))
-    ),
+    mapSetSelectedFeature: (feature: GeoJSON.Feature<any> | null) => dispatch(mapActions.setSelectedFeature(feature)),
     jobsDeleteJob: (job: beachfront.Job) => dispatch(jobsActions.deleteJob(job)),
   }
 }

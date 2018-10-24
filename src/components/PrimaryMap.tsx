@@ -111,7 +111,7 @@ interface Props {
   mapInitialized?(map: ol.Map, collections: any): void
   mapUpdateBbox?(bbox: [number, number, number, number]): void
   mapUpdateView?(view: MapView): void
-  mapSetSelectedFeature?(selectedFeature: beachfront.Job | beachfront.Scene): void
+  mapSetSelectedFeature?(feature: GeoJSON.Feature<any> | null): void
   catalogSearch?(args?: ParamsCatalogSearch): void
 }
 
@@ -1466,9 +1466,7 @@ function mapDispatchToProps(dispatch) {
     mapInitialized: (map: ol.Map, collections: any) => dispatch(mapActions.initialized(map, collections)),
     mapUpdateBbox: (bbox: [number, number, number, number]) => dispatch(mapActions.updateBbox(bbox)),
     mapUpdateView: (view: MapView) => dispatch(mapActions.updateView(view)),
-    mapSetSelectedFeature: (selectedFeature: beachfront.Job | beachfront.Scene | null) => (
-      dispatch(mapActions.setSelectedFeature(selectedFeature))
-    ),
+    mapSetSelectedFeature: (feature: GeoJSON.Feature<any> | null) => dispatch(mapActions.setSelectedFeature(feature)),
     catalogSearch: (args?: ParamsCatalogSearch) => dispatch(catalogActions.search(args)),
   }
 }

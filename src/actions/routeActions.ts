@@ -14,17 +14,31 @@
  * limitations under the License.
  **/
 
-import {RouteState} from '../reducers/routeReducer'
+import {generateRoute} from '../utils/routeUtils'
 
 export const types = {
   ROUTE_CHANGED: 'ROUTE_CHANGED',
 }
 
-export const routeActions = {
-  navigateTo(loc, pushHistory = true) {
-    const route = generateRoute(loc)
+export interface RouteLocation {
+  pathname?: string
+  search?: string
+  hash?: string
+  selectedFeature?: beachfront.Job | beachfront.Scene | null
+}
 
-    if (pushHistory) {
+export interface ParamsRouteNavigateTo {
+  location: RouteLocation
+  pushHistory?: boolean
+}
+
+export const routeActions = {
+  navigateTo(args: ParamsRouteNavigateTo) {
+    args.pushHistory = (args.pushHistory != null) ? args.pushHistory : true
+
+    const route = generateRoute(args.location)
+
+    if (args.pushHistory) {
       history.pushState(null, '', route.href)
     }
 
@@ -33,17 +47,4 @@ export const routeActions = {
       route,
     }
   },
-}
-
-export function generateRoute({ pathname = '/', search = '', hash = '', selectedFeature = null }): RouteState {
-  return {
-    pathname,
-    search,
-    hash,
-    selectedFeature,
-
-    // Helpers
-    href: pathname + search + hash,
-    jobIds: search.substr(1).split('&').filter(s => s.startsWith('jobId')).map(s => s.replace('jobId=', '')),
-  }
 }
