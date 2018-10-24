@@ -169,7 +169,7 @@ export class Application extends React.Component<Props, null> {
       }
 
       this.props.routeNavigateTo({
-        location: {
+        loc: {
           pathname: this.props.route.pathname,
           search,
         },
@@ -195,7 +195,7 @@ export class Application extends React.Component<Props, null> {
 
     if (prevProps.jobs.isCreatingJob && !this.props.jobs.isCreatingJob && !this.props.jobs.createJobError) {
       this.props.routeNavigateTo({
-        location: {
+        loc: {
           pathname: '/jobs',
           search: '?jobId=' + this.props.jobs.createdJob.id,
         },
@@ -205,7 +205,7 @@ export class Application extends React.Component<Props, null> {
     if (prevProps.jobs.isDeletingJob && !this.props.jobs.isDeletingJob && !this.props.jobs.deleteJobError) {
       if (this.props.route.jobIds.includes(this.props.jobs.deletedJob.id)) {
         this.props.routeNavigateTo({
-          location: {
+          loc: {
             pathname: this.props.route.pathname,
             search: this.props.route.search.replace(new RegExp('\\??jobId=' + this.props.jobs.deletedJob.id), ''),
           },
@@ -217,7 +217,7 @@ export class Application extends React.Component<Props, null> {
         !this.props.productLines.isCreatingProductLine &&
         !this.props.productLines.createProductLineError) {
       this.props.routeNavigateTo({
-        location: {
+        loc: {
           pathname: '/product-lines',
         },
       })
@@ -415,7 +415,7 @@ export class Application extends React.Component<Props, null> {
     window.addEventListener('popstate', () => {
       if (this.props.route.href !== location.pathname + location.search + location.hash) {
         this.props.routeNavigateTo({
-          location,
+          loc: location,
           pushHistory: false,
         })
       }

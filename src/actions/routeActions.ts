@@ -28,7 +28,7 @@ export interface RouteLocation {
 }
 
 export interface RouteNavigateToArgs {
-  location: RouteLocation
+  loc: RouteLocation
   pushHistory?: boolean
 }
 
@@ -36,7 +36,7 @@ export const routeActions = {
   navigateTo(args: RouteNavigateToArgs) {
     args.pushHistory = (args.pushHistory != null) ? args.pushHistory : true
 
-    const route = generateRoute(args.location)
+    const route = generateRoute(args.loc)
 
     if (args.pushHistory) {
       history.pushState(null, '', route.href)

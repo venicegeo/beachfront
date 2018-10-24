@@ -21,10 +21,10 @@ import * as React from 'react'
 import {connect} from 'react-redux'
 import {Modal} from './Modal'
 import {BrowsersSupported} from './BrowserSupport'
-import {routeActions} from '../actions/routeActions'
+import {routeActions, RouteNavigateToArgs} from '../actions/routeActions'
 
 interface Props {
-  navigateTo?(loc): void
+  routeNavigateTo?(args: RouteNavigateToArgs): void
 }
 
 export class About extends React.Component<Props, null> {
@@ -61,13 +61,17 @@ export class About extends React.Component<Props, null> {
   }
 
   private handleDismiss() {
-    this.props.navigateTo({ pathname: '/' })
+    this.props.routeNavigateTo({
+      loc: {
+        pathname: '/',
+      },
+    })
   }
 }
 
 function mapDispatchToProps(dispatch) {
   return {
-    navigateTo: (loc) => dispatch(routeActions.navigateTo(loc)),
+    routeNavigateTo: (args: RouteNavigateToArgs) => dispatch(routeActions.navigateTo(args)),
   }
 }
 

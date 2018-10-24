@@ -277,7 +277,7 @@ export class JobStatus extends React.Component<Props, State> {
   }
 
   private handleViewOnMapClick(loc: Location) {
-    this.props.routeNavigateTo({ location: loc })
+    this.props.routeNavigateTo({ loc })
     const feature = this.props.jobs.records.find(j => loc.search.includes(j.id))
     this.props.mapPanToExtent(featureToExtentWrapped(this.props.map.map, feature))
   }

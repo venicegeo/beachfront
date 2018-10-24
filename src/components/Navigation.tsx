@@ -23,7 +23,7 @@ import {Link} from './Link'
 import {USER_GUIDE_URL} from '../config'
 import {connect} from 'react-redux'
 import {RouteState} from '../reducers/routeReducer'
-import {routeActions} from '../actions/routeActions'
+import {routeActions, RouteNavigateToArgs} from '../actions/routeActions'
 
 const Icon = ({ path, size = 40 }) => (
   <svg className={styles.icon} viewBox={`0 0 ${size} ${size}`}>
@@ -38,7 +38,7 @@ interface Props {
   route?: RouteState
   shrunk: boolean
   startTour(): void
-  navigateTo?(loc): void
+  routeNavigateTo?(args: RouteNavigateToArgs): void
 }
 
 export class Navigation extends React.Component<Props, null> {
@@ -102,7 +102,7 @@ export class Navigation extends React.Component<Props, null> {
   }
 
   private handleClick(loc: { pathname: string, search: string, hash: string }) {
-    this.props.navigateTo(loc)
+    this.props.routeNavigateTo({ loc })
   }
 }
 
@@ -129,7 +129,7 @@ function mapStateToProps(state) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    navigateTo: (loc) => dispatch(routeActions.navigateTo(loc)),
+    routeNavigateTo: (args: RouteNavigateToArgs) => dispatch(routeActions.navigateTo(args)),
   }
 }
 

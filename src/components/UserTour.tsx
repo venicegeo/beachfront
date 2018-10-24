@@ -721,23 +721,23 @@ export class UserTour extends React.Component<Props, any> {
   }
 
   private navigateTo(props): Promise<any> {
-    const nav = typeof props === 'string' ? { pathname: props } : props
+    const loc = typeof props === 'string' ? { pathname: props } : props
 
-    if (nav.pathname === this.props.route.pathname) {
-      return Promise.resolve(nav.pathname)
+    if (loc.pathname === this.props.route.pathname) {
+      return Promise.resolve(loc.pathname)
     } else {
       return new Promise((resolve, reject) => {
-        this.props.routeNavigateTo({ location: nav })
+        this.props.routeNavigateTo({ loc })
 
         const timeout = 30000
         const t0 = Date.now()
         const interval = setInterval(() => {
-          if (nav.pathname === this.props.route.pathname) {
+          if (loc.pathname === this.props.route.pathname) {
             clearInterval(interval)
-            resolve(nav.pathname)
+            resolve(loc.pathname)
           } else if (Date.now() - t0 > timeout) {
             clearInterval(interval)
-            reject(`Timed out after ${timeout / 1000} seconds waiting for ${nav.pathname}.`)
+            reject(`Timed out after ${timeout / 1000} seconds waiting for ${loc.pathname}.`)
           }
         }, 10)
       })
