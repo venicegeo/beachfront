@@ -157,7 +157,8 @@ export class Application extends React.Component<Props, null> {
 
     if (prevProps.map.mode !== this.props.map.mode ||
         prevProps.map.selectedFeature !== this.props.map.selectedFeature ||
-        prevProps.jobs !== this.props.jobs) {
+        prevProps.jobs !== this.props.jobs ||
+        prevProps.route !== this.props.route) {
       this.props.mapUpdateDetections()
       this.props.mapUpdateFrames()
     }
