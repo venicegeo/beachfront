@@ -16,7 +16,7 @@
 
 import {applyMiddleware, combineReducers, createStore} from 'redux'
 import reduxThunk from 'redux-thunk'
-import reduxLogger from 'redux-logger'
+import { createLogger } from 'redux-logger'
 import {userInitialState, userReducer, UserState} from './reducers/userReducer'
 import {catalogInitialState, catalogReducer, CatalogState} from './reducers/catalogReducer'
 import {routeInitialState, routeReducer, RouteState} from './reducers/routeReducer'
@@ -29,7 +29,9 @@ import {apiStatusInitialState, apiStatusReducer, ApiStatusState} from './reducer
 const middleware = [reduxThunk]
 
 if (process.env.NODE_ENV !== 'production') {
-  middleware.push(reduxLogger)
+  middleware.push(createLogger({
+    collapsed: true,
+  }))
 }
 
 export interface AppState {
