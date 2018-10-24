@@ -19,6 +19,7 @@ import {MapView, MODE_NORMAL} from '../components/PrimaryMap'
 import ol from '../utils/ol'
 import {TYPE_JOB} from '../constants'
 import {shouldSelectedFeatureAutoDeselect} from '../utils/mapUtils'
+import {Extent} from '../utils/geometries'
 
 export interface MapState {
   map: ol.Map | null
@@ -26,7 +27,7 @@ export interface MapState {
   mode: string
   detections: (beachfront.Job | beachfront.ProductLine)[]
   frames: (beachfront.Job | beachfront.ProductLine)[]
-  bbox: [number, number, number, number] | null
+  bbox: Extent | null
   hoveredFeature: beachfront.Job | null
   collections: any | null
   selectedFeature: GeoJSON.Feature<any> | null

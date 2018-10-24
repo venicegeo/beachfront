@@ -38,7 +38,7 @@ import {connect} from 'react-redux'
 import {mapActions} from '../actions/mapActions'
 import {jobsActions} from '../actions/jobsActions'
 import {AppState} from '../store'
-import {featureToExtentWrapped} from '../utils/geometries'
+import {Extent, featureToExtentWrapped} from '../utils/geometries'
 import {routeActions, RouteNavigateToArgs} from '../actions/routeActions'
 import {JobsState} from '../reducers/jobsReducer'
 import {MapState} from '../reducers/mapReducer'
@@ -51,7 +51,7 @@ interface Props {
   job: beachfront.Job
   onToggleExpansion(job: beachfront.Job, isExpanded: boolean)
   mapSetSelectedFeature?(feature: GeoJSON.Feature<any> | null): void
-  mapPanToExtent?(extent: [number, number, number, number]): void
+  mapPanToExtent?(extent: Extent): void
   jobsDeleteJob?(job: beachfront.Job): void
   routeNavigateTo?(args: RouteNavigateToArgs): void
 }
@@ -310,7 +310,7 @@ function mapStateToProps(state: AppState) {
 function mapDispatchToProps(dispatch) {
   return {
     mapSetSelectedFeature: (feature: GeoJSON.Feature<any> | null) => dispatch(mapActions.setSelectedFeature(feature)),
-    mapPanToExtent: (extent: [number, number, number, number]) => dispatch(mapActions.panToExtent(extent)),
+    mapPanToExtent: (extent: Extent) => dispatch(mapActions.panToExtent(extent)),
     jobsDeleteJob: (job: beachfront.Job) => dispatch(jobsActions.deleteJob(job)),
     routeNavigateTo: (args: RouteNavigateToArgs) => dispatch(routeActions.navigateTo(args)),
   }

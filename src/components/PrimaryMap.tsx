@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-import {catalogActions, CatalogSearchArgs} from '../actions/catalogActions'
 
 require('ol/ol.css')
 const styles: any = require('./PrimaryMap.css')
@@ -44,7 +43,7 @@ import {
   calculateExtent,
   featureToExtentWrapped,
   WEB_MERCATOR_MIN,
-  WEB_MERCATOR_MAX,
+  WEB_MERCATOR_MAX, Point, Extent,
 } from '../utils/geometries'
 import {wrap} from '../utils/math'
 import {
@@ -76,12 +75,13 @@ import {JobsState} from '../reducers/jobsReducer'
 import {ApiStatusState} from '../reducers/apiStatusReducer'
 import {CatalogState} from '../reducers/catalogReducer'
 import {userActions} from '../actions/userActions'
+import {catalogActions, CatalogSearchArgs} from '../actions/catalogActions'
 
-const DEFAULT_CENTER: [number, number] = [-10, 0]
+const DEFAULT_CENTER: Point = [-10, 0]
 const MIN_ZOOM = 2.5
 const MAX_ZOOM = 22
 const RESOLUTION_CLOSE = 850
-const VIEW_BOUNDS: [number, number, number, number] = [-Number.MAX_SAFE_INTEGER, -90, Number.MAX_SAFE_INTEGER, 90]
+const VIEW_BOUNDS: Extent = [-Number.MAX_SAFE_INTEGER, -90, Number.MAX_SAFE_INTEGER, 90]
 const STEM_OFFSET = 10000
 const IDENTIFIER_DETECTIONS = 'piazza:bfdetections'
 const KEY_SCENE_ID = 'SCENE_ID'
@@ -109,7 +109,7 @@ interface Props {
   apiStatus?: ApiStatusState
   shrunk: boolean
   mapInitialized?(map: ol.Map, collections: any): void
-  mapUpdateBbox?(bbox: [number, number, number, number]): void
+  mapUpdateBbox?(bbox: Extent): void
   mapUpdateView?(view: MapView): void
   mapSetSelectedFeature?(feature: GeoJSON.Feature<any> | null): void
   catalogSearch?(args?: CatalogSearchArgs): void
@@ -127,9 +127,9 @@ interface State {
 
 export interface MapView {
   basemapIndex: number
-  center?: [number, number]
+  center?: Point
   zoom?: number
-  extent?: [number, number, number, number]
+  extent?: Extent
 }
 
 export class PrimaryMap extends React.Component<Props, State> {
@@ -724,7 +724,7 @@ export class PrimaryMap extends React.Component<Props, State> {
        once on each side of the map.
       */
       // HACK
-      const addDivotOutboard = (coordinates: [number, number]) => {
+      const addDivotOutboard = (coordinates: Point) => {
         const divotOutboard = new ol.Feature({ geometry: new ol.Point(coordinates) })
         divotOutboard.set(KEY_TYPE, TYPE_DIVOT_OUTBOARD)
         divotOutboard.set(KEY_OWNER_ID, id)
@@ -1472,7 +1472,7 @@ function mapStateToProps(state: AppState) {
 function mapDispatchToProps(dispatch) {
   return {
     mapInitialized: (map: ol.Map, collections: any) => dispatch(mapActions.initialized(map, collections)),
-    mapUpdateBbox: (bbox: [number, number, number, number]) => dispatch(mapActions.updateBbox(bbox)),
+    mapUpdateBbox: (bbox: Extent) => dispatch(mapActions.updateBbox(bbox)),
     mapUpdateView: (view: MapView) => dispatch(mapActions.updateView(view)),
     mapSetSelectedFeature: (feature: GeoJSON.Feature<any> | null) => dispatch(mapActions.setSelectedFeature(feature)),
     catalogSearch: (args?: CatalogSearchArgs) => dispatch(catalogActions.search(args)),

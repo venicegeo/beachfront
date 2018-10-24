@@ -16,6 +16,7 @@
 
 import {getClient} from '../api/session'
 import {JOB_ENDPOINT, PRODUCTLINE_ENDPOINT} from '../config'
+import {Extent} from '../utils/geometries'
 
 export const types = {
   PRODUCT_LINES_FETCHING: 'PRODUCT_LINES_FETCHING',
@@ -31,7 +32,7 @@ export const types = {
 
 export interface ProductLinesCreateArgs {
   algorithmId: string
-  bbox: [number, number, number, number]
+  bbox: Extent
   category: string | null
   dateStart: string
   dateStop: string

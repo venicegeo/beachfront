@@ -17,7 +17,7 @@
 import {MapView, MODE_DRAW_BBOX, MODE_NORMAL, MODE_PRODUCT_LINES, MODE_SELECT_IMAGERY} from '../components/PrimaryMap'
 import {wrap} from '../utils/math'
 import {AppState} from '../store'
-import {TYPE_JOB} from '../constants'
+import {Extent, Point} from '../utils/geometries'
 
 export const types = {
   MAP_INITIALIZED: 'MAP_INITIALIZED',
@@ -36,7 +36,7 @@ export const types = {
 }
 
 export interface MapPanToPointArgs {
-  point: [number, number]
+  point: Point
   zoom?: number
 }
 
@@ -75,7 +75,7 @@ export const mapActions = {
     }
   },
 
-  updateBbox(bbox: [number, number, number, number]) {
+  updateBbox(bbox: Extent) {
     return {
       type: types.MAP_BBOX_UPDATED,
       bbox,
@@ -197,7 +197,7 @@ export const mapActions = {
     }
   },
 
-  panToExtent(extent: [number, number, number, number]) {
+  panToExtent(extent: Extent) {
     return {
       type: types.MAP_PAN_TO_EXTENT,
       extent,

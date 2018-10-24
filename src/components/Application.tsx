@@ -34,7 +34,7 @@ import ProductLineList from './ProductLineList'
 import SessionExpired from './SessionExpired'
 import SessionLoggedOut from './SessionLoggedOut'
 import * as sessionService from '../api/session'
-import {getFeatureCenter} from '../utils/geometries'
+import {Extent, getFeatureCenter} from '../utils/geometries'
 import {
   RECORD_POLLING_INTERVAL,
   SESSION_IDLE_INTERVAL,
@@ -86,7 +86,7 @@ interface Props {
   mapUpdateFrames?(): void
   mapSetSelectedFeature?(feature: GeoJSON.Feature<any> | null): void
   mapPanToPoint?(args: MapPanToPointArgs): void
-  mapPanToExtent?(extent: [number, number, number, number]): void
+  mapPanToExtent?(extent: Extent): void
   mapSerialize?(): void
   mapDeserialize?(): void
   jobsFetch?(): void
@@ -470,7 +470,7 @@ function mapDispatchToProps(dispatch) {
     mapUpdateFrames: () => dispatch(mapActions.updateFrames()),
     mapSetSelectedFeature: (feature: GeoJSON.Feature<any> | null) => dispatch(mapActions.setSelectedFeature(feature)),
     mapPanToPoint: (args: MapPanToPointArgs) => dispatch(mapActions.panToPoint(args)),
-    mapPanToExtent: (extent: [number, number, number, number]) => dispatch(mapActions.panToExtent(extent)),
+    mapPanToExtent: (extent: Extent) => dispatch(mapActions.panToExtent(extent)),
     mapSerialize: () => dispatch(mapActions.serialize()),
     mapDeserialize: () => dispatch(mapActions.deserialize()),
     jobsFetch: () => dispatch(jobsActions.fetch()),

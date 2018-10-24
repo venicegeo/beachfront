@@ -17,6 +17,9 @@
 import * as ol from '../utils/ol'
 import {WEB_MERCATOR, WGS84} from '../constants'
 
+export type Point = [number, number]
+export type Extent = [number, number, number, number]
+
 export const WEB_MERCATOR_MIN = ol.proj.transform([-180, -90], WGS84, WEB_MERCATOR)
 export const WEB_MERCATOR_MAX = ol.proj.transform([180, 90], WGS84, WEB_MERCATOR)
 
@@ -67,7 +70,7 @@ export function serializeBbox(extent) {
   const bbox = ol.proj.transformExtent(extent, WEB_MERCATOR, WGS84)
   const p1 = bbox.slice(0, 2)
   const p2 = bbox.slice(2, 4)
-  return p1.concat(p2).map(truncate) as [number, number, number, number]
+  return p1.concat(p2).map(truncate) as Extent
 }
 
 export function toGeoJSON(feature) {
@@ -77,7 +80,7 @@ export function toGeoJSON(feature) {
   })
 }
 
-export function getWrapIndex(map: ol.Map, positionWgs: [number, number]) {
+export function getWrapIndex(map: ol.Map, positionWgs: Point) {
   // Return an index that signifies how many full map distances the position is from the map center.
   const mapCenter = ol.proj.transform(map.getView().getCenter(), WEB_MERCATOR, WGS84)
   const distanceToMapCenter = mapCenter[0] - positionWgs[0]
@@ -89,13 +92,13 @@ export function getWrapIndex(map: ol.Map, positionWgs: [number, number]) {
   }
 }
 
-export function extentWrapped(map: ol.Map, extent: [number, number, number, number]) {
+export function extentWrapped(map: ol.Map, extent: Extent) {
   // Return an extent that's wrapped so that it follows the camera as it pans across a looping map.
   let extentWgs = ol.proj.transformExtent(extent, WEB_MERCATOR, WGS84)
   const centroid = [
     (extentWgs[0] + extentWgs[2]) / 2,
     (extentWgs[1] + extentWgs[3]) / 2,
-  ] as [number, number]
+  ] as Point
 
   const wrapIndex = getWrapIndex(map, centroid)
   extentWgs[0] += wrapIndex * 360

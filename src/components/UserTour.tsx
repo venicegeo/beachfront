@@ -28,6 +28,7 @@ import {RouteState} from '../reducers/routeReducer'
 import {CatalogState} from '../reducers/catalogReducer'
 import {MapState} from '../reducers/mapReducer'
 import {JobsState} from '../reducers/jobsReducer'
+import {Extent} from '../utils/geometries'
 
 const styles: any = require('./UserTour.css')
 
@@ -70,7 +71,7 @@ interface Props {
   catalogUpdateSearchCriteria?(args: CatalogUpdateSearchCriteriaArgs): void
   catalogSetApiKey?(apiKey: string): void
   mapPanToPoint?(args: MapPanToPointArgs): void
-  mapUpdateBbox?(bbox: [number, number, number, number]): void
+  mapUpdateBbox?(bbox: Extent): void
   mapClearBbox?(): void
   mapSetSelectedFeature?(feature: GeoJSON.Feature<any> | null): void
   routeNavigateTo?(args: RouteNavigateToArgs): void
@@ -80,7 +81,7 @@ export class UserTour extends React.Component<Props, any> {
   private algorithm: string
   private apiKeyInstructions: any
   private basemap: string
-  private bbox: [number, number, number, number]
+  private bbox: Extent
   private bboxName: string
   private searchCriteria: any
   private steps: any[]
@@ -92,7 +93,7 @@ export class UserTour extends React.Component<Props, any> {
     this.algorithm = TOUR.algorithm
     this.apiKeyInstructions = <div dangerouslySetInnerHTML={{ __html: TOUR.apiKeyInstructions }}/>
     this.basemap = TOUR.basemap
-    this.bbox = TOUR.bbox as [number, number, number, number]
+    this.bbox = TOUR.bbox as Extent
     this.bboxName = TOUR.bboxName
     this.searchCriteria = TOUR.searchCriteria
     this.zoom = TOUR.zoom
@@ -856,7 +857,7 @@ function mapDispatchToProps(dispatch) {
     catalogSetApiKey: (apiKey: string) => dispatch(catalogActions.setApiKey(apiKey)),
     catalogSerialize: () => dispatch(catalogActions.serialize()),
     mapPanToPoint: (args: MapPanToPointArgs) => dispatch(mapActions.panToPoint(args)),
-    mapUpdateBbox: (bbox: [number, number, number, number]) => dispatch(mapActions.updateBbox(bbox)),
+    mapUpdateBbox: (bbox: Extent) => dispatch(mapActions.updateBbox(bbox)),
     mapClearBbox: () => dispatch(mapActions.clearBbox()),
     mapSetSelectedFeature: (feature: GeoJSON.Feature<any> | null) => (
       dispatch(mapActions.setSelectedFeature(feature))
