@@ -75,6 +75,7 @@ import {MapState} from '../reducers/mapReducer'
 import {JobsState} from '../reducers/jobsReducer'
 import {ApiStatusState} from '../reducers/apiStatusReducer'
 import {CatalogState} from '../reducers/catalogReducer'
+import {userActions} from '../actions/userActions'
 
 const DEFAULT_CENTER: [number, number] = [-10, 0]
 const MIN_ZOOM = 2.5
@@ -107,12 +108,12 @@ interface Props {
   jobs?: JobsState
   apiStatus?: ApiStatusState
   shrunk: boolean
-  onSignOutClick()
   mapInitialized?(map: ol.Map, collections: any): void
   mapUpdateBbox?(bbox: [number, number, number, number]): void
   mapUpdateView?(view: MapView): void
   mapSetSelectedFeature?(feature: GeoJSON.Feature<any> | null): void
   catalogSearch?(args?: CatalogSearchArgs): void
+  userLogout?(): void
 }
 
 interface State {
@@ -174,6 +175,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.handleSelect = this.handleSelect.bind(this)
     this.handleSelectFeature = this.handleSelectFeature.bind(this)
     this.handlePageChange = this.handlePageChange.bind(this)
+    this.handleSignOutClick = this.handleSignOutClick.bind(this)
     this.renderImagerySearchBbox = debounce(this.renderImagerySearchBbox.bind(this))
     this.updateView = debounce(this.updateView.bind(this), 100)
   }
@@ -303,7 +305,7 @@ export class PrimaryMap extends React.Component<Props, State> {
         ref="container"
         tabIndex={1}
       >
-        <div className={styles.logout}><a onClick={this.props.onSignOutClick}>Sign Out</a></div>
+        <div className={styles.logout}><a onClick={this.handleSignOutClick}>Sign Out</a></div>
         <BasemapSelect
           className={styles.basemapSelect}
           index={this.state.basemapIndex}
@@ -357,6 +359,12 @@ export class PrimaryMap extends React.Component<Props, State> {
 
   private handlePageChange(args: {startIndex: number, count: number}) {
     this.props.catalogSearch(args)
+  }
+
+  private handleSignOutClick() {
+    if (confirm('Are you sure you want to sign out of Beachfront?')) {
+      this.props.userLogout()
+    }
   }
 
   //
@@ -1033,7 +1041,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     })
   }
 
-  private toPreviewable(features: Array<beachfront.Job|beachfront.Scene>) {
+  private toPreviewable(features: Array<GeoJSON.Feature<any>>) {
     return features.map(f => {
       return {
         sceneId: f.properties.type === TYPE_JOB ? f.properties.scene_id : f.id,
@@ -1468,6 +1476,7 @@ function mapDispatchToProps(dispatch) {
     mapUpdateView: (view: MapView) => dispatch(mapActions.updateView(view)),
     mapSetSelectedFeature: (feature: GeoJSON.Feature<any> | null) => dispatch(mapActions.setSelectedFeature(feature)),
     catalogSearch: (args?: CatalogSearchArgs) => dispatch(catalogActions.search(args)),
+    userLogout: () => dispatch(userActions.logout()),
   }
 }
 

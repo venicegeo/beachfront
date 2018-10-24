@@ -24,7 +24,7 @@ export interface RouteLocation {
   pathname?: string
   search?: string
   hash?: string
-  selectedFeature?: beachfront.Job | beachfront.Scene | null
+  selectedFeature?: GeoJSON.Feature<any> | null
 }
 
 export interface RouteNavigateToArgs {

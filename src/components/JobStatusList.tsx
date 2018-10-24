@@ -28,7 +28,6 @@ import {jobsActions} from '../actions/jobsActions'
 interface Props {
   map?: MapState
   jobs?: JobsState
-  onNavigateToJob(loc: { pathname: string, search: string, hash: string })
   jobsFetch?(): void
 }
 
@@ -78,7 +77,6 @@ export class JobStatusList extends React.Component<Props, State> {
               key={job.id}
               isActive={this.state.activeIds.includes(job.id)}
               job={job}
-              onNavigate={this.props.onNavigateToJob}
               onToggleExpansion={this.handleToggleExpansion}
             />
           ))}

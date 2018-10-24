@@ -34,10 +34,7 @@ import ProductLineList from './ProductLineList'
 import SessionExpired from './SessionExpired'
 import SessionLoggedOut from './SessionLoggedOut'
 import * as sessionService from '../api/session'
-import {
-  featureToExtentWrapped,
-  getFeatureCenter,
-} from '../utils/geometries'
+import {getFeatureCenter} from '../utils/geometries'
 import {
   RECORD_POLLING_INTERVAL,
   SESSION_IDLE_INTERVAL,
@@ -111,8 +108,6 @@ export class Application extends React.Component<Props, null> {
   constructor(props) {
     super(props)
     this.importJobsIfNeeded = this.importJobsIfNeeded.bind(this)
-    this.handleNavigateToJob = this.handleNavigateToJob.bind(this)
-    this.handleSignOutClick = this.handleSignOutClick.bind(this)
     this.startIdleTimer = this.startIdleTimer.bind(this)
     this.stopIdleTimer = this.stopIdleTimer.bind(this)
     this.startTour = this.startTour.bind(this)
@@ -279,7 +274,6 @@ export class Application extends React.Component<Props, null> {
         <PrimaryMap
           ref="map"
           shrunk={shrunk}
-          onSignOutClick={this.handleSignOutClick}
         />
         {this.renderRoute()}
         {this.props.user.isSessionExpired && (
@@ -317,9 +311,7 @@ export class Application extends React.Component<Props, null> {
         )
       case '/jobs':
         return (
-          <JobStatusList
-            onNavigateToJob={this.handleNavigateToJob}
-          />
+          <JobStatusList />
         )
       case '/product-lines':
         return (
@@ -351,18 +343,6 @@ export class Application extends React.Component<Props, null> {
     this.props.apiStatusFetch()
     this.props.algorithmsFetch()
     this.props.catalogInitialize()
-  }
-
-  private handleNavigateToJob(loc) {
-    this.props.routeNavigateTo(loc)
-    const feature = this.props.jobs.records.find(j => loc.search.includes(j.id))
-    this.props.mapPanToExtent(featureToExtentWrapped(this.props.map.map, feature))
-  }
-
-  private handleSignOutClick() {
-    if (confirm('Are you sure you want to sign out of Beachfront?')) {
-      this.props.userLogout()
-    }
   }
 
   private refreshRecords() {

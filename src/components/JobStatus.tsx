@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-import {MapState} from '../reducers/mapReducer'
 
 const styles: any = require('./JobStatus.css')
 
@@ -39,16 +38,22 @@ import {connect} from 'react-redux'
 import {mapActions} from '../actions/mapActions'
 import {jobsActions} from '../actions/jobsActions'
 import {AppState} from '../store'
+import {featureToExtentWrapped} from '../utils/geometries'
+import {routeActions, RouteNavigateToArgs} from '../actions/routeActions'
+import {JobsState} from '../reducers/jobsReducer'
+import {MapState} from '../reducers/mapReducer'
 
 interface Props {
   map?: MapState
+  jobs?: JobsState
   className?: string
   isActive: boolean
   job: beachfront.Job
-  onNavigate(loc: { pathname: string, search: string, hash: string })
   onToggleExpansion(job: beachfront.Job, isExpanded: boolean)
   mapSetSelectedFeature?(feature: GeoJSON.Feature<any> | null): void
+  mapPanToExtent?(extent: [number, number, number, number]): void
   jobsDeleteJob?(job: beachfront.Job): void
+  routeNavigateTo?(args: RouteNavigateToArgs): void
 }
 
 interface State {
@@ -78,6 +83,7 @@ export class JobStatus extends React.Component<Props, State> {
     this.handleDownloadStart = this.handleDownloadStart.bind(this)
     this.handleRemoveJob = this.handleRemoveJob.bind(this)
     this.handleRemoveJobConfirm = this.handleRemoveJobConfirm.bind(this)
+    this.handleViewOnMapClick = this.handleViewOnMapClick.bind(this)
     this.toggleExpansion = this.toggleExpansion.bind(this)
   }
 
@@ -163,7 +169,7 @@ export class JobStatus extends React.Component<Props, State> {
               pathname="/jobs"
               search={`?jobId=${id}`}
               title="View on Map"
-              onClick={this.props.onNavigate}>
+              onClick={this.handleViewOnMapClick}>
               <i className="fa fa-globe"/>
             </Link>
             {properties.status === STATUS_SUCCESS && (
@@ -270,6 +276,12 @@ export class JobStatus extends React.Component<Props, State> {
     this.props.jobsDeleteJob(this.props.job)
   }
 
+  private handleViewOnMapClick(loc: Location) {
+    this.props.routeNavigateTo({ location: loc })
+    const feature = this.props.jobs.records.find(j => loc.search.includes(j.id))
+    this.props.mapPanToExtent(featureToExtentWrapped(this.props.map.map, feature))
+  }
+
   private toggleExpansion() {
     this.setState({
       isExpanded: !this.state.isExpanded,
@@ -291,13 +303,16 @@ function segmentIfNeeded(s: string) {
 function mapStateToProps(state: AppState) {
   return {
     map: state.map,
+    jobs: state.jobs,
   }
 }
 
 function mapDispatchToProps(dispatch) {
   return {
     mapSetSelectedFeature: (feature: GeoJSON.Feature<any> | null) => dispatch(mapActions.setSelectedFeature(feature)),
+    mapPanToExtent: (extent: [number, number, number, number]) => dispatch(mapActions.panToExtent(extent)),
     jobsDeleteJob: (job: beachfront.Job) => dispatch(jobsActions.deleteJob(job)),
+    routeNavigateTo: (args: RouteNavigateToArgs) => dispatch(routeActions.navigateTo(args)),
   }
 }
 

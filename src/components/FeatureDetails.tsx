@@ -26,7 +26,7 @@ import {
 } from '../constants'
 
 interface Props {
-  feature: beachfront.Job | beachfront.Scene
+  feature: GeoJSON.Feature<any>
 }
 
 export class FeatureDetails extends React.Component<Props, {}> {
