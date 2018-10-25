@@ -16,6 +16,7 @@
 
 import {getClient} from '../api/session'
 import {AppState} from '../store'
+import {apiStatusInitialState} from '../reducers/apiStatusReducer'
 
 export const types = {
   API_STATUS_FETCHING: 'API_STATUS_FETCHING',
@@ -69,12 +70,23 @@ export const apiStatusActions = {
   },
 
   deserialize() {
+    const deserialized: any = {}
+
+    try {
+      deserialized.geoserver = JSON.parse(sessionStorage.getItem('geoserver')) || apiStatusInitialState.geoserver
+    } catch (error) {
+      console.warn('Failed to deserialize "geoserver"')
+    }
+
+    try {
+      deserialized.enabledPlatforms = JSON.parse(sessionStorage.getItem('enabled_platforms_records')) || apiStatusInitialState.enabledPlatforms
+    } catch (error) {
+      console.warn('Failed to deserialize "enabled_platforms_records"')
+    }
+
     return {
       type: types.API_STATUS_DESERIALIZED,
-      state: {
-        geoserver: JSON.parse(sessionStorage.getItem('geoserver')),
-        enabledPlatforms: JSON.parse(sessionStorage.getItem('enabled_platforms_records')),
-      },
+      deserialized,
     }
   },
 }

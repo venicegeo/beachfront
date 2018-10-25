@@ -33,7 +33,7 @@ export function algorithmsReducer(state = algorithmsInitialState, action: any) {
     case types.ALGORITHMS_DESERIALIZED:
       return {
         ...state,
-        ...action.state,
+        ...action.deserialized,
       }
     case types.ALGORITHMS_FETCHING:
       return {

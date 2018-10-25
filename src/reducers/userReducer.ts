@@ -38,7 +38,7 @@ export function userReducer(state = userInitialState, action: any): UserState {
     case types.USER_DESERIALIZED:
       return {
         ...state,
-        ...action.state,
+        ...action.deserialized,
       }
     case types.USER_LOGGED_OUT:
       return {

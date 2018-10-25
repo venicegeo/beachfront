@@ -242,20 +242,30 @@ export const mapActions = {
     return (dispatch, getState) => {
       const state: AppState = getState()
 
-      let selectedFeature = null
+      const deserialized: any = {}
+
+      deserialized.selectedFeature = null
       const [jobId] = state.route.jobIds
       if (jobId) {
         // This code should never find a selected feature since no jobs have been loaded.
-        selectedFeature = state.jobs.records.find(j => j.id === jobId) || null
+        deserialized.selectedFeature = state.jobs.records.find(j => j.id === jobId) || null
+      }
+
+      try {
+        deserialized.bbox = JSON.parse(sessionStorage.getItem('bbox'))
+      } catch (error) {
+        console.warn('Failed to deserialize "bbox"')
+      }
+
+      try {
+        deserialized.view = JSON.parse(sessionStorage.getItem('mapView'))
+      } catch (error) {
+        console.warn('Failed to deserialize "mapView"')
       }
 
       dispatch({
         type: types.MAP_DESERIALIZED,
-        state: {
-          selectedFeature,
-          bbox: JSON.parse(sessionStorage.getItem('bbox')),
-          mapView: JSON.parse(sessionStorage.getItem('mapView')),
-        },
+        deserialized,
       })
     }
   },

@@ -19,6 +19,7 @@ import {API_ROOT, IMAGERY_ENDPOINT, SCENE_TILE_PROVIDERS, USER_ENDPOINT} from '.
 import axios from 'axios'
 import {DEFAULT_TIMEOUT, getClient} from '../api/session'
 import {wrap} from '../utils/math'
+import {catalogInitialState} from '../reducers/catalogReducer'
 
 export const types = {
   CATALOG_INITIALIZING: 'CATALOG_INITIALIZING',
@@ -164,13 +165,29 @@ export const catalogActions = {
   },
 
   deserialize() {
+    const deserialized: any = {}
+
+    try {
+      deserialized.searchCriteria = JSON.parse(sessionStorage.getItem('searchCriteria')) || catalogInitialState.searchCriteria
+    } catch (error) {
+      console.warn('Failed to deserialize "searchCriteria"')
+    }
+
+    try {
+      deserialized.searchResults = JSON.parse(sessionStorage.getItem('searchResults'))
+    } catch (error) {
+      console.warn('Failed to deserialize "searchResults"')
+    }
+
+    try {
+      deserialized.apiKey = localStorage.getItem('catalog_apiKey') || catalogInitialState.apiKey
+    } catch (error) {
+      console.warn('Failed to deserialize "catalog_apiKey"')
+    }
+
     return {
       type: types.CATALOG_DESERIALIZED,
-      state: {
-        searchCriteria: JSON.parse(sessionStorage.getItem('searchCriteria')),
-        searchResults: JSON.parse(sessionStorage.getItem('searchResults')),
-        apiKey: localStorage.getItem('catalog_apiKey'),
-      },
+      deserialized,
     }
   },
 }

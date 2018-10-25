@@ -16,6 +16,7 @@
 
 import * as session from '../api/session'
 import {AppState} from '../store'
+import {userInitialState} from '../reducers/userReducer'
 
 export const types = {
   USER_LOGGED_OUT: 'USER_LOGGED_OUT',
@@ -61,11 +62,18 @@ export const userActions = {
   },
 
   deserialize() {
+    const deserialized: any = {}
+
+    try {
+      deserialized.isSessionExpired = JSON.parse(sessionStorage.getItem('isSessionExpired'))
+      deserialized.isSessionExpired = (deserialized.isSessionExpired != null) ? deserialized.isSessionExpired : userInitialState.isSessionExpired
+    } catch (error) {
+      console.warn('Failed to deserialize "isSessionExpired"')
+    }
+
     return {
       type: types.USER_DESERIALIZED,
-      state: {
-        isSessionExpired: JSON.parse(sessionStorage.getItem('isSessionExpired')),
-      },
+      deserialized,
     }
   },
 }

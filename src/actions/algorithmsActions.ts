@@ -17,6 +17,7 @@
 import {ALGORITHM_ENDPOINT} from '../config'
 import {getClient} from '../api/session'
 import {AppState} from '../store'
+import {algorithmsInitialState} from '../reducers/algorithmsReducer'
 
 export const types = {
   ALGORITHMS_FETCHING: 'ALGORITHMS_FETCHING',
@@ -61,11 +62,17 @@ export const algorithmsActions = {
   },
 
   deserialize() {
+    const deserialized: any = {}
+
+    try {
+      deserialized.records = JSON.parse(sessionStorage.getItem('algorithms_records')) || algorithmsInitialState.records
+    } catch (error) {
+      console.warn('Failed to deserialize "algorithms_records"')
+    }
+
     return {
       type: types.ALGORITHMS_DESERIALIZED,
-      state: {
-        records: JSON.parse(sessionStorage.getItem('algorithms_records')),
-      },
+      deserialized,
     }
   },
 }

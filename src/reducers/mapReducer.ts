@@ -56,7 +56,7 @@ export function mapReducer(state = mapInitialState, action: any) {
     case types.MAP_DESERIALIZED:
       return {
         ...state,
-        ...action.state,
+        ...action.deserialized,
       }
     case types.MAP_MODE_UPDATED:
       return {

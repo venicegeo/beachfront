@@ -39,7 +39,7 @@ export function apiStatusReducer(state = apiStatusInitialState, action: any) {
     case types.API_STATUS_DESERIALIZED:
       return {
         ...state,
-        ...action.state,
+        ...action.deserialized,
       }
     case types.API_STATUS_FETCHING:
       return {

@@ -64,7 +64,7 @@ export function catalogReducer(state = catalogInitialState, action: any): Catalo
     case types.CATALOG_DESERIALIZED:
       return {
         ...state,
-        ...action.state,
+        ...action.deserialized,
       }
     case types.CATALOG_INITIALIZING:
       return {
