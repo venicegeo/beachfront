@@ -28,8 +28,9 @@ import {apiStatusInitialState, apiStatusReducer, ApiStatusState} from './reducer
 
 const middleware = [reduxThunk]
 
-if (process.env.NODE_ENV !== 'production') {
+if (process.env.NODE_ENV === 'development') {
   middleware.push(createLogger({
+    predicate: (getState, action) => !action.type.includes('SERIALIZED'),
     collapsed: true,
   }))
 }
