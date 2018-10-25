@@ -15,6 +15,7 @@
  **/
 
 import {types} from '../actions/catalogActions'
+import {types as mapTypes} from '../actions/mapActions'
 import {AxiosInstance} from 'axios'
 import * as moment from 'moment'
 import {SOURCE_DEFAULT} from '../constants'
@@ -35,9 +36,6 @@ export interface CatalogState {
   },
   searchError: any
   searchResults: beachfront.ImageryCatalogPage | null
-  count: number
-  startIndex: number
-  totalCount: number
 }
 
 export const catalogInitialState: CatalogState = {
@@ -54,9 +52,6 @@ export const catalogInitialState: CatalogState = {
   },
   searchError: null,
   searchResults: null,
-  count: 0,
-  startIndex: 0,
-  totalCount: 0,
 }
 
 export function catalogReducer(state = catalogInitialState, action: any): CatalogState {
@@ -112,15 +107,18 @@ export function catalogReducer(state = catalogInitialState, action: any): Catalo
         ...state,
         isSearching: false,
         searchResults: action.searchResults,
-        count: action.count,
-        startIndex: action.startIndex,
-        totalCount: action.totalCount,
       }
     case types.CATALOG_SEARCH_ERROR:
       return {
         ...state,
         isSearching: false,
         searchError: action.error,
+      }
+    case mapTypes.MAP_BBOX_CLEARED:
+      return {
+        ...state,
+        searchResults: null,
+        searchError: null,
       }
     default:
       return state

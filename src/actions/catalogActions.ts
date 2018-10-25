@@ -138,10 +138,12 @@ export const catalogActions = {
 
         dispatch({
           type: types.CATALOG_SEARCH_SUCCESS,
-          searchResults: images,
-          count: images.features.length,
-          startIndex: 0,
-          totalCount: images.features.length,
+          searchResults: {
+            images,
+            count: images.features.length,
+            startIndex: 0,
+            totalCount: images.features.length,
+          },
         })
       } catch (error) {
         dispatch({

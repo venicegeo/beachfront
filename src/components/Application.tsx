@@ -128,13 +128,13 @@ export class Application extends React.Component<Props, null> {
       this.stopIdleTimer()
     }
 
-    if (prevProps.route !== this.props.route) {
-      if (prevProps.route.pathname !== this.props.route.pathname ||
-          prevProps.map.bbox !== this.props.map.bbox ||
-          prevProps.catalog.searchResults !== this.props.catalog.searchResults) {
-        this.props.mapUpdateMode()
-      }
+    if (prevProps.route.pathname !== this.props.route.pathname ||
+        prevProps.map.bbox !== this.props.map.bbox ||
+        prevProps.catalog.searchResults !== this.props.catalog.searchResults) {
+      this.props.mapUpdateMode()
+    }
 
+    if (prevProps.route !== this.props.route) {
       if (prevProps.route.jobIds.join(',') !== this.props.route.jobIds.join(',')) {
         this.importJobsIfNeeded()
       }

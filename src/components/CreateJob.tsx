@@ -20,7 +20,7 @@ import * as React from 'react'
 import {connect} from 'react-redux'
 import AlgorithmList from './AlgorithmList'
 import ImagerySearch from './ImagerySearch'
-import {ImagerySearchList} from './ImagerySearchList'
+import ImagerySearchList from './ImagerySearchList'
 import {NewJobDetails} from './NewJobDetails'
 import {PrimaryMap} from './PrimaryMap'
 import {normalizeSceneId} from './SceneFeatureDetails'
@@ -100,10 +100,7 @@ export class CreateJob extends React.Component<Props, State> {
 
           {this.props.map.bbox && this.props.catalog.searchResults && this.props.mapRef && (
             <li className={styles.results}>
-              <ImagerySearchList
-                collections={this.props.map.collections}
-                imagery={this.props.catalog.searchResults}
-              />
+              <ImagerySearchList />
             </li>
           )}
 
