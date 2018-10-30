@@ -173,6 +173,7 @@ export class Application extends React.Component<Props, null> {
         loc: {
           pathname: this.props.route.pathname,
           search,
+          selectedFeature: this.props.map.selectedFeature,
         },
       })
     }

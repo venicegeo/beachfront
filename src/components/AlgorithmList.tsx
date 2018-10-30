@@ -19,7 +19,7 @@ const styles: any = require('./AlgorithmList.css')
 
 import * as React from 'react'
 import {connect} from 'react-redux'
-import {Algorithm} from './Algorithm'
+import Algorithm from './Algorithm'
 import {AppState} from '../store'
 import {JobsState} from '../reducers/jobsReducer'
 
