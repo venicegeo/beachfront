@@ -17,14 +17,15 @@
 export function isElementInViewport(elem): boolean {
   const box = elem.getBoundingClientRect()
   const bannerHeight = 25
-  const minimumBoxHeight = 65
   const client = {
     height: (window.innerHeight || document.documentElement.clientHeight),
     width: (window.innerWidth || document.documentElement.clientWidth),
   }
 
   return box.top >= bannerHeight
-    && box.top + minimumBoxHeight < client.height - bannerHeight
+    && box.left >= 0
+    && parseInt(box.bottom) <= client.height - bannerHeight
+    && parseInt(box.right) <= client.width
 }
 
 export function query(selector: string): HTMLElement {

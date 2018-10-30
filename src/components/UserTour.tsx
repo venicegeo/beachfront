@@ -18,7 +18,7 @@ import * as React from 'react'
 import {TYPE_SCENE} from '../constants'
 import Tour from 'react-user-tour'
 import {TOUR} from '../config'
-import {query, scrollIntoView} from '../utils/domUtils'
+import {query} from '../utils/domUtils'
 import {connect} from 'react-redux'
 import {catalogActions, CatalogUpdateSearchCriteriaArgs} from '../actions/catalogActions'
 import {mapActions, MapPanToPointArgs} from '../actions/mapActions'
@@ -29,6 +29,8 @@ import {CatalogState} from '../reducers/catalogReducer'
 import {MapState} from '../reducers/mapReducer'
 import {JobsState} from '../reducers/jobsReducer'
 import {Extent} from '../utils/geometries'
+import {TourState} from '../reducers/tourReducer'
+import {tourActions, TourStep} from '../actions/tourActions'
 
 const styles: any = require('./UserTour.css')
 
@@ -53,9 +55,12 @@ const SourceName = (props: any) => {
   return <q>{props.tour.sourceName}</q>
 }
 
-const UserTourErrorMessage = (props: any) => {
+const UserTourErrorMessage = (props: {
+  message: string,
+  tour: UserTour,
+}) => {
   return props.message ? <div className={styles.error}>
-    <div className={styles.close} title="Dismiss" onClick={props.tour.cancel}>&times;</div>
+    <div className={styles.close} title="Dismiss" onClick={props.tour.props.tourEnd}>&times;</div>
     <div className={styles.header}>Oops!</div>
     <div className={styles.message}>{props.message}</div>
   </div> : null
@@ -66,6 +71,7 @@ interface Props {
   catalog?: CatalogState
   map?: MapState
   jobs?: JobsState
+  tour?: TourState
   catalogResetSearchCriteria?(): void
   catalogSerialize?(): void
   catalogUpdateSearchCriteria?(args: CatalogUpdateSearchCriteriaArgs): void
@@ -75,6 +81,9 @@ interface Props {
   mapClearBbox?(): void
   mapSetSelectedFeature?(feature: GeoJSON.Feature<any> | null): void
   routeNavigateTo?(args: RouteNavigateToArgs): void
+  tourSetSteps?(steps: TourStep[]): void
+  tourEnd?(): void
+  tourGoToStep?(step: number): void
 }
 
 export class UserTour extends React.Component<Props, any> {
@@ -84,7 +93,6 @@ export class UserTour extends React.Component<Props, any> {
   private bbox: Extent
   private bboxName: string
   private searchCriteria: any
-  private steps: any[]
   private zoom: number
 
   constructor(props: Props) {
@@ -98,13 +106,16 @@ export class UserTour extends React.Component<Props, any> {
     this.searchCriteria = TOUR.searchCriteria
     this.zoom = TOUR.zoom
 
-    this.state = {
-      changing: false,
-      isTourActive: false,
-      tourStep: 1,
-    }
+    this.expandJobStatus = this.expandJobStatus.bind(this)
+    this.navigateTo = this.navigateTo.bind(this)
+    this.onKeyPress = this.onKeyPress.bind(this)
+    this.pace = this.pace.bind(this)
+    this.setTabIndices = this.setTabIndices.bind(this)
+    this.showArrow = this.showArrow.bind(this)
+  }
 
-    this.steps = [
+  componentDidMount() {
+    this.props.tourSetSteps([
       {
         step: 1,
         selector: '.Navigation-linkTour',
@@ -123,12 +134,12 @@ export class UserTour extends React.Component<Props, any> {
         body: <div className={styles.body}>
           You may choose a basemap here.  We&apos;ll use {this.basemap}.
         </div>,
-        before: async () => {
+        before: () => {
           if (!query('.BasemapSelect-root.BasemapSelect-isOpen')) {
             query('.BasemapSelect-button').click()
           }
         },
-        after: async () => {
+        after: () => {
           const basemaps: any = document.querySelectorAll('.BasemapSelect-options li')
 
           basemaps.forEach(basemap => {
@@ -149,22 +160,20 @@ export class UserTour extends React.Component<Props, any> {
           Then we need to pan to an area of interest.
           We&apos;ll look at {this.bboxName}.
         </div>,
-        before: () => {
-          return this.navigateTo('/')
-        },
-        after: () => {
+        before: () => this.navigateTo('/'),
+        after: async () => {
           this.props.catalogResetSearchCriteria()
           this.props.catalogSerialize()
 
-          return this.navigateTo('/').then(() => {
-            // Pan to the center of the bound box that we will highlight later.
-            this.props.mapPanToPoint({
-              point: [
-                (this.bbox[0] + this.bbox[2]) / 2,
-                (this.bbox[1] + this.bbox[3]) / 2,
-              ],
-              zoom: this.zoom,
-            })
+          await this.navigateTo('/')
+
+          // Pan to the center of the bound box that we will highlight later.
+          this.props.mapPanToPoint({
+            point: [
+              (this.bbox[0] + this.bbox[2]) / 2,
+              (this.bbox[1] + this.bbox[3]) / 2,
+            ],
+            zoom: this.zoom,
           })
         },
       },
@@ -187,9 +196,9 @@ export class UserTour extends React.Component<Props, any> {
           You click once to start the bounding box, then click again to end it.
           But we&apos;ll do it for you this time.
         </div>,
-        before: () => {
+        before: async () => {
           this.props.mapClearBbox()
-          return this.navigateTo('/create-job')
+          await this.navigateTo('/create-job')
         },
         after: () => {
           this.showArrow(false)
@@ -231,7 +240,7 @@ export class UserTour extends React.Component<Props, any> {
         body: <div className={styles.body}>
           Select the imagery source.  We&apos;ll use <SourceName tour={this}/> for now.
         </div>,
-        after: async () => {
+        after: () => {
           if (this.props.catalog.searchCriteria.source !== this.searchCriteria.source) {
             this.props.catalogUpdateSearchCriteria({
               source: this.searchCriteria.source,
@@ -257,7 +266,7 @@ export class UserTour extends React.Component<Props, any> {
           </div>
           {this.apiKeyInstructions}
         </div>,
-        after: async () => {
+        after: () => {
           const input = query(`.${styles.apiKey} input`) as HTMLInputElement
           this.props.catalogSetApiKey(input.value)
         },
@@ -490,15 +499,15 @@ export class UserTour extends React.Component<Props, any> {
         body: <div className={styles.body}>
           The details will give you information about the job and its imagery.
         </div>,
-        before: () => {
-          return this.expandJobStatus().then(() => {
-            const elem = query('.JobStatusList-root .JobStatus-isActive')
+        before: async () => {
+          await this.expandJobStatus()
 
-            if (!elem.classList.contains('JobStatus-isExpanded')) {
-              const details = elem.querySelector('.JobStatus-details') as HTMLElement
-              details.click()
-            }
-          })
+          const elem = query('.JobStatusList-root .JobStatus-isActive')
+
+          if (!elem.classList.contains('JobStatus-isExpanded')) {
+            const details = elem.querySelector('.JobStatus-details') as HTMLElement
+            details.click()
+          }
         },
       },
       {
@@ -522,7 +531,7 @@ export class UserTour extends React.Component<Props, any> {
         body: <div className={styles.body}>
           Here we are zoomed in on the job.
         </div>,
-        before: async () => {
+        before: () => {
           if (this.props.route.pathname === '/jobs') {
             query(`.JobStatusList-root .JobStatus-isActive .JobStatus-controls a`).click()
           }
@@ -549,14 +558,14 @@ export class UserTour extends React.Component<Props, any> {
         body: <div className={styles.body}>
           If you expand the job details, then you can click here to delete the job.
         </div>,
-        before: () => {
-          return this.expandJobStatus().then(() => {
-            const elem = query('.JobStatusList-root .JobStatus-isActive')
+        before: async () => {
+          await this.expandJobStatus()
 
-            if (!elem.classList.contains('JobStatus-isExpanded')) {
-              (elem.querySelector('.JobStatus-details') as HTMLElement).click()
-            }
-          })
+          const elem = query('.JobStatusList-root .JobStatus-isActive')
+
+          if (!elem.classList.contains('JobStatus-isExpanded')) {
+            (elem.querySelector('.JobStatus-details') as HTMLElement).click()
+          }
         },
       },
       {
@@ -573,43 +582,24 @@ export class UserTour extends React.Component<Props, any> {
           to you.
         </div>,
       },
-    ]
-
-    this.cancel = this.cancel.bind(this)
-    this.expandJobStatus = this.expandJobStatus.bind(this)
-    this.gotoStep = this.gotoStep.bind(this)
-    this.navigateTo = this.navigateTo.bind(this)
-    this.onKeyPress = this.onKeyPress.bind(this)
-    this.pace = this.pace.bind(this)
-    this.setTabIndices = this.setTabIndices.bind(this)
-    this.showArrow = this.showArrow.bind(this)
-    this.start = this.start.bind(this)
-    this.syncPromiseExec = this.syncPromiseExec.bind(this)
+    ])
   }
 
-  cancel() {
-    this.setState({
-      changing: false,
-      errorMessage: null,
-      isTourActive: false,
-    })
-  }
-
-  componentDidMount() {
-    this.start()
-  }
-
-  start() {
-    this.showArrow(false)
-
-    if (!this.state.isTourActive) {
+  componentDidUpdate(prevProps: Props) {
+    if (!prevProps.tour.inProgress && this.props.tour.inProgress) {
+      if (this.props.tour.inProgress) {
+        const step = this.props.tour.steps[this.props.tour.step - 1]
+        this.showArrow(!step.hideArrow)
+      } else {
+        this.showArrow(false)
+      }
       setTimeout(this.setTabIndices)
-      this.setState({
-        changing: false,
-        errorMessage: null,
-        isTourActive: true,
-        tourStep: 1,
-      })
+    }
+
+    if (prevProps.tour.step !== this.props.tour.step) {
+      const step = this.props.tour.steps[this.props.tour.step - 1]
+      this.showArrow(!step.hideArrow)
+      this.setTabIndices()
     }
   }
 
@@ -620,30 +610,30 @@ export class UserTour extends React.Component<Props, any> {
    * to the overlay.
    */
   render() {
-    return (
+    return this.props.tour.inProgress && (
       <div
-        className={`${styles.root} ${this.state.isTourActive ? styles.overlay : ''}`}
+        className={`${styles.root} ${styles.overlay}`}
         onClick={event => event.stopPropagation()}
       >
         <div
           onClick={event => event.stopPropagation()}
           onKeyPress={this.onKeyPress}
-          style={{ display: this.state.errorMessage ? 'none' : 'block' }}
+          style={{ display: this.props.tour.error ? 'none' : 'block' }}
         >
           <Tour
-            active={this.state.isTourActive}
+            active={this.props.tour.inProgress}
             arrow={Arrow}
             buttonStyle={{}}
             closeButtonText="&#10799;"
-            onBack={step => this.gotoStep(step)}
-            onCancel={this.cancel}
-            onNext={step => this.gotoStep(step)}
+            onBack={this.props.tourGoToStep}
+            onCancel={this.props.tourEnd}
+            onNext={this.props.tourGoToStep}
             ref="tour"
-            step={this.state.tourStep}
-            steps={this.steps}
+            step={this.props.tour.step}
+            steps={this.props.tour.steps}
           />
         </div>
-        <UserTourErrorMessage message={this.state.errorMessage} tour={this}/>
+        <UserTourErrorMessage message={this.props.tour.error} tour={this}/>
       </div>
     )
   }
@@ -665,59 +655,6 @@ export class UserTour extends React.Component<Props, any> {
         }
       }).catch(msg => reject(msg))
     })
-  }
-
-  private gotoStep(n) {
-    if (this.state.changing) {
-      return Promise.reject('Tour step is in process of changing.')
-    } else {
-      this.state.changing = true
-    }
-
-    const functions = []
-    const lastStep = this.steps.find(i => i.step === this.state.tourStep)
-    const nextStep = this.steps.find(i => i.step === n)
-
-    if (lastStep && lastStep.after) {
-      functions.push(lastStep.after.bind(this))
-    }
-
-    if (nextStep) {
-      if (nextStep.before) {
-        functions.push(nextStep.before.bind(this))
-      }
-
-      functions.push(() => {
-        return new Promise((resolve, reject) => {
-          scrollIntoView(nextStep.selector).then(() => {
-            this.showArrow(!nextStep.hideArrow)
-            this.setState({ changing: false, tourStep: n })
-            resolve()
-          }).catch(msg => {
-            if (lastStep.step > nextStep.step) {
-              alert('Sorry.  It seems you cannot go back from here.')
-              resolve()
-            } else {
-              reject(msg)
-            }
-          })
-        })
-      })
-    }
-
-    const rc = this.syncPromiseExec(functions)
-
-    rc.then(() => {
-      this.setState({ changing: false })
-      this.setTabIndices()
-    }).catch(msg => {
-      this.setState({
-        changing: false,
-        errorMessage: msg,
-      })
-    })
-
-    return rc
   }
 
   private navigateTo(props): Promise<any> {
@@ -758,7 +695,7 @@ export class UserTour extends React.Component<Props, any> {
         break
       }
       case 'Escape': {
-        this.cancel()
+        this.props.tourEnd()
 
         break
       }
@@ -804,10 +741,6 @@ export class UserTour extends React.Component<Props, any> {
     }
   }
 
-  private syncPromiseExec(functions: any[]): Promise<any> {
-    return functions.reduce((current, next) => current.then(next), Promise.resolve())
-  }
-
   private get imageCount(): string {
     const results = this.props.catalog.searchResults
 
@@ -845,6 +778,7 @@ function mapStateToProps(state: AppState) {
     catalog: state.catalog,
     map: state.map,
     job: state.jobs,
+    tour: state.tour,
   }
 }
 
@@ -863,6 +797,9 @@ function mapDispatchToProps(dispatch) {
       dispatch(mapActions.setSelectedFeature(feature))
     ),
     routeNavigateTo: (args: RouteNavigateToArgs) => dispatch(routeActions.navigateTo(args)),
+    tourSetSteps: (steps: TourStep[]) => dispatch(tourActions.setSteps(steps)),
+    tourEnd: () => dispatch(tourActions.end()),
+    tourGoToStep: (step: number) => dispatch(tourActions.goToStep(step)),
   }
 }
 

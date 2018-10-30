@@ -17,7 +17,6 @@
 const styles: any = require('./Application.css')
 
 import * as React from 'react'
-import {render} from 'react-dom'
 import {connect} from 'react-redux'
 import * as debounce from 'lodash/debounce'
 import * as moment from 'moment'
@@ -103,14 +102,12 @@ export class Application extends React.Component<Props, null> {
   refs: any
   private pollingInstance: number
   private idleInterval: any
-  private tour: any
 
   constructor(props) {
     super(props)
     this.importJobsIfNeeded = this.importJobsIfNeeded.bind(this)
     this.startIdleTimer = this.startIdleTimer.bind(this)
     this.stopIdleTimer = this.stopIdleTimer.bind(this)
-    this.startTour = this.startTour.bind(this)
     this.timerIncrement = this.timerIncrement.bind(this)
     this.resetTimer = this.resetTimer.bind(this)
     this.serialize = debounce(this.serialize.bind(this), 500)
@@ -271,7 +268,6 @@ export class Application extends React.Component<Props, null> {
         <BrowserSupport/>
         <Navigation
           shrunk={shrunk}
-          startTour={this.startTour}
         />
         <PrimaryMap
           ref="map"
@@ -285,6 +281,7 @@ export class Application extends React.Component<Props, null> {
           <SessionLoggedOut />
         )}
         <ClassificationBanner anchor="bottom"/>
+        <UserTour/>
       </div>
     )
   }
@@ -375,18 +372,6 @@ export class Application extends React.Component<Props, null> {
 
   private stopIdleTimer() {
     clearInterval(this.idleInterval)
-  }
-
-  private startTour() {
-    if (this.tour) {
-      if (!this.tour.state.isTourActive) {
-        this.tour.start()
-      }
-    } else {
-      let root = document.createElement('div')
-      document.body.appendChild(root)
-      this.tour = render(<UserTour />, root)
-    }
   }
 
   private resetTimer() {
