@@ -97,6 +97,7 @@ export function jobsReducer(state = jobsInitialState, action: any) {
         ...state,
         isCreatingJob: false,
         createdJob: action.job,
+        records: [...state.records, action.job],
       }
     case types.JOBS_CREATE_JOB_ERROR:
       return {
