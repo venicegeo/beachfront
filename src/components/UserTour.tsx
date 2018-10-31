@@ -24,12 +24,7 @@ import {catalogActions, CatalogUpdateSearchCriteriaArgs} from '../actions/catalo
 import {mapActions, MapPanToPointArgs} from '../actions/mapActions'
 import {AppState} from '../store'
 import {RouteNavigateToArgs, routeActions} from '../actions/routeActions'
-import {RouteState} from '../reducers/routeReducer'
-import {CatalogState} from '../reducers/catalogReducer'
-import {MapState} from '../reducers/mapReducer'
-import {JobsState} from '../reducers/jobsReducer'
 import {Extent} from '../utils/geometries'
-import {TourState} from '../reducers/tourReducer'
 import {tourActions, TourStep} from '../actions/tourActions'
 
 const styles: any = require('./UserTour.css')
@@ -66,27 +61,13 @@ const UserTourErrorMessage = (props: {
   </div> : null
 }
 
-interface Props {
-  route?: RouteState
-  catalog?: CatalogState
-  map?: MapState
-  jobs?: JobsState
-  tour?: TourState
-  catalogResetSearchCriteria?(): void
-  catalogSerialize?(): void
-  catalogUpdateSearchCriteria?(args: CatalogUpdateSearchCriteriaArgs): void
-  catalogSetApiKey?(apiKey: string): void
-  mapPanToPoint?(args: MapPanToPointArgs): void
-  mapUpdateBbox?(bbox: Extent): void
-  mapClearBbox?(): void
-  mapSetSelectedFeature?(feature: GeoJSON.Feature<any> | null): void
-  routeNavigateTo?(args: RouteNavigateToArgs): void
-  tourSetSteps?(steps: TourStep[]): void
-  tourEnd?(): void
-  tourGoToStep?(step: number): void
-}
+type StateProps = Partial<ReturnType<typeof mapStateToProps>>
+type DispatchProps = Partial<ReturnType<typeof mapDispatchToProps>>
+type PassedProps = {}
 
-export class UserTour extends React.Component<Props, any> {
+type Props = PassedProps & StateProps & DispatchProps
+
+export class UserTour extends React.Component<Props> {
   private algorithm: string
   private apiKeyInstructions: any
   private basemap: string
@@ -777,7 +758,7 @@ function mapStateToProps(state: AppState) {
     route: state.route,
     catalog: state.catalog,
     map: state.map,
-    job: state.jobs,
+    jobs: state.jobs,
     tour: state.tour,
   }
 }
@@ -803,7 +784,7 @@ function mapDispatchToProps(dispatch) {
   }
 }
 
-export default connect(
+export default connect<StateProps, DispatchProps, PassedProps>(
   mapStateToProps,
   mapDispatchToProps,
 )(UserTour)

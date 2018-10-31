@@ -28,7 +28,7 @@ interface Props {
   bbox: number[]
 }
 
-export class StaticMinimap extends React.Component<Props, {}> {
+export class StaticMinimap extends React.Component<Props> {
   refs: any
 
   private map: ol.Map
@@ -90,7 +90,7 @@ export class StaticMinimap extends React.Component<Props, {}> {
         maxZoom: 6,
       }),
     })
-    this.map.getView().fit(bboxGeometry, this.map.getSize())
+    this.map.getView().fit(bboxGeometry, { size: this.map.getSize() })
   }
 
   private destroyMap() {

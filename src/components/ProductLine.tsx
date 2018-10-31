@@ -29,13 +29,13 @@ const LAST_7_DAYS = {value: 'P7D', label: 'Last 7 Days'}
 const LAST_30_DAYS = {value: 'P30D', label: 'Last 30 Days'}
 const SINCE_CREATION = {value: 'P0D', label: 'All'}
 
-interface Props {
+type DispatchProps = Partial<ReturnType<typeof mapDispatchToProps>>
+type PassedProps = {
   className?: string
   productLine: beachfront.ProductLine
-  productLinesFetchJobs?(args: ProductLinesFetchJobsArgs): void
-  mapSetSelectedFeature?(feature: GeoJSON.Feature<any> | null): void
-  mapPanToPoint?(args: MapPanToPointArgs): void
 }
+
+type Props = PassedProps & DispatchProps
 
 interface State {
   duration?: string
@@ -45,8 +45,8 @@ interface State {
 }
 
 export class ProductLine extends React.Component<Props, State> {
-  constructor() {
-    super()
+  constructor(props: Props) {
+    super(props)
     this.state = {
       duration: LAST_24_HOURS.value,
       isExpanded: false,
@@ -185,7 +185,7 @@ function mapDispatchToProps(dispatch) {
   }
 }
 
-export default connect(
+export default connect<undefined, DispatchProps, PassedProps>(
   undefined,
   mapDispatchToProps,
 )(ProductLine)

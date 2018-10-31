@@ -23,12 +23,13 @@ import {Modal} from './Modal'
 import {BrowsersSupported} from './BrowserSupport'
 import {routeActions, RouteNavigateToArgs} from '../actions/routeActions'
 
-interface Props {
-  routeNavigateTo?(args: RouteNavigateToArgs): void
-}
+type DispatchProps = Partial<ReturnType<typeof mapDispatchToProps>>
+type PassedProps = {}
 
-export class About extends React.Component<Props, null> {
-  constructor(props) {
+type Props = PassedProps & DispatchProps
+
+export class About extends React.Component<Props> {
+  constructor(props: Props) {
     super(props)
 
     this.handleDismiss = this.handleDismiss.bind(this)
@@ -75,7 +76,7 @@ function mapDispatchToProps(dispatch) {
   }
 }
 
-export default connect(
+export default connect<undefined, DispatchProps, PassedProps>(
   undefined,
   mapDispatchToProps,
 )(About)

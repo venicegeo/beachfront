@@ -18,7 +18,7 @@ const styles: any = require('./Application.css')
 
 import * as React from 'react'
 import {connect} from 'react-redux'
-import * as debounce from 'lodash/debounce'
+import debounce = require('lodash/debounce')
 import * as moment from 'moment'
 import About from './About'
 import {BrowserSupport} from './BrowserSupport'
@@ -46,64 +46,29 @@ import UserTour from './UserTour'
 import {
   TYPE_JOB,
 } from '../constants'
-import {UserState} from '../reducers/userReducer'
 import {userActions} from '../actions/userActions'
-import {CatalogState} from '../reducers/catalogReducer'
 import {catalogActions, CatalogSearchArgs} from '../actions/catalogActions'
-import {RouteState} from '../reducers/routeReducer'
 import {RouteNavigateToArgs, routeActions} from '../actions/routeActions'
 import {mapActions, MapPanToPointArgs} from '../actions/mapActions'
-import {MapState} from '../reducers/mapReducer'
-import {JobsState} from '../reducers/jobsReducer'
 import {jobsActions} from '../actions/jobsActions'
 import {AppState} from '../store'
 import {algorithmsActions} from '../actions/algorithmsActions'
 import {apiStatusActions} from '../actions/apiStatusActions'
-import {ProductLinesState} from '../reducers/productLinesReducer'
 import {shouldSelectedFeatureAutoDeselect} from '../utils/mapUtils'
 import {scrollIntoView} from '../utils/domUtils'
 
-interface Props {
-  user?: UserState
-  route?: RouteState
-  catalog?: CatalogState
-  map?: MapState
-  jobs?: JobsState
-  productLines?: ProductLinesState
-  userLogin?(args): void
-  userLogout?(): void
-  userSessionExpired?(): void
-  userSerialize?(): void
-  userDeserialize?(): void
-  routeNavigateTo?(args: RouteNavigateToArgs): void
-  catalogInitialize?(): void
-  catalogSearch?(): void
-  catalogSerialize?(): void
-  catalogDeserialize?(): void
-  mapUpdateMode?(): void
-  mapUpdateDetections?(): void
-  mapUpdateFrames?(): void
-  mapSetSelectedFeature?(feature: GeoJSON.Feature<any> | null): void
-  mapPanToPoint?(args: MapPanToPointArgs): void
-  mapPanToExtent?(extent: Extent): void
-  mapSerialize?(): void
-  mapDeserialize?(): void
-  jobsFetch?(): void
-  jobsFetchOne?(jobId: string): void
-  algorithmsFetch?(): void
-  algorithmsSerialize?(): void
-  algorithmsDeserialize?(): void
-  apiStatusFetch?(): void
-  apiStatusSerialize?(): void
-  apiStatusDeserialize?(): void
-}
+type StateProps = Partial<ReturnType<typeof mapStateToProps>>
+type DispatchProps = Partial<ReturnType<typeof mapDispatchToProps>>
+type PassedProps = {}
 
-export class Application extends React.Component<Props, null> {
+type Props = PassedProps & StateProps & DispatchProps
+
+export class Application extends React.Component<Props> {
   refs: any
-  private pollingInstance: number
+  private pollingInstance: any
   private idleInterval: any
 
-  constructor(props) {
+  constructor(props: Props) {
     super(props)
     this.importJobsIfNeeded = this.importJobsIfNeeded.bind(this)
     this.startIdleTimer = this.startIdleTimer.bind(this)
@@ -265,7 +230,7 @@ export class Application extends React.Component<Props, null> {
     return (
       <div className={styles.root}>
         <ClassificationBanner anchor="top"/>
-        <BrowserSupport/>
+        <BrowserSupport />
         <Navigation
           shrunk={shrunk}
         />
@@ -471,7 +436,7 @@ function mapDispatchToProps(dispatch) {
   }
 }
 
-export default connect(
+export default connect<StateProps, DispatchProps, PassedProps>(
   mapStateToProps,
   mapDispatchToProps,
 )(Application)

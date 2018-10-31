@@ -23,7 +23,6 @@ import * as React from 'react'
 import {Link} from './Link'
 import {USER_GUIDE_URL} from '../config'
 import {connect} from 'react-redux'
-import {RouteState} from '../reducers/routeReducer'
 import {routeActions, RouteNavigateToArgs} from '../actions/routeActions'
 
 const Icon = ({ path, size = 40 }) => (
@@ -35,15 +34,16 @@ const Icon = ({ path, size = 40 }) => (
   </svg>
 )
 
-interface Props {
-  route?: RouteState
+type StateProps = Partial<ReturnType<typeof mapStateToProps>>
+type DispatchProps = Partial<ReturnType<typeof mapDispatchToProps>>
+type PassedProps = {
   shrunk: boolean
-  routeNavigateTo?(args: RouteNavigateToArgs): void
-  tourStart?(): void
 }
 
-export class Navigation extends React.Component<Props, null> {
-  constructor(props) {
+type Props = PassedProps & StateProps & DispatchProps
+
+export class Navigation extends React.Component<Props> {
+  constructor(props: Props) {
     super(props)
 
     this.handleClick = this.handleClick.bind(this)
@@ -135,7 +135,7 @@ function mapDispatchToProps(dispatch) {
   }
 }
 
-export default connect(
+export default connect<StateProps, DispatchProps, PassedProps>(
   mapStateToProps,
   mapDispatchToProps,
 )(Navigation)

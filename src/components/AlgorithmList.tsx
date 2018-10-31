@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-import {AlgorithmsState} from '../reducers/algorithmsReducer'
 
 const styles: any = require('./AlgorithmList.css')
 
@@ -21,11 +20,9 @@ import * as React from 'react'
 import {connect} from 'react-redux'
 import Algorithm from './Algorithm'
 import {AppState} from '../store'
-import {JobsState} from '../reducers/jobsReducer'
 
-interface Props {
-  jobs?: JobsState
-  algorithms?: AlgorithmsState
+type StateProps = Partial<ReturnType<typeof mapStateToProps>>
+type PassedProps = {
   sceneMetadata: beachfront.SceneMetadata
   selectedId?: string
   warningHeading?: string
@@ -33,6 +30,8 @@ interface Props {
   onSelect?(algorithm: beachfront.Algorithm)
   onSubmit?(algorithm: beachfront.Algorithm)
 }
+
+type Props = PassedProps & StateProps
 
 export const AlgorithmList = (props: Props) => (
   <div className={styles.root}>
@@ -69,7 +68,7 @@ function mapStateToProps(state: AppState) {
   }
 }
 
-export default connect(
+export default connect<StateProps, undefined, PassedProps>(
   mapStateToProps,
   undefined,
 )(AlgorithmList)

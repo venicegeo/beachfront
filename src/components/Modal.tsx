@@ -25,9 +25,9 @@ interface Props {
   onInitialize(): void
 }
 
-export class Modal extends React.Component<Props, void> {
-  constructor() {
-    super()
+export class Modal extends React.Component<Props> {
+  constructor(props: Props) {
+    super(props)
     this.handleClick = this.handleClick.bind(this)
     this.handleKeyPress = this.handleKeyPress.bind(this)
   }

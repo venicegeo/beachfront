@@ -30,8 +30,8 @@ interface State {
 }
 
 export class Dropdown extends React.Component<Props, State> {
-  constructor() {
-    super()
+  constructor(props: Props) {
+    super(props)
     this.state = {isOpen: false}
     this.handleToggleOpen = this.handleToggleOpen.bind(this)
     this.handleExternalClick = this.handleExternalClick.bind(this)

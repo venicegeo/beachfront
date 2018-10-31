@@ -20,17 +20,15 @@ const DATETIME_FORMAT = 'YYYY-MM-DD HH:mm'
 import * as React from 'react'
 import {connect} from 'react-redux'
 import * as moment from 'moment'
-import * as debounce from 'lodash/debounce'
+import debounce = require('lodash/debounce')
 import * as ol from '../utils/ol'
 import {SCENE_TILE_PROVIDERS} from '../config'
 import {AppState} from '../store'
-import {MapState} from '../reducers/mapReducer'
-import {CatalogState} from '../reducers/catalogReducer'
 
-interface Props {
-  map?: MapState
-  catalog?: CatalogState
-}
+type StateProps = Partial<ReturnType<typeof mapStateToProps>>
+type PassedProps = {}
+
+type Props = PassedProps & StateProps
 
 interface State {
   hoveredIds?: string[]
@@ -230,7 +228,7 @@ function mapStateToProps(state: AppState) {
   }
 }
 
-export default connect(
+export default connect<StateProps, undefined, PassedProps>(
   mapStateToProps,
   undefined,
 )(ImagerySearchList)

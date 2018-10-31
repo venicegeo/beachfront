@@ -21,15 +21,15 @@ import {connect} from 'react-redux'
 import {LoadingAnimation} from './LoadingAnimation'
 import ProductLine from './ProductLine'
 import {AppState} from '../store'
-import {ProductLinesState} from '../reducers/productLinesReducer'
 import {productLinesActions} from '../actions/productLinesActions'
 
-interface Props {
-  productLines?: ProductLinesState
-  productLinesFetch?(): void
-}
+type StateProps = Partial<ReturnType<typeof mapStateToProps>>
+type DispatchProps = Partial<ReturnType<typeof mapDispatchToProps>>
+type PassedProps = {}
 
-export class ProductLineList extends React.Component<Props, {}> {
+type Props = PassedProps & StateProps & DispatchProps
+
+export class ProductLineList extends React.Component<Props> {
   render() {
     const isEmpty = (
       !this.props.productLines.records.length &&
@@ -86,7 +86,7 @@ function mapDispatchToProps(dispatch) {
   }
 }
 
-export default connect(
+export default connect<StateProps, DispatchProps, PassedProps>(
   mapStateToProps,
   mapDispatchToProps,
 )(ProductLineList)

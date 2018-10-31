@@ -25,19 +25,16 @@ import {LoadingAnimation} from './LoadingAnimation'
 import { SCENE_TILE_PROVIDERS } from '../config'
 import {AppState} from '../store'
 import {catalogActions, CatalogSearchArgs} from '../actions/catalogActions'
-import {MapState} from '../reducers/mapReducer'
-import {CatalogState} from '../reducers/catalogReducer'
 
-interface Props {
-  map?: MapState
-  catalog?: CatalogState
-  catalogResetSearchCriteria?(): void
-  catalogSearch?(args?: CatalogSearchArgs): void
-}
+type StateProps = Partial<ReturnType<typeof mapStateToProps>>
+type DispatchProps = Partial<ReturnType<typeof mapDispatchToProps>>
+type PassedProps = {}
 
-export class ImagerySearch extends React.Component<Props, {}> {
-  constructor() {
-    super()
+type Props = PassedProps & StateProps & DispatchProps
+
+export class ImagerySearch extends React.Component<Props> {
+  constructor(props: Props) {
+    super(props)
 
     this.handleSubmit = this.handleSubmit.bind(this)
   }
@@ -113,7 +110,7 @@ function mapDispatchToProps(dispatch) {
   }
 }
 
-export default connect(
+export default connect<StateProps, DispatchProps, PassedProps>(
   mapStateToProps,
   mapDispatchToProps,
 )(ImagerySearch)

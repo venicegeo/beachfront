@@ -21,12 +21,15 @@ import * as React from 'react'
 import {connect} from 'react-redux'
 import {Modal} from './Modal'
 
-interface Props {
+type DispatchProps = Partial<ReturnType<typeof mapDispatchToProps>>
+type PassedProps = {
   clearSession?: () => void
 }
 
-export class SessionExpired extends React.Component<Props, null> {
-  constructor(props) {
+type Props = PassedProps & DispatchProps
+
+export class SessionExpired extends React.Component<Props> {
+  constructor(props: Props) {
     super(props)
     this.handleDismiss = this.handleDismiss.bind(this)
   }
@@ -56,7 +59,7 @@ function mapDispatchToProps(dispatch) {
   }
 }
 
-export default connect(
+export default connect<undefined, DispatchProps, PassedProps>(
   undefined,
   mapDispatchToProps,
 )(SessionExpired)

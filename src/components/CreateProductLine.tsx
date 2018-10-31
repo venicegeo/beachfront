@@ -26,15 +26,13 @@ import {NewProductLineDetails} from './NewProductLineDetails'
 import {
   SOURCE_DEFAULT,
 } from '../constants'
-import {CatalogState} from '../reducers/catalogReducer'
-import {MapState} from '../reducers/mapReducer'
 import {ProductLinesCreateArgs, productLinesActions} from '../actions/productLinesActions'
 
-interface Props {
-  catalog?: CatalogState
-  map?: MapState
-  productLinesCreate?(args: ProductLinesCreateArgs): void
-}
+type StateProps = Partial<ReturnType<typeof mapStateToProps>>
+type DispatchProps = Partial<ReturnType<typeof mapDispatchToProps>>
+type PassedProps = {}
+
+type Props = PassedProps & StateProps & DispatchProps
 
 interface State {
   algorithm?:              beachfront.Algorithm
@@ -48,8 +46,8 @@ interface State {
 }
 
 export class CreateProductLine extends React.Component<Props, State> {
-  constructor() {
-    super()
+  constructor(props: Props) {
+    super(props)
     this.state = {
       algorithm:  null,
       cloudCover: 10,
@@ -169,7 +167,7 @@ function mapDispatchToProps(dispatch) {
   }
 }
 
-export default connect(
+export default connect<StateProps, DispatchProps, PassedProps>(
   mapStateToProps,
   mapDispatchToProps,
 )(CreateProductLine)

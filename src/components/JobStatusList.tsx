@@ -21,15 +21,13 @@ import {connect} from 'react-redux'
 import JobStatus from './JobStatus'
 import * as moment from 'moment'
 import {AppState} from '../store'
-import {MapState} from '../reducers/mapReducer'
-import {JobsState} from '../reducers/jobsReducer'
 import {jobsActions} from '../actions/jobsActions'
 
-interface Props {
-  map?: MapState
-  jobs?: JobsState
-  jobsFetch?(): void
-}
+type StateProps = Partial<ReturnType<typeof mapStateToProps>>
+type DispatchProps = Partial<ReturnType<typeof mapDispatchToProps>>
+type PassedProps = {}
+
+type Props = PassedProps & StateProps & DispatchProps
 
 interface State {
   activeIds: string[]
@@ -140,7 +138,7 @@ function mapDispatchToProps(dispatch) {
   }
 }
 
-export default connect(
+export default connect<StateProps, DispatchProps, PassedProps>(
   mapStateToProps,
   mapDispatchToProps,
 )(JobStatusList)

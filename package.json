@@ -8,7 +8,6 @@
     "clear": "rm -rf beachfront.zip dist/ node_modules/ report/ typings/",
     "create-ssl-certs": "openssl req -newkey rsa:2048 -nodes -keyout .development_ssl_certificate.key -sha256 -x509 -days 3652 -subj /C=US/ST=Unknown/L=Unknown/O=Beachfront/OU=Development/CN=localhost -out .development_ssl_certificate.pem",
     "lint": "tslint '{src,test}/**/*.{ts,tsx}' -t verbose",
-    "postinstall": "npm run typings:install",
     "prereinstall": "npm run clear",
     "prestart": "npm run reinstall",
     "reinstall": "npm install",
@@ -25,6 +24,15 @@
     "node": "^5.7.0"
   },
   "devDependencies": {
+    "@types/chai": "4.1.7",
+    "@types/enzyme": "3.1.14",
+    "@types/geojson": "7946.0.4",
+    "@types/lodash": "4.14.117",
+    "@types/mocha": "5.2.5",
+    "@types/react": "16.4.18",
+    "@types/react-dom": "16.0.9",
+    "@types/react-redux": "6.0.9",
+    "@types/sinon": "5.0.5",
     "chai": "3.5.0",
     "copy-webpack-plugin": "3.0.1",
     "css-loader": "0.23.1",
@@ -53,8 +61,7 @@
     "ts-loader": "0.8.2",
     "tslint": "3.14.0",
     "tslint-loader": "2.1.5",
-    "typescript": "2.1.4",
-    "typings": "2.0.0",
+    "typescript": "3.1.4",
     "webpack": "3.8.1",
     "webpack-dev-server": "2.9.2"
   },

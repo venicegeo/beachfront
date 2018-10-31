@@ -21,8 +21,8 @@ const tileErrorPlaceholder: string = require('../images/tile-error.png')
 import * as React from 'react'
 import {findDOMNode} from 'react-dom'
 import {connect} from 'react-redux'
-import * as debounce from 'lodash/debounce'
-import * as throttle from 'lodash/throttle'
+import debounce = require('lodash/debounce')
+import throttle = require('lodash/throttle')
 import * as ol from '../utils/ol'
 import {ExportControl} from '../utils/openlayers.ExportControl'
 import {SearchControl} from '../utils/openlayers.SearchControl'
@@ -67,13 +67,8 @@ import {
   WEB_MERCATOR,
   WGS84,
 } from '../constants'
-import {RouteState} from '../reducers/routeReducer'
 import {mapActions} from '../actions/mapActions'
 import {AppState} from '../store'
-import {MapState} from '../reducers/mapReducer'
-import {JobsState} from '../reducers/jobsReducer'
-import {ApiStatusState} from '../reducers/apiStatusReducer'
-import {CatalogState} from '../reducers/catalogReducer'
 import {userActions} from '../actions/userActions'
 import {catalogActions, CatalogSearchArgs} from '../actions/catalogActions'
 
@@ -101,20 +96,13 @@ export const MODE_NORMAL = 'MODE_NORMAL'
 export const MODE_PRODUCT_LINES = 'MODE_PRODUCT_LINES'
 export const MODE_SELECT_IMAGERY = 'MODE_SELECT_IMAGERY'
 
-interface Props {
-  route?: RouteState
-  catalog?: CatalogState
-  map?: MapState
-  jobs?: JobsState
-  apiStatus?: ApiStatusState
+type StateProps = Partial<ReturnType<typeof mapStateToProps>>
+type DispatchProps = Partial<ReturnType<typeof mapDispatchToProps>>
+type PassedProps = {
   shrunk: boolean
-  mapInitialized?(map: ol.Map, collections: any): void
-  mapUpdateBbox?(bbox: Extent): void
-  mapUpdateView?(view: MapView): void
-  mapSetSelectedFeature?(feature: GeoJSON.Feature<any> | null): void
-  catalogSearch?(args?: CatalogSearchArgs): void
-  userLogout?(): void
 }
+
+type Props = PassedProps & StateProps & DispatchProps
 
 interface State {
   basemapIndex?: number
@@ -153,8 +141,8 @@ export class PrimaryMap extends React.Component<Props, State> {
   private selectInteraction: ol.Select
   private skipNextViewUpdate: boolean
 
-  constructor() {
-    super()
+  constructor(props: Props) {
+    super(props)
     this.state = {
       basemapIndex: 0,
       loadingRefCount: 0,
@@ -1261,7 +1249,7 @@ function generateBboxDrawInteraction(drawLayer) {
 
 function generateFeatureDetailsOverlay(componentRef) {
   return new ol.Overlay({
-    element:     findDOMNode(componentRef),
+    element:     findDOMNode(componentRef) as Element,
     id:          'featureDetails',
     positioning: 'top-left',
     stopEvent:   false,
@@ -1339,7 +1327,7 @@ function generateImageryLayer() {
 
 function generateImageSearchResultsOverlay(componentRef) {
   return new ol.Overlay({
-    element:   findDOMNode(componentRef),
+    element:   findDOMNode(componentRef) as Element,
     id:        'imageSearchResults',
     stopEvent: false,
   })
@@ -1480,7 +1468,7 @@ function mapDispatchToProps(dispatch) {
   }
 }
 
-export default connect(
+export default connect<StateProps, DispatchProps, PassedProps>(
   mapStateToProps,
   mapDispatchToProps,
 )(PrimaryMap)

@@ -29,7 +29,7 @@ interface Props {
   feature: GeoJSON.Feature<any>
 }
 
-export class FeatureDetails extends React.Component<Props, {}> {
+export class FeatureDetails extends React.Component<Props> {
   render() {
     const {feature} = this.props
     if (!feature) {

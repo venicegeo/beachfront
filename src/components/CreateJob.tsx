@@ -26,21 +26,16 @@ import {PrimaryMap} from './PrimaryMap'
 import {normalizeSceneId} from './SceneFeatureDetails'
 import {TYPE_SCENE} from '../constants'
 import {AppState} from '../store'
-import {CatalogState} from '../reducers/catalogReducer'
-import {MapState} from '../reducers/mapReducer'
 import {jobsActions, JobsCreateJobArgs} from '../actions/jobsActions'
-import {JobsState} from '../reducers/jobsReducer'
 import {catalogActions, CatalogUpdateSearchCriteriaArgs} from '../actions/catalogActions'
 
-interface Props {
-  catalog?: CatalogState
-  map?: MapState
-  jobs?: JobsState
+type StateProps = Partial<ReturnType<typeof mapStateToProps>>
+type DispatchProps = Partial<ReturnType<typeof mapDispatchToProps>>
+type PassedProps = {
   mapRef: PrimaryMap
-  jobsCreateJob?(args: JobsCreateJobArgs): void
-  jobsDismissCreateJobError?(): void
-  catalogUpdateSearchCriteria?(args: CatalogUpdateSearchCriteriaArgs): void
 }
+
+type Props = PassedProps & StateProps & DispatchProps
 
 interface State {
   computeMask?: boolean
@@ -171,7 +166,7 @@ function mapDispatchToProps(dispatch) {
   }
 }
 
-export default connect(
+export default connect<StateProps, DispatchProps, PassedProps>(
   mapStateToProps,
   mapDispatchToProps,
 )(CreateJob)

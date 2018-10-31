@@ -30,8 +30,8 @@ interface State {
 }
 
 export class BasemapSelect extends React.Component<Props, State> {
-  constructor() {
-    super()
+  constructor(props: Props) {
+    super(props)
     this.state            = {isOpen: false}
     this.handleToggleOpen = this.handleToggleOpen.bind(this)
   }

@@ -24,19 +24,20 @@ import {LoadingAnimation} from './LoadingAnimation'
 import {normalizeSceneId} from './SceneFeatureDetails'
 import {JOB_ENDPOINT} from '../config'
 import {AppState} from '../store'
-import {ProductLinesState} from '../reducers/productLinesReducer'
 import {mapActions} from '../actions/mapActions'
 
-interface Props {
-  productLines?: ProductLinesState
+type StateProps = Partial<ReturnType<typeof mapStateToProps>>
+type DispatchProps = Partial<ReturnType<typeof mapDispatchToProps>>
+type PassedProps = {
   className?: string
   duration: string
   durations: {value: string, label: string}[]
   selectedJobIds: string[]
   onDurationChange(value: string)
   onRowClick(job: beachfront.Job)
-  mapSetHoveredFeature?(hoveredFeature: beachfront.Job | null): void
 }
+
+type Props = PassedProps & StateProps & DispatchProps
 
 export const ActivityTable = (props: Props) => (
   <div className={`${styles.root} ${props.productLines.isFetchingJobs ? styles.isLoading : ''} ${props.className}`}>
@@ -148,7 +149,7 @@ function mapDispatchToProps(dispatch) {
   }
 }
 
-export default connect(
+export default connect<StateProps, DispatchProps, PassedProps>(
   mapStateToProps,
   mapDispatchToProps,
 )(ActivityTable)

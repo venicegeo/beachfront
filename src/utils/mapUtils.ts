@@ -14,6 +14,8 @@
  * limitations under the License.
  **/
 
+import {GeoJSON} from 'geojson'
+
 export function shouldSelectedFeatureAutoDeselect(selectedFeature: GeoJSON.Feature<any>, options?: { ignoreTypes?: string[] }) {
   // Determine if the selected feature is an ignorable type that should not be auto-deselected on certain route changes
   options = options || {}

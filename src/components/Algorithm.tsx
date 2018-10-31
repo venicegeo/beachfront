@@ -19,10 +19,9 @@ const styles: any = require('./Algorithm.css')
 
 import * as React from 'react'
 import {AppState} from '../store'
-import {JobsState} from '../reducers/jobsReducer'
 
-interface Props {
-  jobs?: JobsState
+type StateProps = Partial<ReturnType<typeof mapStateToProps>>
+type PassedProps = {
   algorithm: beachfront.Algorithm
   sceneMetadata: beachfront.SceneMetadata
   isSelected?: boolean
@@ -32,6 +31,8 @@ interface Props {
   onSelect?(algorithm: beachfront.Algorithm)
   onSubmit?(algorithm: beachfront.Algorithm)
 }
+
+type Props = PassedProps & StateProps
 
 export const Algorithm = (props: Props) => (
   <div className={[
@@ -110,7 +111,7 @@ function mapStateToProps(state: AppState) {
   }
 }
 
-export default connect(
+export default connect<StateProps, undefined, PassedProps>(
   mapStateToProps,
   undefined,
 )(Algorithm)

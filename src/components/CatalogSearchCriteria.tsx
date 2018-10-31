@@ -26,24 +26,19 @@ import * as moment from 'moment'
 import {SCENE_TILE_PROVIDERS} from '../config'
 import {catalogActions, CatalogUpdateSearchCriteriaArgs} from '../actions/catalogActions'
 import {AppState} from '../store'
-import {ApiStatusState} from '../reducers/apiStatusReducer'
-import {CatalogState} from '../reducers/catalogReducer'
-import {MapState} from '../reducers/mapReducer'
-import FormEvent = __React.FormEvent
 import {AxiosError} from 'axios'
+import {FormEvent} from 'react'
 
-interface Props {
-  apiStatus?: ApiStatusState
-  catalog?: CatalogState
-  map?: MapState
+type StateProps = Partial<ReturnType<typeof mapStateToProps>>
+type DispatchProps = Partial<ReturnType<typeof mapDispatchToProps>>
+type PassedProps = {
   errorElement?: React.ReactElement<any>
-  catalogSetApiKey?(apiKey: string): void
-  catalogUpdateSearchCriteria?(args: CatalogUpdateSearchCriteriaArgs): void
-  mapClearBbox?(): void
 }
 
-export class CatalogSearchCriteria extends React.Component<Props, null> {
-  constructor(props) {
+type Props = PassedProps & StateProps & DispatchProps
+
+export class CatalogSearchCriteria extends React.Component<Props> {
+  constructor(props: Props) {
     super(props)
 
     this.handleSourceChange = this.handleSourceChange.bind(this)
@@ -264,7 +259,7 @@ function mapDispatchToProps(dispatch) {
   }
 }
 
-export default connect(
+export default connect<StateProps, DispatchProps, PassedProps>(
   mapStateToProps,
   mapDispatchToProps,
 )(CatalogSearchCriteria)

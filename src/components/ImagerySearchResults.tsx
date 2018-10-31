@@ -20,17 +20,18 @@ import * as React from 'react'
 import {connect} from 'react-redux'
 import {paginate} from '../utils/pagination'
 import {AppState} from '../store'
-import {CatalogState} from '../reducers/catalogReducer'
 
-interface Props {
-  catalog?: CatalogState
+type StateProps = Partial<ReturnType<typeof mapStateToProps>>
+type PassedProps = {
   className?: string
-  onPageChange(page: {count: number, startIndex: number})
+  onPageChange(args: {startIndex: number, count: number})
 }
 
-export class ImagerySearchResults extends React.Component<Props, void> {
-  constructor() {
-    super()
+type Props = PassedProps & StateProps
+
+export class ImagerySearchResults extends React.Component<Props> {
+  constructor(props: Props) {
+    super(props)
     this.emitPageBack    = this.emitPageBack.bind(this)
     this.emitPageForward = this.emitPageForward.bind(this)
   }
@@ -96,7 +97,7 @@ function mapStateToProps(state: AppState) {
   }
 }
 
-export default connect(
+export default connect<StateProps, undefined, PassedProps>(
   mapStateToProps,
   undefined,
 )(ImagerySearchResults)

@@ -40,21 +40,17 @@ import {jobsActions} from '../actions/jobsActions'
 import {AppState} from '../store'
 import {Extent, featureToExtentWrapped} from '../utils/geometries'
 import {routeActions, RouteNavigateToArgs} from '../actions/routeActions'
-import {JobsState} from '../reducers/jobsReducer'
-import {MapState} from '../reducers/mapReducer'
 
-interface Props {
-  map?: MapState
-  jobs?: JobsState
-  className?: string
+type StateProps = Partial<ReturnType<typeof mapStateToProps>>
+type DispatchProps = Partial<ReturnType<typeof mapDispatchToProps>>
+type PassedProps = {
   isActive: boolean
   job: beachfront.Job
+  className?: string
   onToggleExpansion(job: beachfront.Job, isExpanded: boolean)
-  mapSetSelectedFeature?(feature: GeoJSON.Feature<any> | null): void
-  mapPanToExtent?(extent: Extent): void
-  jobsDeleteJob?(job: beachfront.Job): void
-  routeNavigateTo?(args: RouteNavigateToArgs): void
 }
+
+type Props = PassedProps & StateProps & DispatchProps
 
 interface State {
   downloadProgress?: number
@@ -65,8 +61,8 @@ interface State {
 }
 
 export class JobStatus extends React.Component<Props, State> {
-  constructor() {
-    super()
+  constructor(props: Props) {
+    super(props)
 
     this.state = {
       downloadProgress: NaN,
@@ -316,7 +312,7 @@ function mapDispatchToProps(dispatch) {
   }
 }
 
-export default connect(
+export default connect<StateProps, DispatchProps, PassedProps>(
   mapStateToProps,
   mapDispatchToProps,
 )(JobStatus)
