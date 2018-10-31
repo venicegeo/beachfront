@@ -79,23 +79,27 @@ export class Application extends React.Component<Props> {
   }
 
   componentDidUpdate(prevProps: Props) {
+    // Logged in.
     if (!prevProps.user.isLoggedIn && this.props.user.isLoggedIn) {
       this.initializeServices()
       this.startBackgroundTasks()
       this.refreshRecords()
     }
 
+    // Session expired.
     if (!prevProps.user.isSessionExpired && this.props.user.isSessionExpired || prevProps.user.isLoggedIn && !this.props.user.isLoggedIn) {
       this.stopBackgroundTasks()
       this.stopIdleTimer()
     }
 
+    // Map context changed.
     if (prevProps.route.pathname !== this.props.route.pathname ||
         prevProps.map.bbox !== this.props.map.bbox ||
         prevProps.catalog.searchResults !== this.props.catalog.searchResults) {
       this.props.mapUpdateMode()
     }
 
+    // Route changed.
     if (prevProps.route !== this.props.route) {
       if (prevProps.route.jobIds.join(',') !== this.props.route.jobIds.join(',')) {
         this.importJobsIfNeeded()
@@ -117,6 +121,7 @@ export class Application extends React.Component<Props> {
       this.props.mapSetSelectedFeature(selectedFeature)
     }
 
+    // Map data refreshed.
     if (prevProps.map.mode !== this.props.map.mode ||
         prevProps.map.selectedFeature !== this.props.map.selectedFeature ||
         prevProps.jobs !== this.props.jobs ||
@@ -125,6 +130,7 @@ export class Application extends React.Component<Props> {
       this.props.mapUpdateFrames()
     }
 
+    // Selected feature changed.
     if (prevProps.map.selectedFeature !== this.props.map.selectedFeature) {
       let search = ''
       if (this.props.map.selectedFeature && this.props.map.selectedFeature.properties.type === TYPE_JOB) {
@@ -140,6 +146,7 @@ export class Application extends React.Component<Props> {
       })
     }
 
+    // Jobs fetched successfully.
     if (prevProps.jobs.isFetching && !this.props.jobs.isFetching && !this.props.jobs.fetchError) {
       // Load selected feature if it isn't already (e.g., page refresh w/ jobId).
       let [jobId] = this.props.route.jobIds
@@ -151,12 +158,14 @@ export class Application extends React.Component<Props> {
       this.importJobsIfNeeded()
     }
 
+    // Single job fetched successfully.
     if (prevProps.jobs.isFetchingOne && !this.props.jobs.isFetchingOne && !this.props.jobs.fetchOneError) {
       this.props.mapPanToPoint({
         point: getFeatureCenter(this.props.jobs.lastOneFetched),
       })
     }
 
+    // Job created successfully.
     if (prevProps.jobs.isCreatingJob && !this.props.jobs.isCreatingJob && !this.props.jobs.createJobError) {
       this.props.routeNavigateTo({
         loc: {
@@ -166,6 +175,7 @@ export class Application extends React.Component<Props> {
       })
     }
 
+    // Job deleted successfully.
     if (prevProps.jobs.isDeletingJob && !this.props.jobs.isDeletingJob && !this.props.jobs.deleteJobError) {
       if (this.props.route.jobIds.includes(this.props.jobs.deletedJob.id)) {
         this.props.routeNavigateTo({
@@ -177,6 +187,7 @@ export class Application extends React.Component<Props> {
       }
     }
 
+    // Product line created successfully.
     if (prevProps.productLines.isCreatingProductLine &&
         !this.props.productLines.isCreatingProductLine &&
         !this.props.productLines.createProductLineError) {
@@ -187,6 +198,7 @@ export class Application extends React.Component<Props> {
       })
     }
 
+    // Search started.
     if (!prevProps.catalog.isSearching && this.props.catalog.isSearching) {
       const shouldDeselect = shouldSelectedFeatureAutoDeselect(this.props.map.selectedFeature, { ignoreTypes: [TYPE_JOB] })
       if (shouldDeselect) {
@@ -194,6 +206,7 @@ export class Application extends React.Component<Props> {
       }
     }
 
+    // Search completed successfully.
     if (prevProps.catalog.isSearching && !this.props.catalog.isSearching && !this.props.catalog.searchError) {
       scrollIntoView('.ImagerySearchList-results')
     }
