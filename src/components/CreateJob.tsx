@@ -27,7 +27,6 @@ import {normalizeSceneId} from './SceneFeatureDetails'
 import {TYPE_SCENE} from '../constants'
 import {AppState} from '../store'
 import {jobsActions, JobsCreateJobArgs} from '../actions/jobsActions'
-import {catalogActions, CatalogUpdateSearchCriteriaArgs} from '../actions/catalogActions'
 
 type StateProps = Partial<ReturnType<typeof mapStateToProps>>
 type DispatchProps = Partial<ReturnType<typeof mapDispatchToProps>>
@@ -72,7 +71,7 @@ export class CreateJob extends React.Component<Props, State> {
 
         // Reset the algorithm error.
         if (this.props.jobs.createJobError) {
-          this.props.jobsDismissCreateJobError()
+          this.props.actions.jobs.dismissCreateJobError()
         }
       }
 
@@ -130,7 +129,7 @@ export class CreateJob extends React.Component<Props, State> {
   }
 
   private handleSubmit(algorithm) {
-    this.props.jobsCreateJob({
+    this.props.actions.jobs.createJob({
       algorithmId: algorithm.id,
       computeMask: this.state.computeMask,
       name: this.state.name,
@@ -158,11 +157,12 @@ function mapStateToProps(state: AppState) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    jobsCreateJob: (args: JobsCreateJobArgs) => dispatch(jobsActions.createJob(args)),
-    jobsDismissCreateJobError: () => dispatch(jobsActions.dismissCreateJobError()),
-    catalogUpdateSearchCriteria: (args: CatalogUpdateSearchCriteriaArgs) => (
-      dispatch(catalogActions.updateSearchCriteria(args))
-    ),
+    actions: {
+      jobs: {
+        createJob: (args: JobsCreateJobArgs) => dispatch(jobsActions.createJob(args)),
+        dismissCreateJobError: () => dispatch(jobsActions.dismissCreateJobError()),
+      },
+    },
   }
 }
 

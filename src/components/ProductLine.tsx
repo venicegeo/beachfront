@@ -60,13 +60,13 @@ export class ProductLine extends React.Component<Props, State> {
 
   componentDidUpdate(_, prevState) {
     if (this.state.isExpanded && (prevState.isExpanded !== this.state.isExpanded || prevState.duration !== this.state.duration)) {
-      this.props.productLinesFetchJobs({
+      this.props.actions.productLines.fetchJobs({
         productLineId: this.props.productLine.id,
         sinceDate: generateSinceDate(this.state.duration, this.props.productLine),
       })
     }
     if (prevState.isExpanded && !this.state.isExpanded && this.state.selectedJobs.length) {
-      this.props.mapSetSelectedFeature(null)
+      this.props.actions.map.setSelectedFeature(null)
     }
   }
 
@@ -137,17 +137,17 @@ export class ProductLine extends React.Component<Props, State> {
 
   private handleJobRowClick(job) {
     if (this.state.selectedJobs.some(j => j.id === job.id)) {
-      this.props.mapSetSelectedFeature(null)
+      this.props.actions.map.setSelectedFeature(null)
       this.setState({ selectedJobs: [] })
     }
     else {
-      this.props.mapSetSelectedFeature(job)
+      this.props.actions.map.setSelectedFeature(job)
       this.setState({ selectedJobs: [job] })
     }
   }
 
   private handleViewOnMap() {
-    this.props.mapPanToPoint({
+    this.props.actions.map.panToPoint({
       point: getFeatureCenter(this.props.productLine),
       zoom: 3.5,
     })
@@ -179,9 +179,15 @@ function generateSinceDate(offset: string, productLine: beachfront.ProductLine) 
 
 function mapDispatchToProps(dispatch) {
   return {
-    productLinesFetchJobs: (args: ProductLinesFetchJobsArgs) => dispatch(productLinesActions.fetchJobs(args)),
-    mapSetSelectedFeature: (feature: GeoJSON.Feature<any> | null) => dispatch(mapActions.setSelectedFeature(feature)),
-    mapPanToPoint: (args: MapPanToPointArgs) => dispatch(mapActions.panToPoint(args)),
+    actions: {
+      productLines: {
+        fetchJobs: (args: ProductLinesFetchJobsArgs) => dispatch(productLinesActions.fetchJobs(args)),
+      },
+      map: {
+        setSelectedFeature: (feature: GeoJSON.Feature<any> | null) => dispatch(mapActions.setSelectedFeature(feature)),
+        panToPoint: (args: MapPanToPointArgs) => dispatch(mapActions.panToPoint(args)),
+      },
+    },
   }
 }
 

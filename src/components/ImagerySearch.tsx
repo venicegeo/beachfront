@@ -52,7 +52,7 @@ export class ImagerySearch extends React.Component<Props> {
           <div className={styles.controls}>
             <button
               type="button"
-              onClick={this.props.catalogResetSearchCriteria}
+              onClick={this.props.actions.catalog.resetSearchCriteria}
             >
               Reset Defaults
             </button>
@@ -92,7 +92,7 @@ export class ImagerySearch extends React.Component<Props> {
   private handleSubmit(event) {
     event.preventDefault()
     event.stopPropagation()
-    this.props.catalogSearch()
+    this.props.actions.catalog.search()
   }
 }
 
@@ -105,8 +105,12 @@ function mapStateToProps(state: AppState) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    catalogResetSearchCriteria: () => dispatch(catalogActions.resetSearchCriteria()),
-    catalogSearch: (args?: CatalogSearchArgs) => dispatch(catalogActions.search(args)),
+    actions: {
+      catalog: {
+        resetSearchCriteria: () => dispatch(catalogActions.resetSearchCriteria()),
+        search: (args?: CatalogSearchArgs) => dispatch(catalogActions.search(args)),
+      },
+    },
   }
 }
 

@@ -50,7 +50,7 @@ export class ProductLineList extends React.Component<Props> {
                 ? 'Cannot communicate with the server'
                 : 'An error is preventing the display of product lines'
               }. (<code>{this.props.productLines.fetchError.message}</code>)</p>
-              <button onClick={this.props.productLinesFetch}>Retry</button>
+              <button onClick={this.props.actions.productLines.fetch}>Retry</button>
             </li>
           )}
           {this.props.productLines.records.map(productLine => (
@@ -82,7 +82,11 @@ function mapStateToProps(state: AppState) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    productLinesFetch: () => dispatch(productLinesActions.fetch()),
+    actions: {
+      productLines: {
+        fetch: () => dispatch(productLinesActions.fetch()),
+      },
+    },
   }
 }
 

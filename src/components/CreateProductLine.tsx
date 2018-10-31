@@ -134,7 +134,7 @@ export class CreateProductLine extends React.Component<Props, State> {
   }
 
   private handleSubmit() {
-    this.props.productLinesCreate({
+    this.props.actions.productLines.create({
       algorithmId: this.state.algorithm.id,
       bbox: this.props.map.bbox,
       category: null,
@@ -163,7 +163,11 @@ function mapStateToProps(state: AppState) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    productLinesCreate: (args: ProductLinesCreateArgs) => dispatch(productLinesActions.create(args)),
+    actions: {
+      productLines: {
+        create: (args: ProductLinesCreateArgs) => dispatch(productLinesActions.create(args)),
+      },
+    },
   }
 }
 

@@ -66,7 +66,7 @@ export class JobStatusList extends React.Component<Props, State> {
             <li className={styles.communicationError}>
               <h4><i className="fa fa-warning"/> Communication Error</h4>
               <p>Cannot communicate with the server. (<code>{this.props.jobs.fetchError.toString()}</code>)</p>
-              <button onClick={this.props.jobsFetch}>Retry</button>
+              <button onClick={this.props.actions.jobs.fetch}>Retry</button>
             </li>
           )}
 
@@ -134,7 +134,11 @@ function mapStateToProps(state: AppState) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    jobsFetch: () => dispatch(jobsActions.fetch()),
+    actions: {
+      jobs: {
+        fetch: () => dispatch(jobsActions.fetch()),
+      },
+    },
   }
 }
 

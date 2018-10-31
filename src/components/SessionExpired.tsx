@@ -22,9 +22,7 @@ import {connect} from 'react-redux'
 import {Modal} from './Modal'
 
 type DispatchProps = Partial<ReturnType<typeof mapDispatchToProps>>
-type PassedProps = {
-  clearSession?: () => void
-}
+type PassedProps = {}
 
 type Props = PassedProps & DispatchProps
 
@@ -49,13 +47,17 @@ export class SessionExpired extends React.Component<Props> {
   }
 
   private handleDismiss() {
-    this.props.clearSession()
+    this.props.actions.user.clearSession()
   }
 }
 
 function mapDispatchToProps(dispatch) {
   return {
-    clearSession: () => dispatch(userActions.clearSession()),
+    actions: {
+      user: {
+        clearSession: () => dispatch(userActions.clearSession()),
+      },
+    },
   }
 }
 

@@ -47,13 +47,17 @@ export class SessionLoggedOut extends React.Component<Props> {
   }
 
   private handleInitialize() {
-    this.props.sessionLogout()
+    this.props.actions.user.sessionLogout()
   }
 }
 
 function mapDispatchToProps(dispatch) {
   return {
-    sessionLogout: () => dispatch(userActions.sessionLogout()),
+    actions: {
+      user: {
+        sessionLogout: () => dispatch(userActions.sessionLogout()),
+      },
+    },
   }
 }
 

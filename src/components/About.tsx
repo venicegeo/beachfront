@@ -62,7 +62,7 @@ export class About extends React.Component<Props> {
   }
 
   private handleDismiss() {
-    this.props.routeNavigateTo({
+    this.props.actions.route.navigateTo({
       loc: {
         pathname: '/',
       },
@@ -72,7 +72,11 @@ export class About extends React.Component<Props> {
 
 function mapDispatchToProps(dispatch) {
   return {
-    routeNavigateTo: (args: RouteNavigateToArgs) => dispatch(routeActions.navigateTo(args)),
+    actions: {
+      route: {
+        navigateTo: (args: RouteNavigateToArgs) => dispatch(routeActions.navigateTo(args)),
+      },
+    },
   }
 }
 

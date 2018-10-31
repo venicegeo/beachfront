@@ -191,7 +191,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     // Used by tests
     window['primaryMap'] = this  // tslint:disable-line
 
-    this.props.mapInitialized(this.map, {
+    this.props.actions.map.initialized(this.map, {
       hovered: this.hoverInteraction.getFeatures(),
       imagery: this.imageryLayer.getSource().getFeaturesCollection(),
       selected: this.selectInteraction.getFeatures(),
@@ -329,12 +329,12 @@ export class PrimaryMap extends React.Component<Props, State> {
         const selections = this.selectInteraction.getFeatures()
         selections.clear()
         selections.push(jobFeature)
-        this.props.mapSetSelectedFeature(toGeoJSON(jobFeature) as beachfront.Job)
+        this.props.actions.map.setSelectedFeature(toGeoJSON(jobFeature) as beachfront.Job)
         break
       case TYPE_JOB:
       case TYPE_SCENE:
         this.featureId = feature.ol_uid
-        this.props.mapSetSelectedFeature(toGeoJSON(feature) as beachfront.Scene)
+        this.props.actions.map.setSelectedFeature(toGeoJSON(feature) as beachfront.Scene)
         break
       default:
         // Not a valid "selectable" feature
@@ -346,12 +346,12 @@ export class PrimaryMap extends React.Component<Props, State> {
   }
 
   private handlePageChange(args: {startIndex: number, count: number}) {
-    this.props.catalogSearch(args)
+    this.props.actions.catalog.search(args)
   }
 
   private handleSignOutClick() {
     if (confirm('Are you sure you want to sign out of Beachfront?')) {
-      this.props.userLogout()
+      this.props.actions.user.logout()
     }
   }
 
@@ -427,7 +427,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     }
 
     this.skipNextViewUpdate = true
-    this.props.mapUpdateView({ basemapIndex, center, zoom })
+    this.props.actions.map.updateView({ basemapIndex, center, zoom })
   }
 
   private handleMapMoveEnd() {
@@ -457,7 +457,7 @@ export class PrimaryMap extends React.Component<Props, State> {
   }
 
   private emitDeselectAll() {
-    this.props.mapSetSelectedFeature(null)
+    this.props.actions.map.setSelectedFeature(null)
   }
 
   private handleBasemapChange(index) {
@@ -469,12 +469,12 @@ export class PrimaryMap extends React.Component<Props, State> {
     const geometry = event.feature.getGeometry()
     let bbox = serializeBbox(geometry.getExtent())
 
-    this.props.mapUpdateBbox(bbox)
+    this.props.actions.map.updateBbox(bbox)
   }
 
   private handleDrawStart() {
     this.clearDraw()
-    this.props.mapUpdateBbox(null)
+    this.props.actions.map.updateBbox(null)
   }
 
   private handleMeasureEnd() {
@@ -1459,12 +1459,20 @@ function mapStateToProps(state: AppState) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    mapInitialized: (map: ol.Map, collections: any) => dispatch(mapActions.initialized(map, collections)),
-    mapUpdateBbox: (bbox: Extent) => dispatch(mapActions.updateBbox(bbox)),
-    mapUpdateView: (view: MapView) => dispatch(mapActions.updateView(view)),
-    mapSetSelectedFeature: (feature: GeoJSON.Feature<any> | null) => dispatch(mapActions.setSelectedFeature(feature)),
-    catalogSearch: (args?: CatalogSearchArgs) => dispatch(catalogActions.search(args)),
-    userLogout: () => dispatch(userActions.logout()),
+    actions: {
+      map: {
+        initialized: (map: ol.Map, collections: any) => dispatch(mapActions.initialized(map, collections)),
+        updateBbox: (bbox: Extent) => dispatch(mapActions.updateBbox(bbox)),
+        updateView: (view: MapView) => dispatch(mapActions.updateView(view)),
+        setSelectedFeature: (feature: GeoJSON.Feature<any> | null) => dispatch(mapActions.setSelectedFeature(feature)),
+      },
+      catalog: {
+        search: (args?: CatalogSearchArgs) => dispatch(catalogActions.search(args)),
+      },
+      user: {
+        logout: () => dispatch(userActions.logout()),
+      },
+    },
   }
 }
 

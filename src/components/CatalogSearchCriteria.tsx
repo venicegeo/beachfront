@@ -54,7 +54,7 @@ export class CatalogSearchCriteria extends React.Component<Props> {
       <div className={styles.root}>
         <div className={styles.minimap}>
           <StaticMinimap bbox={this.props.map.bbox}/>
-          <div className={styles.clearBbox} onClick={this.props.mapClearBbox}>
+          <div className={styles.clearBbox} onClick={this.props.actions.map.clearBbox}>
             <i className="fa fa-times-circle"/> Clear
           </div>
         </div>
@@ -148,29 +148,29 @@ export class CatalogSearchCriteria extends React.Component<Props> {
   }
 
   private handleSourceChange(e: FormEvent) {
-    this.props.catalogUpdateSearchCriteria({
+    this.props.actions.catalog.updateSearchCriteria({
       source: (e.target as HTMLSelectElement).value,
     })
   }
 
   private handleApiKeyChange(e: FormEvent) {
-    this.props.catalogSetApiKey((e.target as HTMLInputElement).value)
+    this.props.actions.catalog.setApiKey((e.target as HTMLInputElement).value)
   }
 
   private handleDateOfCaptureFromChange(e: FormEvent) {
-    this.props.catalogUpdateSearchCriteria({
+    this.props.actions.catalog.updateSearchCriteria({
       dateFrom: (e.target as HTMLInputElement).value,
     })
   }
 
   private handleDateOfCaptureToChange(e: FormEvent) {
-    this.props.catalogUpdateSearchCriteria({
+    this.props.actions.catalog.updateSearchCriteria({
       dateTo: (e.target as HTMLInputElement).value,
     })
   }
 
   private handleCloudCoverChange(e: FormEvent) {
-    this.props.catalogUpdateSearchCriteria({
+    this.props.actions.catalog.updateSearchCriteria({
       cloudCover: parseInt((e.target as HTMLInputElement).value, 10),
     })
   }
@@ -251,11 +251,17 @@ function mapStateToProps(state: AppState) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    catalogSetApiKey: (apiKey: string) => dispatch(catalogActions.setApiKey(apiKey)),
-    catalogUpdateSearchCriteria: (args: CatalogUpdateSearchCriteriaArgs) => (
-      dispatch(catalogActions.updateSearchCriteria(args))
-    ),
-    mapClearBbox: () => dispatch(mapActions.clearBbox()),
+    actions: {
+      catalog: {
+        setApiKey: (apiKey: string) => dispatch(catalogActions.setApiKey(apiKey)),
+        updateSearchCriteria: (args: CatalogUpdateSearchCriteriaArgs) => (
+          dispatch(catalogActions.updateSearchCriteria(args))
+        ),
+      },
+      map: {
+        clearBbox: () => dispatch(mapActions.clearBbox()),
+      },
+    },
   }
 }
 
