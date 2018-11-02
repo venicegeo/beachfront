@@ -562,13 +562,16 @@ export class Application extends React.Component<Props, State> {
   private handleForgetJob(job: beachfront.Job) {
     this.setState({
       jobs: this.state.jobs.$filter(j => j.id !== job.id),
+      selectedFeature: null,
+    }, function() {
+      if (this.state.route.jobIds.includes(job.id)) {
+        this.navigateTo({
+          pathname: this.state.route.pathname,
+          search: this.state.route.search.replace(new RegExp('\\??jobId=' + job.id), ''),
+        })
+      }
     })
-    if (this.state.route.jobIds.includes(job.id)) {
-      this.navigateTo({
-        pathname: this.state.route.pathname,
-        search: this.state.route.search.replace(new RegExp('\\??jobId=' + job.id), ''),
-      })
-    }
+
     jobsService.forgetJob(job.id)
       .catch(() => {
         this.setState({
