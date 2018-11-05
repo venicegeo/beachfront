@@ -13,21 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-import {mapActions} from '../actions/mapActions'
 
 const styles: any = require('./CatalogSearchCriteria.css')
 const DATE_FORMAT = 'YYYY-MM-DD'
 const date_format = DATE_FORMAT.toLowerCase()
 
 import * as React from 'react'
+import {FormEvent} from 'react'
 import {connect} from 'react-redux'
+import {AxiosError} from 'axios'
 import {StaticMinimap} from './StaticMinimap'
 import * as moment from 'moment'
 import {SCENE_TILE_PROVIDERS} from '../config'
 import {catalogActions, CatalogUpdateSearchCriteriaArgs} from '../actions/catalogActions'
 import {AppState} from '../store'
-import {AxiosError} from 'axios'
-import {FormEvent} from 'react'
+import {mapActions} from '../actions/mapActions'
 
 type StateProps = Partial<ReturnType<typeof mapStateToProps>>
 type DispatchProps = Partial<ReturnType<typeof mapDispatchToProps>>

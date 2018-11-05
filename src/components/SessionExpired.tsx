@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-import {userActions} from '../actions/userActions'
 
 const styles = require('./SessionExpired.css')
 
 import * as React from 'react'
 import {connect} from 'react-redux'
 import {Modal} from './Modal'
+import {userActions} from '../actions/userActions'
 
 type DispatchProps = Partial<ReturnType<typeof mapDispatchToProps>>
 type PassedProps = {}

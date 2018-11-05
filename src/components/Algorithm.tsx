@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-import {connect} from 'react-redux'
 
 const styles: any = require('./Algorithm.css')
 
 import * as React from 'react'
+import {connect} from 'react-redux'
 import {AppState} from '../store'
 
 type StateProps = Partial<ReturnType<typeof mapStateToProps>>

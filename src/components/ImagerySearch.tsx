@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-import {connect} from 'react-redux'
 
 const styles: any = require('./ImagerySearch.css')
 const DATE_FORMAT = 'YYYY-MM-DD'
 
 import * as React from 'react'
+import {connect} from 'react-redux'
 import * as moment from 'moment'
 import CatalogSearchCriteria from './CatalogSearchCriteria'
 import {LoadingAnimation} from './LoadingAnimation'

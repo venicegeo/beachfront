@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-import {AppState} from '../store'
 
 const styles = require('./CreateProductLine.css')
 
@@ -26,6 +25,7 @@ import {NewProductLineDetails} from './NewProductLineDetails'
 import {
   SOURCE_DEFAULT,
 } from '../constants'
+import {AppState} from '../store'
 import {ProductLinesCreateArgs, productLinesActions} from '../actions/productLinesActions'
 
 type StateProps = Partial<ReturnType<typeof mapStateToProps>>

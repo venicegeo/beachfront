@@ -13,17 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-import {tourActions} from '../actions/tourActions'
 
 const styles: any = require('./Navigation.css')
 const brand: string = require('../images/brand-experiment2.svg')
 const brandSmall: string = require('../images/brand-small-square.svg')
 
 import * as React from 'react'
+import {connect} from 'react-redux'
 import {Link} from './Link'
 import {USER_GUIDE_URL} from '../config'
-import {connect} from 'react-redux'
 import {routeActions, RouteNavigateToArgs} from '../actions/routeActions'
+import {tourActions} from '../actions/tourActions'
 
 const Icon = ({ path, size = 40 }) => (
   <svg className={styles.icon} viewBox={`0 0 ${size} ${size}`}>

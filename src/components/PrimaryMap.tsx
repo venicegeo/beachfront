@@ -67,8 +67,8 @@ import {
   WEB_MERCATOR,
   WGS84,
 } from '../constants'
-import {mapActions} from '../actions/mapActions'
 import {AppState} from '../store'
+import {mapActions} from '../actions/mapActions'
 import {userActions} from '../actions/userActions'
 import {catalogActions, CatalogSearchArgs} from '../actions/catalogActions'
 
