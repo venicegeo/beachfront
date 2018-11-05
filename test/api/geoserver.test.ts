@@ -14,75 +14,75 @@
  * limitations under the License.
  **/
 
-import {assert} from 'chai'
-import * as sinon from 'sinon'
-import * as session from '../../src/api/session'
-import {AxiosPromise} from 'axios'
-
-describe('GeoServer Service', () => {
-  let client: FakeClient
-
-  beforeEach(() => {
-    client = {
-      get: sinon.stub(),
-    }
-    sinon.stub(session, 'getClient').returns(client)
-    sinon.stub(console, 'debug')
-    sinon.stub(console, 'error')
-  })
-
-  afterEach(() => {
-    sinon.restore(session.getClient)
-    sinon.restore(console.debug)
-    sinon.restore(console.error)
-  })
-
-  // describe('discover()', () => {
-  //   it('returns WMS URL', () => {
-  //     client.get.returns(resolve({geoserver: 'test-wms-url'}))
-  //     return geoserver.lookup()
-  //       .then(descriptor => {
-  //         assert.equal(descriptor.wmsUrl, 'test-wms-url/wms')
-  //       })
-  //   })
-  //
-  //   it('calls correct URL', () => {
-  //     client.get.returns(resolve({geoserver: 'test-wms-url'}))
-  //     return geoserver.lookup()
-  //       .then(() => {
-  //         assert.deepEqual(client.get.firstCall.args, ['/'])
-  //       })
-  //   })
-  //
-  //   it('throws on HTTP error', () => {
-  //     client.get.returns(reject('test-error', {status: 500}))
-  //     return geoserver.lookup()
-  //       .then(
-  //         () => assert.fail('Should have rejected'),
-  //         (err) => {
-  //           assert.instanceOf(err, Error)
-  //           assert.match(err, /test-error/i)
-  //         },
-  //       )
-  //   })
-  // })
-})
-
+// import {assert} from 'chai'
+// import * as sinon from 'sinon'
+// import * as session from '../../src/api/session'
+// import {AxiosPromise} from 'axios'
 //
-// Helpers
+// describe('GeoServer Service', () => {
+//   let client: FakeClient
 //
-
-interface FakeClient {
-  get: Sinon.SinonStub
-}
-
-function resolve(data): AxiosPromise {
-  return Promise.resolve({
-    data,
-  })
-}
-function reject(err, response = {}): Promise<void> {
-  return Promise.reject(Object.assign(new Error(err), {
-    response,
-  }))
-}
+//   beforeEach(() => {
+//     client = {
+//       get: sinon.stub(),
+//     }
+//     sinon.stub(session, 'getClient').returns(client)
+//     sinon.stub(console, 'debug')
+//     sinon.stub(console, 'error')
+//   })
+//
+//   afterEach(() => {
+//     sinon.restore(session.getClient)
+//     sinon.restore(console.debug)
+//     sinon.restore(console.error)
+//   })
+//
+//   // describe('discover()', () => {
+//   //   it('returns WMS URL', () => {
+//   //     client.get.returns(resolve({geoserver: 'test-wms-url'}))
+//   //     return geoserver.lookup()
+//   //       .then(descriptor => {
+//   //         assert.equal(descriptor.wmsUrl, 'test-wms-url/wms')
+//   //       })
+//   //   })
+//   //
+//   //   it('calls correct URL', () => {
+//   //     client.get.returns(resolve({geoserver: 'test-wms-url'}))
+//   //     return geoserver.lookup()
+//   //       .then(() => {
+//   //         assert.deepEqual(client.get.firstCall.args, ['/'])
+//   //       })
+//   //   })
+//   //
+//   //   it('throws on HTTP error', () => {
+//   //     client.get.returns(reject('test-error', {status: 500}))
+//   //     return geoserver.lookup()
+//   //       .then(
+//   //         () => assert.fail('Should have rejected'),
+//   //         (err) => {
+//   //           assert.instanceOf(err, Error)
+//   //           assert.match(err, /test-error/i)
+//   //         },
+//   //       )
+//   //   })
+//   // })
+// })
+//
+// //
+// // Helpers
+// //
+//
+// interface FakeClient {
+//   get: Sinon.SinonStub
+// }
+//
+// function resolve(data): AxiosPromise {
+//   return Promise.resolve({
+//     data,
+//   })
+// }
+// function reject(err, response = {}): Promise<void> {
+//   return Promise.reject(Object.assign(new Error(err), {
+//     response,
+//   }))
+// }

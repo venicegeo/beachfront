@@ -14,14 +14,14 @@
  * limitations under the License.
  **/
 
-describe('Catalog Service', () => {
-  describe('discover()', () => {
-    it('looks for service by name')
-    it('extracts URL')
-    it('extracts event type ID')
-    it('extracts filter list')
-    it('throws if service not found')
-    it('throws if not logged in')
-    it('handles client errors gracefully')
-  })
-})
+// describe('Catalog Service', () => {
+//   describe('discover()', () => {
+//     it('looks for service by name')
+//     it('extracts URL')
+//     it('extracts event type ID')
+//     it('extracts filter list')
+//     it('throws if service not found')
+//     it('throws if not logged in')
+//     it('handles client errors gracefully')
+//   })
+// })

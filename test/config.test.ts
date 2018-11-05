@@ -19,7 +19,7 @@ import * as config from '../src/config'
 
 describe('config', () => {
   it('reads API root URL from environment', () => {
-    assert.equal(config.API_ROOT, '/test-api-root')
+    assert.equal(config.API_ROOT, '/test-api-root/')
   })
 
   it('defines at least one basemap tile provider', () => {

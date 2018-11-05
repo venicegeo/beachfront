@@ -30,7 +30,6 @@
     "eofline": true,
 
     "class-name": true,
-    "comment-format": [true, "check-space", "check-uppercase"],
     "indent": [true, "spaces"],
     "no-consecutive-blank-lines": true,
     "no-trailing-whitespace": true,

@@ -11,7 +11,7 @@
     "node_modules"
   ],
   "include": [
-    "../typings/index.d.ts",
+    "../node_modules/@types",
     "../openlayers-4.1.0.d.ts",
     "../beachfront.d.ts",
     "../src/**/*",

@@ -14,50 +14,50 @@
  * limitations under the License.
  **/
 
-import * as React from 'react'
-import {shallow} from 'enzyme'
-import {assert} from 'chai'
-import {Timestamp} from '../../src/components/Timestamp'
-
-const MILLISECOND = 1
-const SECOND = 1000 * MILLISECOND
-const MINUTE = 60 * SECOND
-const HOUR = 60 * MINUTE
-
-describe('<Timestamp/>', () => {
-  let _props
-
-  beforeEach(() => {
-    _props = {
-      timestamp: Date.now() - (3 * HOUR),
-    }
-  })
-
-  it('renders', () => {
-    const wrapper = shallow(
-      <Timestamp
-        timestamp={_props.timestamp}
-      />,
-    )
-    assert.equal(wrapper.text(), '3 hours ago')
-  })
-
-  it('accepts ISO8601 timestamp', () => {
-    const wrapper = shallow(
-      <Timestamp
-        timestamp={new Date(Date.now() - (96 * HOUR)).toISOString()}
-      />,
-    )
-    assert.equal(wrapper.text(), '4 days ago')
-  })
-
-  it('can toggle relative and absolute timestamps', () => {
-    const wrapper = shallow(
-      <Timestamp
-        timestamp={'2016-01-15T12:34:00Z'}
-      />,
-    )
-    wrapper.simulate('click', new Event('click'))
-    assert.match(wrapper.text(), /Jan \d{2}, 2016 \d{1,2}:34 (AM|PM)$/)
-  })
-})
+// import * as React from 'react'
+// import {shallow} from 'enzyme'
+// import {assert} from 'chai'
+// import {Timestamp} from '../../src/components/Timestamp'
+//
+// const MILLISECOND = 1
+// const SECOND = 1000 * MILLISECOND
+// const MINUTE = 60 * SECOND
+// const HOUR = 60 * MINUTE
+//
+// describe('<Timestamp/>', () => {
+//   let _props
+//
+//   beforeEach(() => {
+//     _props = {
+//       timestamp: Date.now() - (3 * HOUR),
+//     }
+//   })
+//
+//   it('renders', () => {
+//     const wrapper = shallow(
+//       <Timestamp
+//         timestamp={_props.timestamp}
+//       />,
+//     )
+//     assert.equal(wrapper.text(), '3 hours ago')
+//   })
+//
+//   it('accepts ISO8601 timestamp', () => {
+//     const wrapper = shallow(
+//       <Timestamp
+//         timestamp={new Date(Date.now() - (96 * HOUR)).toISOString()}
+//       />,
+//     )
+//     assert.equal(wrapper.text(), '4 days ago')
+//   })
+//
+//   it('can toggle relative and absolute timestamps', () => {
+//     const wrapper = shallow(
+//       <Timestamp
+//         timestamp={'2016-01-15T12:34:00Z'}
+//       />,
+//     )
+//     wrapper.simulate('click', new Event('click'))
+//     assert.match(wrapper.text(), /Jan \d{2}, 2016 \d{1,2}:34 (AM|PM)$/)
+//   })
+// })

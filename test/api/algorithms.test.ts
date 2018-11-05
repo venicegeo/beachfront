@@ -14,17 +14,17 @@
  * limitations under the License.
  **/
 
-describe('Algorithms Service', () => {
-  describe('lookup()', () => {
-    it('looks for service by name')
-    it('extracts service ID')
-    it('extracts URL')
-    it('extracts interface')
-    it('extracts description')
-    it('extracts image requirements')
-    it('normalizes algorithm names')
-    it('normalizes image requirements')
-    it('throws if not logged in')
-    it('handles client errors gracefully')
-  })
-})
+// describe('Algorithms Service', () => {
+//   describe('lookup()', () => {
+//     it('looks for service by name')
+//     it('extracts service ID')
+//     it('extracts URL')
+//     it('extracts interface')
+//     it('extracts description')
+//     it('extracts image requirements')
+//     it('normalizes algorithm names')
+//     it('normalizes image requirements')
+//     it('throws if not logged in')
+//     it('handles client errors gracefully')
+//   })
+// })
