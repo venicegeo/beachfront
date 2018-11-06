@@ -57,5 +57,5 @@ npm run build
 ```
 $ npm run lint
 $ npm run test
-$ npm run test:ci  # Will also generate coverage reports
+$ npm run test:coverage  # Will also generate coverage reports
 ```

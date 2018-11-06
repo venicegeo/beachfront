@@ -14,23 +14,23 @@
  * limitations under the License.
  **/
 
-import {assert} from 'chai'
-import * as config from '../src/config'
-
-describe('config', () => {
-  it('reads API root URL from environment', () => {
-    assert.equal(config.API_ROOT, '/test-api-root/')
-  })
-
-  it('defines at least one basemap tile provider', () => {
-    assert.isAbove(config.BASEMAP_TILE_PROVIDERS.length, 0)
-  })
-
-  it('defines at least one scene preview tile provider', () => {
-    assert.isAbove(config.SCENE_TILE_PROVIDERS.length, 0)
-  })
-
-  it('defines at least one tile provider', () => {
-    assert.isAbove(config.BASEMAP_TILE_PROVIDERS.length, 0)
-  })
-})
+// import {assert} from 'chai'
+// import * as config from '../src/config'
+//
+// describe('config', () => {
+//   it('reads API root URL from environment', () => {
+//     assert.equal(config.API_ROOT, '/test-api-root/')
+//   })
+//
+//   it('defines at least one basemap tile provider', () => {
+//     assert.isAbove(config.BASEMAP_TILE_PROVIDERS.length, 0)
+//   })
+//
+//   it('defines at least one scene preview tile provider', () => {
+//     assert.isAbove(config.SCENE_TILE_PROVIDERS.length, 0)
+//   })
+//
+//   it('defines at least one tile provider', () => {
+//     assert.isAbove(config.BASEMAP_TILE_PROVIDERS.length, 0)
+//   })
+// })

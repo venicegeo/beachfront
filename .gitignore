@@ -8,6 +8,7 @@ npm-debug.log
 beachfront.zip
 *.iml
 typings
+coverage
 
 .development_ssl_certificate.pem
 .development_ssl_certificate.key
