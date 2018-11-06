@@ -39,7 +39,7 @@ export function algorithmsReducer(state = algorithmsInitialState, action: any) {
       return {
         ...state,
         isFetching: true,
-        fetchError: false,
+        fetchError: null,
       }
     case types.ALGORITHMS_FETCH_SUCCESS:
       return {
