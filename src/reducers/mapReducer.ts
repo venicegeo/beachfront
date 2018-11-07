@@ -16,7 +16,6 @@
 
 import {types} from '../actions/mapActions'
 import {MapView, MODE_NORMAL} from '../components/PrimaryMap'
-import ol from '../utils/ol'
 import {TYPE_JOB} from '../constants'
 import {shouldSelectedFeatureAutoDeselect} from '../utils/mapUtils'
 import {Extent} from '../utils/geometries'
