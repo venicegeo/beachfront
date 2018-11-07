@@ -129,6 +129,8 @@ module.exports = {
       'process.env.OSM_BASE_URL': JSON.stringify(process.env.OSM_BASE_URL || 'osm.geointservices.io'),
       'process.env.PLANET_BASE_URL': JSON.stringify(process.env.PLANET_BASE_URL || 'planet.com'),
       'process.env.USER_GUIDE_URL': '"https://" + location.hostname.replace("beachfront", "bf-docs")',
+      'process.env.GEOSERVER_WORKSPACE_NAME': JSON.stringify(process.env.GEOSERVER_WORKSPACE_NAME || 'piazza'),
+      'process.env.GEOSERVER_LAYERGROUP_NAME': JSON.stringify(process.env.GEOSERVER_LAYERGROUP_NAME || 'bfdetections'),
     }),
     new HtmlWebpackPlugin({
       template: 'src/index.html',

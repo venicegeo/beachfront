@@ -109,6 +109,8 @@ interface BuildEnvironment {
   OSM_BASE_URL: string
   PLANET_BASE_URL: string
   USER_GUIDE_URL: string
+  GEOSERVER_WORKSPACE_NAME: string
+  GEOSERVER_LAYERGROUP_NAME: string
 }
 
 declare const process: {
