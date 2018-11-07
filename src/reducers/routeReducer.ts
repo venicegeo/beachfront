@@ -33,7 +33,12 @@ export function routeReducer(state = routeInitialState, action: any): RouteState
     case types.ROUTE_CHANGED:
       return {
         ...state,
-        ...action.route,
+        hash: action.hash,
+        href: action.href,
+        jobIds: action.jobIds,
+        pathname: action.pathname,
+        search: action.search,
+        selectedFeature: action.selectedFeature,
       }
     default:
       return state

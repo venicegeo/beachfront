@@ -47,7 +47,12 @@ export const routeActions = {
 
     return {
       type: types.ROUTE_CHANGED,
-      route,
+      hash: route.hash,
+      href: route.href,
+      jobIds: route.jobIds,
+      pathname: route.pathname,
+      search: route.search,
+      selectedFeature: route.selectedFeature,
     }
   },
 }
