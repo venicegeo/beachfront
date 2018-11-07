@@ -78,21 +78,21 @@ export function productLinesReducer(state = productLinesInitialState, action: an
         isFetchingJobs: false,
         fetchJobsError: action.error,
       }
-    case types.PRODUCT_LINES_CREATING:
+    case types.PRODUCT_LINES_CREATING_PRODUCT_LINE:
       return {
         ...state,
         isCreatingProductLine: true,
         createdProductLine: null,
         createProductLineError: null,
       }
-    case types.PRODUCT_LINES_CREATE_SUCCESS:
+    case types.PRODUCT_LINES_CREATE_PRODUCT_LINE_SUCCESS:
       return {
         ...state,
         isCreatingProductLine: false,
         createdProductLine: action.createdProductLine,
         records: [...state.records, action.createdProductLine],
       }
-    case types.PRODUCT_LINES_CREATE_ERROR:
+    case types.PRODUCT_LINES_CREATE_PRODUCT_LINE_ERROR:
       return {
         ...state,
         isCreatingProductLine: false,

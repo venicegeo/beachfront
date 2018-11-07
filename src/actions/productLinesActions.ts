@@ -25,9 +25,9 @@ export const types = {
   PRODUCT_LINES_FETCHING_JOBS: 'PRODUCT_LINES_FETCHING_JOBS',
   PRODUCT_LINES_FETCH_JOBS_SUCCESS: 'PRODUCT_LINES_FETCH_JOBS_SUCCESS',
   PRODUCT_LINES_FETCH_JOBS_ERROR: 'PRODUCT_LINES_FETCH_JOBS_ERROR',
-  PRODUCT_LINES_CREATING: 'PRODUCT_LINES_CREATING',
-  PRODUCT_LINES_CREATE_SUCCESS: 'PRODUCT_LINES_CREATE_SUCCESS',
-  PRODUCT_LINES_CREATE_ERROR: 'PRODUCT_LINES_CREATE_ERROR',
+  PRODUCT_LINES_CREATING_PRODUCT_LINE: 'PRODUCT_LINES_CREATING_PRODUCT_LINE',
+  PRODUCT_LINES_CREATE_PRODUCT_LINE_SUCCESS: 'PRODUCT_LINES_CREATE_PRODUCT_LINE_SUCCESS',
+  PRODUCT_LINES_CREATE_PRODUCT_LINE_ERROR: 'PRODUCT_LINES_CREATE_PRODUCT_LINE_ERROR',
 }
 
 export interface ProductLinesCreateArgs {
@@ -86,7 +86,7 @@ export const productLinesActions = {
 
   create(args: ProductLinesCreateArgs) {
     return async dispatch => {
-      dispatch({ type: types.PRODUCT_LINES_CREATING })
+      dispatch({ type: types.PRODUCT_LINES_CREATING_PRODUCT_LINE })
 
       const [minX, minY, maxX, maxY] = args.bbox
       try {
@@ -104,12 +104,12 @@ export const productLinesActions = {
           stop_on: args.dateStop,
         })
         dispatch({
-          type: types.PRODUCT_LINES_CREATE_SUCCESS,
+          type: types.PRODUCT_LINES_CREATE_PRODUCT_LINE_SUCCESS,
           createdProductLine: response.data.productline,
         })
       } catch (error) {
         dispatch({
-          type: types.PRODUCT_LINES_CREATE_ERROR,
+          type: types.PRODUCT_LINES_CREATE_PRODUCT_LINE_ERROR,
           error,
         })
       }
