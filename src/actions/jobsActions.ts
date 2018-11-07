@@ -94,7 +94,7 @@ export const jobsActions = {
         })
         dispatch({
           type: types.JOBS_CREATE_JOB_SUCCESS,
-          job: response.data.job,
+          createdJob: response.data.job,
         })
       } catch (error) {
         dispatch({
@@ -113,7 +113,7 @@ export const jobsActions = {
     return async dispatch => {
       dispatch({
         type: types.JOBS_DELETING_JOB,
-        job,
+        deletedJob: job,
       })
 
       try {

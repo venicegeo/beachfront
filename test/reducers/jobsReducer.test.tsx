@@ -146,18 +146,19 @@ describe('jobsReducer', () => {
     const state = {
       ...jobsInitialState,
       isCreatingJob: true,
+      records: ['a'],
     }
 
     const action = {
       type: types.JOBS_CREATE_JOB_SUCCESS,
-      job: 'someJob',
+      createdJob: 'someJob',
     }
 
     expect(jobsReducer(state, action)).toEqual({
       ...state,
       isCreatingJob: false,
-      createdJob: action.job,
-      records: [...state.records, action.job],
+      createdJob: action.createdJob,
+      records: [...state.records, action.createdJob],
     })
   })
 
@@ -205,13 +206,13 @@ describe('jobsReducer', () => {
 
     const action = {
       type: types.JOBS_DELETING_JOB,
-      job: { id: 'a' },
+      deletedJob: { id: 'a' },
     }
 
     expect(jobsReducer(state, action)).toEqual({
       ...state,
       isDeletingJob: true,
-      deletedJob: action.job,
+      deletedJob: action.deletedJob,
       deleteJobError: null,
       records: [{ id: 'b' }],
     })

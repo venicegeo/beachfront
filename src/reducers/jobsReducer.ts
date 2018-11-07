@@ -96,8 +96,8 @@ export function jobsReducer(state = jobsInitialState, action: any) {
       return {
         ...state,
         isCreatingJob: false,
-        createdJob: action.job,
-        records: [...state.records, action.job],
+        createdJob: action.createdJob,
+        records: [...state.records, action.createdJob],
       }
     case types.JOBS_CREATE_JOB_ERROR:
       return {
@@ -113,9 +113,9 @@ export function jobsReducer(state = jobsInitialState, action: any) {
     case types.JOBS_DELETING_JOB:
       return {
         ...state,
-        records: state.records.filter(job => job.id !== action.job.id),
+        records: state.records.filter(job => job.id !== action.deletedJob.id),
         isDeletingJob: true,
-        deletedJob: action.job,
+        deletedJob: action.deletedJob,
         deleteJobError: null,
       }
     case types.JOBS_DELETE_JOB_SUCCESS:
