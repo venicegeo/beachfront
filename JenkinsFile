@@ -178,6 +178,8 @@ node {
           sh """
             cf set-env ${appName} SPACE ${env.PHASE_ONE_PCF_SPACE}
             cf set-env ${appName} DOMAIN ${env.PHASE_ONE_PCF_DOMAIN}
+            cf set-env ${appName} GEOSERVER_WORKSPACE_NAME ${env.GEOSERVER_WORKSPACE_NAME}
+            cf set-env ${appName} GEOSERVER_LAYERGROUP_NAME ${env.GEOSERVER_LAYERGROUP_NAME}
           """
           sh "cf start ${appName}"
         } catch (Exception e) {
@@ -254,6 +256,8 @@ node {
             sh """					
               cf set-env ${appName} SPACE ${env.PHASE_TWO_PCF_SPACE}
               cf set-env ${appName} DOMAIN ${env.PHASE_TWO_PCF_DOMAIN}
+              cf set-env ${appName} GEOSERVER_WORKSPACE_NAME ${env.GEOSERVER_WORKSPACE_NAME}
+              cf set-env ${appName} GEOSERVER_LAYERGROUP_NAME ${env.GEOSERVER_LAYERGROUP_NAME}
             """
             sh "cf start ${appName}"
           } catch (Exception e) {

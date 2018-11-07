@@ -20,6 +20,8 @@ export const CLASSIFICATION_BANNER_TEXT       = process.env.CLASSIFICATION_BANNE
 export const OSM_BASE_URL                     = process.env.OSM_BASE_URL
 export const PLANET_BASE_URL                  = process.env.PLANET_BASE_URL
 export const USER_GUIDE_URL                   = process.env.USER_GUIDE_URL
+export const GEOSERVER_WORKSPACE_NAME         = process.env.GEOSERVER_WORKSPACE_NAME
+export const GEOSERVER_LAYERGROUP_NAME        = process.env.GEOSERVER_LAYERGROUP_NAME
 
 export const API_ROOT = process.env.API_ROOT + (process.env.API_ROOT.endsWith('/') ? '' : '/')
 export const CONSENT_BANNER_TEXT = {__html: process.env.CONSENT_BANNER_TEXT}
