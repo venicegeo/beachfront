@@ -39,7 +39,7 @@ describe('tourReducer', () => {
       ...tourInitialState,
       changing: true,
       step: 5,
-      error: 'someError',
+      error: 'a',
     }
 
     const action = { type: types.TOUR_STARTED }
@@ -58,7 +58,7 @@ describe('tourReducer', () => {
       ...tourInitialState,
       inProgress: true,
       changing: true,
-      error: 'someError',
+      error: 'a',
     }
 
     const action = { type: types.TOUR_ENDED }
@@ -106,7 +106,7 @@ describe('tourReducer', () => {
 
     const action = {
       type: types.TOUR_STEP_CHANGE_ERROR,
-      error: 'someError',
+      error: 'a',
     }
 
     expect(tourReducer(state, action)).toEqual({

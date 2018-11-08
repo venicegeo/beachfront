@@ -25,7 +25,7 @@ describe('jobsReducer', () => {
   it('JOBS_FETCHING', () => {
     const state = {
       ...jobsInitialState,
-      fetchError: 'someError',
+      fetchError: 'a',
     }
 
     const action = { type: types.JOBS_FETCHING }
@@ -63,7 +63,7 @@ describe('jobsReducer', () => {
 
     const action = {
       type: types.JOBS_FETCH_ERROR,
-      error: 'someError',
+      error: 'a',
     }
 
     expect(jobsReducer(state, action)).toEqual({
@@ -76,7 +76,7 @@ describe('jobsReducer', () => {
   it('JOBS_FETCHING_ONE', () => {
     const state = {
       ...jobsInitialState,
-      fetchOneError: 'someError',
+      fetchOneError: 'a',
     }
 
     const action = { type: types.JOBS_FETCHING_ONE }
@@ -115,7 +115,7 @@ describe('jobsReducer', () => {
 
     const action = {
       type: types.JOBS_FETCH_ONE_ERROR,
-      error: 'someError',
+      error: 'a',
     }
 
     expect(jobsReducer(state, action)).toEqual({
@@ -128,8 +128,8 @@ describe('jobsReducer', () => {
   it('JOBS_CREATING_JOB', () => {
     const state = {
       ...jobsInitialState,
-      createdJob: 'someJob',
-      createJobError: 'someError',
+      createdJob: 'a',
+      createJobError: 'a',
     }
 
     const action = { type: types.JOBS_CREATING_JOB }
@@ -151,7 +151,7 @@ describe('jobsReducer', () => {
 
     const action = {
       type: types.JOBS_CREATE_JOB_SUCCESS,
-      createdJob: 'someJob',
+      createdJob: 'a',
     }
 
     expect(jobsReducer(state, action)).toEqual({
@@ -170,7 +170,7 @@ describe('jobsReducer', () => {
 
     const action = {
       type: types.JOBS_CREATE_JOB_ERROR,
-      error: 'someError',
+      error: 'a',
     }
 
     expect(jobsReducer(state, action)).toEqual({
@@ -183,7 +183,7 @@ describe('jobsReducer', () => {
   it('JOBS_DISMISS_CREATE_JOB_ERROR', () => {
     const state = {
       ...jobsInitialState,
-      createJobError: 'someError',
+      createJobError: 'a',
     }
 
     const action = { type: types.JOBS_DISMISS_CREATE_JOB_ERROR }
@@ -201,7 +201,7 @@ describe('jobsReducer', () => {
         { id: 'a' },
         { id: 'b' },
       ],
-      deletedJobError: 'someError',
+      deletedJobError: 'a',
     }
 
     const action = {
@@ -242,7 +242,7 @@ describe('jobsReducer', () => {
 
     const action = {
       type: types.JOBS_DELETE_JOB_ERROR,
-      error: 'someError',
+      error: 'a',
     }
 
     expect(jobsReducer(state, action)).toEqual({

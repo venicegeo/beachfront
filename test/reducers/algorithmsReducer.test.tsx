@@ -26,7 +26,7 @@ describe('algorithmsReducer', () => {
     const action = {
       type: types.ALGORITHMS_DESERIALIZED,
       deserialized: {
-        some: 'data',
+        a: 'a',
       },
     }
 
@@ -39,7 +39,7 @@ describe('algorithmsReducer', () => {
   it('ALGORITHMS_FETCHING', () => {
     const state = {
       ...algorithmsInitialState,
-      fetchError: 'someError',
+      fetchError: 'a',
     }
 
     const action = { type: types.ALGORITHMS_FETCHING }
@@ -77,7 +77,7 @@ describe('algorithmsReducer', () => {
 
     const action = {
       type: types.ALGORITHMS_FETCH_ERROR,
-      error: 'someError',
+      error: 'a',
     }
 
     expect(algorithmsReducer(state, action)).toEqual({

@@ -26,7 +26,7 @@ describe('userReducer', () => {
     const action = {
       type: types.USER_DESERIALIZED,
       deserialized: {
-        some: 'data',
+        a: 'a',
       },
     }
 

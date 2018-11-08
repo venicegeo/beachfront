@@ -28,7 +28,7 @@ describe('catalogReducer', () => {
     const action = {
       type: types.CATALOG_DESERIALIZED,
       deserialized: {
-        some: 'data',
+        a: 'a',
       },
     }
 
@@ -55,7 +55,7 @@ describe('catalogReducer', () => {
 
     const action = {
       type: types.CATALOG_INITIALIZE_SUCCESS,
-      client: 'someClient',
+      client: 'a',
     }
 
     expect(catalogReducer(state, action)).toEqual(({
@@ -73,7 +73,7 @@ describe('catalogReducer', () => {
 
     const action = {
       type: types.CATALOG_INITIALIZE_ERROR,
-      error: 'someError',
+      error: 'a',
     }
 
     expect(catalogReducer(state, action)).toEqual({
@@ -86,7 +86,7 @@ describe('catalogReducer', () => {
   it('CATALOG_API_KEY_UPDATED', () => {
     const action = {
       type: types.CATALOG_API_KEY_UPDATED,
-      apiKey: 'someKey',
+      apiKey: 'a',
     }
 
     expect(catalogReducer(catalogInitialState, action)).toEqual({
@@ -102,7 +102,7 @@ describe('catalogReducer', () => {
         cloudCover: 1,
         dateFrom: moment(),
         dateTo: moment(),
-        source: 'someSource',
+        source: 'a',
       },
     }
 
@@ -122,7 +122,7 @@ describe('catalogReducer', () => {
         cloudCover: 1,
         dateFrom: moment(),
         dateTo: moment(),
-        source: 'someSource',
+        source: 'a',
       },
     } as any
 
@@ -137,7 +137,7 @@ describe('catalogReducer', () => {
   it('CATALOG_SEARCHING', () => {
     const state = {
       ...catalogInitialState,
-      searchError: 'someError',
+      searchError: 'a',
     }
 
     const action = { type: types.CATALOG_SEARCHING }
@@ -175,7 +175,7 @@ describe('catalogReducer', () => {
 
     const action = {
       type: types.CATALOG_SEARCH_ERROR,
-      error: 'someError',
+      error: 'a',
     }
 
     expect(catalogReducer(state, action)).toEqual({
@@ -189,7 +189,7 @@ describe('catalogReducer', () => {
     const state = {
       ...catalogInitialState,
       searchResults: [1, 2, 3],
-      searchError: 'someError',
+      searchError: 'a',
     } as any
 
     const action = { type: mapTypes.MAP_BBOX_CLEARED }

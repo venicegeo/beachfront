@@ -25,12 +25,12 @@ describe('routeReducer', () => {
   it('ROUTE_CHANGED', () => {
     const action = {
       type: types.ROUTE_CHANGED,
-      hash: 'someHash',
-      href: 'someHref',
+      hash: 'a',
+      href: 'a',
       jobIds: ['a', 'b', 'c'],
-      pathname: 'somePathname',
-      search: 'someSearch',
-      selectedFeature: 'someSelectedFeature',
+      pathname: 'a',
+      search: 'a',
+      selectedFeature: 'a',
     }
 
     expect(routeReducer(routeInitialState, action)).toEqual({

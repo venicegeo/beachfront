@@ -26,7 +26,7 @@ describe('apiStatusReducer', () => {
     const action = {
       type: types.API_STATUS_DESERIALIZED,
       deserialized: {
-        some: 'data',
+        a: 'a',
       },
     }
 
@@ -39,7 +39,7 @@ describe('apiStatusReducer', () => {
   it('API_STATUS_FETCHING', () => {
     const state = {
       ...apiStatusInitialState,
-      fetchError: 'someError',
+      fetchError: 'a',
     }
 
     const action = { type: types.API_STATUS_FETCHING }
@@ -60,7 +60,7 @@ describe('apiStatusReducer', () => {
     const action = {
       type: types.API_STATUS_FETCH_SUCCESS,
       geoserver: {
-        wmsUrl: 'someUrl',
+        wmsUrl: 'a',
       },
       enabledPlatforms: ['a', 'b', 'c'],
     }
@@ -81,7 +81,7 @@ describe('apiStatusReducer', () => {
 
     const action = {
       type: types.API_STATUS_FETCH_ERROR,
-      error: 'someError',
+      error: 'a',
     }
 
     expect(apiStatusReducer(state, action)).toEqual({

@@ -25,7 +25,7 @@ describe('productLinesReducer', () => {
   it('PRODUCT_LINES_FETCHING', () => {
     const state = {
       ...productLinesInitialState,
-      fetchError: 'someError',
+      fetchError: 'a',
     }
 
     const action = { type: types.PRODUCT_LINES_FETCHING }
@@ -63,7 +63,7 @@ describe('productLinesReducer', () => {
 
     const action = {
       type: types.PRODUCT_LINES_FETCH_ERROR,
-      error: 'someError',
+      error: 'a',
     }
 
     expect(productLinesReducer(state, action)).toEqual({
@@ -76,7 +76,7 @@ describe('productLinesReducer', () => {
   it('PRODUCT_LINES_FETCHING_JOBS', () => {
     const state = {
       ...productLinesInitialState,
-      fetchJobsError: 'someError',
+      fetchJobsError: 'a',
     }
 
     const action = { type: types.PRODUCT_LINES_FETCHING_JOBS }
@@ -114,7 +114,7 @@ describe('productLinesReducer', () => {
 
     const action = {
       type: types.PRODUCT_LINES_FETCH_JOBS_ERROR,
-      error: 'someError',
+      error: 'a',
     }
 
     expect(productLinesReducer(state, action)).toEqual({
@@ -127,8 +127,8 @@ describe('productLinesReducer', () => {
   it('PRODUCT_LINES_CREATING_PRODUCT_LINE', () => {
     const state = {
       ...productLinesInitialState,
-      createdProductLine: 'someProductLine',
-      createProductLineError: 'someError',
+      createdProductLine: 'a',
+      createProductLineError: 'a',
     } as any
 
     const action = { type: types.PRODUCT_LINES_CREATING_PRODUCT_LINE }
@@ -150,7 +150,7 @@ describe('productLinesReducer', () => {
 
     const action = {
       type: types.PRODUCT_LINES_CREATE_PRODUCT_LINE_SUCCESS,
-      createdProductLine: 'someProductLine',
+      createdProductLine: 'a',
     }
 
     expect(productLinesReducer(state, action)).toEqual({
@@ -169,7 +169,7 @@ describe('productLinesReducer', () => {
 
     const action = {
       type: types.PRODUCT_LINES_CREATE_PRODUCT_LINE_ERROR,
-      error: 'someError',
+      error: 'a',
     }
 
     expect(productLinesReducer(state, action)).toEqual({

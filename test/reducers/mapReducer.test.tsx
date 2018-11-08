@@ -26,7 +26,7 @@ describe('mapReducer', () => {
   it('MAP_INITIALIZED', () => {
     const action = {
       type: types.MAP_INITIALIZED,
-      map: 'someMap',
+      map: 'a',
       collections: [1, 2, 3],
     } as any
 
@@ -41,7 +41,7 @@ describe('mapReducer', () => {
     const action = {
       type: types.MAP_DESERIALIZED,
       deserialized: {
-        some: 'data',
+        a: 'a',
       },
     }
 
@@ -54,7 +54,7 @@ describe('mapReducer', () => {
   it('MAP_MODE_UPDATED', () => {
     const action = {
       type: types.MAP_MODE_UPDATED,
-      mode: 'someMode',
+      mode: 'a',
     }
 
     expect(mapReducer(mapInitialState, action)).toEqual({
@@ -79,8 +79,8 @@ describe('mapReducer', () => {
     const state = {
       ...mapInitialState,
       bbox: [1, 2, 3, 4],
-      searchResults: 'someResults',
-      searchError: 'someError',
+      searchResults: 'a',
+      searchError: 'a',
       selectedFeature: {
         properties: {
           type: 'NON_IGNORED_TYPE',
@@ -136,7 +136,7 @@ describe('mapReducer', () => {
   it('MAP_SELECTED_FEATURE_UPDATED', () => {
     const action = {
       type: types.MAP_SELECTED_FEATURE_UPDATED,
-      selectedFeature: 'someFeature',
+      selectedFeature: 'a',
     }
 
     expect(mapReducer(mapInitialState, action)).toEqual({
@@ -148,7 +148,7 @@ describe('mapReducer', () => {
   it('MAP_HOVERED_FEATURE_UPDATED', () => {
     const action = {
       type: types.MAP_HOVERED_FEATURE_UPDATED,
-      hoveredFeature: 'someFeature',
+      hoveredFeature: 'a',
     }
 
     expect(mapReducer(mapInitialState, action)).toEqual({
@@ -160,7 +160,7 @@ describe('mapReducer', () => {
   it('MAP_VIEW_UPDATED', () => {
     const action = {
       type: types.MAP_VIEW_UPDATED,
-      view: 'someView',
+      view: 'a',
     }
 
     expect(mapReducer(mapInitialState, action)).toEqual({
