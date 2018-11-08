@@ -30,6 +30,8 @@ export const types = {
 export const algorithmsActions = {
   fetch() {
     return async dispatch => {
+      dispatch({ type: types.ALGORITHMS_FETCHING })
+
       try {
         const response = await getClient().get(ALGORITHM_ENDPOINT)
         dispatch({
