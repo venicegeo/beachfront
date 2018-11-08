@@ -55,7 +55,7 @@ export const jobsActions = {
       } catch (error) {
         dispatch({
           type: types.JOBS_FETCH_ERROR,
-          error,
+          error: error.response.data,
         })
       }
     }
@@ -74,7 +74,7 @@ export const jobsActions = {
       } catch (error) {
         dispatch({
           type: types.JOBS_FETCH_ONE_ERROR,
-          error,
+          error: error.response.data,
         })
       }
     }
@@ -99,7 +99,7 @@ export const jobsActions = {
       } catch (error) {
         dispatch({
           type: types.JOBS_CREATE_JOB_ERROR,
-          error,
+          error: error.response.data,
         })
       }
     }
@@ -122,7 +122,7 @@ export const jobsActions = {
       } catch (error) {
         dispatch({
           type: types.JOBS_DELETE_JOB_ERROR,
-          error,
+          error: error.response.data,
         })
       }
     }

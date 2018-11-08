@@ -70,7 +70,7 @@ export const catalogActions = {
       } catch (error) {
         dispatch({
           type: types.CATALOG_INITIALIZE_ERROR,
-          error,
+          error: error.response.data,
         })
       }
     }
@@ -148,7 +148,7 @@ export const catalogActions = {
       } catch (error) {
         dispatch({
           type: types.CATALOG_SEARCH_ERROR,
-          error,
+          error: error.response.data,
         })
       }
     }

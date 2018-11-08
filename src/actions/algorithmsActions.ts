@@ -47,7 +47,7 @@ export const algorithmsActions = {
       } catch (error) {
         dispatch({
           type: types.ALGORITHMS_FETCH_ERROR,
-          error,
+          error: error.response.data,
         })
       }
     }
