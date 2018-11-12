@@ -26,7 +26,8 @@
   "jest": {
     "preset": "ts-jest",
     "setupFiles": [
-      "jest-canvas-mock"
+      "jest-canvas-mock",
+      "jest-localstorage-mock"
     ],
     "testPathIgnorePatterns": [
       "/node_modules/",
@@ -62,6 +63,7 @@
     "@types/react-dom": "16.0.9",
     "@types/react-redux": "6.0.9",
     "@types/sinon": "5.0.5",
+    "axios-mock-adapter": "1.15.0",
     "copy-webpack-plugin": "3.0.1",
     "css-loader": "0.23.1",
     "detect-browser": "2.0.0",
@@ -72,9 +74,11 @@
     "jest": "23.6.0",
     "jest-canvas-mock": "1.1.0",
     "jest-cli": "23.6.0",
+    "jest-localstorage-mock": "2.3.0",
     "postcss-cssnext": "2.9.0",
     "postcss-import": "8.0.2",
     "postcss-loader": "0.9.1",
+    "redux-mock-store": "1.5.3",
     "rimraf": "2.5.4",
     "sinon": "2.0.0-pre",
     "style-loader": "0.13.1",
