@@ -129,8 +129,8 @@ describe('apiStatusActions', () => {
 
   it('deserialize (bad json)', async () => {
     // Mock local storage.
-    sessionStorage.setItem('geoserver', '[badJson')
-    sessionStorage.setItem('enabled_platforms_records', '[badJson')
+    sessionStorage.setItem('geoserver', 'badJson')
+    sessionStorage.setItem('enabled_platforms_records', 'badJson')
 
     await store.dispatch(apiStatusActions.deserialize())
 

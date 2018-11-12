@@ -117,4 +117,34 @@ describe('algorithmsActions', () => {
       },
     })
   })
+
+  it('deserialize (defaults)', async () => {
+    await store.dispatch(algorithmsActions.deserialize())
+
+    expect(sessionStorage.getItem).toHaveBeenCalledWith('algorithms_records')
+
+    const actions = store.getActions()
+    expect(actions[0]).toEqual({
+      type: types.ALGORITHMS_DESERIALIZED,
+      deserialized: {
+        records: algorithmsInitialState.records,
+      },
+    })
+  })
+
+  it('deserialize (bad json)', async () => {
+    // Mock local storage.
+    sessionStorage.setItem('algorithms_records', 'badJson')
+
+    await store.dispatch(algorithmsActions.deserialize())
+
+    // Deserialize should gracefully handle errors.
+    expect(sessionStorage.getItem).toHaveBeenCalledWith('algorithms_records')
+
+    const actions = store.getActions()
+    expect(actions[0]).toEqual({
+      type: types.ALGORITHMS_DESERIALIZED,
+      deserialized: {},
+    })
+  })
 })
