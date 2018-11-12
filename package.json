@@ -12,9 +12,9 @@
     "prestart": "npm run reinstall",
     "reinstall": "npm install",
     "start": "npm run watch",
-    "test": "jest",
-    "test:coverage": "jest --coverage",
-    "test:watch": "jest --watch",
+    "test": "jest --silent",
+    "test:coverage": "jest --silent --coverage",
+    "test:watch": "jest --silent --watch",
     "typings:install": "typings install",
     "watch": "webpack-dev-server --inline --colors --history-api-fallback --https --cert .development_ssl_certificate.pem --key .development_ssl_certificate.key --host 0.0.0.0"
   },
