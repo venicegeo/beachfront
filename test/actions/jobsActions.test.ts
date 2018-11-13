@@ -26,7 +26,7 @@ const mockStore = configureStore([thunk])
 const mockAdapter = new MockAdapter(axios, { delayResponse: 1 })
 let store
 
-describe('catalogActions', () => {
+describe('jobsActions', () => {
   beforeEach(() => {
     store = mockStore({
       jobs: jobsInitialState,
