@@ -22,7 +22,7 @@ import {apiStatusActions, types} from '../../src/actions/apiStatusActions'
 import {apiStatusInitialState} from '../../src/reducers/apiStatusReducer'
 
 const mockStore = configureStore([thunk])
-const mock = new MockAdapter(axios, { delayResponse: 1 })
+const mockAdapter = new MockAdapter(axios, { delayResponse: 1 })
 let store
 
 describe('apiStatusActions', () => {
@@ -33,7 +33,7 @@ describe('apiStatusActions', () => {
   })
 
   afterEach(() => {
-    mock.restore()
+    mockAdapter.restore()
     sessionStorage.clear()
   })
 
@@ -42,32 +42,34 @@ describe('apiStatusActions', () => {
       geoserver: 'a',
       'enabled-platforms': ['a', 'b'],
     }
-    mock.onGet('/').reply(200, mockResponse)
+    mockAdapter.onGet('/').reply(200, mockResponse)
 
     await store.dispatch(apiStatusActions.fetch())
 
-    const actions = store.getActions()
-    expect(actions[0]).toEqual({ type: types.API_STATUS_FETCHING })
-    expect(actions[1]).toEqual({
-      type: types.API_STATUS_FETCH_SUCCESS,
-      geoserver: {
-        wmsUrl: mockResponse.geoserver + '/wms',
+    expect(store.getActions()).toEqual([
+      { type: types.API_STATUS_FETCHING },
+      {
+        type: types.API_STATUS_FETCH_SUCCESS,
+        geoserver: {
+          wmsUrl: mockResponse.geoserver + '/wms',
+        },
+        enabledPlatforms: mockResponse['enabled-platforms'],
       },
-      enabledPlatforms: mockResponse['enabled-platforms'],
-    })
+    ])
   })
 
   it('fetch (error)', async () => {
-    mock.onGet('/').reply(400, 'error')
+    mockAdapter.onGet('/').reply(400, 'error')
 
     await store.dispatch(apiStatusActions.fetch())
 
-    const actions = store.getActions()
-    expect(actions[0]).toEqual({ type: types.API_STATUS_FETCHING })
-    expect(actions[1]).toEqual({
-      type: types.API_STATUS_FETCH_ERROR,
-      error: 'error',
-    })
+    expect(store.getActions()).toEqual([
+      { type: types.API_STATUS_FETCHING },
+      {
+        type: types.API_STATUS_FETCH_ERROR,
+        error: 'error',
+      },
+    ])
   })
 
   it('serialize', async () => {
@@ -83,8 +85,9 @@ describe('apiStatusActions', () => {
       JSON.stringify(state.apiStatus.enabledPlatforms),
     )
 
-    const actions = store.getActions()
-    expect(actions[0]).toEqual({ type: types.API_STATUS_SERIALIZED })
+    expect(store.getActions()).toEqual([
+      { type: types.API_STATUS_SERIALIZED },
+    ])
   })
 
   it('deserialize', async () => {
@@ -101,14 +104,15 @@ describe('apiStatusActions', () => {
     expect(sessionStorage.getItem).toHaveBeenCalledWith('geoserver')
     expect(sessionStorage.getItem).toHaveBeenCalledWith('enabled_platforms_records')
 
-    const actions = store.getActions()
-    expect(actions[0]).toEqual({
-      type: types.API_STATUS_DESERIALIZED,
-      deserialized: {
-        geoserver: mockStorage.geoserver,
-        enabledPlatforms: mockStorage.enabled_platforms_records,
+    expect(store.getActions()).toEqual([
+      {
+        type: types.API_STATUS_DESERIALIZED,
+        deserialized: {
+          geoserver: mockStorage.geoserver,
+          enabledPlatforms: mockStorage.enabled_platforms_records,
+        },
       },
-    })
+    ])
   })
 
   it('deserialize (defaults)', async () => {
@@ -117,14 +121,15 @@ describe('apiStatusActions', () => {
     expect(sessionStorage.getItem).toHaveBeenCalledWith('geoserver')
     expect(sessionStorage.getItem).toHaveBeenCalledWith('enabled_platforms_records')
 
-    const actions = store.getActions()
-    expect(actions[0]).toEqual({
-      type: types.API_STATUS_DESERIALIZED,
-      deserialized: {
-        geoserver: apiStatusInitialState.geoserver,
-        enabledPlatforms: apiStatusInitialState.enabledPlatforms,
+    expect(store.getActions()).toEqual([
+      {
+        type: types.API_STATUS_DESERIALIZED,
+        deserialized: {
+          geoserver: apiStatusInitialState.geoserver,
+          enabledPlatforms: apiStatusInitialState.enabledPlatforms,
+        },
       },
-    })
+    ])
   })
 
   it('deserialize (bad json)', async () => {
@@ -138,10 +143,11 @@ describe('apiStatusActions', () => {
     expect(sessionStorage.getItem).toHaveBeenCalledWith('geoserver')
     expect(sessionStorage.getItem).toHaveBeenCalledWith('enabled_platforms_records')
 
-    const actions = store.getActions()
-    expect(actions[0]).toEqual({
-      type: types.API_STATUS_DESERIALIZED,
-      deserialized: {},
-    })
+    expect(store.getActions()).toEqual([
+      {
+        type: types.API_STATUS_DESERIALIZED,
+        deserialized: {},
+      },
+    ])
   })
 })

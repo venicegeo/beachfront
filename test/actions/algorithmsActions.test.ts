@@ -23,7 +23,7 @@ import {ALGORITHM_ENDPOINT} from '../../src/config'
 import {algorithmsInitialState} from '../../src/reducers/algorithmsReducer'
 
 const mockStore = configureStore([thunk])
-const mock = new MockAdapter(axios, { delayResponse: 1 })
+const mockAdapter = new MockAdapter(axios, { delayResponse: 1 })
 let store
 
 describe('algorithmsActions', () => {
@@ -34,7 +34,7 @@ describe('algorithmsActions', () => {
   })
 
   afterEach(() => {
-    mock.restore()
+    mockAdapter.restore()
     sessionStorage.clear()
   })
 
@@ -57,35 +57,37 @@ describe('algorithmsActions', () => {
         },
       ],
     }
-    mock.onGet(ALGORITHM_ENDPOINT).reply(200, mockResponse)
+    mockAdapter.onGet(ALGORITHM_ENDPOINT).reply(200, mockResponse)
 
     await store.dispatch(algorithmsActions.fetch())
 
-    const actions = store.getActions()
-    expect(actions[0]).toEqual({ type: types.ALGORITHMS_FETCHING })
-    expect(actions[1]).toEqual({
-      type: types.ALGORITHMS_FETCH_SUCCESS,
-      records: mockResponse.algorithms.map(record => ({
-        description: record.description,
-        id: record.service_id,
-        maxCloudCover: record.max_cloud_cover,
-        name: record.name,
-        type: record.interface,
-      })),
-    })
+    expect(store.getActions()).toEqual([
+      { type: types.ALGORITHMS_FETCHING },
+      {
+        type: types.ALGORITHMS_FETCH_SUCCESS,
+        records: mockResponse.algorithms.map(record => ({
+          description: record.description,
+          id: record.service_id,
+          maxCloudCover: record.max_cloud_cover,
+          name: record.name,
+          type: record.interface,
+        })),
+      },
+    ])
   })
 
   it('fetch (error)', async () => {
-    mock.onGet(ALGORITHM_ENDPOINT).reply(400, 'error')
+    mockAdapter.onGet(ALGORITHM_ENDPOINT).reply(400, 'error')
 
     await store.dispatch(algorithmsActions.fetch())
 
-    const actions = store.getActions()
-    expect(actions[0]).toEqual({ type: types.ALGORITHMS_FETCHING })
-    expect(actions[1]).toEqual({
-      type: types.ALGORITHMS_FETCH_ERROR,
-      error: 'error',
-    })
+    expect(store.getActions()).toEqual([
+      { type: types.ALGORITHMS_FETCHING },
+      {
+        type: types.ALGORITHMS_FETCH_ERROR,
+        error: 'error',
+      },
+    ])
   })
 
   it('serialize', async () => {
@@ -96,8 +98,9 @@ describe('algorithmsActions', () => {
       JSON.stringify(store.getState().algorithms.records),
     )
 
-    const actions = store.getActions()
-    expect(actions[0]).toEqual({ type: types.ALGORITHMS_SERIALIZED })
+    expect(store.getActions()).toEqual([
+      { type: types.ALGORITHMS_SERIALIZED },
+    ])
   })
 
   it('deserialize', async () => {
@@ -109,13 +112,14 @@ describe('algorithmsActions', () => {
 
     expect(sessionStorage.getItem).toHaveBeenCalledWith('algorithms_records')
 
-    const actions = store.getActions()
-    expect(actions[0]).toEqual({
-      type: types.ALGORITHMS_DESERIALIZED,
-      deserialized: {
-        records: mockSavedRecords,
+    expect(store.getActions()).toEqual([
+      {
+        type: types.ALGORITHMS_DESERIALIZED,
+        deserialized: {
+          records: mockSavedRecords,
+        },
       },
-    })
+    ])
   })
 
   it('deserialize (defaults)', async () => {
@@ -123,13 +127,14 @@ describe('algorithmsActions', () => {
 
     expect(sessionStorage.getItem).toHaveBeenCalledWith('algorithms_records')
 
-    const actions = store.getActions()
-    expect(actions[0]).toEqual({
-      type: types.ALGORITHMS_DESERIALIZED,
-      deserialized: {
-        records: algorithmsInitialState.records,
+    expect(store.getActions()).toEqual([
+      {
+        type: types.ALGORITHMS_DESERIALIZED,
+        deserialized: {
+          records: algorithmsInitialState.records,
+        },
       },
-    })
+    ])
   })
 
   it('deserialize (bad json)', async () => {
@@ -141,10 +146,11 @@ describe('algorithmsActions', () => {
     // Deserialize should gracefully handle errors.
     expect(sessionStorage.getItem).toHaveBeenCalledWith('algorithms_records')
 
-    const actions = store.getActions()
-    expect(actions[0]).toEqual({
-      type: types.ALGORITHMS_DESERIALIZED,
-      deserialized: {},
-    })
+    expect(store.getActions()).toEqual([
+      {
+        type: types.ALGORITHMS_DESERIALIZED,
+        deserialized: {},
+      },
+    ])
   })
 })
