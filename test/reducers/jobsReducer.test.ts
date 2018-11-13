@@ -180,13 +180,13 @@ describe('jobsReducer', () => {
     })
   })
 
-  it('JOBS_DISMISS_CREATE_JOB_ERROR', () => {
+  it('JOBS_CREATE_JOB_ERROR_DISMISSED', () => {
     const state = {
       ...jobsInitialState,
       createJobError: 'a',
     }
 
-    const action = { type: types.JOBS_DISMISS_CREATE_JOB_ERROR }
+    const action = { type: types.JOBS_CREATE_JOB_ERROR_DISMISSED }
 
     expect(jobsReducer(state, action)).toEqual({
       ...state,

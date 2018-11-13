@@ -105,7 +105,7 @@ export function jobsReducer(state = jobsInitialState, action: any) {
         isCreatingJob: false,
         createJobError: action.error,
       }
-    case types.JOBS_DISMISS_CREATE_JOB_ERROR:
+    case types.JOBS_CREATE_JOB_ERROR_DISMISSED:
       return {
         ...state,
         createJobError: null,
