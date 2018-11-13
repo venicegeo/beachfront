@@ -62,7 +62,7 @@ describe('catalogActions', () => {
     getClientSpy.restore()
   })
 
-  it('initialize (error)', async () => {
+  it('initialize (request error)', async () => {
     const getClientSpy = sinon.spy(session, 'getClient')
 
     mockAdapter.onGet(USER_ENDPOINT).reply(400, 'error')
@@ -80,6 +80,22 @@ describe('catalogActions', () => {
     ])
 
     getClientSpy.restore()
+  })
+
+  it('initialize (exception)', async () => {
+    const getClientStub = sinon.stub(session, 'getClient').throwsException('error')
+
+    mockAdapter.onGet(USER_ENDPOINT).reply(200)
+
+    await store.dispatch(catalogActions.initialize())
+
+    const actions = store.getActions()
+    expect(actions.length).toEqual(2)
+    expect(actions[0]).toEqual({ type: types.CATALOG_INITIALIZING })
+    expect(actions[1].type).toEqual(types.CATALOG_INITIALIZE_ERROR)
+    expect(actions[1].error).toBeDefined()
+
+    getClientStub.restore()
   })
 
   it('setApiKey', async () => {
@@ -230,6 +246,29 @@ describe('catalogActions', () => {
         error: 'error',
       },
     ])
+  })
+
+  it('search (invalid response data)', async () => {
+    store = mockStore({
+      catalog: {
+        ...catalogInitialState,
+        client: getClient(),
+      },
+      map: {
+        bbox: [0, 1, 2, 3],
+      },
+    })
+
+    const state = store.getState()
+    mockAdapter.onGet(getSearchUrl(state)).reply(200)
+
+    await store.dispatch(catalogActions.search())
+
+    const actions = store.getActions()
+    expect(actions.length).toEqual(2)
+    expect(actions[0]).toEqual({ type: types.CATALOG_SEARCHING })
+    expect(actions[1].type).toEqual(types.CATALOG_SEARCH_ERROR)
+    expect(actions[1].error).toBeDefined()
   })
 
   it('serialize', async () => {

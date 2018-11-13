@@ -172,11 +172,7 @@ export const catalogActions = {
       console.warn('Failed to deserialize "searchResults"')
     }
 
-    try {
-      deserialized.apiKey = localStorage.getItem('catalog_apiKey') || catalogInitialState.apiKey
-    } catch (error) {
-      console.warn('Failed to deserialize "catalog_apiKey"')
-    }
+    deserialized.apiKey = localStorage.getItem('catalog_apiKey') || catalogInitialState.apiKey
 
     return {
       type: types.CATALOG_DESERIALIZED,
