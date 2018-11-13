@@ -59,7 +59,7 @@ export const productLinesActions = {
       } catch (error) {
         dispatch({
           type: types.PRODUCT_LINES_FETCH_ERROR,
-          error: error.response.data,
+          error: (error.response) ? error.response.data : error,
         })
       }
     }
@@ -78,7 +78,7 @@ export const productLinesActions = {
       } catch (error) {
         dispatch({
           type: types.PRODUCT_LINES_FETCH_JOBS_ERROR,
-          error: error.response.data,
+          error: (error.response) ? error.response.data : error,
         })
       }
     }
@@ -110,7 +110,7 @@ export const productLinesActions = {
       } catch (error) {
         dispatch({
           type: types.PRODUCT_LINES_CREATE_PRODUCT_LINE_ERROR,
-          error: error.response.data,
+          error: (error.response) ? error.response.data : error,
         })
       }
     }

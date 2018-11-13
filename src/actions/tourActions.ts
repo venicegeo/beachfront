@@ -89,7 +89,7 @@ export const tourActions = {
       } catch (error) {
         dispatch({
           type: types.TOUR_STEP_CHANGE_ERROR,
-          error: error.response.data,
+          error: (error.response) ? error.response.data : error,
         })
         return
       }
