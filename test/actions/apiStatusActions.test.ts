@@ -72,6 +72,18 @@ describe('apiStatusActions', () => {
     ])
   })
 
+  it('fetch (invalid response data)', async () => {
+    mockAdapter.onGet('/').reply(200)
+
+    await store.dispatch(apiStatusActions.fetch())
+
+    const actions = store.getActions()
+    expect(actions.length).toEqual(2)
+    expect(actions[0]).toEqual({ type: types.API_STATUS_FETCHING })
+    expect(actions[1].type).toEqual(types.API_STATUS_FETCH_ERROR)
+    expect(actions[1].error).toBeDefined()
+  })
+
   it('serialize', async () => {
     await store.dispatch(apiStatusActions.serialize())
 
