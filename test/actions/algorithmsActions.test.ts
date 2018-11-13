@@ -76,7 +76,7 @@ describe('algorithmsActions', () => {
     ])
   })
 
-  it('fetch (error)', async () => {
+  it('fetch (request error)', async () => {
     mockAdapter.onGet(ALGORITHM_ENDPOINT).reply(400, 'error')
 
     await store.dispatch(algorithmsActions.fetch())
@@ -88,6 +88,18 @@ describe('algorithmsActions', () => {
         error: 'error',
       },
     ])
+  })
+
+  it('fetch (invalid response data)', async () => {
+    mockAdapter.onGet(ALGORITHM_ENDPOINT).reply(200)
+
+    await store.dispatch(algorithmsActions.fetch())
+
+    const actions = store.getActions()
+    expect(actions.length).toEqual(2)
+    expect(actions[0]).toEqual({ type: types.ALGORITHMS_FETCHING })
+    expect(actions[1].type).toEqual(types.ALGORITHMS_FETCH_ERROR)
+    expect(actions[1].error).toBeDefined()
   })
 
   it('serialize', async () => {
