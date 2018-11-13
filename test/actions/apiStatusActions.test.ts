@@ -58,7 +58,7 @@ describe('apiStatusActions', () => {
     ])
   })
 
-  it('fetch (error)', async () => {
+  it('fetch (request error)', async () => {
     mockAdapter.onGet('/').reply(400, 'error')
 
     await store.dispatch(apiStatusActions.fetch())
