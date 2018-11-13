@@ -15,9 +15,8 @@
  **/
 
 import {AppState} from '../store'
-import {API_ROOT, IMAGERY_ENDPOINT, SCENE_TILE_PROVIDERS, USER_ENDPOINT} from '../config'
-import axios from 'axios'
-import {DEFAULT_TIMEOUT, getClient} from '../api/session'
+import {IMAGERY_ENDPOINT, SCENE_TILE_PROVIDERS, USER_ENDPOINT} from '../config'
+import {getClient} from '../api/session'
 import {wrap} from '../utils/math'
 import {catalogInitialState} from '../reducers/catalogReducer'
 
@@ -53,16 +52,8 @@ export const catalogActions = {
       dispatch({ type: types.CATALOG_INITIALIZING })
 
       try {
-        await getClient().get(USER_ENDPOINT)
-        const client = axios.create({
-          baseURL: API_ROOT,
-          timeout: DEFAULT_TIMEOUT,
-          withCredentials: true,
-          headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-            'Authorization': 'Basic Og==',
-          },
-        })
+        const client = getClient()
+        await client.get(USER_ENDPOINT)
         dispatch({
           type: types.CATALOG_INITIALIZE_SUCCESS,
           client,
