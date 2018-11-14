@@ -20,11 +20,11 @@ import {types as mapTypes} from '../../src/actions/mapActions'
 import * as moment from 'moment'
 
 describe('catalogReducer', () => {
-  it('initialState', () => {
+  test('initialState', () => {
     expect(catalogReducer(undefined, {})).toEqual(catalogInitialState)
   })
 
-  it('CATALOG_DESERIALIZED', () => {
+  test('CATALOG_DESERIALIZED', () => {
     const action = {
       type: types.CATALOG_DESERIALIZED,
       deserialized: {
@@ -38,7 +38,7 @@ describe('catalogReducer', () => {
     })
   })
 
-  it('CATALOG_INITIALIZING', () => {
+  test('CATALOG_INITIALIZING', () => {
     const action = { type: types.CATALOG_INITIALIZING }
 
     expect(catalogReducer(catalogInitialState, action)).toEqual({
@@ -47,7 +47,7 @@ describe('catalogReducer', () => {
     })
   })
 
-  it('CATALOG_INITIALIZE_SUCCESS', () => {
+  test('CATALOG_INITIALIZE_SUCCESS', () => {
     const state = {
       ...catalogInitialState,
       isInitializing: true,
@@ -65,7 +65,7 @@ describe('catalogReducer', () => {
     }))
   })
 
-  it('CATALOG_INITIALIZE_ERROR', () => {
+  test('CATALOG_INITIALIZE_ERROR', () => {
     const state = {
       ...catalogInitialState,
       isInitializing: true,
@@ -83,7 +83,7 @@ describe('catalogReducer', () => {
     })
   })
 
-  it('CATALOG_API_KEY_UPDATED', () => {
+  test('CATALOG_API_KEY_UPDATED', () => {
     const action = {
       type: types.CATALOG_API_KEY_UPDATED,
       apiKey: 'a',
@@ -95,7 +95,7 @@ describe('catalogReducer', () => {
     })
   })
 
-  it('CATALOG_SEARCH_CRITERIA_UPDATED', () => {
+  test('CATALOG_SEARCH_CRITERIA_UPDATED', () => {
     const action = {
       type: types.CATALOG_SEARCH_CRITERIA_UPDATED,
       searchCriteria: {
@@ -115,7 +115,7 @@ describe('catalogReducer', () => {
     })
   })
 
-  it('CATALOG_SEARCH_CRITERIA_RESET', () => {
+  test('CATALOG_SEARCH_CRITERIA_RESET', () => {
     const state = {
       ...catalogInitialState,
       searchCriteria: {
@@ -134,7 +134,7 @@ describe('catalogReducer', () => {
     })
   })
 
-  it('CATALOG_SEARCHING', () => {
+  test('CATALOG_SEARCHING', () => {
     const state = {
       ...catalogInitialState,
       searchError: 'a',
@@ -149,7 +149,7 @@ describe('catalogReducer', () => {
     })
   })
 
-  it('CATALOG_SEARCH_SUCCESS', () => {
+  test('CATALOG_SEARCH_SUCCESS', () => {
     const state = {
       ...catalogInitialState,
       isSearching: true,
@@ -167,7 +167,7 @@ describe('catalogReducer', () => {
     })
   })
 
-  it('CATALOG_SEARCH_ERROR', () => {
+  test('CATALOG_SEARCH_ERROR', () => {
     const state = {
       ...catalogInitialState,
       isSearching: true,
@@ -185,7 +185,7 @@ describe('catalogReducer', () => {
     })
   })
 
-  it('MAP_BBOX_CLEARED', () => {
+  test('MAP_BBOX_CLEARED', () => {
     const state = {
       ...catalogInitialState,
       searchResults: [1, 2, 3],

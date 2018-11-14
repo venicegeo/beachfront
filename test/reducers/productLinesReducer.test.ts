@@ -18,11 +18,11 @@ import {productLinesInitialState, productLinesReducer} from '../../src/reducers/
 import {types} from '../../src/actions/productLinesActions'
 
 describe('productLinesReducer', () => {
-  it('initialState', () => {
+  test('initialState', () => {
     expect(productLinesReducer(undefined, {})).toEqual(productLinesInitialState)
   })
 
-  it('PRODUCT_LINES_FETCHING', () => {
+  test('PRODUCT_LINES_FETCHING', () => {
     const state = {
       ...productLinesInitialState,
       fetchError: 'a',
@@ -37,7 +37,7 @@ describe('productLinesReducer', () => {
     })
   })
 
-  it('PRODUCT_LINES_FETCH_SUCCESS', () => {
+  test('PRODUCT_LINES_FETCH_SUCCESS', () => {
     const state = {
       ...productLinesInitialState,
       isFetching: true,
@@ -55,7 +55,7 @@ describe('productLinesReducer', () => {
     })
   })
 
-  it('PRODUCT_LINES_FETCH_ERROR', () => {
+  test('PRODUCT_LINES_FETCH_ERROR', () => {
     const state = {
       ...productLinesInitialState,
       isFetching: true,
@@ -73,7 +73,7 @@ describe('productLinesReducer', () => {
     })
   })
 
-  it('PRODUCT_LINES_FETCHING_JOBS', () => {
+  test('PRODUCT_LINES_FETCHING_JOBS', () => {
     const state = {
       ...productLinesInitialState,
       fetchJobsError: 'a',
@@ -88,7 +88,7 @@ describe('productLinesReducer', () => {
     })
   })
 
-  it('PRODUCT_LINES_FETCH_JOBS_SUCCESS', () => {
+  test('PRODUCT_LINES_FETCH_JOBS_SUCCESS', () => {
     const state = {
       ...productLinesInitialState,
       isFetchingJobs: true,
@@ -106,7 +106,7 @@ describe('productLinesReducer', () => {
     })
   })
 
-  it('PRODUCT_LINES_FETCH_JOBS_ERROR', () => {
+  test('PRODUCT_LINES_FETCH_JOBS_ERROR', () => {
     const state = {
       ...productLinesInitialState,
       isFetchingJobs: true,
@@ -124,7 +124,7 @@ describe('productLinesReducer', () => {
     })
   })
 
-  it('PRODUCT_LINES_CREATING_PRODUCT_LINE', () => {
+  test('PRODUCT_LINES_CREATING_PRODUCT_LINE', () => {
     const state = {
       ...productLinesInitialState,
       createdProductLine: 'a',
@@ -141,7 +141,7 @@ describe('productLinesReducer', () => {
     })
   })
 
-  it('PRODUCT_LINES_CREATE_PRODUCT_LINE_SUCCESS', () => {
+  test('PRODUCT_LINES_CREATE_PRODUCT_LINE_SUCCESS', () => {
     const state = {
       ...productLinesInitialState,
       isCreatingProductLine: true,
@@ -161,7 +161,7 @@ describe('productLinesReducer', () => {
     })
   })
 
-  it('PRODUCT_LINES_CREATE_PRODUCT_LINE_ERROR', () => {
+  test('PRODUCT_LINES_CREATE_PRODUCT_LINE_ERROR', () => {
     const state = {
       ...productLinesInitialState,
       isCreatingProductLine: true,

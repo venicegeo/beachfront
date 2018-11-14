@@ -38,131 +38,137 @@ describe('algorithmsActions', () => {
     sessionStorage.clear()
   })
 
-  it('fetch (success)', async () => {
-    const mockResponse = {
-      algorithms: [
+  describe('fetch()', () => {
+    test('success', async () => {
+      const mockResponse = {
+        algorithms: [
+          {
+            description: 'a',
+            service_id: 'a',
+            max_cloud_cover: 1,
+            name: 'a',
+            interface: 'a',
+          },
+          {
+            description: 'b',
+            service_id: 'b',
+            max_cloud_cover: 2,
+            name: 'b',
+            interface: 'b',
+          },
+        ],
+      }
+      mockAdapter.onGet(ALGORITHM_ENDPOINT).reply(200, mockResponse)
+
+      await store.dispatch(algorithmsActions.fetch())
+
+      expect(store.getActions()).toEqual([
+        { type: types.ALGORITHMS_FETCHING },
         {
-          description: 'a',
-          service_id: 'a',
-          max_cloud_cover: 1,
-          name: 'a',
-          interface: 'a',
+          type: types.ALGORITHMS_FETCH_SUCCESS,
+          records: mockResponse.algorithms.map(record => ({
+            description: record.description,
+            id: record.service_id,
+            maxCloudCover: record.max_cloud_cover,
+            name: record.name,
+            type: record.interface,
+          })),
         },
+      ])
+    })
+
+    test('request error', async () => {
+      mockAdapter.onGet(ALGORITHM_ENDPOINT).reply(400, 'error')
+
+      await store.dispatch(algorithmsActions.fetch())
+
+      expect(store.getActions()).toEqual([
+        { type: types.ALGORITHMS_FETCHING },
         {
-          description: 'b',
-          service_id: 'b',
-          max_cloud_cover: 2,
-          name: 'b',
-          interface: 'b',
+          type: types.ALGORITHMS_FETCH_ERROR,
+          error: 'error',
         },
-      ],
-    }
-    mockAdapter.onGet(ALGORITHM_ENDPOINT).reply(200, mockResponse)
+      ])
+    })
 
-    await store.dispatch(algorithmsActions.fetch())
+    test('non-request error', async () => {
+      mockAdapter.onGet(ALGORITHM_ENDPOINT).reply(200)
 
-    expect(store.getActions()).toEqual([
-      { type: types.ALGORITHMS_FETCHING },
-      {
-        type: types.ALGORITHMS_FETCH_SUCCESS,
-        records: mockResponse.algorithms.map(record => ({
-          description: record.description,
-          id: record.service_id,
-          maxCloudCover: record.max_cloud_cover,
-          name: record.name,
-          type: record.interface,
-        })),
-      },
-    ])
+      await store.dispatch(algorithmsActions.fetch())
+
+      const actions = store.getActions()
+      expect(actions.length).toEqual(2)
+      expect(actions[0]).toEqual({ type: types.ALGORITHMS_FETCHING })
+      expect(actions[1].type).toEqual(types.ALGORITHMS_FETCH_ERROR)
+      expect(actions[1].error).toBeDefined()
+    })
   })
 
-  it('fetch (request error)', async () => {
-    mockAdapter.onGet(ALGORITHM_ENDPOINT).reply(400, 'error')
+  describe('serialize()', () => {
+    test('success', async () => {
+      await store.dispatch(algorithmsActions.serialize())
 
-    await store.dispatch(algorithmsActions.fetch())
+      expect(sessionStorage.setItem).toHaveBeenCalledWith(
+        'algorithms_records',
+        JSON.stringify(store.getState().algorithms.records),
+      )
 
-    expect(store.getActions()).toEqual([
-      { type: types.ALGORITHMS_FETCHING },
-      {
-        type: types.ALGORITHMS_FETCH_ERROR,
-        error: 'error',
-      },
-    ])
+      expect(store.getActions()).toEqual([
+        { type: types.ALGORITHMS_SERIALIZED },
+      ])
+    })
   })
 
-  it('fetch (invalid response data)', async () => {
-    mockAdapter.onGet(ALGORITHM_ENDPOINT).reply(200)
+  describe('deserialize()', () => {
+    test('success', async () => {
+      // Mock local storage.
+      const mockSavedRecords = []
+      sessionStorage.setItem('algorithms_records', JSON.stringify(mockSavedRecords))
 
-    await store.dispatch(algorithmsActions.fetch())
+      await store.dispatch(algorithmsActions.deserialize())
 
-    const actions = store.getActions()
-    expect(actions.length).toEqual(2)
-    expect(actions[0]).toEqual({ type: types.ALGORITHMS_FETCHING })
-    expect(actions[1].type).toEqual(types.ALGORITHMS_FETCH_ERROR)
-    expect(actions[1].error).toBeDefined()
-  })
+      expect(sessionStorage.getItem).toHaveBeenCalledWith('algorithms_records')
 
-  it('serialize', async () => {
-    await store.dispatch(algorithmsActions.serialize())
-
-    expect(sessionStorage.setItem).toHaveBeenCalledWith(
-      'algorithms_records',
-      JSON.stringify(store.getState().algorithms.records),
-    )
-
-    expect(store.getActions()).toEqual([
-      { type: types.ALGORITHMS_SERIALIZED },
-    ])
-  })
-
-  it('deserialize', async () => {
-    // Mock local storage.
-    const mockSavedRecords = []
-    sessionStorage.setItem('algorithms_records', JSON.stringify(mockSavedRecords))
-
-    await store.dispatch(algorithmsActions.deserialize())
-
-    expect(sessionStorage.getItem).toHaveBeenCalledWith('algorithms_records')
-
-    expect(store.getActions()).toEqual([
-      {
-        type: types.ALGORITHMS_DESERIALIZED,
-        deserialized: {
-          records: mockSavedRecords,
+      expect(store.getActions()).toEqual([
+        {
+          type: types.ALGORITHMS_DESERIALIZED,
+          deserialized: {
+            records: mockSavedRecords,
+          },
         },
-      },
-    ])
-  })
+      ])
+    })
 
-  it('deserialize (defaults)', async () => {
-    await store.dispatch(algorithmsActions.deserialize())
+    test('no saved data', async () => {
+      await store.dispatch(algorithmsActions.deserialize())
 
-    expect(sessionStorage.getItem).toHaveBeenCalledWith('algorithms_records')
+      expect(sessionStorage.getItem).toHaveBeenCalledWith('algorithms_records')
 
-    expect(store.getActions()).toEqual([
-      {
-        type: types.ALGORITHMS_DESERIALIZED,
-        deserialized: {
-          records: algorithmsInitialState.records,
+      expect(store.getActions()).toEqual([
+        {
+          type: types.ALGORITHMS_DESERIALIZED,
+          deserialized: {
+            records: algorithmsInitialState.records,
+          },
         },
-      },
-    ])
-  })
+      ])
+    })
 
-  it('deserialize (bad json)', async () => {
-    // Mock local storage.
-    sessionStorage.setItem('algorithms_records', 'badJson')
+    test('invalid saved data', async () => {
+      // Mock local storage.
+      sessionStorage.setItem('algorithms_records', 'badJson')
 
-    await store.dispatch(algorithmsActions.deserialize())
+      await store.dispatch(algorithmsActions.deserialize())
 
-    // Deserialize should gracefully handle errors.
-    expect(sessionStorage.getItem).toHaveBeenCalledWith('algorithms_records')
+      // Deserialize should gracefully handle errors.
+      expect(sessionStorage.getItem).toHaveBeenCalledWith('algorithms_records')
 
-    expect(store.getActions()).toEqual([
-      {
-        type: types.ALGORITHMS_DESERIALIZED,
-        deserialized: {},
-      },
-    ])
+      expect(store.getActions()).toEqual([
+        {
+          type: types.ALGORITHMS_DESERIALIZED,
+          deserialized: {},
+        },
+      ])
+    })
   })
 })

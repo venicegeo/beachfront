@@ -18,11 +18,11 @@ import {algorithmsInitialState, algorithmsReducer} from '../../src/reducers/algo
 import {types} from '../../src/actions/algorithmsActions'
 
 describe('algorithmsReducer', () => {
-  it('initial state', () => {
+  test('initial state', () => {
     expect(algorithmsReducer(undefined, {})).toEqual(algorithmsInitialState)
   })
 
-  it('ALGORITHMS_DESERIALIZED', () => {
+  test('ALGORITHMS_DESERIALIZED', () => {
     const action = {
       type: types.ALGORITHMS_DESERIALIZED,
       deserialized: {
@@ -36,7 +36,7 @@ describe('algorithmsReducer', () => {
     })
   })
 
-  it('ALGORITHMS_FETCHING', () => {
+  test('ALGORITHMS_FETCHING', () => {
     const state = {
       ...algorithmsInitialState,
       fetchError: 'a',
@@ -51,7 +51,7 @@ describe('algorithmsReducer', () => {
     })
   })
 
-  it('ALGORITHMS_FETCH_SUCCESS', () => {
+  test('ALGORITHMS_FETCH_SUCCESS', () => {
     const state = {
       ...algorithmsInitialState,
       isFetching: true,
@@ -69,7 +69,7 @@ describe('algorithmsReducer', () => {
     })
   })
 
-  it('ALGORITHMS_FETCH_ERROR', () => {
+  test('ALGORITHMS_FETCH_ERROR', () => {
     const state = {
       ...algorithmsInitialState,
       isFetching: true,

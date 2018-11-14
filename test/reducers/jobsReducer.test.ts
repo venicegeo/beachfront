@@ -18,11 +18,11 @@ import {jobsInitialState, jobsReducer} from '../../src/reducers/jobsReducer'
 import {types} from '../../src/actions/jobsActions'
 
 describe('jobsReducer', () => {
-  it('initialState', () => {
+  test('initialState', () => {
     expect(jobsReducer(undefined, {})).toEqual(jobsInitialState)
   })
 
-  it('JOBS_FETCHING', () => {
+  test('JOBS_FETCHING', () => {
     const state = {
       ...jobsInitialState,
       fetchError: 'a',
@@ -37,7 +37,7 @@ describe('jobsReducer', () => {
     })
   })
 
-  it('JOBS_FETCH_SUCCESS', () => {
+  test('JOBS_FETCH_SUCCESS', () => {
     const state = {
       ...jobsInitialState,
       isFetching: true,
@@ -55,7 +55,7 @@ describe('jobsReducer', () => {
     })
   })
 
-  it('JOBS_FETCH_ERROR', () => {
+  test('JOBS_FETCH_ERROR', () => {
     const state = {
       ...jobsInitialState,
       isFetching: true,
@@ -73,7 +73,7 @@ describe('jobsReducer', () => {
     })
   })
 
-  it('JOBS_FETCHING_ONE', () => {
+  test('JOBS_FETCHING_ONE', () => {
     const state = {
       ...jobsInitialState,
       fetchOneError: 'a',
@@ -88,7 +88,7 @@ describe('jobsReducer', () => {
     })
   })
 
-  it('JOBS_FETCH_ONE_SUCCESS', () => {
+  test('JOBS_FETCH_ONE_SUCCESS', () => {
     const state = {
       ...jobsInitialState,
       isFetchingOne: true,
@@ -107,7 +107,7 @@ describe('jobsReducer', () => {
     })
   })
 
-  it('JOBS_FETCH_ONE_ERROR', () => {
+  test('JOBS_FETCH_ONE_ERROR', () => {
     const state = {
       ...jobsInitialState,
       isFetchingOne: true,
@@ -125,7 +125,7 @@ describe('jobsReducer', () => {
     })
   })
 
-  it('JOBS_CREATING_JOB', () => {
+  test('JOBS_CREATING_JOB', () => {
     const state = {
       ...jobsInitialState,
       createdJob: 'a',
@@ -142,7 +142,7 @@ describe('jobsReducer', () => {
     })
   })
 
-  it('JOBS_CREATE_JOB_SUCCESS', () => {
+  test('JOBS_CREATE_JOB_SUCCESS', () => {
     const state = {
       ...jobsInitialState,
       isCreatingJob: true,
@@ -162,7 +162,7 @@ describe('jobsReducer', () => {
     })
   })
 
-  it('JOBS_CREATE_JOB_ERROR', () => {
+  test('JOBS_CREATE_JOB_ERROR', () => {
     const state = {
       ...jobsInitialState,
       isCreatingJob: true,
@@ -180,7 +180,7 @@ describe('jobsReducer', () => {
     })
   })
 
-  it('JOBS_CREATE_JOB_ERROR_DISMISSED', () => {
+  test('JOBS_CREATE_JOB_ERROR_DISMISSED', () => {
     const state = {
       ...jobsInitialState,
       createJobError: 'a',
@@ -194,7 +194,7 @@ describe('jobsReducer', () => {
     })
   })
 
-  it('JOBS_DELETING_JOB', () => {
+  test('JOBS_DELETING_JOB', () => {
     const state = {
       ...jobsInitialState,
       records: [
@@ -218,7 +218,7 @@ describe('jobsReducer', () => {
     })
   })
 
-  it('JOBS_DELETE_JOB_SUCCESS', () => {
+  test('JOBS_DELETE_JOB_SUCCESS', () => {
     const state = {
       ...jobsInitialState,
       isDeletingJob: true,
@@ -232,7 +232,7 @@ describe('jobsReducer', () => {
     })
   })
 
-  it('JOBS_DELETE_JOB_ERROR', () => {
+  test('JOBS_DELETE_JOB_ERROR', () => {
     const state = {
       ...jobsInitialState,
       isDeletingJob: true,

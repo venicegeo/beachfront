@@ -18,11 +18,11 @@ import {tourInitialState, tourReducer} from '../../src/reducers/tourReducer'
 import {types} from '../../src/actions/tourActions'
 
 describe('tourReducer', () => {
-  it('initialState', () => {
+  test('initialState', () => {
     expect(tourReducer(undefined, {})).toEqual(tourInitialState)
   })
 
-  it('TOUR_SET_STEPS', () => {
+  test('TOUR_SET_STEPS', () => {
     const action = {
       type: types.TOUR_SET_STEPS,
       steps: [1, 2, 3],
@@ -34,7 +34,7 @@ describe('tourReducer', () => {
     })
   })
 
-  it('TOUR_STARTED', () => {
+  test('TOUR_STARTED', () => {
     const state = {
       ...tourInitialState,
       changing: true,
@@ -53,7 +53,7 @@ describe('tourReducer', () => {
     })
   })
 
-  it('TOUR_ENDED', () => {
+  test('TOUR_ENDED', () => {
     const state = {
       ...tourInitialState,
       inProgress: true,
@@ -71,7 +71,7 @@ describe('tourReducer', () => {
     })
   })
 
-  it('TOUR_STEP_CHANGING', () => {
+  test('TOUR_STEP_CHANGING', () => {
     const action = { type: types.TOUR_STEP_CHANGING }
 
     expect(tourReducer(tourInitialState, action)).toEqual({
@@ -80,7 +80,7 @@ describe('tourReducer', () => {
     })
   })
 
-  it('TOUR_STEP_CHANGE_SUCCESS', () => {
+  test('TOUR_STEP_CHANGE_SUCCESS', () => {
     const state = {
       ...tourInitialState,
       changing: true,
@@ -98,7 +98,7 @@ describe('tourReducer', () => {
     })
   })
 
-  it('TOUR_STEP_CHANGE_ERROR', () => {
+  test('TOUR_STEP_CHANGE_ERROR', () => {
     const state = {
       ...tourInitialState,
       changing: true,

@@ -18,11 +18,11 @@ import {apiStatusInitialState, apiStatusReducer} from '../../src/reducers/apiSta
 import {types} from '../../src/actions/apiStatusActions'
 
 describe('apiStatusReducer', () => {
-  it('initial state', () => {
+  test('initial state', () => {
     expect(apiStatusReducer(undefined, {})).toEqual(apiStatusInitialState)
   })
 
-  it('API_STATUS_DESERIALIZED', () => {
+  test('API_STATUS_DESERIALIZED', () => {
     const action = {
       type: types.API_STATUS_DESERIALIZED,
       deserialized: {
@@ -36,7 +36,7 @@ describe('apiStatusReducer', () => {
     })
   })
 
-  it('API_STATUS_FETCHING', () => {
+  test('API_STATUS_FETCHING', () => {
     const state = {
       ...apiStatusInitialState,
       fetchError: 'a',
@@ -51,7 +51,7 @@ describe('apiStatusReducer', () => {
     })
   })
 
-  it('API_STATUS_FETCH_SUCCESS', () => {
+  test('API_STATUS_FETCH_SUCCESS', () => {
     const state = {
       ...apiStatusInitialState,
       isFetching: true,
@@ -73,7 +73,7 @@ describe('apiStatusReducer', () => {
     })
   })
 
-  it('API_STATUS_FETCH_ERROR', () => {
+  test('API_STATUS_FETCH_ERROR', () => {
     const state = {
       ...apiStatusInitialState,
       isFetching: true,

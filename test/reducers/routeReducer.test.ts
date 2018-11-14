@@ -18,11 +18,11 @@ import {routeInitialState, routeReducer} from '../../src/reducers/routeReducer'
 import {types} from '../../src/actions/routeActions'
 
 describe('routeReducer', () => {
-  it('initialState', () => {
+  test('initialState', () => {
     expect(routeReducer(undefined, {})).toEqual(routeInitialState)
   })
 
-  it('ROUTE_CHANGED', () => {
+  test('ROUTE_CHANGED', () => {
     const action = {
       type: types.ROUTE_CHANGED,
       hash: 'a',
