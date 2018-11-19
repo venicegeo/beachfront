@@ -138,7 +138,8 @@ node {
             "PATH+=${nodejs}/bin",
             "NPM_CONFIG_CACHE=${root}/.npmcache",
             "NODE_ENV=production",
-            "CONSENT_BANNER_TEXT=${CONSENT_BANNER_TEXT}"
+            "CONSENT_BANNER_TEXT=${CONSENT_BANNER_TEXT}",
+            "CLASSIFICATION_BANNER_TEXT=${env.CLASSIFICATION_BANNER_TEXT}"
           ]) {
               sh """
                 npm run build
