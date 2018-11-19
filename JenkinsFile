@@ -130,7 +130,8 @@ node {
       "PATH+=${nodejs}/bin",
       "NPM_CONFIG_CACHE=${root}/.npmcache",
       "NODE_ENV=production",
-      "CONSENT_BANNER_TEXT=${CONSENT_BANNER_TEXT}"
+      "CONSENT_BANNER_TEXT=${CONSENT_BANNER_TEXT}",
+      "CLASSIFICATION_BANNER_TEXT=${env.CLASSIFICATION_BANNER_TEXT}"
       ]) {
         sh """
           npm run build
@@ -181,9 +182,6 @@ node {
             cf set-env ${appName} GEOSERVER_WORKSPACE_NAME ${env.GEOSERVER_WORKSPACE_NAME}
             cf set-env ${appName} GEOSERVER_LAYERGROUP_NAME ${env.GEOSERVER_LAYERGROUP_NAME}
           """
-          if (env.CLASSIFICATION_BANNER_TEXT != null) {
-            sh "cf set-env ${appName} CLASSIFICATION_BANNER_TEXT ${env.CLASSIFICATION_BANNER_TEXT}"
-          }
           sh "cf start ${appName}"
         } catch (Exception e) {
           //sh "cf logs --recent ${appName}"
@@ -262,9 +260,6 @@ node {
               cf set-env ${appName} GEOSERVER_WORKSPACE_NAME ${env.GEOSERVER_WORKSPACE_NAME}
               cf set-env ${appName} GEOSERVER_LAYERGROUP_NAME ${env.GEOSERVER_LAYERGROUP_NAME}
             """
-            if (env.CLASSIFICATION_BANNER_TEXT != null) {
-              sh "cf set-env ${appName} CLASSIFICATION_BANNER_TEXT ${env.CLASSIFICATION_BANNER_TEXT}"
-            }
             sh "cf start ${appName}"
           } catch (Exception e) {
             //sh "cf logs --recent ${appName}"
