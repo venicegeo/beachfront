@@ -19,15 +19,18 @@ import MockAdapter from 'axios-mock-adapter'
 import thunk from 'redux-thunk'
 import configureStore from 'redux-mock-store'
 import * as sinon from 'sinon'
-import * as session from '../../src/api/session'
 import {catalogActions, types} from '../../src/actions/catalogActions'
 import {catalogInitialState} from '../../src/reducers/catalogReducer'
-import {IMAGERY_ENDPOINT, SCENE_TILE_PROVIDERS, USER_ENDPOINT} from '../../src/config'
+import {IMAGERY_ENDPOINT, SCENE_TILE_PROVIDERS} from '../../src/config'
 import {getClient} from '../../src/api/session'
 
 const mockStore = configureStore([thunk])
-const mockAdapter = new MockAdapter(axios, { delayResponse: 1 })
 let store
+
+const mockAdapter = new MockAdapter(axios)
+let clientSpies = {
+  get: sinon.spy(getClient(), 'get'),
+}
 
 describe('catalogActions', () => {
   beforeEach(() => {
@@ -41,65 +44,13 @@ describe('catalogActions', () => {
   })
 
   afterEach(() => {
-    mockAdapter.restore()
+    mockAdapter.reset()
+    Object.keys(clientSpies).forEach(name => clientSpies[name].resetHistory())
   })
 
-  describe('initialize()', () => {
-    test('success', async () => {
-      const getClientSpy = sinon.spy(session, 'getClient')
-
-      mockAdapter.onGet(USER_ENDPOINT).reply(200)
-
-      await store.dispatch(catalogActions.initialize())
-
-      expect(getClientSpy.callCount).toEqual(1)
-
-      expect(store.getActions()).toEqual([
-        { type: types.CATALOG_INITIALIZING },
-        {
-          type: types.CATALOG_INITIALIZE_SUCCESS,
-          client: getClientSpy.returnValues[0],
-        },
-      ])
-
-      getClientSpy.restore()
-    })
-
-    test('request error', async () => {
-      const getClientSpy = sinon.spy(session, 'getClient')
-
-      mockAdapter.onGet(USER_ENDPOINT).reply(400, 'error')
-
-      await store.dispatch(catalogActions.initialize())
-
-      expect(getClientSpy.callCount).toEqual(1)
-
-      expect(store.getActions()).toEqual([
-        { type: types.CATALOG_INITIALIZING },
-        {
-          type: types.CATALOG_INITIALIZE_ERROR,
-          error: 'error',
-        },
-      ])
-
-      getClientSpy.restore()
-    })
-
-    test('non-request error', async () => {
-      const getClientStub = sinon.stub(session, 'getClient').throwsException('error')
-
-      mockAdapter.onGet(USER_ENDPOINT).reply(200)
-
-      await store.dispatch(catalogActions.initialize())
-
-      const actions = store.getActions()
-      expect(actions.length).toEqual(2)
-      expect(actions[0]).toEqual({ type: types.CATALOG_INITIALIZING })
-      expect(actions[1].type).toEqual(types.CATALOG_INITIALIZE_ERROR)
-      expect(actions[1].error).toBeDefined()
-
-      getClientStub.restore()
-    })
+  afterAll(() => {
+    mockAdapter.restore()
+    Object.keys(clientSpies).forEach(name => clientSpies[name].restore())
   })
 
   describe('setApiKey()', () => {
@@ -149,18 +100,13 @@ describe('catalogActions', () => {
   describe('search()', () => {
     test('success', async () => {
       store = mockStore({
-        catalog: {
-          ...catalogInitialState,
-          client: getClient(),
-        },
+        catalog: catalogInitialState,
         map: {
           bbox: [181, 0, 182, 1],
         },
       })
 
       const state = store.getState()
-
-      const clientGetSpy = sinon.spy(state.catalog.client, 'get')
 
       const mockResponse = {
         features: [
@@ -174,8 +120,8 @@ describe('catalogActions', () => {
 
       await store.dispatch(catalogActions.search())
 
-      expect(clientGetSpy.callCount).toEqual(1)
-      expect(clientGetSpy.getCall(0).args).toEqual([
+      expect(clientSpies.get.callCount).toEqual(1)
+      expect(clientSpies.get.args[0]).toEqual([
         searchUrl,
         {
           params: {
@@ -208,8 +154,6 @@ describe('catalogActions', () => {
           },
         },
       ])
-
-      clientGetSpy.restore()
     })
 
     test('tile provider error', async () => {

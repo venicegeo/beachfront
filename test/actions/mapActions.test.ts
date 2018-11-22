@@ -24,8 +24,9 @@ import {MODE_DRAW_BBOX, MODE_NORMAL, MODE_PRODUCT_LINES, MODE_SELECT_IMAGERY} fr
 import {Extent, Point} from '../../src/utils/geometries'
 
 const mockStore = configureStore([thunk])
-const mockAdapter = new MockAdapter(axios, { delayResponse: 1 })
 let store
+
+const mockAdapter = new MockAdapter(axios)
 
 describe('catalogActions', () => {
   beforeEach(() => {
@@ -38,6 +39,10 @@ describe('catalogActions', () => {
   })
 
   afterEach(() => {
+    mockAdapter.reset()
+  })
+
+  afterAll(() => {
     mockAdapter.restore()
   })
 

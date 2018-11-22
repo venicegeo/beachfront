@@ -15,7 +15,7 @@
  **/
 
 import {AppState} from '../store'
-import {IMAGERY_ENDPOINT, SCENE_TILE_PROVIDERS, USER_ENDPOINT} from '../config'
+import {IMAGERY_ENDPOINT, SCENE_TILE_PROVIDERS} from '../config'
 import {getClient} from '../api/session'
 import {wrap} from '../utils/math'
 import {catalogInitialState} from '../reducers/catalogReducer'
@@ -47,26 +47,6 @@ export interface CatalogUpdateSearchCriteriaArgs {
 }
 
 export const catalogActions = {
-  initialize() {
-    return async dispatch => {
-      dispatch({ type: types.CATALOG_INITIALIZING })
-
-      try {
-        const client = getClient()
-        await client.get(USER_ENDPOINT)
-        dispatch({
-          type: types.CATALOG_INITIALIZE_SUCCESS,
-          client,
-        })
-      } catch (error) {
-        dispatch({
-          type: types.CATALOG_INITIALIZE_ERROR,
-          error: (error.response) ? error.response.data : error,
-        })
-      }
-    }
-  },
-
   setApiKey(apiKey: string) {
     return {
       type: types.CATALOG_API_KEY_UPDATED,
@@ -109,7 +89,7 @@ export const catalogActions = {
       }
 
       try {
-        const response = await state.catalog.client.get(`${IMAGERY_ENDPOINT}/${sceneTileProvider.catalogSection}/discover/${state.catalog.searchCriteria.source}`, {
+        const response = await getClient().get(`${IMAGERY_ENDPOINT}/${sceneTileProvider.catalogSection}/discover/${state.catalog.searchCriteria.source}`, {
           params: {
             cloudCover: state.catalog.searchCriteria.cloudCover + .05,
             PL_API_KEY: state.catalog.apiKey,

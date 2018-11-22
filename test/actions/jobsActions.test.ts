@@ -18,13 +18,21 @@ import axios from 'axios'
 import MockAdapter from 'axios-mock-adapter'
 import thunk from 'redux-thunk'
 import configureStore from 'redux-mock-store'
+import * as sinon from 'sinon'
 import {jobsActions, types} from '../../src/actions/jobsActions'
 import {jobsInitialState} from '../../src/reducers/jobsReducer'
 import {JOB_ENDPOINT} from '../../src/config'
+import {getClient} from '../../src/api/session'
 
 const mockStore = configureStore([thunk])
-const mockAdapter = new MockAdapter(axios, { delayResponse: 1 })
 let store
+
+const mockAdapter = new MockAdapter(axios)
+const clientSpies = {
+  get: sinon.spy(getClient(), 'get'),
+  post: sinon.spy(getClient(), 'post'),
+  delete: sinon.spy(getClient(), 'delete'),
+}
 
 describe('jobsActions', () => {
   beforeEach(() => {
@@ -36,7 +44,13 @@ describe('jobsActions', () => {
   })
 
   afterEach(() => {
+    mockAdapter.reset()
+    Object.keys(clientSpies).forEach(name => clientSpies[name].resetHistory())
+  })
+
+  afterAll(() => {
     mockAdapter.restore()
+    Object.keys(clientSpies).forEach(name => clientSpies[name].restore())
   })
 
   describe('fetch()', () => {
@@ -49,6 +63,9 @@ describe('jobsActions', () => {
       mockAdapter.onGet(JOB_ENDPOINT).reply(200, mockResponseData)
 
       await store.dispatch(jobsActions.fetch())
+
+      expect(clientSpies.get.callCount).toEqual(1)
+      expect(clientSpies.get.args[0]).toEqual([JOB_ENDPOINT])
 
       expect(store.getActions()).toEqual([
         { type: types.JOBS_FETCHING },
@@ -92,9 +109,13 @@ describe('jobsActions', () => {
       const mockResponseData = {
         job: { id: mockJobId },
       }
-      mockAdapter.onGet(`${JOB_ENDPOINT}/${mockJobId}`).reply(200, mockResponseData)
+      const url = `${JOB_ENDPOINT}/${mockJobId}`
+      mockAdapter.onGet(url).reply(200, mockResponseData)
 
       await store.dispatch(jobsActions.fetchOne(mockJobId))
+
+      expect(clientSpies.get.callCount).toEqual(1)
+      expect(clientSpies.get.args[0]).toEqual([url])
 
       expect(store.getActions()).toEqual([
         { type: types.JOBS_FETCHING_ONE },
@@ -141,13 +162,26 @@ describe('jobsActions', () => {
       }
       mockAdapter.onPost(JOB_ENDPOINT).reply(200, mockResponseData)
 
-      await store.dispatch(jobsActions.createJob({
+      const args = {
         algorithmId: 'algorithmId',
         computeMask: true,
         name: 'name',
         catalogApiKey: 'catalogApiKey',
         sceneId: 'sceneId',
-      }))
+      }
+      await store.dispatch(jobsActions.createJob(args))
+
+      expect(clientSpies.post.callCount).toEqual(1)
+      expect(clientSpies.post.args[0]).toEqual([
+        JOB_ENDPOINT,
+        {
+          algorithm_id: args.algorithmId,
+          compute_mask: args.computeMask,
+          name: args.name,
+          planet_api_key: args.catalogApiKey,
+          scene_id: args.sceneId,
+        },
+      ])
 
       expect(store.getActions()).toEqual([
         { type: types.JOBS_CREATING_JOB },
@@ -210,9 +244,13 @@ describe('jobsActions', () => {
   describe('deleteJob()', () => {
     test('success', async () => {
       const mockJob = { id: 'a' }
-      mockAdapter.onDelete(`${JOB_ENDPOINT}/${mockJob.id}`).reply(200)
+      const url = `${JOB_ENDPOINT}/${mockJob.id}`
+      mockAdapter.onDelete(url).reply(200)
 
       await store.dispatch(jobsActions.deleteJob(mockJob as any))
+
+      expect(clientSpies.delete.callCount).toEqual(1)
+      expect(clientSpies.delete.args[0]).toEqual([url])
 
       expect(store.getActions()).toEqual([
         {

@@ -38,51 +38,6 @@ describe('catalogReducer', () => {
     })
   })
 
-  test('CATALOG_INITIALIZING', () => {
-    const action = { type: types.CATALOG_INITIALIZING }
-
-    expect(catalogReducer(catalogInitialState, action)).toEqual({
-      ...catalogInitialState,
-      isInitializing: true,
-    })
-  })
-
-  test('CATALOG_INITIALIZE_SUCCESS', () => {
-    const state = {
-      ...catalogInitialState,
-      isInitializing: true,
-    }
-
-    const action = {
-      type: types.CATALOG_INITIALIZE_SUCCESS,
-      client: 'a',
-    }
-
-    expect(catalogReducer(state, action)).toEqual(({
-      ...state,
-      isInitializing: false,
-      client: action.client,
-    }))
-  })
-
-  test('CATALOG_INITIALIZE_ERROR', () => {
-    const state = {
-      ...catalogInitialState,
-      isInitializing: true,
-    }
-
-    const action = {
-      type: types.CATALOG_INITIALIZE_ERROR,
-      error: 'a',
-    }
-
-    expect(catalogReducer(state, action)).toEqual({
-      ...state,
-      isInitializing: false,
-      initializeError: action.error,
-    })
-  })
-
   test('CATALOG_API_KEY_UPDATED', () => {
     const action = {
       type: types.CATALOG_API_KEY_UPDATED,

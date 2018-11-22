@@ -16,16 +16,12 @@
 
 import {types} from '../actions/catalogActions'
 import {types as mapTypes} from '../actions/mapActions'
-import {AxiosInstance} from 'axios'
 import * as moment from 'moment'
 import {SOURCE_DEFAULT} from '../constants'
 
 const DATE_FORMAT = 'YYYY-MM-DD'
 
 export interface CatalogState {
-  client: AxiosInstance | null
-  isInitializing: boolean
-  initializeError: any
   apiKey: string
   isSearching: boolean
   searchCriteria: {
@@ -39,9 +35,6 @@ export interface CatalogState {
 }
 
 export const catalogInitialState: CatalogState = {
-  client: null,
-  isInitializing: false,
-  initializeError: null,
   apiKey: '',
   isSearching: false,
   searchCriteria: {
@@ -60,23 +53,6 @@ export function catalogReducer(state = catalogInitialState, action: any): Catalo
       return {
         ...state,
         ...action.deserialized,
-      }
-    case types.CATALOG_INITIALIZING:
-      return {
-        ...state,
-        isInitializing: true,
-      }
-    case types.CATALOG_INITIALIZE_SUCCESS:
-      return {
-        ...state,
-        isInitializing: false,
-        client: action.client,
-      }
-    case types.CATALOG_INITIALIZE_ERROR:
-      return {
-        ...state,
-        isInitializing: false,
-        initializeError: action.error,
       }
     case types.CATALOG_API_KEY_UPDATED:
       return {

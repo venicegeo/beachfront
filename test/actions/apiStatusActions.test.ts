@@ -18,12 +18,18 @@ import axios from 'axios'
 import MockAdapter from 'axios-mock-adapter'
 import thunk from 'redux-thunk'
 import configureStore from 'redux-mock-store'
+import * as sinon from 'sinon'
 import {apiStatusActions, types} from '../../src/actions/apiStatusActions'
 import {apiStatusInitialState} from '../../src/reducers/apiStatusReducer'
+import {getClient} from '../../src/api/session'
 
 const mockStore = configureStore([thunk])
-const mockAdapter = new MockAdapter(axios, { delayResponse: 1 })
 let store
+
+const mockAdapter = new MockAdapter(axios)
+let clientSpies = {
+  get: sinon.spy(getClient(), 'get'),
+}
 
 describe('apiStatusActions', () => {
   beforeEach(() => {
@@ -36,7 +42,13 @@ describe('apiStatusActions', () => {
   })
 
   afterEach(() => {
+    mockAdapter.reset()
+    Object.keys(clientSpies).forEach(name => clientSpies[name].resetHistory())
+  })
+
+  afterAll(() => {
     mockAdapter.restore()
+    Object.keys(clientSpies).forEach(name => clientSpies[name].restore())
   })
 
   describe('fetch()', () => {
@@ -48,6 +60,9 @@ describe('apiStatusActions', () => {
       mockAdapter.onGet('/').reply(200, mockResponse)
 
       await store.dispatch(apiStatusActions.fetch())
+
+      expect(clientSpies.get.callCount).toEqual(1)
+      expect(clientSpies.get.args[0]).toEqual(['/'])
 
       expect(store.getActions()).toEqual([
         { type: types.API_STATUS_FETCHING },

@@ -26,8 +26,13 @@ import {getClient} from '../../src/api/session'
 import {Extent} from '../../src/utils/geometries'
 
 const mockStore = configureStore([thunk])
-const mockAdapter = new MockAdapter(axios, { delayResponse: 1 })
 let store
+
+const mockAdapter = new MockAdapter(axios)
+const clientSpies = {
+  get: sinon.spy(getClient(), 'get'),
+  post: sinon.spy(getClient(), 'post'),
+}
 
 describe('productLinesActions', () => {
   beforeEach(() => {
@@ -39,7 +44,13 @@ describe('productLinesActions', () => {
   })
 
   afterEach(() => {
+    mockAdapter.reset()
+    Object.keys(clientSpies).forEach(name => clientSpies[name].resetHistory())
+  })
+
+  afterAll(() => {
     mockAdapter.restore()
+    Object.keys(clientSpies).forEach(name => clientSpies[name].restore())
   })
 
   describe('fetch()', () => {
@@ -52,6 +63,9 @@ describe('productLinesActions', () => {
       mockAdapter.onGet(PRODUCTLINE_ENDPOINT).reply(200, mockResponse)
 
       await store.dispatch(productLinesActions.fetch())
+
+      expect(clientSpies.get.callCount).toEqual(1)
+      expect(clientSpies.get.args[0]).toEqual([PRODUCTLINE_ENDPOINT])
 
       expect(store.getActions()).toEqual([
         { type: types.PRODUCT_LINES_FETCHING },
@@ -101,9 +115,13 @@ describe('productLinesActions', () => {
       }
       const productLineId = '1'
       const sinceDate = '2'
-      mockAdapter.onGet(getJobsEndpoint(productLineId, sinceDate)).reply(200, mockResponse)
+      const url = getJobsEndpoint(productLineId, sinceDate)
+      mockAdapter.onGet(url).reply(200, mockResponse)
 
       await store.dispatch(productLinesActions.fetchJobs({ productLineId, sinceDate }))
+
+      expect(clientSpies.get.callCount).toEqual(1)
+      expect(clientSpies.get.args[0]).toEqual([url])
 
       expect(store.getActions()).toEqual([
         { type: types.PRODUCT_LINES_FETCHING_JOBS },
@@ -151,9 +169,6 @@ describe('productLinesActions', () => {
       }
       mockAdapter.onPost(PRODUCTLINE_ENDPOINT).reply(200, mockResponse)
 
-      const client = getClient()
-      const postSpy = sinon.spy(client, 'post')
-
       const args = {
         algorithmId: 'a',
         bbox: [1, 2, 3, 4] as Extent,
@@ -165,8 +180,8 @@ describe('productLinesActions', () => {
       }
       await store.dispatch(productLinesActions.create(args))
 
-      expect(postSpy.callCount).toBe(1)
-      expect(postSpy.args[0]).toEqual([
+      expect(clientSpies.post.callCount).toBe(1)
+      expect(clientSpies.post.args[0]).toEqual([
         PRODUCTLINE_ENDPOINT,
         {
           algorithm_id: args.algorithmId,
@@ -190,8 +205,6 @@ describe('productLinesActions', () => {
           createdProductLine: mockResponse.productline,
         },
       ])
-
-      postSpy.restore()
     })
 
     test('request error', async () => {

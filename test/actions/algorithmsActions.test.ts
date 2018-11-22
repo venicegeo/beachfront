@@ -14,17 +14,23 @@
  * limitations under the License.
  */
 
-import {algorithmsActions, types} from '../../src/actions/algorithmsActions'
 import axios from 'axios'
 import MockAdapter from 'axios-mock-adapter'
 import thunk from 'redux-thunk'
 import configureStore from 'redux-mock-store'
+import * as sinon from 'sinon'
 import {ALGORITHM_ENDPOINT} from '../../src/config'
+import {algorithmsActions, types} from '../../src/actions/algorithmsActions'
 import {algorithmsInitialState} from '../../src/reducers/algorithmsReducer'
+import {getClient} from '../../src/api/session'
 
 const mockStore = configureStore([thunk])
-const mockAdapter = new MockAdapter(axios, { delayResponse: 1 })
 let store
+
+const mockAdapter = new MockAdapter(axios)
+let clientSpies = {
+  get: sinon.spy(getClient(), 'get'),
+}
 
 describe('algorithmsActions', () => {
   beforeEach(() => {
@@ -37,7 +43,13 @@ describe('algorithmsActions', () => {
   })
 
   afterEach(() => {
+    mockAdapter.reset()
+    Object.keys(clientSpies).forEach(name => clientSpies[name].resetHistory())
+  })
+
+  afterAll(() => {
     mockAdapter.restore()
+    Object.keys(clientSpies).forEach(name => clientSpies[name].restore())
   })
 
   describe('fetch()', () => {
@@ -63,6 +75,9 @@ describe('algorithmsActions', () => {
       mockAdapter.onGet(ALGORITHM_ENDPOINT).reply(200, mockResponse)
 
       await store.dispatch(algorithmsActions.fetch())
+
+      expect(clientSpies.get.callCount).toEqual(1)
+      expect(clientSpies.get.args[0]).toEqual([ALGORITHM_ENDPOINT])
 
       expect(store.getActions()).toEqual([
         { type: types.ALGORITHMS_FETCHING },
