@@ -88,16 +88,15 @@ export const productLinesActions = {
     return async dispatch => {
       dispatch({ type: types.PRODUCT_LINES_CREATING_PRODUCT_LINE })
 
-      const [minX, minY, maxX, maxY] = args.bbox
       try {
         const response = await getClient().post(PRODUCTLINE_ENDPOINT, {
           algorithm_id: args.algorithmId,
           category: args.category,
           max_cloud_cover: args.maxCloudCover,
-          min_x: minX,
-          min_y: minY,
-          max_x: maxX,
-          max_y: maxY,
+          min_x: args.bbox[0],
+          min_y: args.bbox[1],
+          max_x: args.bbox[2],
+          max_y: args.bbox[3],
           name: args.name,
           spatial_filter_id: null,
           start_on: args.dateStart,
