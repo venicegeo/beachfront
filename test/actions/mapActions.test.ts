@@ -678,8 +678,8 @@ describe('catalogActions', () => {
 
       // Note: coordinates should be wrapped within -180/180.
       expect(sessionStorage.setItem).toHaveBeenCalledTimes(2)
-      expect(sessionStorage.setItem).toBeCalledWith('bbox', JSON.stringify([-179, 0, -178, 1]))
-      expect(sessionStorage.setItem).toBeCalledWith('mapView', JSON.stringify({ center: [-179, 0] }))
+      expect(sessionStorage.setItem).toHaveBeenCalledWith('bbox', JSON.stringify([-179, 0, -178, 1]))
+      expect(sessionStorage.setItem).toHaveBeenCalledWith('mapView', JSON.stringify({ center: [-179, 0] }))
 
       expect(store.getActions()).toEqual([
         { type: types.MAP_SERIALIZED },
@@ -701,8 +701,8 @@ describe('catalogActions', () => {
       await store.dispatch(mapActions.deserialize())
 
       expect(sessionStorage.getItem).toHaveBeenCalledTimes(2)
-      expect(sessionStorage.getItem).toBeCalledWith('bbox')
-      expect(sessionStorage.getItem).toBeCalledWith('mapView')
+      expect(sessionStorage.getItem).toHaveBeenCalledWith('bbox')
+      expect(sessionStorage.getItem).toHaveBeenCalledWith('mapView')
 
       expect(store.getActions()).toEqual([
         {
@@ -722,8 +722,8 @@ describe('catalogActions', () => {
       await store.dispatch(mapActions.deserialize())
 
       expect(sessionStorage.getItem).toHaveBeenCalledTimes(2)
-      expect(sessionStorage.getItem).toBeCalledWith('bbox')
-      expect(sessionStorage.getItem).toBeCalledWith('mapView')
+      expect(sessionStorage.getItem).toHaveBeenCalledWith('bbox')
+      expect(sessionStorage.getItem).toHaveBeenCalledWith('mapView')
 
       expect(store.getActions()).toEqual([
         {
