@@ -29,6 +29,9 @@ let store
 
 describe('catalogActions', () => {
   beforeEach(() => {
+    jest.clearAllMocks()
+    sessionStorage.clear()
+
     store = mockStore({
       map: mapInitialState,
     })
@@ -36,7 +39,6 @@ describe('catalogActions', () => {
 
   afterEach(() => {
     mockAdapter.restore()
-    sessionStorage.clear()
   })
 
   describe('initialized()', () => {
@@ -674,7 +676,8 @@ describe('catalogActions', () => {
 
       await store.dispatch(mapActions.serialize())
 
-      // Coordinates should be wrapped within -180/180.
+      // Note: coordinates should be wrapped within -180/180.
+      expect(sessionStorage.setItem).toHaveBeenCalledTimes(2)
       expect(sessionStorage.setItem).toBeCalledWith('bbox', JSON.stringify([-179, 0, -178, 1]))
       expect(sessionStorage.setItem).toBeCalledWith('mapView', JSON.stringify({ center: [-179, 0] }))
 
@@ -697,6 +700,7 @@ describe('catalogActions', () => {
 
       await store.dispatch(mapActions.deserialize())
 
+      expect(sessionStorage.getItem).toHaveBeenCalledTimes(2)
       expect(sessionStorage.getItem).toBeCalledWith('bbox')
       expect(sessionStorage.getItem).toBeCalledWith('mapView')
 
@@ -717,6 +721,7 @@ describe('catalogActions', () => {
 
       await store.dispatch(mapActions.deserialize())
 
+      expect(sessionStorage.getItem).toHaveBeenCalledTimes(2)
       expect(sessionStorage.getItem).toBeCalledWith('bbox')
       expect(sessionStorage.getItem).toBeCalledWith('mapView')
 

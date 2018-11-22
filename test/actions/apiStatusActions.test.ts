@@ -27,6 +27,9 @@ let store
 
 describe('apiStatusActions', () => {
   beforeEach(() => {
+    jest.clearAllMocks()
+    sessionStorage.clear()
+
     store = mockStore({
       apiStatus: apiStatusInitialState,
     })
@@ -34,7 +37,6 @@ describe('apiStatusActions', () => {
 
   afterEach(() => {
     mockAdapter.restore()
-    sessionStorage.clear()
   })
 
   describe('fetch()', () => {
@@ -91,6 +93,8 @@ describe('apiStatusActions', () => {
       await store.dispatch(apiStatusActions.serialize())
 
       const state = store.getState()
+
+      expect(sessionStorage.setItem).toHaveBeenCalledTimes(2)
       expect(sessionStorage.setItem).toHaveBeenCalledWith(
         'geoserver',
         JSON.stringify(state.apiStatus.geoserver),
@@ -118,6 +122,7 @@ describe('apiStatusActions', () => {
 
       await store.dispatch(apiStatusActions.deserialize())
 
+      expect(sessionStorage.getItem).toHaveBeenCalledTimes(2)
       expect(sessionStorage.getItem).toHaveBeenCalledWith('geoserver')
       expect(sessionStorage.getItem).toHaveBeenCalledWith('enabled_platforms_records')
 
@@ -135,6 +140,7 @@ describe('apiStatusActions', () => {
     test('no saved data', async () => {
       await store.dispatch(apiStatusActions.deserialize())
 
+      expect(sessionStorage.getItem).toHaveBeenCalledTimes(2)
       expect(sessionStorage.getItem).toHaveBeenCalledWith('geoserver')
       expect(sessionStorage.getItem).toHaveBeenCalledWith('enabled_platforms_records')
 
@@ -157,6 +163,7 @@ describe('apiStatusActions', () => {
       await store.dispatch(apiStatusActions.deserialize())
 
       // Deserialize should gracefully handle errors.
+      expect(sessionStorage.getItem).toHaveBeenCalledTimes(2)
       expect(sessionStorage.getItem).toHaveBeenCalledWith('geoserver')
       expect(sessionStorage.getItem).toHaveBeenCalledWith('enabled_platforms_records')
 

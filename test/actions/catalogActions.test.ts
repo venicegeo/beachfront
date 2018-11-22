@@ -31,6 +31,10 @@ let store
 
 describe('catalogActions', () => {
   beforeEach(() => {
+    jest.clearAllMocks()
+    sessionStorage.clear()
+    localStorage.clear()
+
     store = mockStore({
       catalog: catalogInitialState,
     })
@@ -38,8 +42,6 @@ describe('catalogActions', () => {
 
   afterEach(() => {
     mockAdapter.restore()
-    sessionStorage.clear()
-    localStorage.clear()
   })
 
   describe('initialize()', () => {
@@ -294,9 +296,12 @@ describe('catalogActions', () => {
       await store.dispatch(catalogActions.serialize())
 
       const state = store.getState()
-      expect(sessionStorage.setItem).toHaveBeenCalledTimes(3)
+
+      expect(sessionStorage.setItem).toHaveBeenCalledTimes(2)
       expect(sessionStorage.setItem).toHaveBeenCalledWith('searchCriteria', JSON.stringify(state.catalog.searchCriteria))
       expect(sessionStorage.setItem).toHaveBeenCalledWith('searchResults', JSON.stringify(state.catalog.searchResults))
+
+      expect(localStorage.setItem).toHaveBeenCalledTimes(1)
       expect(localStorage.setItem).toHaveBeenCalledWith('catalog_apiKey', state.catalog.apiKey)
 
       expect(store.getActions()).toEqual([
@@ -324,9 +329,11 @@ describe('catalogActions', () => {
 
       await store.dispatch(catalogActions.deserialize())
 
-      expect(sessionStorage.getItem).toHaveBeenCalledTimes(3)
+      expect(sessionStorage.getItem).toHaveBeenCalledTimes(2)
       expect(sessionStorage.getItem).toHaveBeenCalledWith('searchCriteria')
       expect(sessionStorage.getItem).toHaveBeenCalledWith('searchResults')
+
+      expect(localStorage.getItem).toHaveBeenCalledTimes(1)
       expect(localStorage.getItem).toHaveBeenCalledWith('catalog_apiKey')
 
       expect(store.getActions()).toEqual([
@@ -343,6 +350,13 @@ describe('catalogActions', () => {
 
     test('no saved data', async () => {
       await store.dispatch(catalogActions.deserialize())
+
+      expect(sessionStorage.getItem).toHaveBeenCalledTimes(2)
+      expect(sessionStorage.getItem).toHaveBeenCalledWith('searchCriteria')
+      expect(sessionStorage.getItem).toHaveBeenCalledWith('searchResults')
+
+      expect(localStorage.getItem).toHaveBeenCalledTimes(1)
+      expect(localStorage.getItem).toHaveBeenCalledWith('catalog_apiKey')
 
       expect(store.getActions()).toEqual([
         {
@@ -361,6 +375,13 @@ describe('catalogActions', () => {
       sessionStorage.setItem('searchResults', 'badJson')
 
       await store.dispatch(catalogActions.deserialize())
+
+      expect(sessionStorage.getItem).toHaveBeenCalledTimes(2)
+      expect(sessionStorage.getItem).toHaveBeenCalledWith('searchCriteria')
+      expect(sessionStorage.getItem).toHaveBeenCalledWith('searchResults')
+
+      expect(localStorage.getItem).toHaveBeenCalledTimes(1)
+      expect(localStorage.getItem).toHaveBeenCalledWith('catalog_apiKey')
 
       expect(store.getActions()).toEqual([
         {

@@ -28,6 +28,9 @@ let store
 
 describe('algorithmsActions', () => {
   beforeEach(() => {
+    jest.clearAllMocks()
+    sessionStorage.clear()
+
     store = mockStore({
       algorithms: algorithmsInitialState,
     })
@@ -35,7 +38,6 @@ describe('algorithmsActions', () => {
 
   afterEach(() => {
     mockAdapter.restore()
-    sessionStorage.clear()
   })
 
   describe('fetch()', () => {
@@ -108,6 +110,7 @@ describe('algorithmsActions', () => {
     test('success', async () => {
       await store.dispatch(algorithmsActions.serialize())
 
+      expect(sessionStorage.setItem).toHaveBeenCalledTimes(1)
       expect(sessionStorage.setItem).toHaveBeenCalledWith(
         'algorithms_records',
         JSON.stringify(store.getState().algorithms.records),
@@ -127,6 +130,7 @@ describe('algorithmsActions', () => {
 
       await store.dispatch(algorithmsActions.deserialize())
 
+      expect(sessionStorage.getItem).toHaveBeenCalledTimes(1)
       expect(sessionStorage.getItem).toHaveBeenCalledWith('algorithms_records')
 
       expect(store.getActions()).toEqual([
@@ -142,6 +146,7 @@ describe('algorithmsActions', () => {
     test('no saved data', async () => {
       await store.dispatch(algorithmsActions.deserialize())
 
+      expect(sessionStorage.getItem).toHaveBeenCalledTimes(1)
       expect(sessionStorage.getItem).toHaveBeenCalledWith('algorithms_records')
 
       expect(store.getActions()).toEqual([
@@ -161,6 +166,7 @@ describe('algorithmsActions', () => {
       await store.dispatch(algorithmsActions.deserialize())
 
       // Deserialize should gracefully handle errors.
+      expect(sessionStorage.getItem).toHaveBeenCalledTimes(1)
       expect(sessionStorage.getItem).toHaveBeenCalledWith('algorithms_records')
 
       expect(store.getActions()).toEqual([

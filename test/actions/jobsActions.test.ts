@@ -28,6 +28,8 @@ let store
 
 describe('jobsActions', () => {
   beforeEach(() => {
+    jest.clearAllMocks()
+
     store = mockStore({
       jobs: jobsInitialState,
     })
@@ -35,8 +37,6 @@ describe('jobsActions', () => {
 
   afterEach(() => {
     mockAdapter.restore()
-    sessionStorage.clear()
-    localStorage.clear()
   })
 
   describe('fetch()', () => {
