@@ -67,11 +67,6 @@ export const tourActions = {
       const curStep = state.tour.steps.find(i => i.step === state.tour.step)
       const nextStep = state.tour.steps.find(i => i.step === step)
 
-      if (curStep.step > nextStep.step) {
-        alert('Sorry.  It seems you cannot go back from here.')
-        return
-      }
-
       dispatch({ type: types.TOUR_STEP_CHANGING })
 
       try {
@@ -87,10 +82,15 @@ export const tourActions = {
           await scrollIntoView(nextStep.selector)
         }
       } catch (error) {
+        if (curStep.step > nextStep.step) {
+          alert("Sorry, it seems you can't go back from here.")
+        }
+
         dispatch({
           type: types.TOUR_STEP_CHANGE_ERROR,
           error: error.message,
         })
+
         return
       }
 

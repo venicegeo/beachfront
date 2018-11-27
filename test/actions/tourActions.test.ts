@@ -189,12 +189,17 @@ describe('tourActions', () => {
       expect(store.getActions()).toEqual([])
     })
 
-    test('show alert if trying to step backwards', async () => {
+    test('show alert if an error occurs when trying to step backwards', async () => {
       store = mockStore({
         tour: {
           ...tourInitialState,
           steps: [
-            { step: 1 },
+            {
+              step: 1,
+              before: () => {
+                throw Error('error')
+              },
+            },
             { step: 2 },
           ],
           step: 2,
@@ -207,7 +212,13 @@ describe('tourActions', () => {
 
       expect(alertSpy.callCount).toEqual(1)
 
-      expect(store.getActions()).toEqual([])
+      expect(store.getActions()).toEqual([
+        { type: types.TOUR_STEP_CHANGING },
+        {
+          type: types.TOUR_STEP_CHANGE_ERROR,
+          error: 'error',
+        },
+      ])
 
       alertSpy.restore()
     })
