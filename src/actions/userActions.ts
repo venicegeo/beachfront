@@ -14,9 +14,10 @@
  * limitations under the License.
  **/
 
-import * as session from '../api/session'
+import {getClient} from '../api/session'
 import {AppState} from '../store'
 import {userInitialState} from '../reducers/userReducer'
+
 
 export const types = {
   USER_LOGGED_OUT: 'USER_LOGGED_OUT',
@@ -39,8 +40,8 @@ export const userActions = {
 
   sessionLogout() {
     sessionStorage.clear()
-    const client = session.getClient()
-    client.get(`/oauth/logout`).then(response => {
+
+    getClient().get(`/oauth/logout`).then(response => {
       window.location.href = response.data
     })
 
