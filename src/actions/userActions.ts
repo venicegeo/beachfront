@@ -18,7 +18,6 @@ import {getClient} from '../api/session'
 import {AppState} from '../store'
 import {userInitialState} from '../reducers/userReducer'
 
-
 export const types = {
   USER_LOGGED_OUT: 'USER_LOGGED_OUT',
   USER_SESSION_CLEARED: 'USER_SESSION_CLEARED',
