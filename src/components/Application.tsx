@@ -319,7 +319,6 @@ export class Application extends React.Component<Props> {
   private initializeServices() {
     this.props.actions.apiStatus.fetch()
     this.props.actions.algorithms.fetch()
-    this.props.actions.catalog.initialize()
   }
 
   private refreshRecords() {
@@ -432,7 +431,6 @@ function mapDispatchToProps(dispatch) {
         deserialize: () => dispatch(userActions.deserialize()),
       },
       catalog: {
-        initialize: () => dispatch(catalogActions.initialize()),
         search: (args: CatalogSearchArgs) => dispatch(catalogActions.search(args)),
         serialize: () => dispatch(catalogActions.serialize()),
         deserialize: () => dispatch(catalogActions.deserialize()),
