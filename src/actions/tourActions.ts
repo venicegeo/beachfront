@@ -70,17 +70,15 @@ export const tourActions = {
       dispatch({ type: types.TOUR_STEP_CHANGING })
 
       try {
-        if (curStep && curStep.after) {
+        if (curStep.after) {
           await curStep.after()
         }
 
-        if (nextStep) {
-          if (nextStep.before) {
-            await nextStep.before()
-          }
-
-          await scrollIntoView(nextStep.selector)
+        if (nextStep.before) {
+          await nextStep.before()
         }
+
+        await scrollIntoView(nextStep.selector)
       } catch (error) {
         if (curStep.step > nextStep.step) {
           alert("Sorry, it seems you can't go back from here.")
