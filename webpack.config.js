@@ -28,7 +28,6 @@ const pkg = require('./package')
 
 const __environment__ = process.env.NODE_ENV || 'development'
 const COMPILER_TARGET = process.env.COMPILER_TARGET || (__environment__ === 'development' ? 'es6' : 'es5')
-const enableSourceMaps = process.env.ENABLE_SOURCE_MAPS || 'true'
 
 module.exports = {
   devtool: '#cheap-module-eval-source-map',
@@ -130,6 +129,8 @@ module.exports = {
       'process.env.OSM_BASE_URL': JSON.stringify(process.env.OSM_BASE_URL || 'osm.geointservices.io'),
       'process.env.PLANET_BASE_URL': JSON.stringify(process.env.PLANET_BASE_URL || 'planet.com'),
       'process.env.USER_GUIDE_URL': '"https://" + location.hostname.replace("beachfront", "bf-docs")',
+      'process.env.GEOSERVER_WORKSPACE_NAME': JSON.stringify(process.env.GEOSERVER_WORKSPACE_NAME || 'piazza'),
+      'process.env.GEOSERVER_LAYERGROUP_NAME': JSON.stringify(process.env.GEOSERVER_LAYERGROUP_NAME || 'bfdetections'),
     }),
     new HtmlWebpackPlugin({
       template: 'src/index.html',
@@ -144,7 +145,7 @@ module.exports = {
   ]
 }
 
-if (__environment__ === 'production' && enableSourceMaps === 'true') {
+if (__environment__ === 'production') {
   module.exports.devtool = 'source-map'
   module.exports.plugins.push(new webpack.optimize.UglifyJsPlugin({ sourceMap: true, compress: { warnings: false } }))
 }

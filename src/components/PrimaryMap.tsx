@@ -49,6 +49,8 @@ import {wrap} from '../utils/math'
 import {
   BASEMAP_TILE_PROVIDERS,
   SCENE_TILE_PROVIDERS,
+  GEOSERVER_WORKSPACE_NAME,
+  GEOSERVER_LAYERGROUP_NAME,
 } from '../config'
 import {
   STATUS_ACTIVE,
@@ -78,7 +80,7 @@ const MAX_ZOOM = 22
 const RESOLUTION_CLOSE = 850
 const VIEW_BOUNDS: Extent = [-Number.MAX_SAFE_INTEGER, -90, Number.MAX_SAFE_INTEGER, 90]
 const STEM_OFFSET = 10000
-const IDENTIFIER_DETECTIONS = 'piazza:bfdetections'
+const IDENTIFIER_DETECTIONS = GEOSERVER_WORKSPACE_NAME + ':' + GEOSERVER_LAYERGROUP_NAME
 const KEY_SCENE_ID = 'SCENE_ID'
 const KEY_LAYERS = 'LAYERS'
 const KEY_NAME = 'name'

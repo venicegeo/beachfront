@@ -185,6 +185,10 @@ export class Application extends React.Component<Props> {
           },
         })
       }
+
+      if (this.props.map.selectedFeature.id === this.props.jobs.deletedJob.id) {
+        this.props.actions.map.setSelectedFeature(null)
+      }
     }
 
     // Product line created successfully.
