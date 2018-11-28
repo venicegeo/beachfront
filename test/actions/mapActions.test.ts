@@ -22,6 +22,10 @@ import {mapActions, types} from '../../src/actions/mapActions'
 import {mapInitialState} from '../../src/reducers/mapReducer'
 import {MODE_DRAW_BBOX, MODE_NORMAL, MODE_PRODUCT_LINES, MODE_SELECT_IMAGERY} from '../../src/components/PrimaryMap'
 import {Extent, Point} from '../../src/utils/geometries'
+import {routeInitialState} from '../../src/reducers/routeReducer'
+import {catalogInitialState} from '../../src/reducers/catalogReducer'
+import {jobsInitialState} from '../../src/reducers/jobsReducer'
+import {productLinesInitialState} from '../../src/reducers/productLinesReducer'
 
 const mockStore = configureStore([thunk])
 let store
@@ -67,6 +71,7 @@ describe('catalogActions', () => {
     test('MODE_NORMAL', async () => {
       store = mockStore({
         route: {
+          ...routeInitialState,
           pathname: 'unhandledPathname',
         },
       })
@@ -88,9 +93,11 @@ describe('catalogActions', () => {
           bbox: [1, 2, 3, 4],
         },
         route: {
+          ...routeInitialState,
           pathname: '/create-job',
         },
         catalog: {
+          ...catalogInitialState,
           searchResults: ['a', 'b', 'c'],
         },
       })
@@ -112,9 +119,11 @@ describe('catalogActions', () => {
           bbox: null,
         },
         route: {
+          ...routeInitialState,
           pathname: '/create-job',
         },
         catalog: {
+          ...catalogInitialState,
           searchResults: null,
         },
       })
@@ -132,6 +141,7 @@ describe('catalogActions', () => {
     test('MODE_DRAW_BBOX (via /create-product-line)', async () => {
       store = mockStore({
         route: {
+          ...routeInitialState,
           pathname: '/create-product-line',
         },
       })
@@ -149,6 +159,7 @@ describe('catalogActions', () => {
     test('MODE_PRODUCT_LINES', async () => {
       store = mockStore({
         route: {
+          ...routeInitialState,
           pathname: '/product-lines',
         },
       })
@@ -194,10 +205,12 @@ describe('catalogActions', () => {
       test('success', async () => {
         store = mockStore({
           route: {
+            ...routeInitialState,
             pathname: 'unhandledPathname',
             jobIds: ['a', 'c'],
           },
           jobs: {
+            ...jobsInitialState,
             records: [
               { id: 'a' },
               { id: 'b' },
@@ -205,6 +218,7 @@ describe('catalogActions', () => {
             ],
           },
           map: {
+            ...mapInitialState,
             detections: [
               { id: 'a' },
               { id: 'b' },
@@ -233,13 +247,16 @@ describe('catalogActions', () => {
         ]
         store = mockStore({
           route: {
+            ...routeInitialState,
             pathname: 'unhandledPathname',
             jobIds: [mockJobs[0].id, mockJobs[1].id],
           },
           jobs: {
+            ...jobsInitialState,
             records: mockJobs,
           },
           map: {
+            ...mapInitialState,
             detections: [
               mockJobs[0],
               mockJobs[1],
@@ -258,15 +275,18 @@ describe('catalogActions', () => {
         const mockSelectedFeature = { id: 'b' }
         store = mockStore({
           route: {
+            ...routeInitialState,
             pathname: '/create-product-line',
           },
           jobs: {
+            ...jobsInitialState,
             records: [
               { id: 'a' },
               { id: 'b' },
             ],
           },
           map: {
+            ...mapInitialState,
             detections: [],
             selectedFeature: mockSelectedFeature,
           },
@@ -291,12 +311,15 @@ describe('catalogActions', () => {
         ]
         store = mockStore({
           route: {
+            ...routeInitialState,
             pathname: '/create-product-line',
           },
           map: {
+            ...mapInitialState,
             detections: [],
           },
           productLines: {
+            ...productLinesInitialState,
             records: mockProductLinesRecords,
           },
         })
@@ -317,15 +340,18 @@ describe('catalogActions', () => {
         const mockSelectedFeature = { id: 'b' }
         store = mockStore({
           route: {
+            ...routeInitialState,
             pathname: '/create-product-line',
           },
           jobs: {
+            ...jobsInitialState,
             records: [
               { id: 'a' },
               { id: 'b' },
             ],
           },
           map: {
+            ...mapInitialState,
             detections: [],
             selectedFeature: mockSelectedFeature,
           },
@@ -350,12 +376,15 @@ describe('catalogActions', () => {
         ]
         store = mockStore({
           route: {
+            ...routeInitialState,
             pathname: '/create-product-line',
           },
           map: {
+            ...mapInitialState,
             detections: [],
           },
           productLines: {
+            ...productLinesInitialState,
             records: mockProductLinesRecords,
           },
         })
@@ -377,15 +406,18 @@ describe('catalogActions', () => {
       test('success', async () => {
         store = mockStore({
           route: {
+            ...routeInitialState,
             pathname: 'unhandledPathname',
           },
           jobs: {
+            ...jobsInitialState,
             records: [
               { id: 'a' },
               { id: 'c' },
             ],
           },
           map: {
+            ...mapInitialState,
             frames: [
               { id: 'a' },
               { id: 'b' },
@@ -414,12 +446,15 @@ describe('catalogActions', () => {
         ]
         store = mockStore({
           route: {
+            ...routeInitialState,
             pathname: 'unhandledPathname',
           },
           jobs: {
+            ...jobsInitialState,
             records: mockJobs,
           },
           map: {
+            ...mapInitialState,
             frames: mockJobs,
           },
         })
@@ -439,12 +474,15 @@ describe('catalogActions', () => {
         ]
         store = mockStore({
           route: {
+            ...routeInitialState,
             pathname: '/create-product-line',
           },
           productLines: {
+            ...productLinesInitialState,
             records: mockProductLines,
           },
           map: {
+            ...mapInitialState,
             frames: [],
             selectedFeature: mockSelectedFeature,
           },
@@ -470,12 +508,15 @@ describe('catalogActions', () => {
         ]
         store = mockStore({
           route: {
+            ...routeInitialState,
             pathname: '/create-product-line',
           },
           productLines: {
+            ...productLinesInitialState,
             records: mockProductLines,
           },
           map: {
+            ...mapInitialState,
             frames: [],
           },
         })
@@ -500,12 +541,15 @@ describe('catalogActions', () => {
         ]
         store = mockStore({
           route: {
+            ...routeInitialState,
             pathname: '/product-lines',
           },
           productLines: {
+            ...productLinesInitialState,
             records: mockProductLines,
           },
           map: {
+            ...mapInitialState,
             frames: [],
             selectedFeature: mockSelectedFeature,
           },
@@ -531,12 +575,15 @@ describe('catalogActions', () => {
         ]
         store = mockStore({
           route: {
+            ...routeInitialState,
             pathname: '/product-lines',
           },
           productLines: {
+            ...productLinesInitialState,
             records: mockProductLines,
           },
           map: {
+            ...mapInitialState,
             frames: [],
           },
         })
@@ -557,6 +604,7 @@ describe('catalogActions', () => {
     test('success', async () => {
       store = mockStore({
         map: {
+          ...mapInitialState,
           selectedFeature: null,
         },
       })
@@ -577,6 +625,7 @@ describe('catalogActions', () => {
       const mockFeature = { id: 'a' }
       store = mockStore({
         map: {
+          ...mapInitialState,
           selectedFeature: mockFeature,
         },
       })
@@ -672,6 +721,7 @@ describe('catalogActions', () => {
     test('success', async () => {
       store = mockStore({
         map: {
+          ...mapInitialState,
           view: {
             center: [181, 0],
           },
@@ -685,6 +735,63 @@ describe('catalogActions', () => {
       expect(sessionStorage.setItem).toHaveBeenCalledTimes(2)
       expect(sessionStorage.setItem).toHaveBeenCalledWith('bbox', JSON.stringify([-179, 0, -178, 1]))
       expect(sessionStorage.setItem).toHaveBeenCalledWith('mapView', JSON.stringify({ center: [-179, 0] }))
+
+      expect(store.getActions()).toEqual([
+        { type: types.MAP_SERIALIZED },
+      ])
+    })
+
+    test('handle missing "view" gracefully', async () => {
+      store = mockStore({
+        map: {
+          ...mapInitialState,
+          bbox: [181, 0, 182, 1],
+        },
+      })
+
+      await store.dispatch(mapActions.serialize())
+
+      expect(sessionStorage.setItem).toHaveBeenCalledWith('mapView', JSON.stringify(null))
+
+      expect(store.getActions()).toEqual([
+        { type: types.MAP_SERIALIZED },
+      ])
+    })
+
+    test('handle missing "view.center" gracefully', async () => {
+      const mockView = {
+        extent: [1, 2, 3, 4],
+      }
+      store = mockStore({
+        map: {
+          ...mapInitialState,
+          view: mockView,
+          bbox: [181, 0, 182, 1],
+        },
+      })
+
+      await store.dispatch(mapActions.serialize())
+
+      expect(sessionStorage.setItem).toHaveBeenCalledWith('mapView', JSON.stringify(mockView))
+
+      expect(store.getActions()).toEqual([
+        { type: types.MAP_SERIALIZED },
+      ])
+    })
+
+    test('handle missing "bbox" gracefully', async () => {
+      store = mockStore({
+        map: {
+          ...mapInitialState,
+          view: {
+            center: [181, 0],
+          },
+        },
+      })
+
+      await store.dispatch(mapActions.serialize())
+
+      expect(sessionStorage.setItem).toHaveBeenCalledWith('bbox', JSON.stringify(null))
 
       expect(store.getActions()).toEqual([
         { type: types.MAP_SERIALIZED },
