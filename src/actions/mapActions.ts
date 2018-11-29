@@ -19,7 +19,7 @@ import {wrap} from '../utils/math'
 import {AppState} from '../store'
 import {Extent, Point} from '../utils/geometries'
 
-export const types = {
+export const mapTypes = {
   MAP_INITIALIZED: 'MAP_INITIALIZED',
   MAP_MODE_UPDATED: 'MAP_MODE_UPDATED',
   MAP_DETECTIONS_UPDATED: 'MAP_DETECTIONS_UPDATED',
@@ -43,7 +43,7 @@ export interface MapPanToPointArgs {
 export const mapActions = {
   initialized(map: ol.Map, collections: any) {
     return {
-      type: types.MAP_INITIALIZED,
+      type: mapTypes.MAP_INITIALIZED,
       map,
       collections,
     }
@@ -69,7 +69,7 @@ export const mapActions = {
       }
 
       dispatch({
-        type: types.MAP_MODE_UPDATED,
+        type: mapTypes.MAP_MODE_UPDATED,
         mode,
       })
     }
@@ -77,13 +77,13 @@ export const mapActions = {
 
   updateBbox(bbox: Extent) {
     return {
-      type: types.MAP_BBOX_UPDATED,
+      type: mapTypes.MAP_BBOX_UPDATED,
       bbox,
     }
   },
 
   clearBbox() {
-    return { type: types.MAP_BBOX_CLEARED }
+    return { type: mapTypes.MAP_BBOX_CLEARED }
   },
 
   updateDetections() {
@@ -115,7 +115,7 @@ export const mapActions = {
 
       if (detectionsChanged) {
         dispatch({
-          type: types.MAP_DETECTIONS_UPDATED,
+          type: mapTypes.MAP_DETECTIONS_UPDATED,
           detections,
         })
       }
@@ -151,7 +151,7 @@ export const mapActions = {
 
       if (framesChanged) {
         dispatch({
-          type: types.MAP_FRAMES_UPDATED,
+          type: mapTypes.MAP_FRAMES_UPDATED,
           frames,
         })
       }
@@ -167,7 +167,7 @@ export const mapActions = {
       }
 
       dispatch({
-        type: types.MAP_SELECTED_FEATURE_UPDATED,
+        type: mapTypes.MAP_SELECTED_FEATURE_UPDATED,
         selectedFeature: feature,
       })
     }
@@ -175,14 +175,14 @@ export const mapActions = {
 
   setHoveredFeature(hoveredFeature: beachfront.Job | null) {
     return {
-      type: types.MAP_HOVERED_FEATURE_UPDATED,
+      type: mapTypes.MAP_HOVERED_FEATURE_UPDATED,
       hoveredFeature,
     }
   },
 
   updateView(view: MapView) {
     return {
-      type: types.MAP_VIEW_UPDATED,
+      type: mapTypes.MAP_VIEW_UPDATED,
       view,
     }
   },
@@ -194,7 +194,7 @@ export const mapActions = {
     }
 
     return {
-      type: types.MAP_PAN_TO_POINT,
+      type: mapTypes.MAP_PAN_TO_POINT,
       point: args.point,
       zoom: args.zoom,
     }
@@ -202,7 +202,7 @@ export const mapActions = {
 
   panToExtent(extent: Extent) {
     return {
-      type: types.MAP_PAN_TO_EXTENT,
+      type: mapTypes.MAP_PAN_TO_EXTENT,
       extent,
     }
   },
@@ -234,7 +234,7 @@ export const mapActions = {
       sessionStorage.setItem('bbox', JSON.stringify(bbox))
       sessionStorage.setItem('mapView', JSON.stringify(mapView))
 
-      dispatch({ type: types.MAP_SERIALIZED })
+      dispatch({ type: mapTypes.MAP_SERIALIZED })
     }
   },
 
@@ -254,7 +254,7 @@ export const mapActions = {
     }
 
     return {
-      type: types.MAP_DESERIALIZED,
+      type: mapTypes.MAP_DESERIALIZED,
       deserialized,
     }
   },

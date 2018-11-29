@@ -15,7 +15,7 @@
  */
 
 import {routeInitialState, routeReducer} from '../../src/reducers/routeReducer'
-import {types} from '../../src/actions/routeActions'
+import {routeTypes} from '../../src/actions/routeActions'
 
 describe('routeReducer', () => {
   test('initialState', () => {
@@ -24,7 +24,7 @@ describe('routeReducer', () => {
 
   test('ROUTE_CHANGED', () => {
     const action = {
-      type: types.ROUTE_CHANGED,
+      type: routeTypes.ROUTE_CHANGED,
       hash: 'a',
       href: 'a',
       jobIds: ['a', 'b', 'c'],

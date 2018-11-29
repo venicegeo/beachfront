@@ -17,7 +17,7 @@
 import thunk from 'redux-thunk'
 import configureStore from 'redux-mock-store'
 import * as sinon from 'sinon'
-import {userActions, types} from '../../src/actions/userActions'
+import {userActions, userTypes} from '../../src/actions/userActions'
 import {userInitialState} from '../../src/reducers/userReducer'
 import MockAdapter from 'axios-mock-adapter'
 import axios from 'axios'
@@ -65,7 +65,7 @@ describe('userActions', () => {
       await store.dispatch(userActions.logout())
 
       expect(store.getActions()).toEqual([
-        { type: types.USER_LOGGED_OUT },
+        { type: userTypes.USER_LOGGED_OUT },
       ])
     })
   })
@@ -77,7 +77,7 @@ describe('userActions', () => {
       expect(sessionStorage.clear).toHaveBeenCalledTimes(1)
 
       expect(store.getActions()).toEqual([
-        { type: types.USER_SESSION_CLEARED },
+        { type: userTypes.USER_SESSION_CLEARED },
       ])
     })
   })
@@ -94,7 +94,7 @@ describe('userActions', () => {
       expect(clientSpies.get.args[0]).toEqual(['/oauth/logout'])
 
       expect(store.getActions()).toEqual([
-        { type: types.USER_SESSION_LOGGED_OUT },
+        { type: userTypes.USER_SESSION_LOGGED_OUT },
       ])
 
       await new Promise<void>(resolve => {
@@ -111,7 +111,7 @@ describe('userActions', () => {
       await store.dispatch(userActions.sessionExpired())
 
       expect(store.getActions()).toEqual([
-        { type: types.USER_SESSION_EXPIRED },
+        { type: userTypes.USER_SESSION_EXPIRED },
       ])
     })
   })
@@ -131,7 +131,7 @@ describe('userActions', () => {
       expect(sessionStorage.setItem).toHaveBeenCalledWith('isSessionExpired', 'true')
 
       expect(store.getActions()).toEqual([
-        { type: types.USER_SERIALIZED },
+        { type: userTypes.USER_SERIALIZED },
       ])
     })
   })
@@ -148,7 +148,7 @@ describe('userActions', () => {
 
       expect(store.getActions()).toEqual([
         {
-          type: types.USER_DESERIALIZED,
+          type: userTypes.USER_DESERIALIZED,
           deserialized: {
             isSessionExpired: true,
           },
@@ -164,7 +164,7 @@ describe('userActions', () => {
 
       expect(store.getActions()).toEqual([
         {
-          type: types.USER_DESERIALIZED,
+          type: userTypes.USER_DESERIALIZED,
           deserialized: {
             isSessionExpired: userInitialState.isSessionExpired,
           },
@@ -184,7 +184,7 @@ describe('userActions', () => {
 
       expect(store.getActions()).toEqual([
         {
-          type: types.USER_DESERIALIZED,
+          type: userTypes.USER_DESERIALIZED,
           deserialized: {},
         },
       ])

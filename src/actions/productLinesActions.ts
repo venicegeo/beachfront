@@ -18,7 +18,7 @@ import {getClient} from '../api/session'
 import {JOB_ENDPOINT, PRODUCTLINE_ENDPOINT} from '../config'
 import {Extent} from '../utils/geometries'
 
-export const types = {
+export const productLinesTypes = {
   PRODUCT_LINES_FETCHING: 'PRODUCT_LINES_FETCHING',
   PRODUCT_LINES_FETCH_SUCCESS: 'PRODUCT_LINES_FETCH_SUCCESS',
   PRODUCT_LINES_FETCH_ERROR: 'PRODUCT_LINES_FETCH_ERROR',
@@ -48,17 +48,17 @@ export interface ProductLinesFetchJobsArgs {
 export const productLinesActions = {
   fetch() {
     return async dispatch => {
-      dispatch({ type: types.PRODUCT_LINES_FETCHING })
+      dispatch({ type: productLinesTypes.PRODUCT_LINES_FETCHING })
 
       try {
         const response = await getClient().get(PRODUCTLINE_ENDPOINT)
         dispatch({
-          type: types.PRODUCT_LINES_FETCH_SUCCESS,
+          type: productLinesTypes.PRODUCT_LINES_FETCH_SUCCESS,
           records: response.data.productlines.features,
         })
       } catch (error) {
         dispatch({
-          type: types.PRODUCT_LINES_FETCH_ERROR,
+          type: productLinesTypes.PRODUCT_LINES_FETCH_ERROR,
           error: (error.response) ? error.response.data : error,
         })
       }
@@ -67,17 +67,17 @@ export const productLinesActions = {
 
   fetchJobs(args: ProductLinesFetchJobsArgs) {
     return async dispatch => {
-      dispatch({ type: types.PRODUCT_LINES_FETCHING_JOBS })
+      dispatch({ type: productLinesTypes.PRODUCT_LINES_FETCHING_JOBS })
 
       try {
         const response = await getClient().get(`${JOB_ENDPOINT}/by_productline/${args.productLineId}?since=${args.sinceDate}`)
         dispatch({
-          type: types.PRODUCT_LINES_FETCH_JOBS_SUCCESS,
+          type: productLinesTypes.PRODUCT_LINES_FETCH_JOBS_SUCCESS,
           jobs: response.data.jobs.features,
         })
       } catch (error) {
         dispatch({
-          type: types.PRODUCT_LINES_FETCH_JOBS_ERROR,
+          type: productLinesTypes.PRODUCT_LINES_FETCH_JOBS_ERROR,
           error: (error.response) ? error.response.data : error,
         })
       }
@@ -86,7 +86,7 @@ export const productLinesActions = {
 
   create(args: ProductLinesCreateArgs) {
     return async dispatch => {
-      dispatch({ type: types.PRODUCT_LINES_CREATING_PRODUCT_LINE })
+      dispatch({ type: productLinesTypes.PRODUCT_LINES_CREATING_PRODUCT_LINE })
 
       try {
         const response = await getClient().post(PRODUCTLINE_ENDPOINT, {
@@ -103,12 +103,12 @@ export const productLinesActions = {
           stop_on: args.dateStop,
         })
         dispatch({
-          type: types.PRODUCT_LINES_CREATE_PRODUCT_LINE_SUCCESS,
+          type: productLinesTypes.PRODUCT_LINES_CREATE_PRODUCT_LINE_SUCCESS,
           createdProductLine: response.data.productline,
         })
       } catch (error) {
         dispatch({
-          type: types.PRODUCT_LINES_CREATE_PRODUCT_LINE_ERROR,
+          type: productLinesTypes.PRODUCT_LINES_CREATE_PRODUCT_LINE_ERROR,
           error: (error.response) ? error.response.data : error,
         })
       }

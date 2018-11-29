@@ -19,7 +19,7 @@ import MockAdapter from 'axios-mock-adapter'
 import thunk from 'redux-thunk'
 import configureStore from 'redux-mock-store'
 import * as sinon from 'sinon'
-import {catalogActions, types} from '../../src/actions/catalogActions'
+import {catalogActions, catalogTypes} from '../../src/actions/catalogActions'
 import {catalogInitialState} from '../../src/reducers/catalogReducer'
 import {IMAGERY_ENDPOINT, SCENE_TILE_PROVIDERS} from '../../src/config'
 import {getClient} from '../../src/api/session'
@@ -59,7 +59,7 @@ describe('catalogActions', () => {
 
       expect(store.getActions()).toEqual([
         {
-          type: types.CATALOG_API_KEY_UPDATED,
+          type: catalogTypes.CATALOG_API_KEY_UPDATED,
           apiKey: 'a',
         },
       ])
@@ -79,7 +79,7 @@ describe('catalogActions', () => {
 
       expect(store.getActions()).toEqual([
         {
-          type: types.CATALOG_SEARCH_CRITERIA_UPDATED,
+          type: catalogTypes.CATALOG_SEARCH_CRITERIA_UPDATED,
           searchCriteria,
         },
       ])
@@ -92,7 +92,7 @@ describe('catalogActions', () => {
 
       const actions = store.getActions()
       expect(actions).toEqual([
-        { type: types.CATALOG_SEARCH_CRITERIA_RESET },
+        { type: catalogTypes.CATALOG_SEARCH_CRITERIA_RESET },
       ])
     })
   })
@@ -136,9 +136,9 @@ describe('catalogActions', () => {
 
       const actions = store.getActions()
       expect(actions).toEqual([
-        { type: types.CATALOG_SEARCHING },
+        { type: catalogTypes.CATALOG_SEARCHING },
         {
-          type: types.CATALOG_SEARCH_SUCCESS,
+          type: catalogTypes.CATALOG_SEARCH_SUCCESS,
           searchResults: {
             images: {
               features: mockResponse.features.map(f => {
@@ -173,8 +173,8 @@ describe('catalogActions', () => {
       await store.dispatch(catalogActions.search())
 
       const actions = store.getActions()
-      expect(actions[0]).toEqual({ type: types.CATALOG_SEARCHING })
-      expect(actions[1].type).toEqual(types.CATALOG_SEARCH_ERROR)
+      expect(actions[0]).toEqual({ type: catalogTypes.CATALOG_SEARCHING })
+      expect(actions[1].type).toEqual(catalogTypes.CATALOG_SEARCH_ERROR)
       expect(actions[1].error).toBeDefined()
     })
 
@@ -195,9 +195,9 @@ describe('catalogActions', () => {
       await store.dispatch(catalogActions.search())
 
       expect(store.getActions()).toEqual([
-        { type: types.CATALOG_SEARCHING },
+        { type: catalogTypes.CATALOG_SEARCHING },
         {
-          type: types.CATALOG_SEARCH_ERROR,
+          type: catalogTypes.CATALOG_SEARCH_ERROR,
           error: 'error',
         },
       ])
@@ -221,8 +221,8 @@ describe('catalogActions', () => {
 
       const actions = store.getActions()
       expect(actions.length).toEqual(2)
-      expect(actions[0]).toEqual({ type: types.CATALOG_SEARCHING })
-      expect(actions[1].type).toEqual(types.CATALOG_SEARCH_ERROR)
+      expect(actions[0]).toEqual({ type: catalogTypes.CATALOG_SEARCHING })
+      expect(actions[1].type).toEqual(catalogTypes.CATALOG_SEARCH_ERROR)
       expect(actions[1].error).toBeDefined()
     })
   })
@@ -249,7 +249,7 @@ describe('catalogActions', () => {
       expect(localStorage.setItem).toHaveBeenCalledWith('catalog_apiKey', state.catalog.apiKey)
 
       expect(store.getActions()).toEqual([
-        { type: types.CATALOG_SERIALIZED },
+        { type: catalogTypes.CATALOG_SERIALIZED },
       ])
     })
   })
@@ -282,7 +282,7 @@ describe('catalogActions', () => {
 
       expect(store.getActions()).toEqual([
         {
-          type: types.CATALOG_DESERIALIZED,
+          type: catalogTypes.CATALOG_DESERIALIZED,
           deserialized: {
             searchCriteria: mockStorage.searchCriteria,
             searchResults: mockStorage.searchResults,
@@ -304,7 +304,7 @@ describe('catalogActions', () => {
 
       expect(store.getActions()).toEqual([
         {
-          type: types.CATALOG_DESERIALIZED,
+          type: catalogTypes.CATALOG_DESERIALIZED,
           deserialized: {
             searchCriteria: catalogInitialState.searchCriteria,
             searchResults: null,
@@ -329,7 +329,7 @@ describe('catalogActions', () => {
 
       expect(store.getActions()).toEqual([
         {
-          type: types.CATALOG_DESERIALIZED,
+          type: catalogTypes.CATALOG_DESERIALIZED,
           deserialized: {
             apiKey: catalogInitialState.apiKey,
           },

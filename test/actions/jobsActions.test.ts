@@ -19,7 +19,7 @@ import MockAdapter from 'axios-mock-adapter'
 import thunk from 'redux-thunk'
 import configureStore from 'redux-mock-store'
 import * as sinon from 'sinon'
-import {jobsActions, types} from '../../src/actions/jobsActions'
+import {jobsActions, jobsTypes} from '../../src/actions/jobsActions'
 import {jobsInitialState} from '../../src/reducers/jobsReducer'
 import {JOB_ENDPOINT} from '../../src/config'
 import {getClient} from '../../src/api/session'
@@ -68,9 +68,9 @@ describe('jobsActions', () => {
       expect(clientSpies.get.args[0]).toEqual([JOB_ENDPOINT])
 
       expect(store.getActions()).toEqual([
-        { type: types.JOBS_FETCHING },
+        { type: jobsTypes.JOBS_FETCHING },
         {
-          type: types.JOBS_FETCH_SUCCESS,
+          type: jobsTypes.JOBS_FETCH_SUCCESS,
           records: mockResponseData.jobs.features,
         },
       ])
@@ -82,9 +82,9 @@ describe('jobsActions', () => {
       await store.dispatch(jobsActions.fetch())
 
       expect(store.getActions()).toEqual([
-        { type: types.JOBS_FETCHING },
+        { type: jobsTypes.JOBS_FETCHING },
         {
-          type: types.JOBS_FETCH_ERROR,
+          type: jobsTypes.JOBS_FETCH_ERROR,
           error: 'error',
         },
       ])
@@ -97,8 +97,8 @@ describe('jobsActions', () => {
 
       const actions = store.getActions()
       expect(actions.length).toEqual(2)
-      expect(actions[0]).toEqual({ type: types.JOBS_FETCHING })
-      expect(actions[1].type).toEqual(types.JOBS_FETCH_ERROR)
+      expect(actions[0]).toEqual({ type: jobsTypes.JOBS_FETCHING })
+      expect(actions[1].type).toEqual(jobsTypes.JOBS_FETCH_ERROR)
       expect(actions[1].error).toBeDefined()
     })
   })
@@ -118,9 +118,9 @@ describe('jobsActions', () => {
       expect(clientSpies.get.args[0]).toEqual([url])
 
       expect(store.getActions()).toEqual([
-        { type: types.JOBS_FETCHING_ONE },
+        { type: jobsTypes.JOBS_FETCHING_ONE },
         {
-          type: types.JOBS_FETCH_ONE_SUCCESS,
+          type: jobsTypes.JOBS_FETCH_ONE_SUCCESS,
           record: mockResponseData.job,
         },
       ])
@@ -133,9 +133,9 @@ describe('jobsActions', () => {
       await store.dispatch(jobsActions.fetchOne(mockJobId))
 
       expect(store.getActions()).toEqual([
-        { type: types.JOBS_FETCHING_ONE },
+        { type: jobsTypes.JOBS_FETCHING_ONE },
         {
-          type: types.JOBS_FETCH_ONE_ERROR,
+          type: jobsTypes.JOBS_FETCH_ONE_ERROR,
           error: 'error',
         },
       ])
@@ -149,8 +149,8 @@ describe('jobsActions', () => {
 
       const actions = store.getActions()
       expect(actions.length).toEqual(2)
-      expect(actions[0]).toEqual({ type: types.JOBS_FETCHING_ONE })
-      expect(actions[1].type).toEqual(types.JOBS_FETCH_ONE_ERROR)
+      expect(actions[0]).toEqual({ type: jobsTypes.JOBS_FETCHING_ONE })
+      expect(actions[1].type).toEqual(jobsTypes.JOBS_FETCH_ONE_ERROR)
       expect(actions[1].error).toBeDefined()
     })
   })
@@ -184,9 +184,9 @@ describe('jobsActions', () => {
       ])
 
       expect(store.getActions()).toEqual([
-        { type: types.JOBS_CREATING_JOB },
+        { type: jobsTypes.JOBS_CREATING_JOB },
         {
-          type: types.JOBS_CREATE_JOB_SUCCESS,
+          type: jobsTypes.JOBS_CREATE_JOB_SUCCESS,
           createdJob: mockResponseData.job,
         },
       ])
@@ -204,9 +204,9 @@ describe('jobsActions', () => {
       }))
 
       expect(store.getActions()).toEqual([
-        { type: types.JOBS_CREATING_JOB },
+        { type: jobsTypes.JOBS_CREATING_JOB },
         {
-          type: types.JOBS_CREATE_JOB_ERROR,
+          type: jobsTypes.JOBS_CREATE_JOB_ERROR,
           error: 'error',
         },
       ])
@@ -225,8 +225,8 @@ describe('jobsActions', () => {
 
       const actions = store.getActions()
       expect(actions.length).toEqual(2)
-      expect(actions[0]).toEqual({ type: types.JOBS_CREATING_JOB })
-      expect(actions[1].type).toEqual(types.JOBS_CREATE_JOB_ERROR)
+      expect(actions[0]).toEqual({ type: jobsTypes.JOBS_CREATING_JOB })
+      expect(actions[1].type).toEqual(jobsTypes.JOBS_CREATE_JOB_ERROR)
       expect(actions[1].error).toBeDefined()
     })
   })
@@ -236,7 +236,7 @@ describe('jobsActions', () => {
       await store.dispatch(jobsActions.dismissCreateJobError())
 
       expect(store.getActions()).toEqual([
-        { type: types.JOBS_CREATE_JOB_ERROR_DISMISSED },
+        { type: jobsTypes.JOBS_CREATE_JOB_ERROR_DISMISSED },
       ])
     })
   })
@@ -254,10 +254,10 @@ describe('jobsActions', () => {
 
       expect(store.getActions()).toEqual([
         {
-          type: types.JOBS_DELETING_JOB,
+          type: jobsTypes.JOBS_DELETING_JOB,
           deletedJob: mockJob,
         },
-        { type: types.JOBS_DELETE_JOB_SUCCESS },
+        { type: jobsTypes.JOBS_DELETE_JOB_SUCCESS },
       ])
     })
 
@@ -269,11 +269,11 @@ describe('jobsActions', () => {
 
       expect(store.getActions()).toEqual([
         {
-          type: types.JOBS_DELETING_JOB,
+          type: jobsTypes.JOBS_DELETING_JOB,
           deletedJob: mockJob,
         },
         {
-          type: types.JOBS_DELETE_JOB_ERROR,
+          type: jobsTypes.JOBS_DELETE_JOB_ERROR,
           error: 'error',
         },
       ])
@@ -284,10 +284,10 @@ describe('jobsActions', () => {
 
       const actions = store.getActions()
       expect(actions[0]).toEqual({
-        type: types.JOBS_DELETING_JOB,
+        type: jobsTypes.JOBS_DELETING_JOB,
         deletedJob: null,
       })
-      expect(actions[1].type).toEqual(types.JOBS_DELETE_JOB_ERROR)
+      expect(actions[1].type).toEqual(jobsTypes.JOBS_DELETE_JOB_ERROR)
       expect(actions[1].error).toBeDefined()
     })
   })

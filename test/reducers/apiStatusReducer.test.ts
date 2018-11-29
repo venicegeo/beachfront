@@ -15,7 +15,7 @@
  */
 
 import {apiStatusInitialState, apiStatusReducer} from '../../src/reducers/apiStatusReducer'
-import {types} from '../../src/actions/apiStatusActions'
+import {apiStatusTypes} from '../../src/actions/apiStatusActions'
 
 describe('apiStatusReducer', () => {
   test('initial state', () => {
@@ -24,7 +24,7 @@ describe('apiStatusReducer', () => {
 
   test('API_STATUS_DESERIALIZED', () => {
     const action = {
-      type: types.API_STATUS_DESERIALIZED,
+      type: apiStatusTypes.API_STATUS_DESERIALIZED,
       deserialized: {
         a: 'a',
       },
@@ -42,7 +42,7 @@ describe('apiStatusReducer', () => {
       fetchError: 'a',
     }
 
-    const action = { type: types.API_STATUS_FETCHING }
+    const action = { type: apiStatusTypes.API_STATUS_FETCHING }
 
     expect(apiStatusReducer(state, action)).toEqual({
       ...state,
@@ -58,7 +58,7 @@ describe('apiStatusReducer', () => {
     }
 
     const action = {
-      type: types.API_STATUS_FETCH_SUCCESS,
+      type: apiStatusTypes.API_STATUS_FETCH_SUCCESS,
       geoserver: {
         wmsUrl: 'a',
       },
@@ -80,7 +80,7 @@ describe('apiStatusReducer', () => {
     }
 
     const action = {
-      type: types.API_STATUS_FETCH_ERROR,
+      type: apiStatusTypes.API_STATUS_FETCH_ERROR,
       error: 'a',
     }
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  **/
 
-import {types} from '../actions/routeActions'
+import {routeTypes} from '../actions/routeActions'
 import {generateRoute} from '../utils/routeUtils'
 
 export interface RouteState {
@@ -30,7 +30,7 @@ export const routeInitialState: RouteState = generateRoute(location)
 
 export function routeReducer(state = routeInitialState, action: any): RouteState {
   switch (action.type) {
-    case types.ROUTE_CHANGED:
+    case routeTypes.ROUTE_CHANGED:
       return {
         ...state,
         hash: action.hash,

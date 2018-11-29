@@ -15,7 +15,7 @@
  */
 
 import {jobsInitialState, jobsReducer} from '../../src/reducers/jobsReducer'
-import {types} from '../../src/actions/jobsActions'
+import {jobsTypes} from '../../src/actions/jobsActions'
 
 describe('jobsReducer', () => {
   test('initialState', () => {
@@ -28,7 +28,7 @@ describe('jobsReducer', () => {
       fetchError: 'a',
     }
 
-    const action = { type: types.JOBS_FETCHING }
+    const action = { type: jobsTypes.JOBS_FETCHING }
 
     expect(jobsReducer(state, action)).toEqual({
       ...state,
@@ -44,7 +44,7 @@ describe('jobsReducer', () => {
     }
 
     const action = {
-      type: types.JOBS_FETCH_SUCCESS,
+      type: jobsTypes.JOBS_FETCH_SUCCESS,
       records: ['a', 'b', 'c'],
     }
 
@@ -62,7 +62,7 @@ describe('jobsReducer', () => {
     }
 
     const action = {
-      type: types.JOBS_FETCH_ERROR,
+      type: jobsTypes.JOBS_FETCH_ERROR,
       error: 'a',
     }
 
@@ -79,7 +79,7 @@ describe('jobsReducer', () => {
       fetchOneError: 'a',
     }
 
-    const action = { type: types.JOBS_FETCHING_ONE }
+    const action = { type: jobsTypes.JOBS_FETCHING_ONE }
 
     expect(jobsReducer(state, action)).toEqual({
       ...state,
@@ -95,7 +95,7 @@ describe('jobsReducer', () => {
     }
 
     const action = {
-      type: types.JOBS_FETCH_ONE_SUCCESS,
+      type: jobsTypes.JOBS_FETCH_ONE_SUCCESS,
       record: 'a',
     }
 
@@ -114,7 +114,7 @@ describe('jobsReducer', () => {
     }
 
     const action = {
-      type: types.JOBS_FETCH_ONE_ERROR,
+      type: jobsTypes.JOBS_FETCH_ONE_ERROR,
       error: 'a',
     }
 
@@ -132,7 +132,7 @@ describe('jobsReducer', () => {
       createJobError: 'a',
     }
 
-    const action = { type: types.JOBS_CREATING_JOB }
+    const action = { type: jobsTypes.JOBS_CREATING_JOB }
 
     expect(jobsReducer(state, action)).toEqual({
       ...state,
@@ -150,7 +150,7 @@ describe('jobsReducer', () => {
     }
 
     const action = {
-      type: types.JOBS_CREATE_JOB_SUCCESS,
+      type: jobsTypes.JOBS_CREATE_JOB_SUCCESS,
       createdJob: 'a',
     }
 
@@ -169,7 +169,7 @@ describe('jobsReducer', () => {
     }
 
     const action = {
-      type: types.JOBS_CREATE_JOB_ERROR,
+      type: jobsTypes.JOBS_CREATE_JOB_ERROR,
       error: 'a',
     }
 
@@ -186,7 +186,7 @@ describe('jobsReducer', () => {
       createJobError: 'a',
     }
 
-    const action = { type: types.JOBS_CREATE_JOB_ERROR_DISMISSED }
+    const action = { type: jobsTypes.JOBS_CREATE_JOB_ERROR_DISMISSED }
 
     expect(jobsReducer(state, action)).toEqual({
       ...state,
@@ -205,7 +205,7 @@ describe('jobsReducer', () => {
     }
 
     const action = {
-      type: types.JOBS_DELETING_JOB,
+      type: jobsTypes.JOBS_DELETING_JOB,
       deletedJob: { id: 'a' },
     }
 
@@ -224,7 +224,7 @@ describe('jobsReducer', () => {
       isDeletingJob: true,
     }
 
-    const action = { type: types.JOBS_DELETE_JOB_SUCCESS }
+    const action = { type: jobsTypes.JOBS_DELETE_JOB_SUCCESS }
 
     expect(jobsReducer(state, action)).toEqual({
       ...state,
@@ -241,7 +241,7 @@ describe('jobsReducer', () => {
     }
 
     const action = {
-      type: types.JOBS_DELETE_JOB_ERROR,
+      type: jobsTypes.JOBS_DELETE_JOB_ERROR,
       error: 'a',
     }
 

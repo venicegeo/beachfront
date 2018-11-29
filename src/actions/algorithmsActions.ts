@@ -19,7 +19,7 @@ import {getClient} from '../api/session'
 import {AppState} from '../store'
 import {algorithmsInitialState} from '../reducers/algorithmsReducer'
 
-export const types = {
+export const algorithmsTypes = {
   ALGORITHMS_FETCHING: 'ALGORITHMS_FETCHING',
   ALGORITHMS_FETCH_SUCCESS: 'ALGORITHMS_FETCH_SUCCESS',
   ALGORITHMS_FETCH_ERROR: 'ALGORITHMS_FETCH_ERROR',
@@ -30,12 +30,12 @@ export const types = {
 export const algorithmsActions = {
   fetch() {
     return async dispatch => {
-      dispatch({ type: types.ALGORITHMS_FETCHING })
+      dispatch({ type: algorithmsTypes.ALGORITHMS_FETCHING })
 
       try {
         const response = await getClient().get(ALGORITHM_ENDPOINT)
         dispatch({
-          type: types.ALGORITHMS_FETCH_SUCCESS,
+          type: algorithmsTypes.ALGORITHMS_FETCH_SUCCESS,
           records: response.data.algorithms.map(record => ({
             description: record.description,
             id: record.service_id,
@@ -46,7 +46,7 @@ export const algorithmsActions = {
         })
       } catch (error) {
         dispatch({
-          type: types.ALGORITHMS_FETCH_ERROR,
+          type: algorithmsTypes.ALGORITHMS_FETCH_ERROR,
           error: (error.response) ? error.response.data : error,
         })
       }
@@ -59,7 +59,7 @@ export const algorithmsActions = {
 
       sessionStorage.setItem('algorithms_records', JSON.stringify(state.algorithms.records))
 
-      dispatch({ type: types.ALGORITHMS_SERIALIZED })
+      dispatch({ type: algorithmsTypes.ALGORITHMS_SERIALIZED })
     }
   },
 
@@ -73,7 +73,7 @@ export const algorithmsActions = {
     }
 
     return {
-      type: types.ALGORITHMS_DESERIALIZED,
+      type: algorithmsTypes.ALGORITHMS_DESERIALIZED,
       deserialized,
     }
   },

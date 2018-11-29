@@ -20,7 +20,7 @@ import thunk from 'redux-thunk'
 import configureStore from 'redux-mock-store'
 import * as sinon from 'sinon'
 import {ALGORITHM_ENDPOINT} from '../../src/config'
-import {algorithmsActions, types} from '../../src/actions/algorithmsActions'
+import {algorithmsActions, algorithmsTypes} from '../../src/actions/algorithmsActions'
 import {algorithmsInitialState} from '../../src/reducers/algorithmsReducer'
 import {getClient} from '../../src/api/session'
 
@@ -80,9 +80,9 @@ describe('algorithmsActions', () => {
       expect(clientSpies.get.args[0]).toEqual([ALGORITHM_ENDPOINT])
 
       expect(store.getActions()).toEqual([
-        { type: types.ALGORITHMS_FETCHING },
+        { type: algorithmsTypes.ALGORITHMS_FETCHING },
         {
-          type: types.ALGORITHMS_FETCH_SUCCESS,
+          type: algorithmsTypes.ALGORITHMS_FETCH_SUCCESS,
           records: mockResponse.algorithms.map(record => ({
             description: record.description,
             id: record.service_id,
@@ -100,9 +100,9 @@ describe('algorithmsActions', () => {
       await store.dispatch(algorithmsActions.fetch())
 
       expect(store.getActions()).toEqual([
-        { type: types.ALGORITHMS_FETCHING },
+        { type: algorithmsTypes.ALGORITHMS_FETCHING },
         {
-          type: types.ALGORITHMS_FETCH_ERROR,
+          type: algorithmsTypes.ALGORITHMS_FETCH_ERROR,
           error: 'error',
         },
       ])
@@ -115,8 +115,8 @@ describe('algorithmsActions', () => {
 
       const actions = store.getActions()
       expect(actions.length).toEqual(2)
-      expect(actions[0]).toEqual({ type: types.ALGORITHMS_FETCHING })
-      expect(actions[1].type).toEqual(types.ALGORITHMS_FETCH_ERROR)
+      expect(actions[0]).toEqual({ type: algorithmsTypes.ALGORITHMS_FETCHING })
+      expect(actions[1].type).toEqual(algorithmsTypes.ALGORITHMS_FETCH_ERROR)
       expect(actions[1].error).toBeDefined()
     })
   })
@@ -132,7 +132,7 @@ describe('algorithmsActions', () => {
       )
 
       expect(store.getActions()).toEqual([
-        { type: types.ALGORITHMS_SERIALIZED },
+        { type: algorithmsTypes.ALGORITHMS_SERIALIZED },
       ])
     })
   })
@@ -150,7 +150,7 @@ describe('algorithmsActions', () => {
 
       expect(store.getActions()).toEqual([
         {
-          type: types.ALGORITHMS_DESERIALIZED,
+          type: algorithmsTypes.ALGORITHMS_DESERIALIZED,
           deserialized: {
             records: mockSavedRecords,
           },
@@ -166,7 +166,7 @@ describe('algorithmsActions', () => {
 
       expect(store.getActions()).toEqual([
         {
-          type: types.ALGORITHMS_DESERIALIZED,
+          type: algorithmsTypes.ALGORITHMS_DESERIALIZED,
           deserialized: {
             records: algorithmsInitialState.records,
           },
@@ -186,7 +186,7 @@ describe('algorithmsActions', () => {
 
       expect(store.getActions()).toEqual([
         {
-          type: types.ALGORITHMS_DESERIALIZED,
+          type: algorithmsTypes.ALGORITHMS_DESERIALIZED,
           deserialized: {},
         },
       ])

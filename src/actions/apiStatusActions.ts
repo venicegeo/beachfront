@@ -18,7 +18,7 @@ import {getClient} from '../api/session'
 import {AppState} from '../store'
 import {apiStatusInitialState} from '../reducers/apiStatusReducer'
 
-export const types = {
+export const apiStatusTypes = {
   API_STATUS_FETCHING: 'API_STATUS_FETCHING',
   API_STATUS_FETCH_SUCCESS: 'API_STATUS_FETCH_SUCCESS',
   API_STATUS_FETCH_ERROR: 'API_STATUS_FETCH_ERROR',
@@ -37,13 +37,13 @@ interface ApiStatus {
 export const apiStatusActions = {
   fetch() {
     return async dispatch => {
-      dispatch({ type: types.API_STATUS_FETCHING })
+      dispatch({ type: apiStatusTypes.API_STATUS_FETCHING })
 
       try {
         const response = await getClient().get('/')
         const status = response.data as ApiStatus
         dispatch({
-          type: types.API_STATUS_FETCH_SUCCESS,
+          type: apiStatusTypes.API_STATUS_FETCH_SUCCESS,
           geoserver: {
             wmsUrl: status.geoserver + '/wms',
           },
@@ -51,7 +51,7 @@ export const apiStatusActions = {
         })
       } catch (error) {
         dispatch({
-          type: types.API_STATUS_FETCH_ERROR,
+          type: apiStatusTypes.API_STATUS_FETCH_ERROR,
           error: (error.response) ? error.response.data : error,
         })
       }
@@ -65,7 +65,7 @@ export const apiStatusActions = {
       sessionStorage.setItem('geoserver', JSON.stringify(state.apiStatus.geoserver))
       sessionStorage.setItem('enabled_platforms_records', JSON.stringify(state.apiStatus.enabledPlatforms))
 
-      dispatch({ type: types.API_STATUS_SERIALIZED })
+      dispatch({ type: apiStatusTypes.API_STATUS_SERIALIZED })
     }
   },
 
@@ -85,7 +85,7 @@ export const apiStatusActions = {
     }
 
     return {
-      type: types.API_STATUS_DESERIALIZED,
+      type: apiStatusTypes.API_STATUS_DESERIALIZED,
       deserialized,
     }
   },

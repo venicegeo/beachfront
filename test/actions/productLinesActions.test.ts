@@ -19,7 +19,7 @@ import MockAdapter from 'axios-mock-adapter'
 import thunk from 'redux-thunk'
 import configureStore from 'redux-mock-store'
 import * as sinon from 'sinon'
-import {productLinesActions, types} from '../../src/actions/productLinesActions'
+import {productLinesActions, productLinesTypes} from '../../src/actions/productLinesActions'
 import {productLinesInitialState} from '../../src/reducers/productLinesReducer'
 import {JOB_ENDPOINT, PRODUCTLINE_ENDPOINT} from '../../src/config'
 import {getClient} from '../../src/api/session'
@@ -68,9 +68,9 @@ describe('productLinesActions', () => {
       expect(clientSpies.get.args[0]).toEqual([PRODUCTLINE_ENDPOINT])
 
       expect(store.getActions()).toEqual([
-        { type: types.PRODUCT_LINES_FETCHING },
+        { type: productLinesTypes.PRODUCT_LINES_FETCHING },
         {
-          type: types.PRODUCT_LINES_FETCH_SUCCESS,
+          type: productLinesTypes.PRODUCT_LINES_FETCH_SUCCESS,
           records: mockResponse.productlines.features,
         },
       ])
@@ -82,9 +82,9 @@ describe('productLinesActions', () => {
       await store.dispatch(productLinesActions.fetch())
 
       expect(store.getActions()).toEqual([
-        { type: types.PRODUCT_LINES_FETCHING },
+        { type: productLinesTypes.PRODUCT_LINES_FETCHING },
         {
-          type: types.PRODUCT_LINES_FETCH_ERROR,
+          type: productLinesTypes.PRODUCT_LINES_FETCH_ERROR,
           error: 'error',
         },
       ])
@@ -96,8 +96,8 @@ describe('productLinesActions', () => {
       await store.dispatch(productLinesActions.fetch())
 
       const actions = store.getActions()
-      expect(actions[0].type).toEqual(types.PRODUCT_LINES_FETCHING)
-      expect(actions[1].type).toEqual(types.PRODUCT_LINES_FETCH_ERROR)
+      expect(actions[0].type).toEqual(productLinesTypes.PRODUCT_LINES_FETCHING)
+      expect(actions[1].type).toEqual(productLinesTypes.PRODUCT_LINES_FETCH_ERROR)
       expect(actions[1].error).toBeDefined()
     })
   })
@@ -124,9 +124,9 @@ describe('productLinesActions', () => {
       expect(clientSpies.get.args[0]).toEqual([url])
 
       expect(store.getActions()).toEqual([
-        { type: types.PRODUCT_LINES_FETCHING_JOBS },
+        { type: productLinesTypes.PRODUCT_LINES_FETCHING_JOBS },
         {
-          type: types.PRODUCT_LINES_FETCH_JOBS_SUCCESS,
+          type: productLinesTypes.PRODUCT_LINES_FETCH_JOBS_SUCCESS,
           jobs: mockResponse.jobs.features,
         },
       ])
@@ -140,9 +140,9 @@ describe('productLinesActions', () => {
       await store.dispatch(productLinesActions.fetchJobs({ productLineId, sinceDate }))
 
       expect(store.getActions()).toEqual([
-        { type: types.PRODUCT_LINES_FETCHING_JOBS },
+        { type: productLinesTypes.PRODUCT_LINES_FETCHING_JOBS },
         {
-          type: types.PRODUCT_LINES_FETCH_JOBS_ERROR,
+          type: productLinesTypes.PRODUCT_LINES_FETCH_JOBS_ERROR,
           error: 'error',
         },
       ])
@@ -156,8 +156,8 @@ describe('productLinesActions', () => {
       await store.dispatch(productLinesActions.fetchJobs({ productLineId, sinceDate }))
 
       const actions = store.getActions()
-      expect(actions[0].type).toEqual(types.PRODUCT_LINES_FETCHING_JOBS)
-      expect(actions[1].type).toEqual(types.PRODUCT_LINES_FETCH_JOBS_ERROR)
+      expect(actions[0].type).toEqual(productLinesTypes.PRODUCT_LINES_FETCHING_JOBS)
+      expect(actions[1].type).toEqual(productLinesTypes.PRODUCT_LINES_FETCH_JOBS_ERROR)
       expect(actions[1].error).toBeDefined()
     })
   })
@@ -199,9 +199,9 @@ describe('productLinesActions', () => {
       ])
 
       expect(store.getActions()).toEqual([
-        { type: types.PRODUCT_LINES_CREATING_PRODUCT_LINE },
+        { type: productLinesTypes.PRODUCT_LINES_CREATING_PRODUCT_LINE },
         {
-          type: types.PRODUCT_LINES_CREATE_PRODUCT_LINE_SUCCESS,
+          type: productLinesTypes.PRODUCT_LINES_CREATE_PRODUCT_LINE_SUCCESS,
           createdProductLine: mockResponse.productline,
         },
       ])
@@ -215,9 +215,9 @@ describe('productLinesActions', () => {
       } as any))
 
       expect(store.getActions()).toEqual([
-        { type: types.PRODUCT_LINES_CREATING_PRODUCT_LINE },
+        { type: productLinesTypes.PRODUCT_LINES_CREATING_PRODUCT_LINE },
         {
-          type: types.PRODUCT_LINES_CREATE_PRODUCT_LINE_ERROR,
+          type: productLinesTypes.PRODUCT_LINES_CREATE_PRODUCT_LINE_ERROR,
           error: 'error',
         },
       ])
@@ -231,8 +231,8 @@ describe('productLinesActions', () => {
       } as any))
 
       const actions = store.getActions()
-      expect(actions[0].type).toEqual(types.PRODUCT_LINES_CREATING_PRODUCT_LINE)
-      expect(actions[1].type).toEqual(types.PRODUCT_LINES_CREATE_PRODUCT_LINE_ERROR)
+      expect(actions[0].type).toEqual(productLinesTypes.PRODUCT_LINES_CREATING_PRODUCT_LINE)
+      expect(actions[1].type).toEqual(productLinesTypes.PRODUCT_LINES_CREATE_PRODUCT_LINE_ERROR)
       expect(actions[1].error).toBeDefined()
     })
   })

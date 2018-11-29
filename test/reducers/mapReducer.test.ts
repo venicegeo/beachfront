@@ -15,7 +15,7 @@
  */
 
 import {mapInitialState, mapReducer} from '../../src/reducers/mapReducer'
-import {types} from '../../src/actions/mapActions'
+import {mapTypes} from '../../src/actions/mapActions'
 import {TYPE_JOB} from '../../src/constants'
 
 describe('mapReducer', () => {
@@ -25,7 +25,7 @@ describe('mapReducer', () => {
 
   test('MAP_INITIALIZED', () => {
     const action = {
-      type: types.MAP_INITIALIZED,
+      type: mapTypes.MAP_INITIALIZED,
       map: 'a',
       collections: [1, 2, 3],
     } as any
@@ -39,7 +39,7 @@ describe('mapReducer', () => {
 
   test('MAP_DESERIALIZED', () => {
     const action = {
-      type: types.MAP_DESERIALIZED,
+      type: mapTypes.MAP_DESERIALIZED,
       deserialized: {
         a: 'a',
       },
@@ -53,7 +53,7 @@ describe('mapReducer', () => {
 
   test('MAP_MODE_UPDATED', () => {
     const action = {
-      type: types.MAP_MODE_UPDATED,
+      type: mapTypes.MAP_MODE_UPDATED,
       mode: 'a',
     }
 
@@ -65,7 +65,7 @@ describe('mapReducer', () => {
 
   test('MAP_BBOX_UPDATED', () => {
     const action = {
-      type: types.MAP_BBOX_UPDATED,
+      type: mapTypes.MAP_BBOX_UPDATED,
       bbox: [1, 2, 3, 4],
     }
 
@@ -88,7 +88,7 @@ describe('mapReducer', () => {
       },
     } as any
 
-    const action = { type: types.MAP_BBOX_CLEARED }
+    const action = { type: mapTypes.MAP_BBOX_CLEARED }
 
     // Should auto deselect job.
     expect(mapReducer(state, action)).toEqual({
@@ -111,7 +111,7 @@ describe('mapReducer', () => {
 
   test('MAP_DETECTIONS_UPDATED', () => {
     const action = {
-      type: types.MAP_DETECTIONS_UPDATED,
+      type: mapTypes.MAP_DETECTIONS_UPDATED,
       detections: [1, 2, 3],
     }
 
@@ -123,7 +123,7 @@ describe('mapReducer', () => {
 
   test('MAP_FRAMES_UPDATED', () => {
     const action = {
-      type: types.MAP_FRAMES_UPDATED,
+      type: mapTypes.MAP_FRAMES_UPDATED,
       frames: [1, 2, 3],
     }
 
@@ -135,7 +135,7 @@ describe('mapReducer', () => {
 
   test('MAP_SELECTED_FEATURE_UPDATED', () => {
     const action = {
-      type: types.MAP_SELECTED_FEATURE_UPDATED,
+      type: mapTypes.MAP_SELECTED_FEATURE_UPDATED,
       selectedFeature: 'a',
     }
 
@@ -147,7 +147,7 @@ describe('mapReducer', () => {
 
   test('MAP_HOVERED_FEATURE_UPDATED', () => {
     const action = {
-      type: types.MAP_HOVERED_FEATURE_UPDATED,
+      type: mapTypes.MAP_HOVERED_FEATURE_UPDATED,
       hoveredFeature: 'a',
     }
 
@@ -159,7 +159,7 @@ describe('mapReducer', () => {
 
   test('MAP_VIEW_UPDATED', () => {
     const action = {
-      type: types.MAP_VIEW_UPDATED,
+      type: mapTypes.MAP_VIEW_UPDATED,
       view: 'a',
     }
 
@@ -181,7 +181,7 @@ describe('mapReducer', () => {
     } as any
 
     const action = {
-      type: types.MAP_PAN_TO_POINT,
+      type: mapTypes.MAP_PAN_TO_POINT,
       point: [1, 2],
       zoom: 1,
     }
@@ -209,7 +209,7 @@ describe('mapReducer', () => {
     } as any
 
     const action = {
-      type: types.MAP_PAN_TO_EXTENT,
+      type: mapTypes.MAP_PAN_TO_EXTENT,
       extent: [1, 2, 3, 4],
     }
 

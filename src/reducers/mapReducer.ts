@@ -14,7 +14,7 @@
  * limitations under the License.
  **/
 
-import {types} from '../actions/mapActions'
+import {mapTypes} from '../actions/mapActions'
 import {MapView, MODE_NORMAL} from '../components/PrimaryMap'
 import {TYPE_JOB} from '../constants'
 import {shouldSelectedFeatureAutoDeselect} from '../utils/mapUtils'
@@ -46,28 +46,28 @@ export const mapInitialState: MapState = {
 
 export function mapReducer(state = mapInitialState, action: any) {
   switch (action.type) {
-    case types.MAP_INITIALIZED:
+    case mapTypes.MAP_INITIALIZED:
       return {
         ...state,
         map: action.map,
         collections: action.collections,
       }
-    case types.MAP_DESERIALIZED:
+    case mapTypes.MAP_DESERIALIZED:
       return {
         ...state,
         ...action.deserialized,
       }
-    case types.MAP_MODE_UPDATED:
+    case mapTypes.MAP_MODE_UPDATED:
       return {
         ...state,
         mode: action.mode,
       }
-    case types.MAP_BBOX_UPDATED:
+    case mapTypes.MAP_BBOX_UPDATED:
       return {
         ...state,
         bbox: action.bbox,
       }
-    case types.MAP_BBOX_CLEARED: {
+    case mapTypes.MAP_BBOX_CLEARED: {
       let selectedFeature = state.selectedFeature
       if (shouldSelectedFeatureAutoDeselect(selectedFeature, { ignoreTypes: [TYPE_JOB] })) {
         selectedFeature = null
@@ -81,32 +81,32 @@ export function mapReducer(state = mapInitialState, action: any) {
         selectedFeature,
       }
     }
-    case types.MAP_DETECTIONS_UPDATED:
+    case mapTypes.MAP_DETECTIONS_UPDATED:
       return {
         ...state,
         detections: action.detections,
       }
-    case types.MAP_FRAMES_UPDATED:
+    case mapTypes.MAP_FRAMES_UPDATED:
       return {
         ...state,
         frames: action.frames,
       }
-    case types.MAP_SELECTED_FEATURE_UPDATED:
+    case mapTypes.MAP_SELECTED_FEATURE_UPDATED:
       return {
         ...state,
         selectedFeature: action.selectedFeature,
       }
-    case types.MAP_HOVERED_FEATURE_UPDATED:
+    case mapTypes.MAP_HOVERED_FEATURE_UPDATED:
       return {
         ...state,
         hoveredFeature: action.hoveredFeature,
       }
-    case types.MAP_VIEW_UPDATED:
+    case mapTypes.MAP_VIEW_UPDATED:
       return {
         ...state,
         view: action.view,
       }
-    case types.MAP_PAN_TO_POINT:
+    case mapTypes.MAP_PAN_TO_POINT:
       return {
         ...state,
         view: {
@@ -116,7 +116,7 @@ export function mapReducer(state = mapInitialState, action: any) {
           extent: null,
         },
       }
-    case types.MAP_PAN_TO_EXTENT:
+    case mapTypes.MAP_PAN_TO_EXTENT:
       return {
         ...state,
         view: {

@@ -15,8 +15,8 @@
  */
 
 import {catalogInitialState, catalogReducer} from '../../src/reducers/catalogReducer'
-import {types} from '../../src/actions/catalogActions'
-import {types as mapTypes} from '../../src/actions/mapActions'
+import {catalogTypes} from '../../src/actions/catalogActions'
+import {mapTypes} from '../../src/actions/mapActions'
 import * as moment from 'moment'
 
 describe('catalogReducer', () => {
@@ -26,7 +26,7 @@ describe('catalogReducer', () => {
 
   test('CATALOG_DESERIALIZED', () => {
     const action = {
-      type: types.CATALOG_DESERIALIZED,
+      type: catalogTypes.CATALOG_DESERIALIZED,
       deserialized: {
         a: 'a',
       },
@@ -40,7 +40,7 @@ describe('catalogReducer', () => {
 
   test('CATALOG_API_KEY_UPDATED', () => {
     const action = {
-      type: types.CATALOG_API_KEY_UPDATED,
+      type: catalogTypes.CATALOG_API_KEY_UPDATED,
       apiKey: 'a',
     }
 
@@ -52,7 +52,7 @@ describe('catalogReducer', () => {
 
   test('CATALOG_SEARCH_CRITERIA_UPDATED', () => {
     const action = {
-      type: types.CATALOG_SEARCH_CRITERIA_UPDATED,
+      type: catalogTypes.CATALOG_SEARCH_CRITERIA_UPDATED,
       searchCriteria: {
         cloudCover: 1,
         dateFrom: moment(),
@@ -81,7 +81,7 @@ describe('catalogReducer', () => {
       },
     } as any
 
-    const action = { type: types.CATALOG_SEARCH_CRITERIA_RESET }
+    const action = { type: catalogTypes.CATALOG_SEARCH_CRITERIA_RESET }
 
     expect(catalogReducer(state, action)).toEqual({
       ...state,
@@ -95,7 +95,7 @@ describe('catalogReducer', () => {
       searchError: 'a',
     }
 
-    const action = { type: types.CATALOG_SEARCHING }
+    const action = { type: catalogTypes.CATALOG_SEARCHING }
 
     expect(catalogReducer(state, action)).toEqual({
       ...state,
@@ -111,7 +111,7 @@ describe('catalogReducer', () => {
     }
 
     const action = {
-      type: types.CATALOG_SEARCH_SUCCESS,
+      type: catalogTypes.CATALOG_SEARCH_SUCCESS,
       searchResults: [1, 2, 3],
     }
 
@@ -129,7 +129,7 @@ describe('catalogReducer', () => {
     }
 
     const action = {
-      type: types.CATALOG_SEARCH_ERROR,
+      type: catalogTypes.CATALOG_SEARCH_ERROR,
       error: 'a',
     }
 

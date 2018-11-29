@@ -15,7 +15,7 @@
  */
 
 import {algorithmsInitialState, algorithmsReducer} from '../../src/reducers/algorithmsReducer'
-import {types} from '../../src/actions/algorithmsActions'
+import {algorithmsTypes} from '../../src/actions/algorithmsActions'
 
 describe('algorithmsReducer', () => {
   test('initial state', () => {
@@ -24,7 +24,7 @@ describe('algorithmsReducer', () => {
 
   test('ALGORITHMS_DESERIALIZED', () => {
     const action = {
-      type: types.ALGORITHMS_DESERIALIZED,
+      type: algorithmsTypes.ALGORITHMS_DESERIALIZED,
       deserialized: {
         a: 'a',
       },
@@ -42,7 +42,7 @@ describe('algorithmsReducer', () => {
       fetchError: 'a',
     }
 
-    const action = { type: types.ALGORITHMS_FETCHING }
+    const action = { type: algorithmsTypes.ALGORITHMS_FETCHING }
 
     expect(algorithmsReducer(state, action)).toEqual({
       ...state,
@@ -58,7 +58,7 @@ describe('algorithmsReducer', () => {
     }
 
     const action = {
-      type: types.ALGORITHMS_FETCH_SUCCESS,
+      type: algorithmsTypes.ALGORITHMS_FETCH_SUCCESS,
       records: [1, 2, 3],
     }
 
@@ -76,7 +76,7 @@ describe('algorithmsReducer', () => {
     }
 
     const action = {
-      type: types.ALGORITHMS_FETCH_ERROR,
+      type: algorithmsTypes.ALGORITHMS_FETCH_ERROR,
       error: 'a',
     }
 

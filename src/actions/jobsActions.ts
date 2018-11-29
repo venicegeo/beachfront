@@ -17,7 +17,7 @@
 import {getClient} from '../api/session'
 import {JOB_ENDPOINT} from '../config'
 
-export const types = {
+export const jobsTypes = {
   JOBS_FETCHING: 'JOBS_FETCHING',
   JOBS_FETCH_SUCCESS: 'JOBS_FETCH_SUCCESS',
   JOBS_FETCH_ERROR: 'JOBS_FETCH_ERROR',
@@ -44,17 +44,17 @@ export interface JobsCreateJobArgs {
 export const jobsActions = {
   fetch() {
     return async dispatch => {
-      dispatch({ type: types.JOBS_FETCHING })
+      dispatch({ type: jobsTypes.JOBS_FETCHING })
 
       try {
         const response = await getClient().get(JOB_ENDPOINT)
         dispatch({
-          type: types.JOBS_FETCH_SUCCESS,
+          type: jobsTypes.JOBS_FETCH_SUCCESS,
           records: response.data.jobs.features,
         })
       } catch (error) {
         dispatch({
-          type: types.JOBS_FETCH_ERROR,
+          type: jobsTypes.JOBS_FETCH_ERROR,
           error: (error.response) ? error.response.data : error,
         })
       }
@@ -63,17 +63,17 @@ export const jobsActions = {
 
   fetchOne(jobId: string) {
     return async dispatch => {
-      dispatch({ type: types.JOBS_FETCHING_ONE })
+      dispatch({ type: jobsTypes.JOBS_FETCHING_ONE })
 
       try {
         const response = await getClient().get(`${JOB_ENDPOINT}/${jobId}`)
         dispatch({
-          type: types.JOBS_FETCH_ONE_SUCCESS,
+          type: jobsTypes.JOBS_FETCH_ONE_SUCCESS,
           record: response.data.job,
         })
       } catch (error) {
         dispatch({
-          type: types.JOBS_FETCH_ONE_ERROR,
+          type: jobsTypes.JOBS_FETCH_ONE_ERROR,
           error: (error.response) ? error.response.data : error,
         })
       }
@@ -82,7 +82,7 @@ export const jobsActions = {
 
   createJob(args: JobsCreateJobArgs) {
     return async dispatch => {
-      dispatch({ type: types.JOBS_CREATING_JOB })
+      dispatch({ type: jobsTypes.JOBS_CREATING_JOB })
 
       try {
         const response = await getClient().post(JOB_ENDPOINT, {
@@ -93,12 +93,12 @@ export const jobsActions = {
           scene_id: args.sceneId,
         })
         dispatch({
-          type: types.JOBS_CREATE_JOB_SUCCESS,
+          type: jobsTypes.JOBS_CREATE_JOB_SUCCESS,
           createdJob: response.data.job,
         })
       } catch (error) {
         dispatch({
-          type: types.JOBS_CREATE_JOB_ERROR,
+          type: jobsTypes.JOBS_CREATE_JOB_ERROR,
           error: (error.response) ? error.response.data : error,
         })
       }
@@ -106,22 +106,22 @@ export const jobsActions = {
   },
 
   dismissCreateJobError() {
-    return { type: types.JOBS_CREATE_JOB_ERROR_DISMISSED }
+    return { type: jobsTypes.JOBS_CREATE_JOB_ERROR_DISMISSED }
   },
 
   deleteJob(job: beachfront.Job) {
     return async dispatch => {
       dispatch({
-        type: types.JOBS_DELETING_JOB,
+        type: jobsTypes.JOBS_DELETING_JOB,
         deletedJob: job,
       })
 
       try {
         await getClient().delete(`${JOB_ENDPOINT}/${job.id}`)
-        dispatch({ type: types.JOBS_DELETE_JOB_SUCCESS })
+        dispatch({ type: jobsTypes.JOBS_DELETE_JOB_SUCCESS })
       } catch (error) {
         dispatch({
-          type: types.JOBS_DELETE_JOB_ERROR,
+          type: jobsTypes.JOBS_DELETE_JOB_ERROR,
           error: (error.response) ? error.response.data : error,
         })
       }

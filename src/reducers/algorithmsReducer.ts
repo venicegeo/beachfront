@@ -14,7 +14,7 @@
  * limitations under the License.
  **/
 
-import {types} from '../actions/algorithmsActions'
+import {algorithmsTypes} from '../actions/algorithmsActions'
 
 export interface AlgorithmsState {
   records: beachfront.Algorithm[]
@@ -30,24 +30,24 @@ export const algorithmsInitialState: AlgorithmsState = {
 
 export function algorithmsReducer(state = algorithmsInitialState, action: any) {
   switch (action.type) {
-    case types.ALGORITHMS_DESERIALIZED:
+    case algorithmsTypes.ALGORITHMS_DESERIALIZED:
       return {
         ...state,
         ...action.deserialized,
       }
-    case types.ALGORITHMS_FETCHING:
+    case algorithmsTypes.ALGORITHMS_FETCHING:
       return {
         ...state,
         isFetching: true,
         fetchError: null,
       }
-    case types.ALGORITHMS_FETCH_SUCCESS:
+    case algorithmsTypes.ALGORITHMS_FETCH_SUCCESS:
       return {
         ...state,
         isFetching: false,
         records: action.records,
       }
-    case types.ALGORITHMS_FETCH_ERROR:
+    case algorithmsTypes.ALGORITHMS_FETCH_ERROR:
       return {
         ...state,
         isFetching: false,

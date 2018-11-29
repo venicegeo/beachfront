@@ -18,7 +18,7 @@ import thunk from 'redux-thunk'
 import configureStore from 'redux-mock-store'
 import * as sinon from 'sinon'
 import {SinonStub} from 'sinon'
-import {tourActions, types} from '../../src/actions/tourActions'
+import {tourActions, tourTypes} from '../../src/actions/tourActions'
 import {tourInitialState} from '../../src/reducers/tourReducer'
 import * as domUtils from '../../src/utils/domUtils'
 
@@ -42,7 +42,7 @@ describe('tourActions', () => {
 
       expect(store.getActions()).toEqual([
         {
-          type: types.TOUR_SET_STEPS,
+          type: tourTypes.TOUR_SET_STEPS,
           steps: mockSteps,
         },
       ])
@@ -54,7 +54,7 @@ describe('tourActions', () => {
       await store.dispatch(tourActions.start())
 
       expect(store.getActions()).toEqual([
-        { type: types.TOUR_STARTED },
+        { type: tourTypes.TOUR_STARTED },
       ])
     })
   })
@@ -64,7 +64,7 @@ describe('tourActions', () => {
       await store.dispatch(tourActions.end())
 
       expect(store.getActions()).toEqual([
-        { type: types.TOUR_ENDED },
+        { type: tourTypes.TOUR_ENDED },
       ])
     })
   })
@@ -106,9 +106,9 @@ describe('tourActions', () => {
       expect(scrollIntoViewStub.callCount).toEqual(1)
 
       expect(store.getActions()).toEqual([
-        { type: types.TOUR_STEP_CHANGING },
+        { type: tourTypes.TOUR_STEP_CHANGING },
         {
-          type: types.TOUR_STEP_CHANGE_SUCCESS,
+          type: tourTypes.TOUR_STEP_CHANGE_SUCCESS,
           step: 2,
         },
       ])
@@ -137,9 +137,9 @@ describe('tourActions', () => {
       await store.dispatch(tourActions.goToStep(2))
 
       expect(store.getActions()).toEqual([
-        { type: types.TOUR_STEP_CHANGING },
+        { type: tourTypes.TOUR_STEP_CHANGING },
         {
-          type: types.TOUR_STEP_CHANGE_ERROR,
+          type: tourTypes.TOUR_STEP_CHANGE_ERROR,
           error: 'after error',
         },
       ])
@@ -168,9 +168,9 @@ describe('tourActions', () => {
       await store.dispatch(tourActions.goToStep(2))
 
       expect(store.getActions()).toEqual([
-        { type: types.TOUR_STEP_CHANGING },
+        { type: tourTypes.TOUR_STEP_CHANGING },
         {
-          type: types.TOUR_STEP_CHANGE_ERROR,
+          type: tourTypes.TOUR_STEP_CHANGE_ERROR,
           error: 'before error',
         },
       ])
@@ -213,9 +213,9 @@ describe('tourActions', () => {
       expect(alertSpy.callCount).toEqual(1)
 
       expect(store.getActions()).toEqual([
-        { type: types.TOUR_STEP_CHANGING },
+        { type: tourTypes.TOUR_STEP_CHANGING },
         {
-          type: types.TOUR_STEP_CHANGE_ERROR,
+          type: tourTypes.TOUR_STEP_CHANGE_ERROR,
           error: 'error',
         },
       ])
@@ -237,9 +237,9 @@ describe('tourActions', () => {
       await store.dispatch(tourActions.goToStep(2))
 
       expect(store.getActions()).toEqual([
-        { type: types.TOUR_STEP_CHANGING },
+        { type: tourTypes.TOUR_STEP_CHANGING },
         {
-          type: types.TOUR_STEP_CHANGE_SUCCESS,
+          type: tourTypes.TOUR_STEP_CHANGE_SUCCESS,
           step: 2,
         },
       ])
@@ -277,9 +277,9 @@ describe('tourActions', () => {
       expect(mockSteps[2].before.callCount).toEqual(1)
 
       expect(store.getActions()).toEqual([
-        { type: types.TOUR_STEP_CHANGING },
+        { type: tourTypes.TOUR_STEP_CHANGING },
         {
-          type: types.TOUR_STEP_CHANGE_SUCCESS,
+          type: tourTypes.TOUR_STEP_CHANGE_SUCCESS,
           step: 3,
         },
       ])

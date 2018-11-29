@@ -15,7 +15,7 @@
  */
 
 import {userInitialState, userReducer} from '../../src/reducers/userReducer'
-import {types} from '../../src/actions/userActions'
+import {userTypes} from '../../src/actions/userActions'
 
 describe('userReducer', () => {
   test('initialState', () => {
@@ -24,7 +24,7 @@ describe('userReducer', () => {
 
   test('USER_DESERIALIZED', () => {
     const action = {
-      type: types.USER_DESERIALIZED,
+      type: userTypes.USER_DESERIALIZED,
       deserialized: {
         a: 'a',
       },
@@ -42,7 +42,7 @@ describe('userReducer', () => {
       isLoggedIn: true,
     }
 
-    const action = { type: types.USER_LOGGED_OUT }
+    const action = { type: userTypes.USER_LOGGED_OUT }
 
     expect(userReducer(state, action)).toEqual({
       ...state,
@@ -58,7 +58,7 @@ describe('userReducer', () => {
       isSessionExpired: true,
     }
 
-    const action = { type: types.USER_SESSION_CLEARED }
+    const action = { type: userTypes.USER_SESSION_CLEARED }
 
     expect(userReducer(state, action)).toEqual({
       ...state,
@@ -74,7 +74,7 @@ describe('userReducer', () => {
       isSessionLoggedOut: true,
     }
 
-    const action = { type: types.USER_SESSION_LOGGED_OUT }
+    const action = { type: userTypes.USER_SESSION_LOGGED_OUT }
 
     expect(userReducer(state, action)).toEqual({
       ...state,
@@ -84,7 +84,7 @@ describe('userReducer', () => {
   })
 
   test('USER_SESSION_EXPIRED', () => {
-    const action = { type: types.USER_SESSION_EXPIRED }
+    const action = { type: userTypes.USER_SESSION_EXPIRED }
 
     expect(userReducer(userInitialState, action)).toEqual({
       ...userInitialState,

@@ -18,7 +18,7 @@ import {getClient} from '../api/session'
 import {AppState} from '../store'
 import {userInitialState} from '../reducers/userReducer'
 
-export const types = {
+export const userTypes = {
   USER_LOGGED_OUT: 'USER_LOGGED_OUT',
   USER_SESSION_CLEARED: 'USER_SESSION_CLEARED',
   USER_SESSION_LOGGED_OUT: 'USER_SESSION_LOGGED_OUT',
@@ -29,12 +29,12 @@ export const types = {
 
 export const userActions = {
   logout() {
-    return { type: types.USER_LOGGED_OUT }
+    return { type: userTypes.USER_LOGGED_OUT }
   },
 
   clearSession() {
     sessionStorage.clear()
-    return { type: types.USER_SESSION_CLEARED }
+    return { type: userTypes.USER_SESSION_CLEARED }
   },
 
   sessionLogout() {
@@ -44,11 +44,11 @@ export const userActions = {
       window.location.href = response.data
     })
 
-    return { type: types.USER_SESSION_LOGGED_OUT }
+    return { type: userTypes.USER_SESSION_LOGGED_OUT }
   },
 
   sessionExpired() {
-    return { type: types.USER_SESSION_EXPIRED }
+    return { type: userTypes.USER_SESSION_EXPIRED }
   },
 
   serialize() {
@@ -57,7 +57,7 @@ export const userActions = {
 
       sessionStorage.setItem('isSessionExpired', JSON.stringify(state.user.isSessionExpired))
 
-      dispatch({ type: types.USER_SERIALIZED })
+      dispatch({ type: userTypes.USER_SERIALIZED })
     }
   },
 
@@ -72,7 +72,7 @@ export const userActions = {
     }
 
     return {
-      type: types.USER_DESERIALIZED,
+      type: userTypes.USER_DESERIALIZED,
       deserialized,
     }
   },

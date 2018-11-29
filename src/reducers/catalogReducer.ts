@@ -14,8 +14,8 @@
  * limitations under the License.
  **/
 
-import {types} from '../actions/catalogActions'
-import {types as mapTypes} from '../actions/mapActions'
+import {catalogTypes} from '../actions/catalogActions'
+import {mapTypes} from '../actions/mapActions'
 import * as moment from 'moment'
 import {SOURCE_DEFAULT} from '../constants'
 
@@ -49,17 +49,17 @@ export const catalogInitialState: CatalogState = {
 
 export function catalogReducer(state = catalogInitialState, action: any): CatalogState {
   switch (action.type) {
-    case types.CATALOG_DESERIALIZED:
+    case catalogTypes.CATALOG_DESERIALIZED:
       return {
         ...state,
         ...action.deserialized,
       }
-    case types.CATALOG_API_KEY_UPDATED:
+    case catalogTypes.CATALOG_API_KEY_UPDATED:
       return {
         ...state,
         apiKey: action.apiKey,
       }
-    case types.CATALOG_SEARCH_CRITERIA_UPDATED:
+    case catalogTypes.CATALOG_SEARCH_CRITERIA_UPDATED:
       return {
         ...state,
         searchCriteria: {
@@ -67,24 +67,24 @@ export function catalogReducer(state = catalogInitialState, action: any): Catalo
           ...action.searchCriteria,
         },
       }
-    case types.CATALOG_SEARCH_CRITERIA_RESET:
+    case catalogTypes.CATALOG_SEARCH_CRITERIA_RESET:
       return {
         ...state,
         searchCriteria: catalogInitialState.searchCriteria,
       }
-    case types.CATALOG_SEARCHING:
+    case catalogTypes.CATALOG_SEARCHING:
       return {
         ...state,
         isSearching: true,
         searchError: null,
       }
-    case types.CATALOG_SEARCH_SUCCESS:
+    case catalogTypes.CATALOG_SEARCH_SUCCESS:
       return {
         ...state,
         isSearching: false,
         searchResults: action.searchResults,
       }
-    case types.CATALOG_SEARCH_ERROR:
+    case catalogTypes.CATALOG_SEARCH_ERROR:
       return {
         ...state,
         isSearching: false,

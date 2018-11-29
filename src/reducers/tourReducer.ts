@@ -14,7 +14,7 @@
  * limitations under the License.
  **/
 
-import {TourStep, types} from '../actions/tourActions'
+import {TourStep, tourTypes} from '../actions/tourActions'
 
 export interface TourState {
   inProgress: boolean
@@ -34,12 +34,12 @@ export const tourInitialState: TourState = {
 
 export function tourReducer(state = tourInitialState, action: any) {
   switch (action.type) {
-    case types.TOUR_SET_STEPS:
+    case tourTypes.TOUR_SET_STEPS:
       return {
         ...state,
         steps: action.steps,
       }
-    case types.TOUR_STARTED:
+    case tourTypes.TOUR_STARTED:
       return {
         ...state,
         inProgress: true,
@@ -47,25 +47,25 @@ export function tourReducer(state = tourInitialState, action: any) {
         step: 1,
         error: null,
       }
-    case types.TOUR_ENDED:
+    case tourTypes.TOUR_ENDED:
       return {
         ...state,
         inProgress: false,
         changing: false,
         error: null,
       }
-    case types.TOUR_STEP_CHANGING:
+    case tourTypes.TOUR_STEP_CHANGING:
       return {
         ...state,
         changing: true,
       }
-    case types.TOUR_STEP_CHANGE_SUCCESS:
+    case tourTypes.TOUR_STEP_CHANGE_SUCCESS:
       return {
         ...state,
         changing: false,
         step: action.step,
       }
-    case types.TOUR_STEP_CHANGE_ERROR:
+    case tourTypes.TOUR_STEP_CHANGE_ERROR:
       return {
         ...state,
         changing: false,

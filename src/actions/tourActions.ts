@@ -17,7 +17,7 @@
 import {scrollIntoView} from '../utils/domUtils'
 import {AppState} from '../store'
 
-export const types = {
+export const tourTypes = {
   TOUR_SET_STEPS: 'TOUR_SET_STEPS',
   TOUR_STARTED: 'TOUR_STARTED',
   TOUR_ENDED: 'TOUR_ENDED',
@@ -42,17 +42,17 @@ export interface TourStep {
 export const tourActions = {
   setSteps(steps: TourStep[]) {
     return {
-      type: types.TOUR_SET_STEPS,
+      type: tourTypes.TOUR_SET_STEPS,
       steps,
     }
   },
 
   start() {
-    return { type: types.TOUR_STARTED }
+    return { type: tourTypes.TOUR_STARTED }
   },
 
   end() {
-    return { type: types.TOUR_ENDED }
+    return { type: tourTypes.TOUR_ENDED }
   },
 
   goToStep(step: number) {
@@ -67,7 +67,7 @@ export const tourActions = {
       const curStep = state.tour.steps.find(i => i.step === state.tour.step)
       const nextStep = state.tour.steps.find(i => i.step === step)
 
-      dispatch({ type: types.TOUR_STEP_CHANGING })
+      dispatch({ type: tourTypes.TOUR_STEP_CHANGING })
 
       try {
         if (curStep.after) {
@@ -85,7 +85,7 @@ export const tourActions = {
         }
 
         dispatch({
-          type: types.TOUR_STEP_CHANGE_ERROR,
+          type: tourTypes.TOUR_STEP_CHANGE_ERROR,
           error: error.message,
         })
 
@@ -93,7 +93,7 @@ export const tourActions = {
       }
 
       dispatch({
-        type: types.TOUR_STEP_CHANGE_SUCCESS,
+        type: tourTypes.TOUR_STEP_CHANGE_SUCCESS,
         step,
       })
     }

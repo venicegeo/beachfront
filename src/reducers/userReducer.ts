@@ -14,7 +14,7 @@
  * limitations under the License.
  **/
 
-import {types} from '../actions/userActions'
+import {userTypes} from '../actions/userActions'
 import * as session from '../api/session'
 
 export interface UserState {
@@ -35,30 +35,30 @@ export const userInitialState: UserState = {
 
 export function userReducer(state = userInitialState, action: any): UserState {
   switch (action.type) {
-    case types.USER_DESERIALIZED:
+    case userTypes.USER_DESERIALIZED:
       return {
         ...state,
         ...action.deserialized,
       }
-    case types.USER_LOGGED_OUT:
+    case userTypes.USER_LOGGED_OUT:
       return {
         ...state,
         isLoggedIn: false,
         isSessionLoggedOut: true,
       }
-    case types.USER_SESSION_CLEARED:
+    case userTypes.USER_SESSION_CLEARED:
       return {
         ...state,
         isLoggedIn: false,
         isSessionExpired: false,
       }
-    case types.USER_SESSION_LOGGED_OUT:
+    case userTypes.USER_SESSION_LOGGED_OUT:
       return {
         ...state,
         isLoggedIn: false,
         isSessionLoggedOut: false,
       }
-    case types.USER_SESSION_EXPIRED:
+    case userTypes.USER_SESSION_EXPIRED:
       return {
         ...state,
         isSessionExpired: true,

@@ -17,7 +17,7 @@
 import thunk from 'redux-thunk'
 import configureStore from 'redux-mock-store'
 import * as sinon from 'sinon'
-import {routeActions, types} from '../../src/actions/routeActions'
+import {routeActions, routeTypes} from '../../src/actions/routeActions'
 import {routeInitialState} from '../../src/reducers/routeReducer'
 
 const mockStore = configureStore([thunk])
@@ -52,7 +52,7 @@ describe('routeActions', () => {
 
       expect(store.getActions()).toEqual([
         {
-          type: types.ROUTE_CHANGED,
+          type: routeTypes.ROUTE_CHANGED,
           pathname: loc.pathname,
           search: loc.search,
           hash: loc.hash,
@@ -70,7 +70,7 @@ describe('routeActions', () => {
 
       expect(store.getActions()).toEqual([
         {
-          type: types.ROUTE_CHANGED,
+          type: routeTypes.ROUTE_CHANGED,
           pathname: '/',
           search: '',
           hash: '',

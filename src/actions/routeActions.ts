@@ -16,7 +16,7 @@
 
 import {generateRoute} from '../utils/routeUtils'
 
-export const types = {
+export const routeTypes = {
   ROUTE_CHANGED: 'ROUTE_CHANGED',
 }
 
@@ -46,7 +46,7 @@ export const routeActions = {
     }
 
     return {
-      type: types.ROUTE_CHANGED,
+      type: routeTypes.ROUTE_CHANGED,
       hash: route.hash,
       href: route.href,
       jobIds: route.jobIds,

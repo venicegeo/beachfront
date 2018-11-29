@@ -20,7 +20,7 @@ import {getClient} from '../api/session'
 import {wrap} from '../utils/math'
 import {catalogInitialState} from '../reducers/catalogReducer'
 
-export const types = {
+export const catalogTypes = {
   CATALOG_INITIALIZING: 'CATALOG_INITIALIZING',
   CATALOG_INITIALIZE_SUCCESS: 'CATALOG_INITIALIZE_SUCCESS',
   CATALOG_INITIALIZE_ERROR: 'CATALOG_INITIALIZE_ERROR',
@@ -49,25 +49,25 @@ export interface CatalogUpdateSearchCriteriaArgs {
 export const catalogActions = {
   setApiKey(apiKey: string) {
     return {
-      type: types.CATALOG_API_KEY_UPDATED,
+      type: catalogTypes.CATALOG_API_KEY_UPDATED,
       apiKey,
     }
   },
 
   updateSearchCriteria(searchCriteria: CatalogUpdateSearchCriteriaArgs) {
     return {
-      type: types.CATALOG_SEARCH_CRITERIA_UPDATED,
+      type: catalogTypes.CATALOG_SEARCH_CRITERIA_UPDATED,
       searchCriteria,
     }
   },
 
   resetSearchCriteria() {
-    return { type: types.CATALOG_SEARCH_CRITERIA_RESET }
+    return { type: catalogTypes.CATALOG_SEARCH_CRITERIA_RESET }
   },
 
   search(args: CatalogSearchArgs = {startIndex: 0, count: 100}) {
     return async (dispatch, getState) => {
-      dispatch({ type: types.CATALOG_SEARCHING })
+      dispatch({ type: catalogTypes.CATALOG_SEARCHING })
 
       console.warn('(catalog:search): Discarding parameters `count` (%s) and `startIndex` (%s)', args.count, args.startIndex)
 
@@ -82,7 +82,7 @@ export const catalogActions = {
       let sceneTileProvider = SCENE_TILE_PROVIDERS.find(p => p.prefix === state.catalog.searchCriteria.source)
       if (!sceneTileProvider) {
         dispatch({
-          type: types.CATALOG_SEARCH_ERROR,
+          type: catalogTypes.CATALOG_SEARCH_ERROR,
           error: new Error(`Unknown data source prefix: '${state.catalog.searchCriteria.source}'`),
         })
         return
@@ -108,7 +108,7 @@ export const catalogActions = {
         })
 
         dispatch({
-          type: types.CATALOG_SEARCH_SUCCESS,
+          type: catalogTypes.CATALOG_SEARCH_SUCCESS,
           searchResults: {
             images,
             count: images.features.length,
@@ -118,7 +118,7 @@ export const catalogActions = {
         })
       } catch (error) {
         dispatch({
-          type: types.CATALOG_SEARCH_ERROR,
+          type: catalogTypes.CATALOG_SEARCH_ERROR,
           error: (error.response) ? error.response.data : error,
         })
       }
@@ -133,7 +133,7 @@ export const catalogActions = {
       sessionStorage.setItem('searchResults', JSON.stringify(state.catalog.searchResults))
       localStorage.setItem('catalog_apiKey', state.catalog.apiKey)  // HACK
 
-      dispatch({ type: types.CATALOG_SERIALIZED })
+      dispatch({ type: catalogTypes.CATALOG_SERIALIZED })
     }
   },
 
@@ -155,7 +155,7 @@ export const catalogActions = {
     deserialized.apiKey = localStorage.getItem('catalog_apiKey') || catalogInitialState.apiKey
 
     return {
-      type: types.CATALOG_DESERIALIZED,
+      type: catalogTypes.CATALOG_DESERIALIZED,
       deserialized,
     }
   },

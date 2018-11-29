@@ -19,7 +19,7 @@ import MockAdapter from 'axios-mock-adapter'
 import thunk from 'redux-thunk'
 import configureStore from 'redux-mock-store'
 import * as sinon from 'sinon'
-import {apiStatusActions, types} from '../../src/actions/apiStatusActions'
+import {apiStatusActions, apiStatusTypes} from '../../src/actions/apiStatusActions'
 import {apiStatusInitialState} from '../../src/reducers/apiStatusReducer'
 import {getClient} from '../../src/api/session'
 
@@ -65,9 +65,9 @@ describe('apiStatusActions', () => {
       expect(clientSpies.get.args[0]).toEqual(['/'])
 
       expect(store.getActions()).toEqual([
-        { type: types.API_STATUS_FETCHING },
+        { type: apiStatusTypes.API_STATUS_FETCHING },
         {
-          type: types.API_STATUS_FETCH_SUCCESS,
+          type: apiStatusTypes.API_STATUS_FETCH_SUCCESS,
           geoserver: {
             wmsUrl: mockResponse.geoserver + '/wms',
           },
@@ -82,9 +82,9 @@ describe('apiStatusActions', () => {
       await store.dispatch(apiStatusActions.fetch())
 
       expect(store.getActions()).toEqual([
-        { type: types.API_STATUS_FETCHING },
+        { type: apiStatusTypes.API_STATUS_FETCHING },
         {
-          type: types.API_STATUS_FETCH_ERROR,
+          type: apiStatusTypes.API_STATUS_FETCH_ERROR,
           error: 'error',
         },
       ])
@@ -97,8 +97,8 @@ describe('apiStatusActions', () => {
 
       const actions = store.getActions()
       expect(actions.length).toEqual(2)
-      expect(actions[0]).toEqual({ type: types.API_STATUS_FETCHING })
-      expect(actions[1].type).toEqual(types.API_STATUS_FETCH_ERROR)
+      expect(actions[0]).toEqual({ type: apiStatusTypes.API_STATUS_FETCHING })
+      expect(actions[1].type).toEqual(apiStatusTypes.API_STATUS_FETCH_ERROR)
       expect(actions[1].error).toBeDefined()
     })
   })
@@ -120,7 +120,7 @@ describe('apiStatusActions', () => {
       )
 
       expect(store.getActions()).toEqual([
-        { type: types.API_STATUS_SERIALIZED },
+        { type: apiStatusTypes.API_STATUS_SERIALIZED },
       ])
     })
   })
@@ -143,7 +143,7 @@ describe('apiStatusActions', () => {
 
       expect(store.getActions()).toEqual([
         {
-          type: types.API_STATUS_DESERIALIZED,
+          type: apiStatusTypes.API_STATUS_DESERIALIZED,
           deserialized: {
             geoserver: mockStorage.geoserver,
             enabledPlatforms: mockStorage.enabled_platforms_records,
@@ -161,7 +161,7 @@ describe('apiStatusActions', () => {
 
       expect(store.getActions()).toEqual([
         {
-          type: types.API_STATUS_DESERIALIZED,
+          type: apiStatusTypes.API_STATUS_DESERIALIZED,
           deserialized: {
             geoserver: apiStatusInitialState.geoserver,
             enabledPlatforms: apiStatusInitialState.enabledPlatforms,
@@ -184,7 +184,7 @@ describe('apiStatusActions', () => {
 
       expect(store.getActions()).toEqual([
         {
-          type: types.API_STATUS_DESERIALIZED,
+          type: apiStatusTypes.API_STATUS_DESERIALIZED,
           deserialized: {},
         },
       ])

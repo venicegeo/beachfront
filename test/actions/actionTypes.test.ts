@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {types as algorithmsTypes} from '../../src/actions/algorithmsActions'
-import {types as apiStatusTypes} from '../../src/actions/apiStatusActions'
-import {types as catalogTypes} from '../../src/actions/catalogActions'
-import {types as jobsTypes} from '../../src/actions/jobsActions'
-import {types as mapTypes} from '../../src/actions/mapActions'
-import {types as productLinesTypes} from '../../src/actions/productLinesActions'
-import {types as routeTypes} from '../../src/actions/routeActions'
-import {types as tourTypes} from '../../src/actions/tourActions'
-import {types as userTypes} from '../../src/actions/userActions'
+import {algorithmsTypes} from '../../src/actions/algorithmsActions'
+import {apiStatusTypes} from '../../src/actions/apiStatusActions'
+import {catalogTypes} from '../../src/actions/catalogActions'
+import {jobsTypes} from '../../src/actions/jobsActions'
+import {mapTypes} from '../../src/actions/mapActions'
+import {productLinesTypes} from '../../src/actions/productLinesActions'
+import {routeTypes} from '../../src/actions/routeActions'
+import {tourTypes} from '../../src/actions/tourActions'
+import {userTypes} from '../../src/actions/userActions'
 
 describe('action types', () => {
   test('no duplicate types', () => {

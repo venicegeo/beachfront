@@ -14,7 +14,7 @@
  * limitations under the License.
  **/
 
-import {types} from '../actions/apiStatusActions'
+import {apiStatusTypes} from '../actions/apiStatusActions'
 
 export interface ApiStatusState {
   geoserver: {
@@ -36,25 +36,25 @@ export const apiStatusInitialState: ApiStatusState = {
 
 export function apiStatusReducer(state = apiStatusInitialState, action: any) {
   switch (action.type) {
-    case types.API_STATUS_DESERIALIZED:
+    case apiStatusTypes.API_STATUS_DESERIALIZED:
       return {
         ...state,
         ...action.deserialized,
       }
-    case types.API_STATUS_FETCHING:
+    case apiStatusTypes.API_STATUS_FETCHING:
       return {
         ...state,
         isFetching: true,
         fetchError: null,
       }
-    case types.API_STATUS_FETCH_SUCCESS:
+    case apiStatusTypes.API_STATUS_FETCH_SUCCESS:
       return {
         ...state,
         isFetching: false,
         geoserver: action.geoserver,
         enabledPlatforms: action.enabledPlatforms,
       }
-    case types.API_STATUS_FETCH_ERROR:
+    case apiStatusTypes.API_STATUS_FETCH_ERROR:
       return {
         ...state,
         isFetching: false,
