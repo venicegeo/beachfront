@@ -34,7 +34,7 @@ export const tourInitialState: TourState = {
 
 export function tourReducer(state = tourInitialState, action: any) {
   switch (action.type) {
-    case tourTypes.TOUR_SET_STEPS:
+    case tourTypes.TOUR_STEPS_UPDATED:
       return {
         ...state,
         steps: action.steps,

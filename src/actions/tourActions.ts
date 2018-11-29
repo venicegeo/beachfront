@@ -18,7 +18,7 @@ import {scrollIntoView} from '../utils/domUtils'
 import {AppState} from '../store'
 
 export const tourTypes = {
-  TOUR_SET_STEPS: 'TOUR_SET_STEPS',
+  TOUR_STEPS_UPDATED: 'TOUR_STEPS_UPDATED',
   TOUR_STARTED: 'TOUR_STARTED',
   TOUR_ENDED: 'TOUR_ENDED',
   TOUR_STEP_CHANGING: 'TOUR_STEP_CHANGING',
@@ -42,7 +42,7 @@ export interface TourStep {
 export const tourActions = {
   setSteps(steps: TourStep[]) {
     return {
-      type: tourTypes.TOUR_SET_STEPS,
+      type: tourTypes.TOUR_STEPS_UPDATED,
       steps,
     }
   },

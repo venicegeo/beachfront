@@ -42,7 +42,7 @@ describe('tourActions', () => {
 
       expect(store.getActions()).toEqual([
         {
-          type: tourTypes.TOUR_SET_STEPS,
+          type: tourTypes.TOUR_STEPS_UPDATED,
           steps: mockSteps,
         },
       ])

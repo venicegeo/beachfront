@@ -22,9 +22,9 @@ describe('tourReducer', () => {
     expect(tourReducer(undefined, {})).toEqual(tourInitialState)
   })
 
-  test('TOUR_SET_STEPS', () => {
+  test('TOUR_STEPS_UPDATED', () => {
     const action = {
-      type: tourTypes.TOUR_SET_STEPS,
+      type: tourTypes.TOUR_STEPS_UPDATED,
       steps: [1, 2, 3],
     }
 
