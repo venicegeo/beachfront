@@ -29,13 +29,12 @@ import {catalogActions, CatalogUpdateSearchCriteriaArgs} from '../actions/catalo
 import {AppState} from '../store'
 import {mapActions} from '../actions/mapActions'
 
-type StateProps = Partial<ReturnType<typeof mapStateToProps>>
-type DispatchProps = Partial<ReturnType<typeof mapDispatchToProps>>
+type StateProps = ReturnType<typeof mapStateToProps>
+type DispatchProps = ReturnType<typeof mapDispatchToProps>
 type PassedProps = {
   errorElement?: React.ReactElement<any>
 }
-
-type Props = PassedProps & StateProps & DispatchProps
+type Props = StateProps & DispatchProps & PassedProps
 
 export class CatalogSearchCriteria extends React.Component<Props> {
   constructor(props: Props) {

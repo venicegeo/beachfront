@@ -28,13 +28,12 @@ import {TYPE_SCENE} from '../constants'
 import {AppState} from '../store'
 import {jobsActions, JobsCreateJobArgs} from '../actions/jobsActions'
 
-type StateProps = Partial<ReturnType<typeof mapStateToProps>>
-type DispatchProps = Partial<ReturnType<typeof mapDispatchToProps>>
+type StateProps = ReturnType<typeof mapStateToProps>
+type DispatchProps = ReturnType<typeof mapDispatchToProps>
 type PassedProps = {
   mapRef: PrimaryMap
 }
-
-type Props = PassedProps & StateProps & DispatchProps
+type Props = StateProps & DispatchProps & PassedProps
 
 interface State {
   computeMask?: boolean

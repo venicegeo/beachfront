@@ -23,11 +23,9 @@ import ProductLine from './ProductLine'
 import {AppState} from '../store'
 import {productLinesActions} from '../actions/productLinesActions'
 
-type StateProps = Partial<ReturnType<typeof mapStateToProps>>
-type DispatchProps = Partial<ReturnType<typeof mapDispatchToProps>>
-type PassedProps = {}
-
-type Props = PassedProps & StateProps & DispatchProps
+type StateProps = ReturnType<typeof mapStateToProps>
+type DispatchProps = ReturnType<typeof mapDispatchToProps>
+type Props = StateProps & DispatchProps
 
 export class ProductLineList extends React.Component<Props> {
   render() {
@@ -90,7 +88,7 @@ function mapDispatchToProps(dispatch) {
   }
 }
 
-export default connect<StateProps, DispatchProps, PassedProps>(
+export default connect<StateProps, DispatchProps>(
   mapStateToProps,
   mapDispatchToProps,
 )(ProductLineList)

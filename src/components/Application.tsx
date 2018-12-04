@@ -57,11 +57,9 @@ import {apiStatusActions} from '../actions/apiStatusActions'
 import {shouldSelectedFeatureAutoDeselect} from '../utils/mapUtils'
 import {scrollIntoView} from '../utils/domUtils'
 
-type StateProps = Partial<ReturnType<typeof mapStateToProps>>
-type DispatchProps = Partial<ReturnType<typeof mapDispatchToProps>>
-type PassedProps = {}
-
-type Props = PassedProps & StateProps & DispatchProps
+type StateProps = ReturnType<typeof mapStateToProps>
+type DispatchProps = ReturnType<typeof mapDispatchToProps>
+type Props = StateProps & DispatchProps
 
 export class Application extends React.Component<Props> {
   refs: any
@@ -467,7 +465,7 @@ function mapDispatchToProps(dispatch) {
   }
 }
 
-export default connect<StateProps, DispatchProps, PassedProps>(
+export default connect<StateProps, DispatchProps>(
   mapStateToProps,
   mapDispatchToProps,
 )(Application)

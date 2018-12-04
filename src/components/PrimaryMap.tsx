@@ -98,13 +98,12 @@ export const MODE_NORMAL = 'MODE_NORMAL'
 export const MODE_PRODUCT_LINES = 'MODE_PRODUCT_LINES'
 export const MODE_SELECT_IMAGERY = 'MODE_SELECT_IMAGERY'
 
-type StateProps = Partial<ReturnType<typeof mapStateToProps>>
-type DispatchProps = Partial<ReturnType<typeof mapDispatchToProps>>
+type StateProps = ReturnType<typeof mapStateToProps>
+type DispatchProps = ReturnType<typeof mapDispatchToProps>
 type PassedProps = {
   shrunk: boolean
 }
-
-type Props = PassedProps & StateProps & DispatchProps
+type Props = StateProps & DispatchProps & PassedProps
 
 interface State {
   basemapIndex?: number

@@ -23,11 +23,9 @@ import * as moment from 'moment'
 import {AppState} from '../store'
 import {jobsActions} from '../actions/jobsActions'
 
-type StateProps = Partial<ReturnType<typeof mapStateToProps>>
-type DispatchProps = Partial<ReturnType<typeof mapDispatchToProps>>
-type PassedProps = {}
-
-type Props = PassedProps & StateProps & DispatchProps
+type StateProps = ReturnType<typeof mapStateToProps>
+type DispatchProps = ReturnType<typeof mapDispatchToProps>
+type Props = StateProps & DispatchProps
 
 interface State {
   activeIds: string[]
@@ -142,7 +140,7 @@ function mapDispatchToProps(dispatch) {
   }
 }
 
-export default connect<StateProps, DispatchProps, PassedProps>(
+export default connect<StateProps, DispatchProps>(
   mapStateToProps,
   mapDispatchToProps,
 )(JobStatusList)

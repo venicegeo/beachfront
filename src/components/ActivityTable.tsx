@@ -26,8 +26,8 @@ import {JOB_ENDPOINT} from '../config'
 import {AppState} from '../store'
 import {mapActions} from '../actions/mapActions'
 
-type StateProps = Partial<ReturnType<typeof mapStateToProps>>
-type DispatchProps = Partial<ReturnType<typeof mapDispatchToProps>>
+type StateProps = ReturnType<typeof mapStateToProps>
+type DispatchProps = ReturnType<typeof mapDispatchToProps>
 type PassedProps = {
   className?: string
   duration: string
@@ -36,8 +36,7 @@ type PassedProps = {
   onDurationChange(value: string)
   onRowClick(job: beachfront.Job)
 }
-
-type Props = PassedProps & StateProps & DispatchProps
+type Props = StateProps & DispatchProps & PassedProps
 
 export const ActivityTable = (props: Props) => (
   <div className={`${styles.root} ${props.productLines.isFetchingJobs ? styles.isLoading : ''} ${props.className}`}>

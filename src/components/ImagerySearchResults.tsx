@@ -21,13 +21,12 @@ import {connect} from 'react-redux'
 import {paginate} from '../utils/pagination'
 import {AppState} from '../store'
 
-type StateProps = Partial<ReturnType<typeof mapStateToProps>>
+type StateProps = ReturnType<typeof mapStateToProps>
 type PassedProps = {
   className?: string
   onPageChange(args: {startIndex: number, count: number})
 }
-
-type Props = PassedProps & StateProps
+type Props = StateProps & PassedProps
 
 export class ImagerySearchResults extends React.Component<Props> {
   constructor(props: Props) {
@@ -99,5 +98,4 @@ function mapStateToProps(state: AppState) {
 
 export default connect<StateProps, undefined, PassedProps>(
   mapStateToProps,
-  undefined,
 )(ImagerySearchResults)

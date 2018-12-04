@@ -25,10 +25,8 @@ import * as ol from '../utils/ol'
 import {SCENE_TILE_PROVIDERS} from '../config'
 import {AppState} from '../store'
 
-type StateProps = Partial<ReturnType<typeof mapStateToProps>>
-type PassedProps = {}
-
-type Props = PassedProps & StateProps
+type StateProps = ReturnType<typeof mapStateToProps>
+type Props = StateProps
 
 interface State {
   hoveredIds?: string[]
@@ -228,7 +226,6 @@ function mapStateToProps(state: AppState) {
   }
 }
 
-export default connect<StateProps, undefined, PassedProps>(
+export default connect<StateProps, undefined>(
   mapStateToProps,
-  undefined,
 )(ImagerySearchList)

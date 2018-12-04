@@ -23,10 +23,8 @@ import {Modal} from './Modal'
 import {BrowsersSupported} from './BrowserSupport'
 import {routeActions, RouteNavigateToArgs} from '../actions/routeActions'
 
-type DispatchProps = Partial<ReturnType<typeof mapDispatchToProps>>
-type PassedProps = {}
-
-type Props = PassedProps & DispatchProps
+type DispatchProps = ReturnType<typeof mapDispatchToProps>
+type Props = DispatchProps
 
 export class About extends React.Component<Props> {
   constructor(props: Props) {
@@ -80,7 +78,7 @@ function mapDispatchToProps(dispatch) {
   }
 }
 
-export default connect<undefined, DispatchProps, PassedProps>(
+export default connect<undefined, DispatchProps>(
   undefined,
   mapDispatchToProps,
 )(About)

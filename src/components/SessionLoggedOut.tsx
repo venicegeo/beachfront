@@ -21,10 +21,8 @@ import {connect} from 'react-redux'
 import {Modal} from './Modal'
 import {userActions} from '../actions/userActions'
 
-type DispatchProps = Partial<ReturnType<typeof mapDispatchToProps>>
-type PassedProps = {}
-
-type Props = PassedProps & DispatchProps
+type DispatchProps = ReturnType<typeof mapDispatchToProps>
+type Props = DispatchProps
 
 export class SessionLoggedOut extends React.Component<Props> {
   constructor(props: Props) {
@@ -61,7 +59,7 @@ function mapDispatchToProps(dispatch) {
   }
 }
 
-export default connect<undefined, DispatchProps, PassedProps>(
+export default connect<undefined, DispatchProps>(
   undefined,
   mapDispatchToProps,
 )(SessionLoggedOut)

@@ -41,16 +41,15 @@ import {AppState} from '../store'
 import {Extent, featureToExtentWrapped} from '../utils/geometries'
 import {routeActions, RouteNavigateToArgs} from '../actions/routeActions'
 
-type StateProps = Partial<ReturnType<typeof mapStateToProps>>
-type DispatchProps = Partial<ReturnType<typeof mapDispatchToProps>>
+type StateProps = ReturnType<typeof mapStateToProps>
+type DispatchProps = ReturnType<typeof mapDispatchToProps>
 type PassedProps = {
   isActive: boolean
   job: beachfront.Job
   className?: string
   onToggleExpansion(job: beachfront.Job, isExpanded: boolean)
 }
-
-type Props = PassedProps & StateProps & DispatchProps
+type Props = StateProps & DispatchProps & PassedProps
 
 interface State {
   downloadProgress?: number

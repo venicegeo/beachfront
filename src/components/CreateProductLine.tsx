@@ -19,7 +19,7 @@ const styles = require('./CreateProductLine.css')
 import * as React from 'react'
 import {connect} from 'react-redux'
 import * as moment from 'moment'
-import {AlgorithmList} from './AlgorithmList'
+import AlgorithmList from './AlgorithmList'
 import CatalogSearchCriteria from './CatalogSearchCriteria'
 import {NewProductLineDetails} from './NewProductLineDetails'
 import {
@@ -28,11 +28,9 @@ import {
 import {AppState} from '../store'
 import {ProductLinesCreateArgs, productLinesActions} from '../actions/productLinesActions'
 
-type StateProps = Partial<ReturnType<typeof mapStateToProps>>
-type DispatchProps = Partial<ReturnType<typeof mapDispatchToProps>>
-type PassedProps = {}
-
-type Props = PassedProps & StateProps & DispatchProps
+type StateProps = ReturnType<typeof mapStateToProps>
+type DispatchProps = ReturnType<typeof mapDispatchToProps>
+type Props = StateProps & DispatchProps
 
 interface State {
   algorithm?:              beachfront.Algorithm
@@ -171,7 +169,7 @@ function mapDispatchToProps(dispatch) {
   }
 }
 
-export default connect<StateProps, DispatchProps, PassedProps>(
+export default connect<StateProps, DispatchProps>(
   mapStateToProps,
   mapDispatchToProps,
 )(CreateProductLine)

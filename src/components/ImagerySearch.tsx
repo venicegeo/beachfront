@@ -26,11 +26,9 @@ import { SCENE_TILE_PROVIDERS } from '../config'
 import {AppState} from '../store'
 import {catalogActions, CatalogSearchArgs} from '../actions/catalogActions'
 
-type StateProps = Partial<ReturnType<typeof mapStateToProps>>
-type DispatchProps = Partial<ReturnType<typeof mapDispatchToProps>>
-type PassedProps = {}
-
-type Props = PassedProps & StateProps & DispatchProps
+type StateProps = ReturnType<typeof mapStateToProps>
+type DispatchProps = ReturnType<typeof mapDispatchToProps>
+type Props = StateProps & DispatchProps
 
 export class ImagerySearch extends React.Component<Props> {
   constructor(props: Props) {
@@ -114,7 +112,7 @@ function mapDispatchToProps(dispatch) {
   }
 }
 
-export default connect<StateProps, DispatchProps, PassedProps>(
+export default connect<StateProps, DispatchProps>(
   mapStateToProps,
   mapDispatchToProps,
 )(ImagerySearch)

@@ -21,7 +21,7 @@ import {connect} from 'react-redux'
 import Algorithm from './Algorithm'
 import {AppState} from '../store'
 
-type StateProps = Partial<ReturnType<typeof mapStateToProps>>
+type StateProps = ReturnType<typeof mapStateToProps>
 type PassedProps = {
   sceneMetadata: beachfront.SceneMetadata
   selectedId?: string
@@ -30,8 +30,7 @@ type PassedProps = {
   onSelect?(algorithm: beachfront.Algorithm)
   onSubmit?(algorithm: beachfront.Algorithm)
 }
-
-type Props = PassedProps & StateProps
+type Props = StateProps & PassedProps
 
 export const AlgorithmList = (props: Props) => (
   <div className={styles.root}>
@@ -70,5 +69,4 @@ function mapStateToProps(state: AppState) {
 
 export default connect<StateProps, undefined, PassedProps>(
   mapStateToProps,
-  undefined,
 )(AlgorithmList)

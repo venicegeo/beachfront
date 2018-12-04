@@ -34,13 +34,12 @@ const Icon = ({ path, size = 40 }) => (
   </svg>
 )
 
-type StateProps = Partial<ReturnType<typeof mapStateToProps>>
-type DispatchProps = Partial<ReturnType<typeof mapDispatchToProps>>
+type StateProps = ReturnType<typeof mapStateToProps>
+type DispatchProps = ReturnType<typeof mapDispatchToProps>
 type PassedProps = {
   shrunk: boolean
 }
-
-type Props = PassedProps & StateProps & DispatchProps
+type Props = StateProps & DispatchProps & PassedProps
 
 export class Navigation extends React.Component<Props> {
   constructor(props: Props) {
