@@ -17,10 +17,17 @@
 import * as React from 'react'
 import {TYPE_SCENE} from '../constants'
 import Tour from 'react-user-tour'
-import {createSearchCriteria} from './CreateJob'
 import {TOUR} from '../config'
+import {query} from '../utils/domUtils'
+import {connect} from 'react-redux'
+import {catalogActions, CatalogUpdateSearchCriteriaArgs} from '../actions/catalogActions'
+import {mapActions, MapPanToPointArgs} from '../actions/mapActions'
+import {AppState} from '../store'
+import {RouteNavigateToArgs, routeActions} from '../actions/routeActions'
+import {Extent} from '../utils/geometries'
+import {tourActions, TourStep} from '../actions/tourActions'
 
-const styles: any = require('./Tour.css')
+const styles: any = require('./UserTour.css')
 
 const Arrow = ({ position }) => {
   const classnames = {
@@ -43,42 +50,51 @@ const SourceName = (props: any) => {
   return <q>{props.tour.sourceName}</q>
 }
 
-const UserTourErrorMessage = (props: any) => {
+const UserTourErrorMessage = (props: {
+  message: string,
+  tour: UserTour,
+}) => {
   return props.message ? <div className={styles.error}>
-    <div className={styles.close} title="Dismiss" onClick={props.tour.cancel}>&times;</div>
+    <div className={styles.close} title="Dismiss" onClick={props.tour.props.actions.tour.end}>&times;</div>
     <div className={styles.header}>Oops!</div>
     <div className={styles.message}>{props.message}</div>
   </div> : null
 }
 
-export class UserTour extends React.Component<any, any> {
+type StateProps = ReturnType<typeof mapStateToProps>
+type DispatchProps = ReturnType<typeof mapDispatchToProps>
+type Props = StateProps & DispatchProps
+
+export class UserTour extends React.Component<Props> {
   private algorithm: string
   private apiKeyInstructions: any
   private basemap: string
-  private bbox: [number, number, number, number]
+  private bbox: Extent
   private bboxName: string
   private searchCriteria: any
-  private steps: any[]
   private zoom: number
 
-  constructor(props: any) {
+  constructor(props: Props) {
     super(props)
 
     this.algorithm = TOUR.algorithm
     this.apiKeyInstructions = <div dangerouslySetInnerHTML={{ __html: TOUR.apiKeyInstructions }}/>
     this.basemap = TOUR.basemap
-    this.bbox = TOUR.bbox as [number, number, number, number]
+    this.bbox = TOUR.bbox as Extent
     this.bboxName = TOUR.bboxName
     this.searchCriteria = TOUR.searchCriteria
     this.zoom = TOUR.zoom
 
-    this.state = {
-      changing: false,
-      isTourActive: false,
-      tourStep: 1,
-    }
+    this.expandJobStatus = this.expandJobStatus.bind(this)
+    this.navigateTo = this.navigateTo.bind(this)
+    this.onKeyPress = this.onKeyPress.bind(this)
+    this.pace = this.pace.bind(this)
+    this.setTabIndices = this.setTabIndices.bind(this)
+    this.showArrow = this.showArrow.bind(this)
+  }
 
-    this.steps = [
+  componentDidMount() {
+    this.props.actions.tour.setSteps([
       {
         step: 1,
         selector: '.Navigation-linkTour',
@@ -97,13 +113,13 @@ export class UserTour extends React.Component<any, any> {
         body: <div className={styles.body}>
           You may choose a basemap here.  We&apos;ll use {this.basemap}.
         </div>,
-        async before() {
-          if (!this.query('.BasemapSelect-root.BasemapSelect-isOpen')) {
-            this.query('.BasemapSelect-button').click()
+        before: () => {
+          if (!query('.BasemapSelect-root.BasemapSelect-isOpen')) {
+            query('.BasemapSelect-button').click()
           }
         },
-        async after() {
-          let basemaps: any = document.querySelectorAll('.BasemapSelect-options li')
+        after: () => {
+          const basemaps: any = document.querySelectorAll('.BasemapSelect-options li')
 
           basemaps.forEach(basemap => {
             if (basemap.textContent === this.basemap) {
@@ -123,22 +139,20 @@ export class UserTour extends React.Component<any, any> {
           Then we need to pan to an area of interest.
           We&apos;ll look at {this.bboxName}.
         </div>,
-        before() {
-          return this.navigateTo('/')
-        },
-        after() {
-          let app = this.props.application
-          let searchCriteria = createSearchCriteria()
+        before: () => this.navigateTo('/'),
+        after: async () => {
+          this.props.actions.catalog.resetSearchCriteria()
+          this.props.actions.catalog.serialize()
 
-          app.setState({ searchCriteria })
-          sessionStorage.setItem('searchCriteria', JSON.stringify(searchCriteria))
+          await this.navigateTo('/')
 
-          return this.navigateTo('/').then(() => {
-            // Pan to the center of the bound box that we will highlight later.
-            app.panTo([
+          // Pan to the center of the bound box that we will highlight later.
+          this.props.actions.map.panToPoint({
+            point: [
               (this.bbox[0] + this.bbox[2]) / 2,
               (this.bbox[1] + this.bbox[3]) / 2,
-            ], this.zoom)
+            ],
+            zoom: this.zoom,
           })
         },
       },
@@ -161,39 +175,39 @@ export class UserTour extends React.Component<any, any> {
           You click once to start the bounding box, then click again to end it.
           But we&apos;ll do it for you this time.
         </div>,
-        before() {
-          this.props.application.handleClearBbox()
-          return this.navigateTo('/create-job')
+        before: async () => {
+          this.props.actions.map.clearBbox()
+          await this.navigateTo('/create-job')
         },
-        after() {
+        after: () => {
           this.showArrow(false)
 
           return new Promise(resolve => {
-            let app = this.props.application
-            let bbox = app.state.bbox
+            const bbox = this.props.map.bbox
 
             if (!bbox || this.bbox.some((x, i) => x !== bbox[i])) {
-              let duration = 1000, i = 0, n = 20, interval = setInterval(() => {
+              const duration = 1000
+              const n = 20
+              let i = 0
+              const interval = setInterval(() => {
                 ++i
 
-                app.setState({
-                  bbox: [
-                    this.bbox[0],
-                    this.bbox[1],
-                    this.bbox[0] + i / n * (this.bbox[2] - this.bbox[0]),
-                    this.bbox[1] + i / n * (this.bbox[3] - this.bbox[1]),
-                  ],
-                })
+                this.props.actions.map.updateBbox([
+                  this.bbox[0],
+                  this.bbox[1],
+                  this.bbox[0] + i / n * (this.bbox[2] - this.bbox[0]),
+                  this.bbox[1] + i / n * (this.bbox[3] - this.bbox[1]),
+                ])
 
                 if (i >= n) {
                   clearInterval(interval)
-                  app.setState({ bbox: this.bbox })
+                  this.props.actions.map.updateBbox(this.bbox)
                   resolve()
                 }
               }, duration / n)
             }
 
-            app.setState({ bbox: this.bbox })
+            this.props.actions.map.updateBbox(this.bbox)
           })
         },
       },
@@ -205,14 +219,10 @@ export class UserTour extends React.Component<any, any> {
         body: <div className={styles.body}>
           Select the imagery source.  We&apos;ll use <SourceName tour={this}/> for now.
         </div>,
-        async after() {
-          let app = this.props.application
-
-          if (app.state.searchCriteria.source !== this.searchCriteria.source) {
-            app.setState({
-              searchCriteria: Object.assign({}, app.state.searchCriteria, {
-                source: this.searchCriteria.source,
-              }),
+        after: () => {
+          if (this.props.catalog.searchCriteria.source !== this.searchCriteria.source) {
+            this.props.actions.catalog.updateSearchCriteria({
+              source: this.searchCriteria.source,
             })
           }
         },
@@ -235,12 +245,9 @@ export class UserTour extends React.Component<any, any> {
           </div>
           {this.apiKeyInstructions}
         </div>,
-        async after() {
-          let input = this.query(`.${styles.apiKey} input`)
-
-          this.props.application.setState({
-            catalogApiKey: input.value,
-          })
+        after: () => {
+          const input = query(`.${styles.apiKey} input`) as HTMLInputElement
+          this.props.actions.catalog.setApiKey(input.value)
         },
       },
       {
@@ -251,37 +258,24 @@ export class UserTour extends React.Component<any, any> {
           Enter the date range that will be used to search for imagery.
           By default the last 30 days is searched, but your needs may vary.
         </div>,
-        after() {
-          return new Promise(resolve => {
-            let app = this.props.application
-            let search = this.searchCriteria
-            let fromElem = this.query('.CatalogSearchCriteria-captureDateFrom input')
-            let $from = fromElem && fromElem.value !== search.dateFrom
-              ? this.pace(search.dateFrom, (_, s) => fromElem.value = s)
-              : Promise.resolve()
+        after: async () => {
+          const search = this.searchCriteria
+          const fromElem = query('.CatalogSearchCriteria-captureDateFrom input') as HTMLInputElement
+          if (fromElem && fromElem.value !== search.dateFrom) {
+            await this.pace(search.dateFrom, (_, s) => fromElem.value = s)
+          }
 
-            $from.then(() => {
-              app.setState({
-                searchCriteria: Object.assign({}, app.state.searchCriteria, {
-                  dateFrom: search.dateFrom,
-                }),
-              })
+          this.props.actions.catalog.updateSearchCriteria({
+            dateFrom: search.dateFrom,
+          })
 
-              let toElem = this.query('.CatalogSearchCriteria-captureDateTo input')
-              let $to = toElem && toElem.value !== search.dateTo
-                ? this.pace(search.dateTo, (_, s) => toElem.value = s)
-                : Promise.resolve()
+          const toElem = query('.CatalogSearchCriteria-captureDateTo input') as HTMLInputElement
+          if (toElem && toElem.value !== search.dateTo) {
+            await this.pace(search.dateTo, (_, s) => toElem.value = s)
+          }
 
-              $to.then(() => {
-                app.setState({
-                  searchCriteria: Object.assign({}, app.state.searchCriteria, {
-                    dateTo: search.dateTo,
-                  }),
-                })
-
-                resolve()
-              })
-            })
+          this.props.actions.catalog.updateSearchCriteria({
+            dateTo: search.dateTo,
           })
         },
       },
@@ -293,10 +287,8 @@ export class UserTour extends React.Component<any, any> {
         body: <div className={styles.body}>
           Adjust the amount of cloud cover that you are willing to tolerate.
         </div>,
-        after() {
+        after: () => {
           return new Promise(resolve => {
-            let app = this.props.application
-
             function gen(from, to): number[] {
               const rc: number[] = []
               const sign = Math.sign(to - from)
@@ -310,20 +302,18 @@ export class UserTour extends React.Component<any, any> {
               return rc
             }
 
-            if (app.state.searchCriteria.cloudCover === this.searchCriteria.cloudCover) {
+            if (this.props.catalog.searchCriteria.cloudCover === this.searchCriteria.cloudCover) {
               resolve()
             } else {
-              let fn = (g) => {
+              const fn = (g) => {
                 const i = g.pop()
 
                 if (i == null) {
                   setTimeout(resolve, 100)
                 } else {
                   setTimeout(() => {
-                    app.setState({
-                      searchCriteria: Object.assign({}, app.state.searchCriteria, {
-                        cloudCover: i,
-                      }),
+                    this.props.actions.catalog.updateSearchCriteria({
+                      cloudCover: i,
                     })
 
                     fn(g)
@@ -331,7 +321,7 @@ export class UserTour extends React.Component<any, any> {
                 }
               }
 
-              fn(gen(app.state.searchCriteria.cloudCover, this.searchCriteria.cloudCover))
+              fn(gen(this.props.catalog.searchCriteria.cloudCover, this.searchCriteria.cloudCover))
             }
           })
         },
@@ -345,26 +335,25 @@ export class UserTour extends React.Component<any, any> {
         body: <div className={styles.body}>
           Just click the button to perform the search.
         </div>,
-        after() {
-          if (this.props.application.state.searchResults) {
+        after: () => {
+          if (this.props.catalog.searchResults) {
             return Promise.resolve()
           } else {
-            this.query('.ImagerySearch-controls button[type=submit]').click()
+            query('.ImagerySearch-controls button[type=submit]').click()
             this.showArrow(false)
 
             return new Promise((resolve, reject) => {
               const timeout = 60000
               const t0 = Date.now()
-              const app = this.props.application
               const interval = setInterval(() => {
-                if (app.state.searchResults) {
+                if (this.props.catalog.searchResults) {
                   clearInterval(interval)
                   resolve()
                 } else if (Date.now() - t0 > timeout) {
                   clearInterval(interval)
                   reject(`Timed out after ${timeout / 1000} seconds waiting for imagery results.`)
                 } else {
-                  const elem = this.query('.ImagerySearch-errorMessage')
+                  const elem = query('.ImagerySearch-errorMessage')
 
                   if (elem) {
                     const m = elem.querySelector('h4')
@@ -388,12 +377,10 @@ export class UserTour extends React.Component<any, any> {
           matching the search criteria.  Click on one to load the image
           itself&hellip; For now, we&apos;ll select one for you.
         </div>,
-        after() {
+        after: () => {
           return new Promise(resolve => {
-            let app = this.props.application
-
             // Get the feature with the least amount of cloud cover.
-            let feature = app.state.searchResults.images.features.filter(f => {
+            const feature = this.props.catalog.searchResults.images.features.filter(f => {
               // Eliminate images w/ zero cloud cover; that may mean a bad image.
               return f.properties.cloudCover
             }).sort((a, b) => {
@@ -406,8 +393,7 @@ export class UserTour extends React.Component<any, any> {
             the correct value in the normal course of events.
             */
             feature.properties.type = TYPE_SCENE
-            app.handleSelectFeature(feature)
-            app.setState({ selectedFeature: feature })
+            this.props.actions.map.setSelectedFeature(feature)
             setTimeout(resolve, 100)
           })
         },
@@ -443,16 +429,16 @@ export class UserTour extends React.Component<any, any> {
         body: <div className={styles.body}>
           We&apos;ll use this one.
         </div>,
-        after() {
-          const algorithm = this.query(`.AlgorithmList-root li${this.algorithm}`)
-          algorithm.querySelector('.Algorithm-startButton').click()
+        after: () => {
+          const algorithm = query(`.AlgorithmList-root li${this.algorithm}`)
+          const startButton = algorithm.querySelector('.Algorithm-startButton') as HTMLElement
+          startButton.click()
 
           return new Promise((resolve, reject) => {
             const timeout = 30000
             const t0 = Date.now()
-            const app = this.props.application
             const interval = setInterval(() => {
-              if (app.state.route.pathname === '/jobs') {
+              if (this.props.route.pathname === '/jobs') {
                 clearInterval(interval)
                 resolve()
               } else if (Date.now() - t0 > timeout) {
@@ -462,7 +448,7 @@ export class UserTour extends React.Component<any, any> {
                 const elem = algorithm.querySelector('.AlgorithmList-errorMessage')
 
                 if (elem) {
-                  let m = elem.querySelector('h4')
+                  const m = elem.querySelector('h4')
 
                   clearInterval(interval)
                   reject(m && m.textContent || 'Oops!')
@@ -492,14 +478,15 @@ export class UserTour extends React.Component<any, any> {
         body: <div className={styles.body}>
           The details will give you information about the job and its imagery.
         </div>,
-        before() {
-          return this.expandJobStatus().then(() => {
-            const elem = this.query('.JobStatusList-root .JobStatus-isActive')
+        before: async () => {
+          await this.expandJobStatus()
 
-            if (!elem.classList.contains('JobStatus-isExpanded')) {
-              elem.querySelector('.JobStatus-details').click()
-            }
-          })
+          const elem = query('.JobStatusList-root .JobStatus-isActive')
+
+          if (!elem.classList.contains('JobStatus-isExpanded')) {
+            const details = elem.querySelector('.JobStatus-details') as HTMLElement
+            details.click()
+          }
         },
       },
       {
@@ -523,9 +510,9 @@ export class UserTour extends React.Component<any, any> {
         body: <div className={styles.body}>
           Here we are zoomed in on the job.
         </div>,
-        async before() {
-          if (this.props.application.state.route.pathname === '/jobs') {
-            this.query(`.JobStatusList-root .JobStatus-isActive .JobStatus-controls a`).click()
+        before: () => {
+          if (this.props.route.pathname === '/jobs') {
+            query(`.JobStatusList-root .JobStatus-isActive .JobStatus-controls a`).click()
           }
         },
       },
@@ -550,14 +537,14 @@ export class UserTour extends React.Component<any, any> {
         body: <div className={styles.body}>
           If you expand the job details, then you can click here to delete the job.
         </div>,
-        before() {
-          return this.expandJobStatus().then(() => {
-            const elem = this.query('.JobStatusList-root .JobStatus-isActive')
+        before: async () => {
+          await this.expandJobStatus()
 
-            if (!elem.classList.contains('JobStatus-isExpanded')) {
-              (elem.querySelector('.JobStatus-details') as HTMLElement).click()
-            }
-          })
+          const elem = query('.JobStatusList-root .JobStatus-isActive')
+
+          if (!elem.classList.contains('JobStatus-isExpanded')) {
+            (elem.querySelector('.JobStatus-details') as HTMLElement).click()
+          }
         },
       },
       {
@@ -574,46 +561,24 @@ export class UserTour extends React.Component<any, any> {
           to you.
         </div>,
       },
-    ]
-
-    this.cancel = this.cancel.bind(this)
-    this.expandJobStatus = this.expandJobStatus.bind(this)
-    this.gotoStep = this.gotoStep.bind(this)
-    this.isElementInViewport = this.isElementInViewport.bind(this)
-    this.navigateTo = this.navigateTo.bind(this)
-    this.onKeyPress = this.onKeyPress.bind(this)
-    this.pace = this.pace.bind(this)
-    this.query = this.query.bind(this)
-    this.scrollIntoView = this.scrollIntoView.bind(this)
-    this.setTabIndices = this.setTabIndices.bind(this)
-    this.showArrow = this.showArrow.bind(this)
-    this.start = this.start.bind(this)
-    this.syncPromiseExec = this.syncPromiseExec.bind(this)
+    ])
   }
 
-  cancel() {
-    this.setState({
-      changing: false,
-      errorMessage: null,
-      isTourActive: false,
-    })
-  }
-
-  componentDidMount() {
-    this.start()
-  }
-
-  start() {
-    this.showArrow(false)
-
-    if (!this.state.isTourActive) {
+  componentDidUpdate(prevProps: Props) {
+    if (!prevProps.tour.inProgress && this.props.tour.inProgress) {
+      if (this.props.tour.inProgress) {
+        const step = this.props.tour.steps[this.props.tour.step - 1]
+        this.showArrow(!step.hideArrow)
+      } else {
+        this.showArrow(false)
+      }
       setTimeout(this.setTabIndices)
-      this.setState({
-        changing: false,
-        errorMessage: null,
-        isTourActive: true,
-        tourStep: 1,
-      })
+    }
+
+    if (prevProps.tour.step !== this.props.tour.step) {
+      const step = this.props.tour.steps[this.props.tour.step - 1]
+      this.showArrow(!step.hideArrow)
+      this.setTabIndices()
     }
   }
 
@@ -624,43 +589,42 @@ export class UserTour extends React.Component<any, any> {
    * to the overlay.
    */
   render() {
-    return (
+    return this.props.tour.inProgress && (
       <div
-        className={`${styles.root} ${this.state.isTourActive ? styles.overlay : ''}`}
+        className={`${styles.root} ${styles.overlay}`}
         onClick={event => event.stopPropagation()}
       >
         <div
           onClick={event => event.stopPropagation()}
           onKeyPress={this.onKeyPress}
-          style={{ display: this.state.errorMessage ? 'none' : 'block' }}
+          style={{ display: this.props.tour.error ? 'none' : 'block' }}
         >
           <Tour
-            active={this.state.isTourActive}
+            active={this.props.tour.inProgress}
             arrow={Arrow}
             buttonStyle={{}}
             closeButtonText="&#10799;"
-            onBack={step => this.gotoStep(step)}
-            onCancel={this.cancel}
-            onNext={step => this.gotoStep(step)}
+            onBack={this.props.actions.tour.goToStep}
+            onCancel={this.props.actions.tour.end}
+            onNext={this.props.actions.tour.goToStep}
             ref="tour"
-            step={this.state.tourStep}
-            steps={this.steps}
+            step={this.props.tour.step}
+            steps={this.props.tour.steps}
           />
         </div>
-        <UserTourErrorMessage message={this.state.errorMessage} tour={this}/>
+        <UserTourErrorMessage message={this.props.tour.error} tour={this}/>
       </div>
     )
   }
 
   private expandJobStatus() {
     return new Promise((resolve, reject) => {
-      const app = this.props.application
-      const promise = app.state.route.pathname === '/jobs'
+      const promise = this.props.route.pathname === '/jobs'
         ? Promise.resolve()
-        : this.navigateTo({ pathname: '/jobs', search: app.state.route.search })
+        : this.navigateTo({ pathname: '/jobs', search: this.props.route.search })
 
       promise.then(() => {
-        const elem = this.query(`.JobStatusList-root .${styles.newJob}`)
+        const elem = query(`.JobStatusList-root .${styles.newJob}`)
 
         if (!elem || Array.from(elem.classList).find(n => n === 'JobStatus-isExpanded')) {
           resolve()
@@ -672,92 +636,24 @@ export class UserTour extends React.Component<any, any> {
     })
   }
 
-  private gotoStep(n) {
-    if (this.state.changing) {
-      return Promise.reject('Tour step is in process of changing.')
-    } else {
-      this.state.changing = true
-    }
-
-    let functions = []
-    let lastStep = this.steps.find(i => i.step === this.state.tourStep)
-    let nextStep = this.steps.find(i => i.step === n)
-
-    if (lastStep && lastStep.after) {
-      functions.push(lastStep.after.bind(this))
-    }
-
-    if (nextStep) {
-      if (nextStep.before) {
-        functions.push(nextStep.before.bind(this))
-      }
-
-      functions.push(() => {
-        return new Promise((resolve, reject) => {
-          this.scrollIntoView(nextStep.selector).then(() => {
-            this.showArrow(!nextStep.hideArrow)
-            this.setState({ changing: false, tourStep: n })
-            resolve()
-          }).catch(msg => {
-            if (lastStep.step > nextStep.step) {
-              alert('Sorry.  It seems you cannot go back from here.')
-              resolve()
-            } else {
-              reject(msg)
-            }
-          })
-        })
-      })
-    }
-
-    let rc = this.syncPromiseExec(functions)
-
-    rc.then(() => {
-      this.setState({ changing: false })
-      this.setTabIndices()
-    }).catch(msg => {
-      this.setState({
-        changing: false,
-        errorMessage: msg,
-      })
-    })
-
-    return rc
-  }
-
-  private isElementInViewport(elem): boolean {
-    const box = elem.getBoundingClientRect()
-    const bannerHeight = 25
-    const client = {
-      height: (window.innerHeight || document.documentElement.clientHeight),
-      width: (window.innerWidth || document.documentElement.clientWidth),
-    }
-
-    return box.top >= bannerHeight
-      && box.left >= 0
-      && parseInt(box.bottom) <= client.height - bannerHeight
-      && parseInt(box.right) <= client.width
-  }
-
   private navigateTo(props): Promise<any> {
-    const app = this.props.application
-    const nav = typeof props === 'string' ? { pathname: props } : props
+    const loc = typeof props === 'string' ? { pathname: props } : props
 
-    if (nav.pathname === app.state.route.pathname) {
-      return Promise.resolve(nav.pathname)
+    if (loc.pathname === this.props.route.pathname) {
+      return Promise.resolve(loc.pathname)
     } else {
       return new Promise((resolve, reject) => {
-        app.navigateTo(nav)
+        this.props.actions.route.navigateTo({ loc })
 
-        let timeout = 30000
-        let t0 = Date.now()
-        let interval = setInterval(() => {
-          if (nav.pathname === app.state.route.pathname) {
+        const timeout = 30000
+        const t0 = Date.now()
+        const interval = setInterval(() => {
+          if (loc.pathname === this.props.route.pathname) {
             clearInterval(interval)
-            resolve(nav.pathname)
+            resolve(loc.pathname)
           } else if (Date.now() - t0 > timeout) {
             clearInterval(interval)
-            reject(`Timed out after ${timeout / 1000} seconds waiting for ${nav.pathname}.`)
+            reject(`Timed out after ${timeout / 1000} seconds waiting for ${loc.pathname}.`)
           }
         }, 10)
       })
@@ -769,7 +665,7 @@ export class UserTour extends React.Component<any, any> {
 
     switch (event.key) {
       case 'Enter': {
-        const button = this.query('.react-user-tour-button-container div:focus')
+        const button = query('.react-user-tour-button-container div:focus')
 
         if (button) {
           button.click()
@@ -778,7 +674,7 @@ export class UserTour extends React.Component<any, any> {
         break
       }
       case 'Escape': {
-        this.cancel()
+        this.props.actions.tour.end()
 
         break
       }
@@ -787,7 +683,8 @@ export class UserTour extends React.Component<any, any> {
 
   private pace(text, cb, delay = 100): Promise<string> {
     return new Promise(resolve => {
-      let i = 0, interval = setInterval(() => {
+      let i = 0
+      const interval = setInterval(() => {
         if (i < text.length) {
           cb(text.charAt(i), text.substring(0, ++i))
         } else {
@@ -798,15 +695,11 @@ export class UserTour extends React.Component<any, any> {
     })
   }
 
-  private query(selector: string): HTMLElement {
-    return document.querySelector(selector) as HTMLElement
-  }
-
   private setTabIndices() {
     const buttons: any[] = [
-      this.query('.react-user-tour-button-container .react-user-tour-done-button'),
-      this.query('.react-user-tour-button-container .react-user-tour-next-button'),
-      this.query('.react-user-tour-button-container .react-user-tour-back-button'),
+      query('.react-user-tour-button-container .react-user-tour-done-button'),
+      query('.react-user-tour-button-container .react-user-tour-next-button'),
+      query('.react-user-tour-button-container .react-user-tour-back-button'),
     ].filter(b => b).map((button, i) => {
       button.setAttribute('tabindex', (i + 1).toString())
       return button
@@ -819,50 +712,16 @@ export class UserTour extends React.Component<any, any> {
     return buttons[0]
   }
 
-  private scrollIntoView(selector: any): Promise<any> {
-    return new Promise((resolve, reject) => {
-      let elem = typeof selector === 'string' ? this.query(selector) : selector
-
-      if (elem) {
-        if (this.isElementInViewport(elem)) {
-          resolve()
-        } else {
-          elem.scrollIntoView({ behavior: 'smooth' })
-
-          let timeout = 10000
-          let t0 = Date.now()
-          let interval = setInterval(() => {
-            if (this.isElementInViewport(elem)) {
-              clearInterval(interval)
-              setTimeout(resolve, 100)
-            } else if (Date.now() - t0 > timeout) {
-              clearInterval(interval)
-              reject(`Timed out after ${timeout / 1000} seconds scrolling ${selector} into view.`)
-            }
-          }, 100)
-        }
-      } else {
-        let message = `The DOM element, "${selector}", is not available.`
-        console.warn(message)
-        reject(message)
-      }
-    })
-  }
-
   private showArrow(show: boolean): void {
-    let arrow = this.query(`.${styles.arrow}`)
+    const arrow = query(`.${styles.arrow}`)
 
     if (arrow) {
       arrow.style.visibility = show ? 'visible' : 'hidden'
     }
   }
 
-  private syncPromiseExec(functions: any[]): Promise<any> {
-    return functions.reduce((current, next) => current.then(next), Promise.resolve())
-  }
-
   private get imageCount(): string {
-    let results = this.props.application.state.searchResults
+    const results = this.props.catalog.searchResults
 
     switch (results && results.count) {
       case null:
@@ -876,18 +735,64 @@ export class UserTour extends React.Component<any, any> {
   }
 
   private get jobStatus(): string {
-    let jobs = this.props.application.state.jobs
-    let job = jobs && jobs.records && jobs.records[jobs.records.length - 1]
+    const jobs = this.props.jobs
+    const job = jobs && jobs.records && jobs.records[jobs.records.length - 1]
 
     return job && job.properties && job.properties.status || 'Unknown'
   }
 
   private get sourceName() {
-    let options = document.querySelectorAll('.CatalogSearchCriteria-source select option')
-    let option: any = options && Array.from(options).find((o: any) => {
+    const options = document.querySelectorAll('.CatalogSearchCriteria-source select option')
+    const option: any = options && Array.from(options).find((o: any) => {
       return o.value === this.searchCriteria.source
     })
 
     return option && option.text
   }
 }
+
+function mapStateToProps(state: AppState) {
+  return {
+    route: state.route,
+    catalog: state.catalog,
+    map: state.map,
+    jobs: state.jobs,
+    tour: state.tour,
+  }
+}
+
+function mapDispatchToProps(dispatch) {
+  return {
+    actions: {
+      catalog: {
+        resetSearchCriteria: () => dispatch(catalogActions.resetSearchCriteria()),
+        updateSearchCriteria: (args: CatalogUpdateSearchCriteriaArgs) => (
+          dispatch(catalogActions.updateSearchCriteria(args))
+        ),
+        setApiKey: (apiKey: string) => dispatch(catalogActions.setApiKey(apiKey)),
+        serialize: () => dispatch(catalogActions.serialize()),
+      },
+      map: {
+        panToPoint: (args: MapPanToPointArgs) => dispatch(mapActions.panToPoint(args)),
+        updateBbox: (bbox: Extent) => dispatch(mapActions.updateBbox(bbox)),
+        clearBbox: () => dispatch(mapActions.clearBbox()),
+        setSelectedFeature: (feature: GeoJSON.Feature<any> | null) => (
+          dispatch(mapActions.setSelectedFeature(feature))
+        ),
+      },
+      route: {
+        navigateTo: (args: RouteNavigateToArgs) => dispatch(routeActions.navigateTo(args)),
+      },
+      tour: {
+        setSteps: (steps: TourStep[]) => dispatch(tourActions.setSteps(steps)),
+        end: () => dispatch(tourActions.end()),
+        goToStep: (step: number) => dispatch(tourActions.goToStep(step)),
+      },
+    },
+  }
+}
+
+export default connect<StateProps, DispatchProps>(
+  mapStateToProps,
+  mapDispatchToProps,
+)(UserTour)

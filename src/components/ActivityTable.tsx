@@ -17,47 +17,37 @@
 const styles = require('./ActivityTable.css')
 
 import * as React from 'react'
+import {connect} from 'react-redux'
 import {Dropdown} from './Dropdown'
 import {FileDownloadLink} from './FileDownloadLink'
 import {LoadingAnimation} from './LoadingAnimation'
 import {normalizeSceneId} from './SceneFeatureDetails'
 import {JOB_ENDPOINT} from '../config'
+import {AppState} from '../store'
+import {mapActions} from '../actions/mapActions'
 
-interface Props {
+type StateProps = ReturnType<typeof mapStateToProps>
+type DispatchProps = ReturnType<typeof mapDispatchToProps>
+type PassedProps = {
   className?: string
   duration: string
   durations: {value: string, label: string}[]
-  error?: any
-  isLoading: boolean
-  jobs: beachfront.Job[]
   selectedJobIds: string[]
   onDurationChange(value: string)
-  onHoverIn(job: beachfront.Job)
-  onHoverOut(job: beachfront.Job)
   onRowClick(job: beachfront.Job)
 }
+type Props = StateProps & DispatchProps & PassedProps
 
-export const ActivityTable = ({
-  className,
-  duration,
-  durations,
-  isLoading,
-  jobs,
-  selectedJobIds,
-  onDurationChange,
-  onHoverIn,
-  onHoverOut,
-  onRowClick,
-}: Props) => (
-  <div className={`${styles.root} ${isLoading ? styles.isLoading : ''} ${className}`}>
+export const ActivityTable = (props: Props) => (
+  <div className={`${styles.root} ${props.productLines.isFetchingJobs ? styles.isLoading : ''} ${props.className}`}>
 
     <div className={styles.filter}>
       Activity:
       <Dropdown
         className={styles.filterDropdown}
-        options={durations}
-        value={duration}
-        onChange={onDurationChange}
+        options={props.durations}
+        value={props.duration}
+        onChange={props.onDurationChange}
       />
     </div>
 
@@ -65,46 +55,46 @@ export const ActivityTable = ({
     <div className={styles.tableContainer}>
       <table>
         <thead>
-          <tr>
-            <th>Scene ID</th>
-            {/*<th>Captured On</th>
-            <th>Sensor</th>*/}
-            <td></td>
-          </tr>
+        <tr>
+          <th>Scene ID</th>
+          {/*<th>Captured On</th>
+        <th>Sensor</th>*/}
+          <td></td>
+        </tr>
         </thead>
         <tbody>
-          {jobs.map(job => (
-            <tr
-              key={job.id}
-              className={selectedJobIds.includes(job.id) ? styles.isActive : ''}
-              onClick={() => onRowClick(job)}
-              onMouseEnter={() => onHoverIn(job)}
-              onMouseLeave={() => onHoverOut(job)}
-              >
-              <td>{getSceneId(job)}</td>
-              {/*<td>{getCapturedOn(job)}</td>
-              <td>{getImageSensor(job)}</td>*/}
-              <td className={styles.downloadCell} onClick={e => e.stopPropagation()}>
-                <FileDownloadLink
-                  className={styles.downloadButton}
-                  filename={job.properties.name + '.geojson'}
-                  jobId={job.id}
-                  apiUrl={JOB_ENDPOINT + '/' + job.id + '.geojson'}
-                  displayText="Download GeoJSON"
-                  onComplete={() => console.log('onComplete')}
-                  onError={() => console.log('onError')}
-                  onProgress={() => console.log('onProgress')}
-                  onStart={() => console.log('onStart')}
-                />
-              </td>
-            </tr>
-          ))}
-          {isLoading && generatePlaceholderRows(10)}
+        {props.productLines.jobs.map(job => (
+          <tr
+            key={job.id}
+            className={props.selectedJobIds.includes(job.id) ? styles.isActive : ''}
+            onClick={() => props.onRowClick(job)}
+            onMouseEnter={() => props.actions.map.setHoveredFeature(job)}
+            onMouseLeave={() => props.actions.map.setHoveredFeature(null)}
+          >
+            <td>{getSceneId(job)}</td>
+            {/*<td>{getCapturedOn(job)}</td>
+          <td>{getImageSensor(job)}</td>*/}
+            <td className={styles.downloadCell} onClick={e => e.stopPropagation()}>
+              <FileDownloadLink
+                className={styles.downloadButton}
+                filename={job.properties.name + '.geojson'}
+                jobId={job.id}
+                apiUrl={JOB_ENDPOINT + '/' + job.id + '.geojson'}
+                displayText="Download GeoJSON"
+                onComplete={() => console.log('onComplete')}
+                onError={() => console.log('onError')}
+                onProgress={() => console.log('onProgress')}
+                onStart={() => console.log('onStart')}
+              />
+            </td>
+          </tr>
+        ))}
+        {props.productLines.isFetchingJobs && generatePlaceholderRows(10)}
         </tbody>
       </table>
     </div>
     <div className={styles.shadowBottom}/>
-    {isLoading && (
+    {props.productLines.isFetchingJobs && (
       <div className={styles.loadingMask}>
         <LoadingAnimation className={styles.loadingAnimation}/>
       </div>
@@ -143,3 +133,26 @@ function getSceneId({ properties }: beachfront.Job) {
 /*function getImageSensor({ properties }: beachfront.Job) {
   return properties.scene_sensor_name
 }*/
+
+function mapStateToProps(state: AppState) {
+  return {
+    productLines: state.productLines,
+  }
+}
+
+function mapDispatchToProps(dispatch) {
+  return {
+    actions: {
+      map: {
+        setHoveredFeature: (hoveredFeature: beachfront.Job | null) => (
+          dispatch(mapActions.setHoveredFeature(hoveredFeature))
+        ),
+      },
+    },
+  }
+}
+
+export default connect<StateProps, DispatchProps, PassedProps>(
+  mapStateToProps,
+  mapDispatchToProps,
+)(ActivityTable)

@@ -18,15 +18,15 @@ const styles: any = require('./ImagerySearchList.css')
 const DATETIME_FORMAT = 'YYYY-MM-DD HH:mm'
 
 import * as React from 'react'
+import {connect} from 'react-redux'
 import * as moment from 'moment'
-import * as debounce from 'lodash/debounce'
+import debounce = require('lodash/debounce')
 import * as ol from '../utils/ol'
 import {SCENE_TILE_PROVIDERS} from '../config'
+import {AppState} from '../store'
 
-interface Props {
-  collections: any
-  imagery: beachfront.ImageryCatalogPage
-}
+type StateProps = ReturnType<typeof mapStateToProps>
+type Props = StateProps
 
 interface State {
   hoveredIds?: string[]
@@ -77,20 +77,20 @@ export class ImagerySearchList extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    this.props.collections.hovered.on(['add', 'remove'], this.setHoveredIds)
-    this.props.collections.selected.on(['add', 'remove'], this.setSelectedIds)
+    this.props.map.collections.hovered.on(['add', 'remove'], this.setHoveredIds)
+    this.props.map.collections.selected.on(['add', 'remove'], this.setSelectedIds)
     this.setHoveredIds()
     this.setSelectedIds()
     this.scrollToSelected()
   }
 
   componentWillUnmount() {
-    this.props.collections.hovered.un(['add', 'remove'], this.setHoveredIds)
-    this.props.collections.selected.un(['add', 'remove'], this.setSelectedIds)
+    this.props.map.collections.hovered.un(['add', 'remove'], this.setHoveredIds)
+    this.props.map.collections.selected.un(['add', 'remove'], this.setSelectedIds)
   }
 
   render() {
-    const scenes = this.props.imagery.images.features.sort(this.compare[this.state.sortBy])
+    const scenes = this.props.catalog.searchResults.images.features.sort(this.compare[this.state.sortBy])
 
     if (this.state.sortReverse) {
       scenes.reverse()
@@ -129,7 +129,7 @@ export class ImagerySearchList extends React.Component<Props, State> {
               <TableHeader name="cloudCover" label="Cloud Cover"/>
             </tr>
           </thead>
-          <tbody onMouseEnter={() => this.props.collections.hovered.clear()}>
+          <tbody onMouseEnter={() => this.props.map.collections.hovered.clear()}>
             {scenes.map(f => {
               return (
                 <tr
@@ -138,12 +138,12 @@ export class ImagerySearchList extends React.Component<Props, State> {
                     this.state.hoveredIds.includes(f.id) && styles.hovered,
                   ].filter(Boolean).join(' ')}
                   key={f.id}
-                  onClick={() => this.props.collections.handleSelectFeature(f.id)}
+                  onClick={() => this.props.map.collections.handleSelectFeature(f.id)}
                   onMouseEnter={() => {
-                    const { imagery, hovered } = this.props.collections
+                    const { imagery, hovered } = this.props.map.collections
                     hovered.push(imagery.getArray().find(i => i.getId() === f.id))
                   }}
-                  onMouseLeave={() => this.props.collections.hovered.clear()}
+                  onMouseLeave={() => this.props.map.collections.hovered.clear()}
                 >
                   <td>{f.properties.sensorName}</td>
                   <td>{moment.utc(f.properties.acquiredDate).format(DATETIME_FORMAT)}</td>
@@ -158,7 +158,7 @@ export class ImagerySearchList extends React.Component<Props, State> {
   }
 
   private get sourceName() {
-    const features = this.props.imagery.images.features as any
+    const features = this.props.catalog.searchResults.images.features as any
     let provider
 
     if (features.length) {
@@ -200,13 +200,13 @@ export class ImagerySearchList extends React.Component<Props, State> {
 
   private setHoveredIds(event?: ol.Select.Event): void {
     this.setState((_, props) => ({
-      hoveredIds: this.getFeatureIds(event ? event.target : props.collections.hovered),
+      hoveredIds: this.getFeatureIds(event ? event.target : props.map.collections.hovered),
     }))
   }
 
   private setSelectedIds(event?: ol.Select.Event): void {
     this.setState((_, props) => ({
-      selectedIds: this.getFeatureIds(event ? event.target : props.collections.selected),
+      selectedIds: this.getFeatureIds(event ? event.target : props.map.collections.selected),
     }), this.scrollToSelected)
    }
 
@@ -218,3 +218,14 @@ export class ImagerySearchList extends React.Component<Props, State> {
     }
   }
 }
+
+function mapStateToProps(state: AppState) {
+  return {
+    map: state.map,
+    catalog: state.catalog,
+  }
+}
+
+export default connect<StateProps, undefined>(
+  mapStateToProps,
+)(ImagerySearchList)

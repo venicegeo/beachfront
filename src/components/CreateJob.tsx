@@ -15,89 +15,66 @@
  **/
 
 const styles: any = require('./CreateJob.css')
-const DATE_FORMAT = 'YYYY-MM-DD'
 
 import * as React from 'react'
-import * as moment from 'moment'
-import {AlgorithmList} from './AlgorithmList'
-import {ImagerySearch} from './ImagerySearch'
-import {ImagerySearchList} from './ImagerySearchList'
+import {connect} from 'react-redux'
+import AlgorithmList from './AlgorithmList'
+import ImagerySearch from './ImagerySearch'
+import ImagerySearchList from './ImagerySearchList'
 import {NewJobDetails} from './NewJobDetails'
 import {PrimaryMap} from './PrimaryMap'
-import {createJob} from '../api/jobs'
 import {normalizeSceneId} from './SceneFeatureDetails'
-import {SOURCE_DEFAULT} from '../constants'
+import {TYPE_SCENE} from '../constants'
+import {AppState} from '../store'
+import {jobsActions, JobsCreateJobArgs} from '../actions/jobsActions'
 
-export interface SearchCriteria {
-  cloudCover: number
-  dateFrom: string
-  dateTo: string
-  source: string
+type StateProps = ReturnType<typeof mapStateToProps>
+type DispatchProps = ReturnType<typeof mapDispatchToProps>
+type PassedProps = {
+  mapRef: PrimaryMap
 }
-
-interface Props {
-  algorithms: beachfront.Algorithm[]
-  enabledPlatforms: string[]
-  bbox: number[]
-  catalogApiKey: string
-  collections: any
-  imagery: beachfront.ImageryCatalogPage
-  isSearching: boolean
-  map: PrimaryMap
-  searchError: any
-  searchCriteria: SearchCriteria
-  selectedScene: beachfront.Scene
-  onCatalogApiKeyChange(apiKey: string)
-  onClearBbox()
-  onJobCreated(job: beachfront.Job)
-  onSearchCriteriaChange(criteria: SearchCriteria)
-  onSearchSubmit()
-}
+type Props = StateProps & DispatchProps & PassedProps
 
 interface State {
-  isCreating?: boolean
   computeMask?: boolean
   name?: string
-  algorithmError?: any
+  selectedScene?: beachfront.Scene
 }
-
-export const createSearchCriteria = (): SearchCriteria => ({
-  cloudCover: 10,
-  dateFrom: moment().subtract(30, 'days').format(DATE_FORMAT),
-  dateTo: moment().format(DATE_FORMAT),
-  source: SOURCE_DEFAULT,
-})
 
 export class CreateJob extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props)
 
     this.state = {
-      isCreating: false,
       computeMask: true,
-      name: props.selectedScene ? normalizeSceneId(props.selectedScene.id) : '',
-      algorithmError: '',
+      name: '',
     }
 
-    this.handleCreateJob = this.handleCreateJob.bind(this)
+    this.handleSubmit = this.handleSubmit.bind(this)
     this.handleComputeMaskChange = this.handleComputeMaskChange.bind(this)
     this.handleNameChange = this.handleNameChange.bind(this)
-    this.handleSearchCloudCoverChange = this.handleSearchCloudCoverChange.bind(this)
-    this.handleSearchDateChange = this.handleSearchDateChange.bind(this)
-    this.handleSearchSourceChange = this.handleSearchSourceChange.bind(this)
   }
 
   componentDidUpdate(prevProps: Props) {
-    if (this.props.selectedScene !== prevProps.selectedScene) {
-      // Set the default name using the scene id.
-      if (this.props.selectedScene) {
-        this.setState({ name: normalizeSceneId(this.props.selectedScene.id) })
+    if (prevProps.map.selectedFeature !== this.props.map.selectedFeature) {
+      let selectedScene = null
+      if (this.props.map.selectedFeature && this.props.map.selectedFeature.properties.type === TYPE_SCENE) {
+        selectedScene = this.props.map.selectedFeature as beachfront.Scene
       }
 
-      // Reset the algorithm error.
-      if (this.state.algorithmError) {
-        this.setState({ algorithmError: '' })
+      if (selectedScene !== this.state.selectedScene) {
+        // Set the default name using the scene id.
+        if (selectedScene) {
+          this.setState({ name: normalizeSceneId(selectedScene.id) })
+        }
+
+        // Reset the algorithm error.
+        if (this.props.jobs.createJobError) {
+          this.props.actions.jobs.dismissCreateJobError()
+        }
       }
+
+      this.setState({ selectedScene })
     }
   }
 
@@ -108,39 +85,19 @@ export class CreateJob extends React.Component<Props, State> {
           <h1>Create Job</h1>
         </header>
         <ul>
-          {this.props.bbox && (
+          {this.props.map.bbox && (
             <li className={styles.search}>
-              <ImagerySearch
-                enabledPlatforms={this.props.enabledPlatforms}
-                bbox={this.props.bbox}
-                catalogApiKey={this.props.catalogApiKey}
-                cloudCover={this.props.searchCriteria.cloudCover}
-                dateFrom={this.props.searchCriteria.dateFrom}
-                dateTo={this.props.searchCriteria.dateTo}
-                error={this.props.searchError}
-                isSearching={this.props.isSearching}
-                source={this.props.searchCriteria.source}
-                onApiKeyChange={this.props.onCatalogApiKeyChange}
-                onClearBbox={this.props.onClearBbox}
-                onCloudCoverChange={this.handleSearchCloudCoverChange}
-                onDateChange={this.handleSearchDateChange}
-                onSearchCriteriaChange={this.props.onSearchCriteriaChange}
-                onSourceChange={this.handleSearchSourceChange}
-                onSubmit={this.props.onSearchSubmit}
-              />
+              <ImagerySearch />
             </li>
           )}
 
-          {this.props.bbox && this.props.imagery && this.props.map && (
+          {this.props.map.bbox && this.props.catalog.searchResults && this.props.mapRef && (
             <li className={styles.results}>
-              <ImagerySearchList
-                collections={this.props.collections}
-                imagery={this.props.imagery}
-              />
+              <ImagerySearchList />
             </li>
           )}
 
-          {this.props.bbox && this.props.selectedScene && (
+          {this.props.map.bbox && this.state.selectedScene && (
             <li className={styles.details}>
               <NewJobDetails
                 computeMask={this.state.computeMask}
@@ -151,19 +108,16 @@ export class CreateJob extends React.Component<Props, State> {
             </li>
           )}
 
-          {this.props.bbox && this.props.selectedScene && (
+          {this.props.map.bbox && this.state.selectedScene && (
             <li className={styles.algorithms}>
               <AlgorithmList
-                algorithms={this.props.algorithms}
-                sceneMetadata={this.props.selectedScene.properties}
-                isSubmitting={this.state.isCreating}
-                error={this.state.algorithmError}
-                onSubmit={this.handleCreateJob}
+                sceneMetadata={this.state.selectedScene.properties}
+                onSubmit={this.handleSubmit}
               />
             </li>
           )}
 
-          {!this.props.bbox && (
+          {!this.props.map.bbox && (
             <li className={styles.placeholder}>
               <h3>Draw bounding box to search for imagery</h3>
             </li>
@@ -173,41 +127,14 @@ export class CreateJob extends React.Component<Props, State> {
     )
   }
 
-  private handleCreateJob(algorithm) {
-    this.setState({
-      isCreating: true,
-      algorithmError: '',
-    })
-
-    createJob({
+  private handleSubmit(algorithm) {
+    this.props.actions.jobs.createJob({
       algorithmId: algorithm.id,
       computeMask: this.state.computeMask,
       name: this.state.name,
-      sceneId: this.props.selectedScene.id,
-      catalogApiKey: this.props.catalogApiKey,
-    }).then(job => {
-      this.setState({ isCreating: false })
-      this.props.onJobCreated(job) // Release the job.
-    }).catch(algorithmError => {
-      this.setState({ algorithmError, isCreating: false })
+      sceneId: this.state.selectedScene.id,
+      catalogApiKey: this.props.catalog.apiKey,
     })
-  }
-
-  private handleSearchCloudCoverChange(cloudCover) {
-    this.props.onSearchCriteriaChange(Object.assign({}, this.props.searchCriteria, {
-      cloudCover: parseInt(cloudCover, 10),
-    }))
-  }
-
-  private handleSearchDateChange(dateFrom, dateTo) {
-    this.props.onSearchCriteriaChange(Object.assign({}, this.props.searchCriteria, {
-      dateFrom,
-      dateTo,
-    }))
-  }
-
-  private handleSearchSourceChange(source: string) {
-    this.props.onSearchCriteriaChange({ ...this.props.searchCriteria, source })
   }
 
   private handleComputeMaskChange(computeMask: boolean) {
@@ -218,3 +145,27 @@ export class CreateJob extends React.Component<Props, State> {
     this.setState({ name })
   }
 }
+
+function mapStateToProps(state: AppState) {
+  return {
+    catalog: state.catalog,
+    map: state.map,
+    jobs: state.jobs,
+  }
+}
+
+function mapDispatchToProps(dispatch) {
+  return {
+    actions: {
+      jobs: {
+        createJob: (args: JobsCreateJobArgs) => dispatch(jobsActions.createJob(args)),
+        dismissCreateJobError: () => dispatch(jobsActions.dismissCreateJobError()),
+      },
+    },
+  }
+}
+
+export default connect<StateProps, DispatchProps, PassedProps>(
+  mapStateToProps,
+  mapDispatchToProps,
+)(CreateJob)

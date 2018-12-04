@@ -15,14 +15,20 @@
  **/
 
 import * as React from 'react'
-import * as MAP from 'lodash/map'
+import MAP = require('lodash/map')
 import {SUPPORTED_BROWSERS} from '../config'
 
 const styles: any = require('./BrowserSupport.css')
 const {detect} = require('detect-browser')
 
-function getState() {
-  let rc: any = {
+interface State {
+  browser: any
+  supported: boolean
+  hide: boolean
+}
+
+function getState(): State {
+  let rc: State = {
     browser: detect(),
     supported: false,
     hide: JSON.parse(localStorage.getItem('dismissBrowserSupport')),
@@ -55,8 +61,8 @@ export function BrowsersSupported() {
   )
 }
 
-export class BrowserSupport extends React.Component<any, any> {
-  constructor(props: any) {
+export class BrowserSupport extends React.Component<{}, State> {
+  constructor(props: {}) {
     super(props)
 
     this.state = getState()

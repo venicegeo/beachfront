@@ -18,33 +18,67 @@ const styles: any = require('./About.css')
 const brand: string = require('../images/brand-small-square.svg')
 
 import * as React from 'react'
+import {connect} from 'react-redux'
 import {Modal} from './Modal'
 import {BrowsersSupported} from './BrowserSupport'
+import {routeActions, RouteNavigateToArgs} from '../actions/routeActions'
 
-interface Props {
-  onDismiss()
+type DispatchProps = ReturnType<typeof mapDispatchToProps>
+type Props = DispatchProps
+
+export class About extends React.Component<Props> {
+  constructor(props: Props) {
+    super(props)
+
+    this.handleDismiss = this.handleDismiss.bind(this)
+  }
+
+  render() {
+    return (
+      <Modal className={styles.parent} onDismiss={this.handleDismiss} onInitialize={() => {/* noop */}}>
+        <div className={styles.root}>
+          <section className={styles.heading}>
+            <img src={brand} alt="Beachfront"/>
+            <h1>About Beachfront</h1>
+          </section>
+          <section className={styles.body}>
+            <p>
+              Beachfront is an NGA Services project aimed at providing automated
+              near real time feature extraction of global shoreline captured at
+              the best possible resolution based on available sources. Beachfront
+              leverages computer vision algorithm services, the Piazza Platform,
+              and incoming satellite imagery to provide this capability.
+            </p>
+          </section>
+          <section className={styles.browserSupport}>
+            <p>Beachfront will work best when used with a supported browser.</p>
+            <BrowsersSupported/>
+          </section>
+        </div>
+      </Modal>
+    )
+  }
+
+  private handleDismiss() {
+    this.props.actions.route.navigateTo({
+      loc: {
+        pathname: '/',
+      },
+    })
+  }
 }
 
-export const About = ({ onDismiss }: Props) => (
-  <Modal className={styles.parent} onDismiss={onDismiss} onInitialize={() => {/* noop */}}>
-    <div className={styles.root}>
-      <section className={styles.heading}>
-        <img src={brand} alt="Beachfront"/>
-        <h1>About Beachfront</h1>
-      </section>
-      <section className={styles.body}>
-        <p>
-          Beachfront is an NGA Services project aimed at providing automated
-          near real time feature extraction of global shoreline captured at
-          the best possible resolution based on available sources. Beachfront
-          leverages computer vision algorithm services, the Piazza Platform,
-          and incoming satellite imagery to provide this capability.
-        </p>
-      </section>
-      <section className={styles.browserSupport}>
-        <p>Beachfront will work best when used with a supported browser.</p>
-        <BrowsersSupported/>
-      </section>
-    </div>
-  </Modal>
-)
+function mapDispatchToProps(dispatch) {
+  return {
+    actions: {
+      route: {
+        navigateTo: (args: RouteNavigateToArgs) => dispatch(routeActions.navigateTo(args)),
+      },
+    },
+  }
+}
+
+export default connect<undefined, DispatchProps>(
+  undefined,
+  mapDispatchToProps,
+)(About)

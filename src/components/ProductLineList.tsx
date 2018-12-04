@@ -17,56 +17,51 @@
 const styles = require('./ProductLineList.css')
 
 import * as React from 'react'
+import {connect} from 'react-redux'
 import {LoadingAnimation} from './LoadingAnimation'
-import {ProductLine} from './ProductLine'
+import ProductLine from './ProductLine'
+import {AppState} from '../store'
+import {productLinesActions} from '../actions/productLinesActions'
 
-interface Props {
-  error: { message: string, code?: number }
-  isFetching: boolean
-  productLines: beachfront.ProductLine[]
-  onDismissError()
-  onJobHoverIn(job: beachfront.Job)
-  onJobHoverOut()
-  onJobSelect(job: beachfront.Job)
-  onJobDeselect()
-  onPanTo(productLine: beachfront.ProductLine)
-}
+type StateProps = ReturnType<typeof mapStateToProps>
+type DispatchProps = ReturnType<typeof mapDispatchToProps>
+type Props = StateProps & DispatchProps
 
-export class ProductLineList extends React.Component<Props, {}> {
+export class ProductLineList extends React.Component<Props> {
   render() {
-    const isEmpty = !this.props.productLines.length && !this.props.isFetching && !this.props.error
+    const isEmpty = (
+      !this.props.productLines.records.length &&
+      !this.props.productLines.isFetching &&
+      !this.props.productLines.fetchError
+    )
+
     return (
       <div className={`${styles.root} ${isEmpty ? styles.isEmpty : ''}`}>
         <header>
           <h1>Product Lines</h1>
         </header>
         <ul>
-          {this.props.error && (
+          {this.props.productLines.fetchError && (
             <li className={styles.error}>
-              <h4><i className="fa fa-warning"/> {this.props.error.code ? 'Communication' : 'Application'} Error</h4>
-              <p>{this.props.error.code
+              <h4><i className="fa fa-warning"/> {this.props.productLines.fetchError.code ? 'Communication' : 'Application'} Error</h4>
+              <p>{this.props.productLines.fetchError.code
                 ? 'Cannot communicate with the server'
                 : 'An error is preventing the display of product lines'
-              }. (<code>{this.props.error.message}</code>)</p>
-              <button onClick={this.props.onDismissError}>Retry</button>
+              }. (<code>{this.props.productLines.fetchError.message}</code>)</p>
+              <button onClick={this.props.actions.productLines.fetch}>Retry</button>
             </li>
           )}
-          {this.props.productLines.map(productLine => (
+          {this.props.productLines.records.map(productLine => (
             <ProductLine
               className={styles.listItem}
               key={productLine.id}
               productLine={productLine}
-              onJobHoverIn={this.props.onJobHoverIn}
-              onJobHoverOut={this.props.onJobHoverOut}
-              onJobSelect={this.props.onJobSelect}
-              onJobDeselect={this.props.onJobDeselect}
-              onPanTo={this.props.onPanTo}
             />
           ))}
           {isEmpty && (
             <li className={styles.placeholder}>No product lines currently exist</li>
           )}
-          {this.props.isFetching && (
+          {this.props.productLines.isFetching && (
             <li className={styles.loadingMask}>
               <LoadingAnimation className={styles.loadingAnimation}/>
             </li>
@@ -76,3 +71,24 @@ export class ProductLineList extends React.Component<Props, {}> {
     )
   }
 }
+
+function mapStateToProps(state: AppState) {
+  return {
+    productLines: state.productLines,
+  }
+}
+
+function mapDispatchToProps(dispatch) {
+  return {
+    actions: {
+      productLines: {
+        fetch: () => dispatch(productLinesActions.fetch()),
+      },
+    },
+  }
+}
+
+export default connect<StateProps, DispatchProps>(
+  mapStateToProps,
+  mapDispatchToProps,
+)(ProductLineList)

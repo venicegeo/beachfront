@@ -17,57 +17,55 @@
 const styles = require('./ProductLine.css')
 
 import * as React from 'react'
+import {connect} from 'react-redux'
 import * as moment from 'moment'
-import {ActivityTable} from './ActivityTable'
-import {fetchJobs} from '../api/productLines'
+import ActivityTable from './ActivityTable'
+import {ProductLinesFetchJobsArgs, productLinesActions} from '../actions/productLinesActions'
+import {mapActions, MapPanToPointArgs} from '../actions/mapActions'
+import {getFeatureCenter} from '../utils/geometries'
 
 const LAST_24_HOURS = {value: 'PT24H', label: 'Last 24 Hours'}
 const LAST_7_DAYS = {value: 'P7D', label: 'Last 7 Days'}
 const LAST_30_DAYS = {value: 'P30D', label: 'Last 30 Days'}
 const SINCE_CREATION = {value: 'P0D', label: 'All'}
 
-interface Props {
+type DispatchProps = ReturnType<typeof mapDispatchToProps>
+type PassedProps = {
   className?: string
   productLine: beachfront.ProductLine
-  onJobHoverIn(job: beachfront.Job)
-  onJobHoverOut(job: beachfront.Job)
-  onJobSelect(job: beachfront.Job)
-  onJobDeselect()
-  onPanTo(productLine: beachfront.ProductLine)
 }
+type Props = DispatchProps & PassedProps
 
 interface State {
   duration?: string
-  error?: any
   isExpanded?: boolean
-  isFetchingJobs?: boolean
-  jobs?: beachfront.Job[]
   selectedJobs?: beachfront.Job[]
   sinceDate?: string
 }
 
 export class ProductLine extends React.Component<Props, State> {
-  constructor() {
-    super()
+  constructor(props: Props) {
+    super(props)
     this.state = {
       duration: LAST_24_HOURS.value,
-      error: null,
       isExpanded: false,
-      isFetchingJobs: false,
       selectedJobs: [],
-      jobs: [],
     }
     this.handleDurationChange = this.handleDurationChange.bind(this)
     this.handleExpansionToggle = this.handleExpansionToggle.bind(this)
     this.handleJobRowClick = this.handleJobRowClick.bind(this)
+    this.handleViewOnMap = this.handleViewOnMap.bind(this)
   }
 
   componentDidUpdate(_, prevState) {
     if (this.state.isExpanded && (prevState.isExpanded !== this.state.isExpanded || prevState.duration !== this.state.duration)) {
-      this.fetchJobs()
+      this.props.actions.productLines.fetchJobs({
+        productLineId: this.props.productLine.id,
+        sinceDate: generateSinceDate(this.state.duration, this.props.productLine),
+      })
     }
     if (prevState.isExpanded && !this.state.isExpanded && this.state.selectedJobs.length) {
-      this.props.onJobDeselect()
+      this.props.actions.map.setSelectedFeature(null)
     }
   }
 
@@ -83,7 +81,7 @@ export class ProductLine extends React.Component<Props, State> {
             <span>{properties.name}</span>
           </h3>
           <div className={styles.controls}>
-            <a onClick={() => this.props.onPanTo(this.props.productLine)} title="View on Map">
+            <a onClick={this.handleViewOnMap} title="View on Map">
               <i className="fa fa-globe"/>
             </a>
           </div>
@@ -118,28 +116,13 @@ export class ProductLine extends React.Component<Props, State> {
               LAST_30_DAYS,
               SINCE_CREATION,
             ]}
-            error={this.state.error}
-            isLoading={this.state.isFetchingJobs}
-            jobs={this.state.jobs}
             selectedJobIds={this.state.selectedJobs.map(j => j.id)}
             onDurationChange={this.handleDurationChange}
-            onHoverIn={this.props.onJobHoverIn}
-            onHoverOut={this.props.onJobHoverOut}
             onRowClick={this.handleJobRowClick}
           />
         </section>
       </li>
     )
-  }
-
-  private fetchJobs() {
-    this.setState({ isFetchingJobs: true })
-    fetchJobs({
-      productLineId: this.props.productLine.id,
-      sinceDate: generateSinceDate(this.state.duration, this.props.productLine),
-    })
-      .then(jobs => this.setState({ jobs, isFetchingJobs: false }))
-      .catch(error => this.setState({ error, isFetchingJobs: false }))
   }
 
   private handleDurationChange(duration) {
@@ -153,13 +136,20 @@ export class ProductLine extends React.Component<Props, State> {
 
   private handleJobRowClick(job) {
     if (this.state.selectedJobs.some(j => j.id === job.id)) {
-      this.props.onJobDeselect()
+      this.props.actions.map.setSelectedFeature(null)
       this.setState({ selectedJobs: [] })
     }
     else {
-      this.props.onJobSelect(job)
+      this.props.actions.map.setSelectedFeature(job)
       this.setState({ selectedJobs: [job] })
     }
+  }
+
+  private handleViewOnMap() {
+    this.props.actions.map.panToPoint({
+      point: getFeatureCenter(this.props.productLine),
+      zoom: 3.5,
+    })
   }
 }
 
@@ -185,3 +175,22 @@ function generateSinceDate(offset: string, productLine: beachfront.ProductLine) 
     .startOf(offset === LAST_24_HOURS.value ? 'hour' : 'day')
     .toISOString()
 }
+
+function mapDispatchToProps(dispatch) {
+  return {
+    actions: {
+      productLines: {
+        fetchJobs: (args: ProductLinesFetchJobsArgs) => dispatch(productLinesActions.fetchJobs(args)),
+      },
+      map: {
+        setSelectedFeature: (feature: GeoJSON.Feature<any> | null) => dispatch(mapActions.setSelectedFeature(feature)),
+        panToPoint: (args: MapPanToPointArgs) => dispatch(mapActions.panToPoint(args)),
+      },
+    },
+  }
+}
+
+export default connect<undefined, DispatchProps, PassedProps>(
+  undefined,
+  mapDispatchToProps,
+)(ProductLine)

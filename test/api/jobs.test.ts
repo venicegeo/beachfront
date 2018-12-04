@@ -14,21 +14,21 @@
  * limitations under the License.
  **/
 
-describe('Jobs Service', () => {
-  describe('createJob()', () => {
-    it('sends correct payload')
-    it('yields correctly formatted job record')
-    it('handles HTTP errors gracefully')
-  })
-  describe('importJob()', () => {
-    it('calls importer')
-    it('calls importer')
-  })
-  describe('startWorker()', () => {
-    it('starts worker')
-    it('sends correct configuration')
-  })
-  describe('stopWorker()', () => {
-    it('stops worker')
-  })
-})
+// describe('Jobs Service', () => {
+//   describe('createJob()', () => {
+//     it('sends correct payload')
+//     it('yields correctly formatted job record')
+//     it('handles HTTP errors gracefully')
+//   })
+//   describe('importJob()', () => {
+//     it('calls importer')
+//     it('calls importer')
+//   })
+//   describe('startWorker()', () => {
+//     it('starts worker')
+//     it('sends correct configuration')
+//   })
+//   describe('stopWorker()', () => {
+//     it('stops worker')
+//   })
+// })

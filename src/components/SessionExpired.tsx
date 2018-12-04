@@ -17,20 +17,49 @@
 const styles = require('./SessionExpired.css')
 
 import * as React from 'react'
+import {connect} from 'react-redux'
 import {Modal} from './Modal'
+import {userActions} from '../actions/userActions'
 
-interface Props {
-  onDismiss()
+type DispatchProps = ReturnType<typeof mapDispatchToProps>
+type Props = DispatchProps
+
+export class SessionExpired extends React.Component<Props> {
+  constructor(props: Props) {
+    super(props)
+    this.handleDismiss = this.handleDismiss.bind(this)
+  }
+
+  render() {
+    return (
+      <Modal onDismiss={this.handleDismiss} onInitialize={() => {/* noop */}}>
+        <div className={styles.root}>
+          <h1><i className="fa fa-lock"/> Your session has expired</h1>
+          <p>This happens if you've been idle for a while or if Beachfront has been upgraded after you logged in.</p>
+          <p className={styles.instructions}>
+            Click anywhere or press <kbd>ESC</kbd> to close this message
+          </p>
+        </div>
+      </Modal>
+    )
+  }
+
+  private handleDismiss() {
+    this.props.actions.user.clearSession()
+  }
 }
 
-export const SessionExpired = ({ onDismiss }: Props) => (
-  <Modal onDismiss={onDismiss} onInitialize={() => {/* noop */}}>
-    <div className={styles.root}>
-      <h1><i className="fa fa-lock"/> Your session has expired</h1>
-      <p>This happens if you've been idle for a while or if Beachfront has been upgraded after you logged in.</p>
-      <p className={styles.instructions}>
-        Click anywhere or press <kbd>ESC</kbd> to close this message
-      </p>
-    </div>
-  </Modal>
-)
+function mapDispatchToProps(dispatch) {
+  return {
+    actions: {
+      user: {
+        clearSession: () => dispatch(userActions.clearSession()),
+      },
+    },
+  }
+}
+
+export default connect<undefined, DispatchProps>(
+  undefined,
+  mapDispatchToProps,
+)(SessionExpired)

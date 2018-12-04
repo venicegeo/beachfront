@@ -33,7 +33,7 @@ module.exports = {
   devtool: '#cheap-module-eval-source-map',
 
   context: __dirname,
-  entry: './src/index.ts',
+  entry: './src/index.tsx',
 
   /*externals: {
     'openlayers': 'ol'

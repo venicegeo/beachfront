@@ -17,40 +17,40 @@
 const styles: any = require('./AlgorithmList.css')
 
 import * as React from 'react'
-import {Algorithm} from './Algorithm'
+import {connect} from 'react-redux'
+import Algorithm from './Algorithm'
+import {AppState} from '../store'
 
-interface Props {
-  algorithms: beachfront.Algorithm[]
+type StateProps = ReturnType<typeof mapStateToProps>
+type PassedProps = {
   sceneMetadata: beachfront.SceneMetadata
-  isSubmitting?: boolean
   selectedId?: string
   warningHeading?: string
   warningMessage?: string
-  error?: any
   onSelect?(algorithm: beachfront.Algorithm)
   onSubmit?(algorithm: beachfront.Algorithm)
 }
+type Props = StateProps & PassedProps
 
 export const AlgorithmList = (props: Props) => (
   <div className={styles.root}>
     <h2>Select Algorithm</h2>
     <ul>
-      {props.algorithms.map(algorithm => (
+      {props.algorithms.records.map(algorithm => (
         <li key={algorithm.id}>
           <Algorithm
             algorithm={algorithm}
             sceneMetadata={props.sceneMetadata}
             isSelected={props.selectedId === algorithm.id}
-            isSubmitting={props.isSubmitting}
             warningHeading={props.warningHeading}
             warningMessage={props.warningMessage}
             onSelect={props.onSelect}
             onSubmit={props.onSubmit}
-            errorElement={props.error && (
+            errorElement={props.jobs.createJobError && (
             <div className={styles.errorMessage}>
               <h4><i className="fa fa-warning"/> Algorithm failed</h4>
-              <p>{props.error.response.data}</p>
-              <pre>{props.error.stack}</pre>
+              <p>{props.jobs.createJobError.response.data}</p>
+              <pre>{props.jobs.createJobError.stack}</pre>
             </div>
           )}
           />
@@ -59,3 +59,14 @@ export const AlgorithmList = (props: Props) => (
     </ul>
   </div>
 )
+
+function mapStateToProps(state: AppState) {
+  return {
+    jobs: state.jobs,
+    algorithms: state.algorithms,
+  }
+}
+
+export default connect<StateProps, undefined, PassedProps>(
+  mapStateToProps,
+)(AlgorithmList)

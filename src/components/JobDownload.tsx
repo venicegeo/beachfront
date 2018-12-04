@@ -19,7 +19,7 @@ const styles: any = require('./JobDownload.css')
 import * as React from 'react'
 import {findDOMNode} from 'react-dom'
 import {FileDownloadLink} from './FileDownloadLink'
-import * as wrap from 'lodash/wrap'
+import wrap = require('lodash/wrap')
 import {JOB_ENDPOINT} from '../config'
 
 interface Props {
@@ -91,7 +91,7 @@ export class JobDownload extends React.Component<Props, State> {
 
   downloads = {}
 
-  constructor(props) {
+  constructor(props: Props) {
     super(props)
 
     this.state = {
@@ -246,7 +246,7 @@ export class JobDownload extends React.Component<Props, State> {
    * those components to use the values.
    */
   private setOffset(add?: any) {
-    const e = findDOMNode(this).closest('li.JobStatus-root').closest('ul') as HTMLElement
+    const e = (findDOMNode(this) as Element).closest('li.JobStatus-root').closest('ul') as HTMLElement
 
     if (add) {
       e.style.paddingTop = `${e.offsetTop}px`

@@ -14,16 +14,28 @@
  * limitations under the License.
  **/
 
-import {Promise} from 'axios'
-import {getGeoserverUrl} from './status'
+// Styles
+import 'font-awesome/css/font-awesome.css'
+import './styles/webfonts/index.css'
+import './styles/layout.css'
+import './styles/colors.css'
+import './styles/typography.css'
+import './styles/forms.css'
+import './styles/menus.css'
 
-export interface Descriptor {
-  wmsUrl?: string
-  detectionsLayerId?: string
-}
+import './polyfills'
 
-export function lookup(): Promise<Descriptor> {
-  return getGeoserverUrl().then(geoserverUrl => ({
-    wmsUrl: geoserverUrl + '/wms',
-  }))
-}
+import * as React from 'react'
+import {render} from 'react-dom'
+import {Provider} from 'react-redux'
+import Application from './components/Application'
+import store from './store'
+
+const root = document.createElement('div')
+document.body.appendChild(root)
+render(
+  <Provider store={store}>
+    <Application />
+  </Provider>,
+  root,
+)

@@ -13,67 +13,71 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
+
 const styles: any = require('./JobStatusList.css')
-const jobStatusStyles: any = require('./JobStatus.css')
 
 import * as React from 'react'
-import {JobStatus} from './JobStatus'
+import {connect} from 'react-redux'
+import JobStatus from './JobStatus'
 import * as moment from 'moment'
+import {AppState} from '../store'
+import {jobsActions} from '../actions/jobsActions'
 
-interface Props {
+type StateProps = ReturnType<typeof mapStateToProps>
+type DispatchProps = ReturnType<typeof mapDispatchToProps>
+type Props = StateProps & DispatchProps
+
+interface State {
   activeIds: string[]
-  error: any
-  jobs: beachfront.Job[]
-  selectedFeature: beachfront.Job | beachfront.Scene
-  onDismissError()
-  onSelectJob(job: beachfront.Job)
-  onForgetJob(job: beachfront.Job)
-  onNavigateToJob(loc: { pathname: string, search: string, hash: string })
 }
 
-export class JobStatusList extends React.Component<Props, void> {
+export class JobStatusList extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props)
+
+    this.state = {
+      activeIds: this.props.map.detections.map(d => d.id),
+    }
 
     this.handleToggleExpansion = this.handleToggleExpansion.bind(this)
   }
 
-  componentDidUpdate(prevProps) {
-    if (this.props.selectedFeature !== prevProps.selectedFeature) {
+  componentDidUpdate(prevProps: Props) {
+    if (this.props.map.selectedFeature !== prevProps.map.selectedFeature) {
       this.scrollToSelectedJob()
+    }
+
+    if (this.props.map.detections !== prevProps.map.detections) {
+      this.setState({ activeIds: this.props.map.detections.map(d => d.id) })
     }
   }
 
   render() {
     return (
-      <div className={`${styles.root} ${!this.props.jobs.length ? styles.isEmpty : ''}`}>
+      <div className={`${styles.root} ${!this.props.jobs.records.length ? styles.isEmpty : ''}`}>
         <header>
           <h1>Jobs</h1>
         </header>
 
         <ul>
-          {this.props.error && (
+          {this.props.jobs.fetchError && (
             <li className={styles.communicationError}>
               <h4><i className="fa fa-warning"/> Communication Error</h4>
-              <p>Cannot communicate with the server. (<code>{this.props.error.toString()}</code>)</p>
-              <button onClick={this.props.onDismissError}>Retry</button>
+              <p>Cannot communicate with the server. (<code>{this.props.jobs.fetchError.toString()}</code>)</p>
+              <button onClick={this.props.actions.jobs.fetch}>Retry</button>
             </li>
           )}
 
-          {!this.props.jobs.length ? (
+          {!this.props.jobs.records.length ? (
             <li className={styles.placeholder}>You haven't started any Jobs yet</li>
-          ) : this.props.jobs.sort((job1, job2) => {
+          ) : this.props.jobs.records.sort((job1, job2) => {
             return moment(job1.properties.created_on).isBefore(job2.properties.created_on) ? 1 : -1
           }).map(job => (
             <JobStatus
               key={job.id}
-              isActive={this.props.activeIds.includes(job.id)}
+              isActive={this.state.activeIds.includes(job.id)}
               job={job}
-              onNavigate={this.props.onNavigateToJob}
-              onForgetJob={this.props.onForgetJob}
-              onSelectJob={this.props.onSelectJob}
               onToggleExpansion={this.handleToggleExpansion}
-              selectedFeature={this.props.selectedFeature}
             />
           ))}
         </ul>
@@ -94,7 +98,7 @@ export class JobStatusList extends React.Component<Props, void> {
   }
 
   private scrollToSelectedJob() {
-    const job = this.props.selectedFeature as beachfront.Job
+    const job = this.props.map.selectedFeature as beachfront.Job
     if (job) {
       this.scrollToJob(job)
     }
@@ -118,3 +122,25 @@ export class JobStatusList extends React.Component<Props, void> {
   }
 
 }
+
+function mapStateToProps(state: AppState) {
+  return {
+    map: state.map,
+    jobs: state.jobs,
+  }
+}
+
+function mapDispatchToProps(dispatch) {
+  return {
+    actions: {
+      jobs: {
+        fetch: () => dispatch(jobsActions.fetch()),
+      },
+    },
+  }
+}
+
+export default connect<StateProps, DispatchProps>(
+  mapStateToProps,
+  mapDispatchToProps,
+)(JobStatusList)

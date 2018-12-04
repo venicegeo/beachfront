@@ -14,26 +14,26 @@
  * limitations under the License.
  **/
 
-describe('ProductLines Service', () => {
-  describe('create()', () => {
-    it('calls correct URL')
-    it('sends correct payload')
-    it('throws if required response data is missing')
-  })
-  describe('fetchJobs()', () => {
-    it('calls correct URL')
-    it('sends correct payload')
-    it('yields list of jobs')
-  })
-  describe('fetchProductLines()', () => {
-    it('calls correct URL')
-    it('sends correct payload')
-    it('yields list of product lines')
-    it('normalizes status')
-    it('normalizes geometry')
-    it('normalizes spatial filter name')
-    it('normalizes start and stop date')
-    it('normalizes algorithm name')
-    it('normalizes WMS layer ID')
-  })
-})
+// describe('ProductLines Service', () => {
+//   describe('create()', () => {
+//     it('calls correct URL')
+//     it('sends correct payload')
+//     it('throws if required response data is missing')
+//   })
+//   describe('fetchJobs()', () => {
+//     it('calls correct URL')
+//     it('sends correct payload')
+//     it('yields list of jobs')
+//   })
+//   describe('fetchProductLines()', () => {
+//     it('calls correct URL')
+//     it('sends correct payload')
+//     it('yields list of product lines')
+//     it('normalizes status')
+//     it('normalizes geometry')
+//     it('normalizes spatial filter name')
+//     it('normalizes start and stop date')
+//     it('normalizes algorithm name')
+//     it('normalizes WMS layer ID')
+//   })
+// })

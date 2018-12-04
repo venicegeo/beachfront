@@ -8,14 +8,13 @@
     "clear": "rm -rf beachfront.zip dist/ node_modules/ report/ typings/",
     "create-ssl-certs": "openssl req -newkey rsa:2048 -nodes -keyout .development_ssl_certificate.key -sha256 -x509 -days 3652 -subj /C=US/ST=Unknown/L=Unknown/O=Beachfront/OU=Development/CN=localhost -out .development_ssl_certificate.pem",
     "lint": "tslint '{src,test}/**/*.{ts,tsx}' -t verbose",
-    "postinstall": "npm run typings:install",
     "prereinstall": "npm run clear",
     "prestart": "npm run reinstall",
     "reinstall": "npm install",
     "start": "npm run watch",
-    "test": "karma start",
-    "test:ci": "NODE_ENV=ci karma start --single-run --browsers Chrome,Firefox --reporters progress,coverage,junit",
-    "test:once": "karma start --single-run",
+    "test": "jest --silent",
+    "test:coverage": "jest --silent --coverage",
+    "test:watch": "jest --silent --watch",
     "typings:install": "typings install",
     "watch": "webpack-dev-server --inline --colors --history-api-fallback --https --cert .development_ssl_certificate.pem --key .development_ssl_certificate.key --host 0.0.0.0"
   },
@@ -24,37 +23,71 @@
   "engines": {
     "node": "^5.7.0"
   },
+  "jest": {
+    "preset": "ts-jest",
+    "setupFiles": [
+      "jest-canvas-mock",
+      "jest-localstorage-mock"
+    ],
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "test/config.test.ts",
+      "test/api/*",
+      "/test/components/*"
+    ],
+    "moduleNameMapper": {
+      "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/test/mocks/fileMock.js",
+      "\\.(css|less|scss|sass)$": "identity-obj-proxy"
+    },
+    "moduleFileExtensions": [
+      "js",
+      "jsx",
+      "ts",
+      "tsx"
+    ],
+    "transform": {
+      "^.+\\.jsx$": "babel-jest",
+      "^.+\\.js$": "babel-jest"
+    },
+    "transformIgnorePatterns": [
+      "node_modules/(?!(ol))"
+    ]
+  },
   "devDependencies": {
-    "chai": "3.5.0",
+    "@babel/preset-env": "7.1.5",
+    "@types/enzyme": "3.1.14",
+    "@types/geojson": "7946.0.4",
+    "@types/jest": "23.3.9",
+    "@types/lodash": "4.14.117",
+    "@types/react": "16.4.18",
+    "@types/react-dom": "16.0.9",
+    "@types/react-redux": "6.0.9",
+    "@types/sinon": "5.0.7",
+    "axios-mock-adapter": "1.15.0",
+    "babel-plugin-transform-es2015-modules-commonjs": "6.26.2",
     "copy-webpack-plugin": "3.0.1",
     "css-loader": "0.23.1",
     "detect-browser": "2.0.0",
     "enzyme": "2.4.1",
     "file-loader": "0.8.5",
     "html-webpack-plugin": "2.30.1",
-    "istanbul-instrumenter-loader": "1.1.0",
-    "karma": "1.1.2",
-    "karma-chrome-launcher": "2.0.0",
-    "karma-coverage": "1.1.1",
-    "karma-firefox-launcher": "1.0.0",
-    "karma-junit-reporter": "1.1.0",
-    "karma-mocha": "1.1.1",
-    "karma-mocha-reporter": "2.0.5",
-    "karma-sourcemap-loader": "0.3.7",
-    "karma-webpack": "2.0.9",
-    "mocha": "3.2.0",
+    "identity-obj-proxy": "3.0.0",
+    "jest": "23.6.0",
+    "jest-canvas-mock": "1.1.0",
+    "jest-cli": "23.6.0",
+    "jest-localstorage-mock": "2.3.0",
     "postcss-cssnext": "2.9.0",
     "postcss-import": "8.0.2",
     "postcss-loader": "0.9.1",
-    "react-addons-test-utils": "15.2.1",
+    "redux-mock-store": "1.5.3",
     "rimraf": "2.5.4",
-    "sinon": "2.0.0-pre",
+    "sinon": "7.1.1",
     "style-loader": "0.13.1",
+    "ts-jest": "23.10.4",
     "ts-loader": "0.8.2",
     "tslint": "3.14.0",
     "tslint-loader": "2.1.5",
-    "typescript": "2.1.4",
-    "typings": "2.0.0",
+    "typescript": "3.1.4",
     "webpack": "3.8.1",
     "webpack-dev-server": "2.9.2"
   },
@@ -65,8 +98,12 @@
     "lodash": "4.17.4",
     "moment": "2.20.1",
     "ol": "4.1.1",
-    "react": "15.2.1",
-    "react-dom": "15.2.1",
-    "react-user-tour": "3.0.0"
+    "react": "16.5.0",
+    "react-dom": "16.5.0",
+    "react-redux": "5.0.7",
+    "react-user-tour": "3.0.0",
+    "redux": "3.6.0",
+    "redux-logger": "3.0.6",
+    "redux-thunk": "2.1.0"
   }
 }

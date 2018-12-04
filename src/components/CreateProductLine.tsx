@@ -17,32 +17,26 @@
 const styles = require('./CreateProductLine.css')
 
 import * as React from 'react'
+import {connect} from 'react-redux'
 import * as moment from 'moment'
-import {AlgorithmList} from './AlgorithmList'
-import {CatalogSearchCriteria} from './CatalogSearchCriteria'
+import AlgorithmList from './AlgorithmList'
+import CatalogSearchCriteria from './CatalogSearchCriteria'
 import {NewProductLineDetails} from './NewProductLineDetails'
-import {create} from '../api/productLines'
 import {
   SOURCE_DEFAULT,
 } from '../constants'
+import {AppState} from '../store'
+import {ProductLinesCreateArgs, productLinesActions} from '../actions/productLinesActions'
 
-interface Props {
-  algorithms:        beachfront.Algorithm[]
-  bbox:              [number, number, number, number]
-  catalogApiKey:     string
-  enabledPlatforms?: string[]
-
-  onCatalogApiKeyChange(apiKey: string)
-  onClearBbox()
-  onProductLineCreated(productLine: beachfront.ProductLine)
-}
+type StateProps = ReturnType<typeof mapStateToProps>
+type DispatchProps = ReturnType<typeof mapDispatchToProps>
+type Props = StateProps & DispatchProps
 
 interface State {
   algorithm?:              beachfront.Algorithm
   cloudCover?:             number
   dateStart?:              string
   dateStop?:               string
-  error?:                  any
   isCreating?:             boolean
   name?:                   string
   shouldAutogenerateName?: boolean
@@ -50,8 +44,8 @@ interface State {
 }
 
 export class CreateProductLine extends React.Component<Props, State> {
-  constructor() {
-    super()
+  constructor(props: Props) {
+    super(props)
     this.state = {
       algorithm:  null,
       cloudCover: 10,
@@ -74,24 +68,14 @@ export class CreateProductLine extends React.Component<Props, State> {
           <h1>Create Product Line</h1>
         </header>
         <ul>
-          {!this.props.bbox ? (
+          {!this.props.map.bbox ? (
             <li className={styles.placeholder}>
               <h3>Draw bounding box to set AOI</h3>
             </li>
           ) : (
             <li>
               <h2>Source Imagery</h2>
-              <CatalogSearchCriteria
-                apiKey={this.props.catalogApiKey}
-                bbox={this.props.bbox}
-                cloudCover={this.state.cloudCover}
-                enabledPlatforms={this.props.enabledPlatforms}
-                source={this.state.source}
-                onApiKeyChange={this.props.onCatalogApiKeyChange}
-                onClearBbox={this.props.onClearBbox}
-                onCloudCoverChange={cloudCover => this.setState({ cloudCover })}
-                onSourceChange={this.handleSourceChange}
-              />
+              <CatalogSearchCriteria />
               <NewProductLineDetails
                 name={this.state.name}
                 dateStart={this.state.dateStart}
@@ -100,7 +84,6 @@ export class CreateProductLine extends React.Component<Props, State> {
                 onNameChange={name => this.setState({ name, shouldAutogenerateName: !name })}
               />
               <AlgorithmList
-                algorithms={this.props.algorithms}
                 sceneMetadata={{
                   cloudCover: this.state.cloudCover,
                 } as any}
@@ -128,7 +111,7 @@ export class CreateProductLine extends React.Component<Props, State> {
   }
 
   private get canSubmit() {
-    return this.props.bbox
+    return this.props.map.bbox
         && this.state.algorithm
         && this.state.dateStart
         && this.state.name
@@ -149,20 +132,15 @@ export class CreateProductLine extends React.Component<Props, State> {
   }
 
   private handleSubmit() {
-    create({
-      algorithmId:   this.state.algorithm.id,
-      bbox:          this.props.bbox,
-      category:      null,
-      dateStart:     this.state.dateStart,
-      dateStop:      this.state.dateStop,
+    this.props.actions.productLines.create({
+      algorithmId: this.state.algorithm.id,
+      bbox: this.props.map.bbox,
+      category: null,
+      dateStart: this.state.dateStart,
+      dateStop: this.state.dateStop,
       maxCloudCover: this.state.cloudCover,
-      name:          this.state.name,
+      name: this.state.name,
     })
-      .then(this.props.onProductLineCreated)
-      .catch(error => {
-        this.setState({ error })
-        throw error
-      })
   }
 }
 
@@ -173,3 +151,25 @@ export class CreateProductLine extends React.Component<Props, State> {
 function generateName(source: string, algorithm: beachfront.Algorithm) {
   return algorithm ? `${source}_${algorithm.name}`.toUpperCase() : ''
 }
+
+function mapStateToProps(state: AppState) {
+  return {
+    catalog: state.catalog,
+    map: state.map,
+  }
+}
+
+function mapDispatchToProps(dispatch) {
+  return {
+    actions: {
+      productLines: {
+        create: (args: ProductLinesCreateArgs) => dispatch(productLinesActions.create(args)),
+      },
+    },
+  }
+}
+
+export default connect<StateProps, DispatchProps>(
+  mapStateToProps,
+  mapDispatchToProps,
+)(CreateProductLine)

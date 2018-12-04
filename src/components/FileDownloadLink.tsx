@@ -46,7 +46,7 @@ export class FileDownloadLink extends React.Component<Props, State> {
   refs: any
   private cancel: any
 
-  constructor(props) {
+  constructor(props: Props) {
     super(props)
 
     this.state = {

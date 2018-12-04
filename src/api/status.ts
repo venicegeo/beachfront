@@ -26,14 +26,6 @@ export function getApiStatus(): Promise<ApiStatus> {
         })
 }
 
-export function getEnabledPlatforms() {
-    return getApiStatus().then(status => status['enabled-platforms'])
-}
-
-export function getGeoserverUrl() {
-    return getApiStatus().then(status => status.geoserver)
-}
-
 export interface ApiStatus {
     geoserver: string
     'geoserver-upstream': string

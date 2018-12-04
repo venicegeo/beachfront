@@ -17,18 +17,20 @@
 const styles: any = require('./ImagerySearchResults.css')
 
 import * as React from 'react'
+import {connect} from 'react-redux'
 import {paginate} from '../utils/pagination'
+import {AppState} from '../store'
 
-interface Props {
+type StateProps = ReturnType<typeof mapStateToProps>
+type PassedProps = {
   className?: string
-  imagery: beachfront.ImageryCatalogPage
-  isSearching: boolean
-  onPageChange(page: {count: number, startIndex: number})
+  onPageChange(args: {startIndex: number, count: number})
 }
+type Props = StateProps & PassedProps
 
-export class ImagerySearchResults extends React.Component<Props, void> {
-  constructor() {
-    super()
+export class ImagerySearchResults extends React.Component<Props> {
+  constructor(props: Props) {
+    super(props)
     this.emitPageBack    = this.emitPageBack.bind(this)
     this.emitPageForward = this.emitPageForward.bind(this)
   }
@@ -36,13 +38,13 @@ export class ImagerySearchResults extends React.Component<Props, void> {
   render() {
     return (
       <div className={`${styles.root} ${this.props.className || ''}`}>
-        {this.props.imagery && this.renderContent(this.props.imagery)}
+        {this.props.catalog.searchResults && this.renderContent(this.props.catalog.searchResults)}
       </div>
     )
   }
 
   private renderContent(imagery) {
-    if (this.props.isSearching) {
+    if (this.props.catalog.isSearching) {
       return <div className={styles.searching}>
         <span>Searching for Imagery&hellip;</span>
       </div>
@@ -72,7 +74,7 @@ export class ImagerySearchResults extends React.Component<Props, void> {
   }
 
   private emitPageBack() {
-    const {count, startIndex} = this.props.imagery
+    const {count, startIndex} = this.props.catalog.searchResults
     this.props.onPageChange({
       count,
       startIndex: startIndex - count,
@@ -80,10 +82,20 @@ export class ImagerySearchResults extends React.Component<Props, void> {
   }
 
   private emitPageForward() {
-    const {count, startIndex} = this.props.imagery
+    const {count, startIndex} = this.props.catalog.searchResults
     this.props.onPageChange({
       count,
       startIndex: startIndex + count,
     })
   }
 }
+
+function mapStateToProps(state: AppState) {
+  return {
+    catalog: state.catalog,
+  }
+}
+
+export default connect<StateProps, undefined, PassedProps>(
+  mapStateToProps,
+)(ImagerySearchResults)

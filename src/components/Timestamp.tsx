@@ -31,10 +31,10 @@ interface State {
 }
 
 export class Timestamp extends React.Component<Props, State> {
-  private _timer: number
+  private _timer: any
 
-  constructor() {
-    super()
+  constructor(props: Props) {
+    super(props)
     this.state = {relative: true}
     this.handleClick = this.handleClick.bind(this)
   }

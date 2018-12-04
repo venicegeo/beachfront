@@ -9,6 +9,7 @@
     "sinon": "registry:dt/sinon#1.16.1+20161208163514"
   },
   "dependencies": {
-    "lodash": "registry:npm/lodash#4.0.0+20161015015725"
+    "lodash": "registry:npm/lodash#4.0.0+20161015015725",
+    "react-redux": "registry:npm/react-redux#4.4.0+20160614222153"
   }
 }
