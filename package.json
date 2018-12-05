@@ -5,7 +5,7 @@
   "scripts": {
     "build": "webpack",
     "clean": "rimraf report dist beachfront.zip",
-    "clear": "rm -rf beachfront.zip dist/ node_modules/ report/ typings/",
+    "clear": "rm -rf beachfront.zip dist/ node_modules/ report/",
     "create-ssl-certs": "openssl req -newkey rsa:2048 -nodes -keyout .development_ssl_certificate.key -sha256 -x509 -days 3652 -subj /C=US/ST=Unknown/L=Unknown/O=Beachfront/OU=Development/CN=localhost -out .development_ssl_certificate.pem",
     "lint": "tslint '{src,test}/**/*.{ts,tsx}' -t verbose",
     "prereinstall": "npm run clear",
@@ -15,7 +15,6 @@
     "test": "jest --silent",
     "test:coverage": "jest --silent --coverage",
     "test:watch": "jest --silent --watch",
-    "typings:install": "typings install",
     "watch": "webpack-dev-server --inline --colors --history-api-fallback --https --cert .development_ssl_certificate.pem --key .development_ssl_certificate.key --host 0.0.0.0"
   },
   "author": "RadiantBlue Technologies",
