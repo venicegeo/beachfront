@@ -53,7 +53,6 @@ node {
         sh """
           npm config list
           npm install
-          ./node_modules/.bin/typings install
         """
       }
     }
