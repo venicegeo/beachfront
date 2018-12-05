@@ -52,7 +52,7 @@ export const apiStatusActions = {
       } catch (error) {
         dispatch({
           type: apiStatusTypes.API_STATUS_FETCH_ERROR,
-          error: (error.response) ? error.response.data : error,
+          error,
         })
       }
     }

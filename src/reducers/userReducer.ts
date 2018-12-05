@@ -22,7 +22,6 @@ export interface UserState {
   isSessionExpired: boolean
   isSessionLoggedOut: boolean
   catalogApiKey: string
-  errors: any[]
 }
 
 export const userInitialState: UserState = {
@@ -30,7 +29,6 @@ export const userInitialState: UserState = {
   isSessionExpired: false,
   isSessionLoggedOut: false,
   catalogApiKey: '',
-  errors: [],
 }
 
 export function userReducer(state = userInitialState, action: any): UserState {

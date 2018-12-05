@@ -77,17 +77,15 @@ describe('productLinesActions', () => {
     })
 
     test('request error', async () => {
-      mockAdapter.onGet(PRODUCTLINE_ENDPOINT).reply(400, 'error')
+      mockAdapter.onGet(PRODUCTLINE_ENDPOINT).reply(400)
 
       await store.dispatch(productLinesActions.fetch())
 
-      expect(store.getActions()).toEqual([
-        { type: productLinesTypes.PRODUCT_LINES_FETCHING },
-        {
-          type: productLinesTypes.PRODUCT_LINES_FETCH_ERROR,
-          error: 'error',
-        },
-      ])
+      const actions = store.getActions()
+      expect(actions.length).toEqual(2)
+      expect(actions[0]).toEqual({ type: productLinesTypes.PRODUCT_LINES_FETCHING })
+      expect(actions[1].type).toEqual(productLinesTypes.PRODUCT_LINES_FETCH_ERROR)
+      expect(actions[1].error).toBeDefined()
     })
 
     test('invalid response data', async () => {
@@ -135,17 +133,14 @@ describe('productLinesActions', () => {
     test('request error', async () => {
       const productLineId = '1'
       const sinceDate = '2'
-      mockAdapter.onGet(getJobsEndpoint(productLineId, sinceDate)).reply(400, 'error')
+      mockAdapter.onGet(getJobsEndpoint(productLineId, sinceDate)).reply(400,)
 
       await store.dispatch(productLinesActions.fetchJobs({ productLineId, sinceDate }))
 
-      expect(store.getActions()).toEqual([
-        { type: productLinesTypes.PRODUCT_LINES_FETCHING_JOBS },
-        {
-          type: productLinesTypes.PRODUCT_LINES_FETCH_JOBS_ERROR,
-          error: 'error',
-        },
-      ])
+      const actions = store.getActions()
+      expect(actions[0]).toEqual({ type: productLinesTypes.PRODUCT_LINES_FETCHING_JOBS })
+      expect(actions[1].type).toEqual(productLinesTypes.PRODUCT_LINES_FETCH_JOBS_ERROR)
+      expect(actions[1].error).toBeDefined()
     })
 
     test('invalid response data', async () => {
@@ -208,19 +203,16 @@ describe('productLinesActions', () => {
     })
 
     test('request error', async () => {
-      mockAdapter.onPost(PRODUCTLINE_ENDPOINT).reply(400, 'error')
+      mockAdapter.onPost(PRODUCTLINE_ENDPOINT).reply(400)
 
       await store.dispatch(productLinesActions.create({
         bbox: [1, 2, 3, 4],
       } as any))
 
-      expect(store.getActions()).toEqual([
-        { type: productLinesTypes.PRODUCT_LINES_CREATING_PRODUCT_LINE },
-        {
-          type: productLinesTypes.PRODUCT_LINES_CREATE_PRODUCT_LINE_ERROR,
-          error: 'error',
-        },
-      ])
+      const actions = store.getActions()
+      expect(actions[0]).toEqual({ type: productLinesTypes.PRODUCT_LINES_CREATING_PRODUCT_LINE })
+      expect(actions[1].type).toEqual(productLinesTypes.PRODUCT_LINES_CREATE_PRODUCT_LINE_ERROR)
+      expect(actions[1].error).toBeDefined()
     })
 
     test('invalid response data', async () => {

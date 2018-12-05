@@ -190,17 +190,15 @@ describe('catalogActions', () => {
       })
 
       const state = store.getState()
-      mockAdapter.onGet(getSearchUrl(state)).reply(400, 'error')
+      mockAdapter.onGet(getSearchUrl(state)).reply(400)
 
       await store.dispatch(catalogActions.search())
 
-      expect(store.getActions()).toEqual([
-        { type: catalogTypes.CATALOG_SEARCHING },
-        {
-          type: catalogTypes.CATALOG_SEARCH_ERROR,
-          error: 'error',
-        },
-      ])
+      const actions = store.getActions()
+      expect(actions.length).toEqual(2)
+      expect(actions[0]).toEqual({ type: catalogTypes.CATALOG_SEARCHING })
+      expect(actions[1].type).toEqual(catalogTypes.CATALOG_SEARCH_ERROR)
+      expect(actions[1].error).toBeDefined()
     })
 
     test('invalid response data', async () => {
