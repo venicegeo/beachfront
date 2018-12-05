@@ -119,7 +119,7 @@ export const catalogActions = {
       } catch (error) {
         dispatch({
           type: catalogTypes.CATALOG_SEARCH_ERROR,
-          error: (error.response) ? error.response.data : error,
+          error,
         })
       }
     }

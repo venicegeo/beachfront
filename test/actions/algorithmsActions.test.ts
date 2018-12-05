@@ -95,17 +95,15 @@ describe('algorithmsActions', () => {
     })
 
     test('request error', async () => {
-      mockAdapter.onGet(ALGORITHM_ENDPOINT).reply(400, 'error')
+      mockAdapter.onGet(ALGORITHM_ENDPOINT).reply(400)
 
       await store.dispatch(algorithmsActions.fetch())
 
-      expect(store.getActions()).toEqual([
-        { type: algorithmsTypes.ALGORITHMS_FETCHING },
-        {
-          type: algorithmsTypes.ALGORITHMS_FETCH_ERROR,
-          error: 'error',
-        },
-      ])
+      const actions = store.getActions()
+      expect(actions.length).toEqual(2)
+      expect(actions[0]).toEqual({ type: algorithmsTypes.ALGORITHMS_FETCHING })
+      expect(actions[1].type).toEqual(algorithmsTypes.ALGORITHMS_FETCH_ERROR)
+      expect(actions[1].error).toBeDefined()
     })
 
     test('non-request error', async () => {

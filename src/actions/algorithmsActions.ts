@@ -47,7 +47,7 @@ export const algorithmsActions = {
       } catch (error) {
         dispatch({
           type: algorithmsTypes.ALGORITHMS_FETCH_ERROR,
-          error: (error.response) ? error.response.data : error,
+          error,
         })
       }
     }

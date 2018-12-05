@@ -77,17 +77,15 @@ describe('apiStatusActions', () => {
     })
 
     test('request error', async () => {
-      mockAdapter.onGet('/').reply(400, 'error')
+      mockAdapter.onGet('/').reply(400)
 
       await store.dispatch(apiStatusActions.fetch())
 
-      expect(store.getActions()).toEqual([
-        { type: apiStatusTypes.API_STATUS_FETCHING },
-        {
-          type: apiStatusTypes.API_STATUS_FETCH_ERROR,
-          error: 'error',
-        },
-      ])
+      const actions = store.getActions()
+      expect(actions.length).toEqual(2)
+      expect(actions[0]).toEqual({ type: apiStatusTypes.API_STATUS_FETCHING })
+      expect(actions[1].type).toEqual(apiStatusTypes.API_STATUS_FETCH_ERROR)
+      expect(actions[1].error).toBeDefined()
     })
 
     test('invalid response data', async () => {

@@ -26,35 +26,6 @@
   margin: 0 0.5em;
 }
 
-.errorMessage {
-  background-color: var(--COLOR_RED);
-  box-shadow: inset 0 0 2px 2px rgba(0, 0, 0, 0.2);
-  color: white;
-  font-size: 14px;
-}
-
-.errorMessage h4 {
-  color: inherit;
-  font-size: 1.3em;
-  padding: 0.5em 1em;
-}
-
-.errorMessage p {
-  font-weight: 500;
-  line-height: 1.4;
-  margin: 0;
-  padding: 0.5em 1em;
-}
-
-.errorMessage pre {
-  background-color: rgba(0, 0, 0, 0.2);
-  font-size: 12px;
-  margin: 0.5em 0 0;
-  overflow: hidden;
-  padding: 1em;
-  text-align: left;
-}
-
 .loadingMask {
   position: absolute;
   top: 0;

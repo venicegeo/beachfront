@@ -77,17 +77,15 @@ describe('jobsActions', () => {
     })
 
     test('request error', async () => {
-      mockAdapter.onGet(JOB_ENDPOINT).reply(400, 'error')
+      mockAdapter.onGet(JOB_ENDPOINT).reply(400)
 
       await store.dispatch(jobsActions.fetch())
 
-      expect(store.getActions()).toEqual([
-        { type: jobsTypes.JOBS_FETCHING },
-        {
-          type: jobsTypes.JOBS_FETCH_ERROR,
-          error: 'error',
-        },
-      ])
+      const actions = store.getActions()
+      expect(actions.length).toEqual(2)
+      expect(actions[0]).toEqual({ type: jobsTypes.JOBS_FETCHING })
+      expect(actions[1].type).toEqual(jobsTypes.JOBS_FETCH_ERROR)
+      expect(actions[1].error).toBeDefined()
     })
 
     test('invalid response data', async () => {
@@ -128,17 +126,15 @@ describe('jobsActions', () => {
 
     test('request error', async () => {
       const mockJobId = 'a'
-      mockAdapter.onGet(`${JOB_ENDPOINT}/${mockJobId}`).reply(400, 'error')
+      mockAdapter.onGet(`${JOB_ENDPOINT}/${mockJobId}`).reply(400)
 
       await store.dispatch(jobsActions.fetchOne(mockJobId))
 
-      expect(store.getActions()).toEqual([
-        { type: jobsTypes.JOBS_FETCHING_ONE },
-        {
-          type: jobsTypes.JOBS_FETCH_ONE_ERROR,
-          error: 'error',
-        },
-      ])
+      const actions = store.getActions()
+      expect(actions.length).toEqual(2)
+      expect(actions[0]).toEqual({ type: jobsTypes.JOBS_FETCHING_ONE })
+      expect(actions[1].type).toEqual(jobsTypes.JOBS_FETCH_ONE_ERROR)
+      expect(actions[1].error).toBeDefined()
     })
 
     test('invalid response data', async () => {
@@ -193,7 +189,7 @@ describe('jobsActions', () => {
     })
 
     test('request error', async () => {
-      mockAdapter.onPost(JOB_ENDPOINT).reply(400, 'error')
+      mockAdapter.onPost(JOB_ENDPOINT).reply(400)
 
       await store.dispatch(jobsActions.createJob({
         algorithmId: 'algorithmId',
@@ -203,13 +199,11 @@ describe('jobsActions', () => {
         sceneId: 'sceneId',
       }))
 
-      expect(store.getActions()).toEqual([
-        { type: jobsTypes.JOBS_CREATING_JOB },
-        {
-          type: jobsTypes.JOBS_CREATE_JOB_ERROR,
-          error: 'error',
-        },
-      ])
+      const actions = store.getActions()
+      expect(actions.length).toEqual(2)
+      expect(actions[0]).toEqual({ type: jobsTypes.JOBS_CREATING_JOB })
+      expect(actions[1].type).toEqual(jobsTypes.JOBS_CREATE_JOB_ERROR)
+      expect(actions[1].error).toBeDefined()
     })
 
     test('invalid response data', async () => {
@@ -263,26 +257,24 @@ describe('jobsActions', () => {
 
     test('request error', async () => {
       const mockJob = { id: 'a' }
-      mockAdapter.onDelete(`${JOB_ENDPOINT}/${mockJob.id}`).reply(400, 'error')
+      mockAdapter.onDelete(`${JOB_ENDPOINT}/${mockJob.id}`).reply(400)
 
       await store.dispatch(jobsActions.deleteJob(mockJob as any))
 
-      expect(store.getActions()).toEqual([
-        {
-          type: jobsTypes.JOBS_DELETING_JOB,
-          deletedJob: mockJob,
-        },
-        {
-          type: jobsTypes.JOBS_DELETE_JOB_ERROR,
-          error: 'error',
-        },
-      ])
+      const actions = store.getActions()
+      expect(actions[0]).toEqual({
+        type: jobsTypes.JOBS_DELETING_JOB,
+        deletedJob: mockJob,
+      })
+      expect(actions[1].type).toEqual(jobsTypes.JOBS_DELETE_JOB_ERROR)
+      expect(actions[1].error).toBeDefined()
     })
 
     test('non-request error', async () => {
       await store.dispatch(jobsActions.deleteJob(null))
 
       const actions = store.getActions()
+      expect(actions.length).toEqual(2)
       expect(actions[0]).toEqual({
         type: jobsTypes.JOBS_DELETING_JOB,
         deletedJob: null,
