@@ -75,7 +75,7 @@ export const mapActions = {
     }
   },
 
-  updateBbox(bbox: Extent) {
+  updateBbox(bbox: Extent | null) {
     return {
       type: mapTypes.MAP_BBOX_UPDATED,
       bbox,
@@ -215,7 +215,7 @@ export const mapActions = {
       Wrap map center to keep it within the -180/180 range. Otherwise the map may scroll awkardly on initial load to get
       back to a far away location. Do the same for the bbox so that it's in the same starting location as the map.
      */
-      let mapView = null
+      let mapView: MapView | null = null
       if (state.map.view) {
         mapView = {...state.map.view}
         if (mapView.center) {
@@ -223,9 +223,9 @@ export const mapActions = {
         }
       }
 
-      let bbox = null
+      let bbox: Extent | null = null
       if (state.map.bbox) {
-        bbox = [...state.map.bbox]
+        bbox = [...state.map.bbox] as Extent
         const bboxWidth = bbox[2] - bbox[0]
         bbox[0] = wrap(bbox[0], -180, 180)
         bbox[2] = bbox[0] + bboxWidth
@@ -242,13 +242,13 @@ export const mapActions = {
     const deserialized: any = {}
 
     try {
-      deserialized.bbox = JSON.parse(sessionStorage.getItem('bbox'))
+      deserialized.bbox = JSON.parse(sessionStorage.getItem('bbox') || 'null')
     } catch (error) {
       console.warn('Failed to deserialize "bbox"')
     }
 
     try {
-      deserialized.view = JSON.parse(sessionStorage.getItem('mapView'))
+      deserialized.view = JSON.parse(sessionStorage.getItem('mapView') || 'null')
     } catch (error) {
       console.warn('Failed to deserialize "mapView"')
     }

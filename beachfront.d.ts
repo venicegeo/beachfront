@@ -99,25 +99,29 @@ declare namespace beachfront {
 
 // Interop: Webpack
 
-interface BuildEnvironment {
-  NODE_ENV: string
-  API_ROOT: string
-  CLASSIFICATION_BANNER_BACKGROUND: string
-  CLASSIFICATION_BANNER_FOREGROUND: string
-  CLASSIFICATION_BANNER_TEXT: string
-  CONSENT_BANNER_TEXT: string
-  OSM_BASE_URL: string
-  PLANET_BASE_URL: string
-  USER_GUIDE_URL: string
-  GEOSERVER_WORKSPACE_NAME: string
-  GEOSERVER_LAYERGROUP_NAME: string
+// @ts-ignore
+declare const process: any
+
+// @ts-ignore
+declare const require: any
+
+declare namespace NodeJS {
+  interface ProcessEnv {
+    NODE_ENV: string
+    API_ROOT: string
+    CLASSIFICATION_BANNER_BACKGROUND: string
+    CLASSIFICATION_BANNER_FOREGROUND: string
+    CLASSIFICATION_BANNER_TEXT: string
+    CONSENT_BANNER_TEXT: string
+    OSM_BASE_URL: string
+    PLANET_BASE_URL: string
+    USER_GUIDE_URL: string
+    GEOSERVER_WORKSPACE_NAME: string
+    GEOSERVER_LAYERGROUP_NAME: string
+  }
 }
 
-declare const process: {
-  env: BuildEnvironment,
-}
-
-declare const require: {
+interface NodeRequire {
   (path: string)
   context(path: string, recursive: boolean, pattern?: RegExp): {
     keys(): string[]

@@ -41,7 +41,7 @@ export const Algorithm = (props: Props) => (
     props.isSelected ? styles.isSelected : '',
     props.onSelect ? styles.isSelectable : '',
   ].join(' ')}>
-    <section className={styles.header} onClick={props.onSelect && (() => !props.isSelected && props.onSelect(props.algorithm))}>
+    <section className={styles.header} onClick={props.onSelect && (() => !props.isSelected && props.onSelect && props.onSelect(props.algorithm))}>
       {props.onSelect && (
         <span className={styles.selectionIndicator}>
           <input
@@ -74,7 +74,9 @@ export const Algorithm = (props: Props) => (
           <button
             className={styles.startButton}
             disabled={props.jobs.isCreatingJob}
-            onClick={() => props.onSubmit(props.algorithm)}
+            onClick={() => {
+              return props.onSubmit && props.onSubmit(props.algorithm)
+            }}
             >
             {props.jobs.isCreatingJob ? 'Starting' : 'Run Algorithm'}
           </button>

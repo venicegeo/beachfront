@@ -29,7 +29,7 @@ import {SearchControl} from '../utils/openlayers.SearchControl'
 import {MeasureControl} from '../utils/openlayers.MeasureControl'
 import {ScaleControl} from '../utils/openlayers.ScaleControl'
 import {BasemapSelect} from './BasemapSelect'
-import {FeatureDetails} from './FeatureDetails'
+import FeatureDetails from './FeatureDetails'
 import {LoadingAnimation} from './LoadingAnimation'
 import ImagerySearchResults from './ImagerySearchResults'
 import {normalizeSceneId} from './SceneFeatureDetails'
@@ -106,12 +106,12 @@ type PassedProps = {
 type Props = StateProps & DispatchProps & PassedProps
 
 interface State {
-  basemapIndex?: number
-  isMeasuring?: boolean
-  loadingRefCount?: number
-  tileLoadError?: boolean
-  selectedFeatureHalfWrapIndex?: number
-  bboxHalfWrapIndex?: number
+  basemapIndex: number
+  isMeasuring: boolean
+  loadingRefCount: number
+  tileLoadError: boolean
+  selectedFeatureHalfWrapIndex: number
+  bboxHalfWrapIndex: number
 }
 
 export interface MapView {
@@ -129,7 +129,7 @@ export class PrimaryMap extends React.Component<Props, State> {
   private detectionsLayers: {[key: string]: ol.Tile}
   private drawLayer: ol.VectorLayer
   private featureDetailsOverlay: ol.Overlay
-  private featureId?: number | string
+  private featureId: number | string | null
   private frameLayer: ol.VectorLayer
   private frameFillLayer: ol.VectorLayer
   private pinLayer: ol.VectorLayer
@@ -146,7 +146,9 @@ export class PrimaryMap extends React.Component<Props, State> {
     super(props)
     this.state = {
       basemapIndex: 0,
+      isMeasuring: false,
       loadingRefCount: 0,
+      tileLoadError: false,
       selectedFeatureHalfWrapIndex: 0,
       bboxHalfWrapIndex: 0,
     }
@@ -275,7 +277,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     }
 
     if ((!previousProps.map.view) ||
-      (previousProps.map.view.zoom !== this.props.map.view.zoom && this.props.map.view) ||
+      (this.props.map.view && previousProps.map.view.zoom !== this.props.map.view.zoom) ||
       (previousProps.map.selectedFeature !== this.props.map.selectedFeature) ||
       (previousProps.map.frames !== this.props.map.frames)) {
       this.updateStyles()
@@ -303,7 +305,6 @@ export class PrimaryMap extends React.Component<Props, State> {
         />
         <FeatureDetails
           ref="featureDetails"
-          feature={this.props.map.selectedFeature}
         />
         <ImagerySearchResults
           ref="imageSearchResults"
@@ -631,7 +632,7 @@ export class PrimaryMap extends React.Component<Props, State> {
         constrainResolution: false,
         duration,
       })
-    } else {
+    } else if (center) {
       view.animate({
         center: view.constrainCenter(ol.proj.transform(center, WGS84, WEB_MERCATOR)),
         zoom,
@@ -882,6 +883,8 @@ export class PrimaryMap extends React.Component<Props, State> {
                 textBaseline: 'middle',
               }),
             })
+          default:
+            return new ol.Style()
         }
       })
     })
@@ -909,7 +912,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     const reader = new ol.GeoJSON()
     const source = this.imageryLayer.getSource()
 
-    source.setAttributions(undefined)
+    source.setAttributions(undefined as any)
     source.clear()
 
     if (this.props.route.pathname !== '/create-job') {
@@ -930,7 +933,7 @@ export class PrimaryMap extends React.Component<Props, State> {
   }
 
   private renderImagerySearchResultsOverlay({ autoPan = false } = {}) {
-    this.imageSearchResultsOverlay.setPosition(undefined)
+    this.imageSearchResultsOverlay.setPosition(undefined as any)
 
     // HACK HACK HACK HACK HACK HACK HACK HACK
     let bbox = deserializeBbox(this.props.map.bbox)
@@ -984,7 +987,8 @@ export class PrimaryMap extends React.Component<Props, State> {
   }
 
   private renderSelectionPreview() {
-    const previewables = this.toPreviewable([this.props.map.selectedFeature].filter(Boolean))
+    const features = (this.props.map.selectedFeature) ? [this.props.map.selectedFeature] : []
+    const previewables = this.toPreviewable(features)
 
     // Remove currently rendered selection previews.
     Object.keys(this.previewLayers).forEach(imageId => {
@@ -1030,10 +1034,10 @@ export class PrimaryMap extends React.Component<Props, State> {
     })
   }
 
-  private toPreviewable(features: Array<GeoJSON.Feature<any>>) {
+  private toPreviewable(features: GeoJSON.Feature<any>[]) {
     return features.map(f => {
       return {
-        sceneId: f.properties.type === TYPE_JOB ? f.properties.scene_id : f.id,
+        sceneId: (f.properties && f.properties.type === TYPE_JOB) ? f.properties.scene_id : f.id,
         extent: featureToExtent(f),
         extentWrapped: featureToExtentWrapped(this.map, f),
       }
@@ -1215,7 +1219,7 @@ function generateBboxDrawInteraction(drawLayer) {
     type: 'LineString',
     geometryFunction(coordinates: any, geometry: ol.Polygon) {
       if (!geometry) {
-        geometry = new ol.Polygon(null)
+        geometry = new ol.Polygon(null as any)
       }
       const [[x1, y1], [x2, y2]] = coordinates
       geometry.setCoordinates([[[x1, y1], [x1, y2], [x2, y2], [x2, y1], [x1, y1]]])
@@ -1463,7 +1467,7 @@ function mapDispatchToProps(dispatch) {
     actions: {
       map: {
         initialized: (map: ol.Map, collections: any) => dispatch(mapActions.initialized(map, collections)),
-        updateBbox: (bbox: Extent) => dispatch(mapActions.updateBbox(bbox)),
+        updateBbox: (bbox: Extent | null) => dispatch(mapActions.updateBbox(bbox)),
         updateView: (view: MapView) => dispatch(mapActions.updateView(view)),
         setSelectedFeature: (feature: GeoJSON.Feature<any> | null) => dispatch(mapActions.setSelectedFeature(feature)),
       },

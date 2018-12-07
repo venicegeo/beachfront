@@ -145,7 +145,7 @@ class Coordinate {
     longitude = parseFloat(longitude)
 
     // Validate the inputs
-    const invalidConditions = []
+    const invalidConditions: string[] = []
     if (isNaN(latitude)) {
       invalidConditions.push('Latitude is not a number')
     }

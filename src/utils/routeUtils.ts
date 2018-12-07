@@ -18,7 +18,7 @@ import {RouteState} from '../reducers/routeReducer'
 import {RouteLocation} from '../actions/routeActions'
 
 export function generateRoute(args: RouteLocation): RouteState {
-  args = {
+  const route = {
     ...args,
     pathname: args.pathname || '/',
     search: args.search || '',
@@ -27,13 +27,13 @@ export function generateRoute(args: RouteLocation): RouteState {
   }
 
   return {
-    pathname: args.pathname,
-    search: args.search,
-    hash: args.hash,
-    selectedFeature: args.selectedFeature,
+    pathname: route.pathname,
+    search: route.search,
+    hash: route.hash,
+    selectedFeature: route.selectedFeature,
 
     // Helpers
-    href: args.pathname + args.search + args.hash,
-    jobIds: args.search.substr(1).split('&').filter(s => s.startsWith('jobId')).map(s => s.replace('jobId=', '')),
+    href: route.pathname + route.search + route.hash,
+    jobIds: route.search.substr(1).split('&').filter(s => s.startsWith('jobId')).map(s => s.replace('jobId=', '')),
   }
 }

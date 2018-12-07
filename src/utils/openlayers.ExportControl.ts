@@ -26,6 +26,9 @@ export class ExportControl extends Control {
     element.title = 'Click to export an image of this map'
     element.innerHTML = '<a href="map.png"><i class="fa fa-download"/></a>'
     const hyperlink = this.element.firstChild
+    if (!hyperlink) {
+      throw new Error('Could not find hyperlink!')
+    }
     hyperlink.addEventListener('click', this._clicked.bind(this))
   }
 
@@ -40,6 +43,9 @@ export class ExportControl extends Control {
       const imageData = event.context.getImageData(0, 0, canvas.width, canvas.height)
       const newCanvas = document.createElement('canvas')
       const context = newCanvas.getContext('2d')
+      if (!context) {
+        throw new Error('Could not get context!')
+      }
 
       newCanvas.width = canvas.width
       newCanvas.height = canvas.height

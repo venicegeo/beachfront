@@ -37,10 +37,9 @@ type PassedProps = {
 type Props = DispatchProps & PassedProps
 
 interface State {
-  duration?: string
-  isExpanded?: boolean
-  selectedJobs?: beachfront.Job[]
-  sinceDate?: string
+  duration: string
+  isExpanded: boolean
+  selectedJobs: beachfront.Job[]
 }
 
 export class ProductLine extends React.Component<Props, State> {

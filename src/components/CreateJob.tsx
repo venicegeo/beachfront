@@ -36,9 +36,9 @@ type PassedProps = {
 type Props = StateProps & DispatchProps & PassedProps
 
 interface State {
-  computeMask?: boolean
-  name?: string
-  selectedScene?: beachfront.Scene
+  computeMask: boolean
+  name: string
+  selectedScene: beachfront.Scene | null
 }
 
 export class CreateJob extends React.Component<Props, State> {
@@ -48,6 +48,7 @@ export class CreateJob extends React.Component<Props, State> {
     this.state = {
       computeMask: true,
       name: '',
+      selectedScene: null,
     }
 
     this.handleSubmit = this.handleSubmit.bind(this)
@@ -57,15 +58,16 @@ export class CreateJob extends React.Component<Props, State> {
 
   componentDidUpdate(prevProps: Props) {
     if (prevProps.map.selectedFeature !== this.props.map.selectedFeature) {
-      let selectedScene = null
-      if (this.props.map.selectedFeature && this.props.map.selectedFeature.properties.type === TYPE_SCENE) {
-        selectedScene = this.props.map.selectedFeature as beachfront.Scene
+      let selectedScene: beachfront.Scene | null = null
+      const selectedFeature = this.props.map.selectedFeature
+      if (selectedFeature && selectedFeature.properties && selectedFeature.properties.type === TYPE_SCENE) {
+        selectedScene = selectedFeature as beachfront.Scene
       }
 
       if (selectedScene !== this.state.selectedScene) {
         // Set the default name using the scene id.
         if (selectedScene) {
-          this.setState({ name: normalizeSceneId(selectedScene.id) })
+          this.setState({ name: normalizeSceneId(selectedScene.id) || '' })
         }
 
         // Reset the algorithm error.
@@ -128,6 +130,10 @@ export class CreateJob extends React.Component<Props, State> {
   }
 
   private handleSubmit(algorithm) {
+    if (!this.state.selectedScene) {
+      throw new Error('Unable to submit: selectedScene is null!')
+    }
+
     this.props.actions.jobs.createJob({
       algorithmId: algorithm.id,
       computeMask: this.state.computeMask,

@@ -17,40 +17,41 @@
 const styles: any = require('./FeatureDetails.css')
 
 import * as React from 'react'
-import {JobFeatureDetails} from './JobFeatureDetails'
+import {connect} from 'react-redux'
 import {SceneFeatureDetails} from './SceneFeatureDetails'
+import {AppState} from '../store'
 
 import {
-  TYPE_JOB,
   TYPE_SCENE,
 } from '../constants'
 
-interface Props {
-  feature: GeoJSON.Feature<any>
-}
+type StateProps = ReturnType<typeof mapStateToProps>
+type Props = StateProps
 
 export class FeatureDetails extends React.Component<Props> {
   render() {
-    const {feature} = this.props
-    if (!feature) {
+    if (!this.props.map.selectedFeature) {
       return <div role="nothing-selected"/>
     }
     return (
       <div className={styles.root}>
-        {feature.properties.type === TYPE_JOB && (
-          <JobFeatureDetails
-            className={styles.jobDetails}
-            feature={feature as beachfront.Job}
-          />
-        )}
-
-        {feature.properties.type === TYPE_SCENE && (
+        {this.props.map.selectedFeature.properties && this.props.map.selectedFeature.properties.type === TYPE_SCENE && (
           <SceneFeatureDetails
             className={styles.sceneDetails}
-            feature={feature as beachfront.Scene}
+            feature={this.props.map.selectedFeature as beachfront.Scene}
           />
         )}
       </div>
     )
   }
 }
+
+function mapStateToProps(state: AppState) {
+  return {
+    map: state.map,
+  }
+}
+
+export default connect<StateProps, undefined>(
+  mapStateToProps,
+)(FeatureDetails)

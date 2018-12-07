@@ -67,6 +67,16 @@ export const tourActions = {
       const curStep = state.tour.steps.find(i => i.step === state.tour.step)
       const nextStep = state.tour.steps.find(i => i.step === step)
 
+      if (!curStep) {
+        console.error('Current tour step could not be found!')
+        return
+      }
+
+      if (!nextStep) {
+        console.error('Next tour step could not be found!')
+        return
+      }
+
       dispatch({ type: tourTypes.TOUR_STEP_CHANGING })
 
       try {

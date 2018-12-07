@@ -37,9 +37,9 @@ interface Props {
 
 interface State {
   blobUrl?: string
-  isDownloading?: boolean
-  loaded?: number
-  total?: number
+  isDownloading: boolean
+  loaded: number
+  total: number
 }
 
 export class FileDownloadLink extends React.Component<Props, State> {
@@ -52,8 +52,8 @@ export class FileDownloadLink extends React.Component<Props, State> {
     this.state = {
       blobUrl: undefined,
       isDownloading: false,
-      loaded: null,
-      total: null,
+      loaded: 0,
+      total: 0,
     }
 
     this.handleClick = this.handleClick.bind(this)

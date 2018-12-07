@@ -32,7 +32,7 @@ export type JobsState = {
 }
 
 export const jobsInitialState = {
-  records: [],
+  records: Array<beachfront.Job>(),
   isFetching: false,
   fetchError: null,
   isFetchingOne: false,

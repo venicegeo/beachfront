@@ -31,7 +31,7 @@ function getState(): State {
   let rc: State = {
     browser: detect(),
     supported: false,
-    hide: JSON.parse(localStorage.getItem('dismissBrowserSupport')),
+    hide: JSON.parse(localStorage.getItem('dismissBrowserSupport') || 'false'),
   }
 
   if (rc.browser) {

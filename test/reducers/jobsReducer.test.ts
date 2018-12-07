@@ -154,7 +154,7 @@ describe('jobsReducer', () => {
       createdJob: 'a',
     }
 
-    expect(jobsReducer(state, action)).toEqual({
+    expect(jobsReducer(state as any, action)).toEqual({
       ...state,
       isCreatingJob: false,
       createdJob: action.createdJob,
@@ -209,7 +209,7 @@ describe('jobsReducer', () => {
       deletedJob: { id: 'a' },
     }
 
-    expect(jobsReducer(state, action)).toEqual({
+    expect(jobsReducer(state as any, action)).toEqual({
       ...state,
       isDeletingJob: true,
       deletedJob: action.deletedJob,
@@ -245,7 +245,7 @@ describe('jobsReducer', () => {
       error: 'a',
     }
 
-    expect(jobsReducer(state, action)).toEqual({
+    expect(jobsReducer(state as any, action)).toEqual({
       ...state,
       isDeletingJob: false,
       deleteJobError: action.error,

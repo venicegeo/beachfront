@@ -106,7 +106,7 @@ export class Application extends React.Component<Props> {
       // Update selected feature if needed.
       let selectedFeature = this.props.map.selectedFeature
       if (this.props.route.jobIds.length) {
-        selectedFeature = this.props.jobs.records.find(j => this.props.route.jobIds.includes(j.id))
+        selectedFeature = this.props.jobs.records.find(j => this.props.route.jobIds.includes(j.id)) || null
       } else if (this.props.route.selectedFeature) {
         selectedFeature = this.props.route.selectedFeature
       } else {
@@ -131,15 +131,16 @@ export class Application extends React.Component<Props> {
     // Selected feature changed.
     if (prevProps.map.selectedFeature !== this.props.map.selectedFeature) {
       let search = ''
-      if (this.props.map.selectedFeature && this.props.map.selectedFeature.properties.type === TYPE_JOB) {
-        search = `?jobId=${this.props.map.selectedFeature.id}`
+      const selectedFeature = this.props.map.selectedFeature
+      if (selectedFeature && selectedFeature.properties && selectedFeature.properties.type === TYPE_JOB) {
+        search = `?jobId=${selectedFeature.id}`
       }
 
       this.props.actions.route.navigateTo({
         loc: {
           pathname: this.props.route.pathname,
           search,
-          selectedFeature: this.props.map.selectedFeature,
+          selectedFeature,
         },
       })
     }
@@ -150,7 +151,7 @@ export class Application extends React.Component<Props> {
       let [jobId] = this.props.route.jobIds
 
       if (jobId && !this.props.map.selectedFeature) {
-        this.props.actions.map.setSelectedFeature(this.props.jobs.records.find(job => job.id === jobId))
+        this.props.actions.map.setSelectedFeature(this.props.jobs.records.find(job => job.id === jobId) || null)
       }
 
       this.importJobsIfNeeded()
@@ -164,7 +165,7 @@ export class Application extends React.Component<Props> {
     }
 
     // Job created successfully.
-    if (prevProps.jobs.isCreatingJob && !this.props.jobs.isCreatingJob && !this.props.jobs.createJobError) {
+    if (prevProps.jobs.isCreatingJob && !this.props.jobs.isCreatingJob && this.props.jobs.createdJob) {
       this.props.actions.route.navigateTo({
         loc: {
           pathname: '/jobs',
@@ -174,7 +175,7 @@ export class Application extends React.Component<Props> {
     }
 
     // Job deleted successfully.
-    if (prevProps.jobs.isDeletingJob && !this.props.jobs.isDeletingJob && !this.props.jobs.deleteJobError) {
+    if (prevProps.jobs.isDeletingJob && !this.props.jobs.isDeletingJob && !this.props.jobs.deleteJobError && this.props.jobs.deletedJob) {
       if (this.props.route.jobIds.includes(this.props.jobs.deletedJob.id)) {
         this.props.actions.route.navigateTo({
           loc: {
@@ -184,7 +185,7 @@ export class Application extends React.Component<Props> {
         })
       }
 
-      if (this.props.map.selectedFeature.id === this.props.jobs.deletedJob.id) {
+      if (this.props.map.selectedFeature && this.props.map.selectedFeature.id === this.props.jobs.deletedJob.id) {
         this.props.actions.map.setSelectedFeature(null)
       }
     }
@@ -341,7 +342,7 @@ export class Application extends React.Component<Props> {
 
   private timerIncrement() {
     if (this.props.user.isLoggedIn && !this.props.user.isSessionExpired) {
-      const lastActivity = moment(localStorage.getItem(SESSION_IDLE_STORE))
+      const lastActivity = moment(localStorage.getItem(SESSION_IDLE_STORE) || undefined)
       const timeSinceLast = moment().utc().diff(lastActivity, SESSION_IDLE_UNITS)
       if (timeSinceLast >= SESSION_IDLE_TIMEOUT) {
         this.props.actions.user.logout()
@@ -356,7 +357,7 @@ export class Application extends React.Component<Props> {
   private resetTimer() {
     // Only bother with resetting the timer if we're logged in
     if (this.props.user.isLoggedIn && !this.props.user.isSessionExpired) {
-      const timeSinceLastActivity = moment().utc().diff(moment(localStorage.getItem(SESSION_IDLE_STORE)), SESSION_IDLE_UNITS)
+      const timeSinceLastActivity = moment().utc().diff(moment(localStorage.getItem(SESSION_IDLE_STORE) || undefined), SESSION_IDLE_UNITS)
       // Only reset the timer if we're more than a minute out of date
       if (timeSinceLastActivity > 0) {
         localStorage.setItem(SESSION_IDLE_STORE, moment().utc().format())

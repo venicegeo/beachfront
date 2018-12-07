@@ -240,7 +240,7 @@ export class UserTour extends React.Component<Props> {
           <div>
             <label className={styles.apiKey}>
               <span>Enter your API key&hellip;</span>
-              <input defaultValue={localStorage.getItem('catalog_apiKey')} type="password"/>
+              <input defaultValue={localStorage.getItem('catalog_apiKey') || undefined} type="password"/>
             </label>
           </div>
           {this.apiKeyInstructions}
@@ -379,20 +379,30 @@ export class UserTour extends React.Component<Props> {
         </div>,
         after: () => {
           return new Promise(resolve => {
+            if (!this.props.catalog.searchResults) {
+              throw new Error('Catalog search results are null!')
+            }
+
             // Get the feature with the least amount of cloud cover.
             const feature = this.props.catalog.searchResults.images.features.filter(f => {
               // Eliminate images w/ zero cloud cover; that may mean a bad image.
-              return f.properties.cloudCover
+              return f.properties && f.properties.cloudCover
             }).sort((a, b) => {
-              return a.properties.cloudCover - b.properties.cloudCover
+              return (a.properties && b.properties) ? a.properties.cloudCover - b.properties.cloudCover : 0
             }).shift()
+
+            if (!feature) {
+              throw new Error('A valid feature could not be found!')
+            }
 
             /*
             Manually setting this 'type' here is a hack to force the
             FeatureDetails to render.  I'm not sure how this gets set to
             the correct value in the normal course of events.
             */
-            feature.properties.type = TYPE_SCENE
+            if (feature.properties) {
+              feature.properties.type = TYPE_SCENE
+            }
             this.props.actions.map.setSelectedFeature(feature)
             setTimeout(resolve, 100)
           })
@@ -612,7 +622,7 @@ export class UserTour extends React.Component<Props> {
             steps={this.props.tour.steps}
           />
         </div>
-        <UserTourErrorMessage message={this.props.tour.error} tour={this}/>
+        <UserTourErrorMessage message={this.props.tour.error || 'An unknown error occurred.'} tour={this}/>
       </div>
     )
   }
@@ -722,15 +732,12 @@ export class UserTour extends React.Component<Props> {
 
   private get imageCount(): string {
     const results = this.props.catalog.searchResults
-
-    switch (results && results.count) {
-      case null:
-      case undefined:
-        return 'images'
-      case 1:
-        return 'one image'
-      default:
-        return `${results.count} images`
+    if (!results) {
+      return 'images'
+    } else if (results.count === 1) {
+      return 'one image'
+    } else {
+      return `${results.count} images`
     }
   }
 

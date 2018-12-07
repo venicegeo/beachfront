@@ -69,8 +69,18 @@ export class MeasureControl extends Control {
     })
 
     this._dialog = generateDialog()
-    this._dialog.querySelector('.measureControl__units').addEventListener('change', () => this._recalculate())
-    this._dialog.querySelector('.measureControl__close').addEventListener('click', () => this._deactivate())
+
+    const unitsElement = this._dialog.querySelector('.measureControl__units')
+    if (!unitsElement) {
+      throw new Error('Could not find measure control units element!')
+    }
+    unitsElement.addEventListener('change', () => this._recalculate())
+
+    const closeElement = this._dialog.querySelector('.measureControl__close')
+    if (!closeElement) {
+      throw new Error('Could not find measure control close element!')
+    }
+    closeElement.addEventListener('click', () => this._deactivate())
 
     this._handleDocumentKeyDown = this._handleDocumentKeyDown.bind(this)
   }
@@ -111,10 +121,18 @@ export class MeasureControl extends Control {
   }
 
   private _recalculate() {
-    const isKilometers = this._dialog.querySelector('select').value === 'kilometers'
+    const selectElement = this._dialog.querySelector('select')
+    if (!selectElement) {
+      throw new Error('Could not find select element!')
+    }
+    const isKilometers = selectElement.value === 'kilometers'
     const PRECISION = isKilometers ? PRECISION_KM : PRECISION_M
     const distance = isKilometers ? this._distanceInMeters / 1000 : this._distanceInMeters
-    this._dialog.querySelector('.measureControl__distance').textContent = (Math.round(distance * PRECISION) / PRECISION).toString()
+    const distanceElement = this._dialog.querySelector('.measureControl__distance')
+    if (!distanceElement) {
+      throw new Error('Could not find measure control distance element!')
+    }
+    distanceElement.textContent = (Math.round(distance * PRECISION) / PRECISION).toString()
   }
 
   private _handleActivationToggle() {
@@ -169,7 +187,7 @@ function generateInteraction(drawLayer) {
     type: 'LineString',
     geometryFunction(coordinates: any, geometry: LineString) {
       if (!geometry) {
-        geometry = new LineString(null)
+        geometry = new LineString([])
       }
       const [[x1, y1], [x2, y2]] = coordinates
       geometry.setCoordinates([[x1, y1], [x2, y2]])

@@ -74,6 +74,10 @@ export class ImagerySearchResults extends React.Component<Props> {
   }
 
   private emitPageBack() {
+    if (!this.props.catalog.searchResults) {
+      throw new Error('Catalog search results are null!')
+    }
+
     const {count, startIndex} = this.props.catalog.searchResults
     this.props.onPageChange({
       count,
@@ -82,6 +86,10 @@ export class ImagerySearchResults extends React.Component<Props> {
   }
 
   private emitPageForward() {
+    if (!this.props.catalog.searchResults) {
+      throw new Error('Catalog search results are null!')
+    }
+
     const {count, startIndex} = this.props.catalog.searchResults
     this.props.onPageChange({
       count,

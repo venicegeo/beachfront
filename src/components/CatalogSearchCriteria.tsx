@@ -22,7 +22,7 @@ import * as React from 'react'
 import {FormEvent} from 'react'
 import {connect} from 'react-redux'
 import {AxiosError} from 'axios'
-import {StaticMinimap} from './StaticMinimap'
+import StaticMinimap from './StaticMinimap'
 import * as moment from 'moment'
 import {SCENE_TILE_PROVIDERS} from '../config'
 import {catalogActions, CatalogUpdateSearchCriteriaArgs} from '../actions/catalogActions'
@@ -52,7 +52,7 @@ export class CatalogSearchCriteria extends React.Component<Props> {
     return (
       <div className={styles.root}>
         <div className={styles.minimap}>
-          <StaticMinimap bbox={this.props.map.bbox}/>
+          <StaticMinimap />
           <div className={styles.clearBbox} onClick={this.props.actions.map.clearBbox}>
             <i className="fa fa-times-circle"/> Clear
           </div>
@@ -244,7 +244,6 @@ function mapStateToProps(state: AppState) {
   return {
     apiStatus: state.apiStatus,
     catalog: state.catalog,
-    map: state.map,
   }
 }
 
