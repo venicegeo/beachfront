@@ -107,7 +107,7 @@ export const ActivityTable = (props: Props) => (
 //
 
 function generatePlaceholderRows(count) {
-  const rows = []
+  const rows: JSX.Element[] = []
   for (let i = 0; i < count; i++) {
     rows.push(
       <tr key={i} className={styles.placeholder}>
@@ -115,7 +115,7 @@ function generatePlaceholderRows(count) {
         <td><span/></td>
         <td><span/></td>
         <td><span/></td>
-      </tr>,
+      </tr>
     )
   }
   return rows

@@ -34,11 +34,11 @@ interface Props {
 }
 
 interface State {
-  errors?: any
-  isActive?: boolean
-  isDownloading?: boolean
-  isOpen?: boolean
-  percentage?: number
+  errors: any[]
+  isActive: boolean
+  isDownloading: boolean
+  isOpen: boolean
+  percentage: number
 }
 
 interface DownloadType {
@@ -99,6 +99,7 @@ export class JobDownload extends React.Component<Props, State> {
       isActive: false,
       isDownloading: false,
       isOpen: false,
+      percentage: Number.NaN,
     }
 
     this.dismissErrors = this.dismissErrors.bind(this)
@@ -246,7 +247,12 @@ export class JobDownload extends React.Component<Props, State> {
    * those components to use the values.
    */
   private setOffset(add?: any) {
-    const e = (findDOMNode(this) as Element).closest('li.JobStatus-root').closest('ul') as HTMLElement
+    const jobStatusRootElement = (findDOMNode(this) as Element).closest('li.JobStatus-root')
+    if (!jobStatusRootElement) {
+      throw new Error('li.JobStatus-root element could not be found!')
+    }
+
+    const e = jobStatusRootElement.closest('ul') as HTMLElement
 
     if (add) {
       e.style.paddingTop = `${e.offsetTop}px`

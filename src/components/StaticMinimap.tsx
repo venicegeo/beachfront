@@ -17,21 +17,22 @@
 const styles: any = require('./StaticMinimap.css')
 
 import * as React from 'react'
+import {connect} from 'react-redux'
 import * as ol from '../utils/ol'
 
 import {BASEMAP_TILE_PROVIDERS} from '../config'
 import {deserializeBbox} from '../utils/geometries'
+import {AppState} from '../store'
 
 const [DEFAULT_TILE_PROVIDER] = BASEMAP_TILE_PROVIDERS
 
-interface Props {
-  bbox: number[]
-}
+type StateProps = ReturnType<typeof mapStateToProps>
+type Props = StateProps
 
 export class StaticMinimap extends React.Component<Props> {
   refs: any
 
-  private map: ol.Map
+  private map: ol.Map | null
 
   componentDidMount() {
     this.initializeMap()
@@ -52,7 +53,10 @@ export class StaticMinimap extends React.Component<Props> {
   //
 
   private initializeMap() {
-    const bbox = deserializeBbox(this.props.bbox)
+    const bbox = deserializeBbox(this.props.map.bbox)
+    if (!bbox) {
+      throw new Error('Unable to initialize map: bbox is null!')
+    }
     const bboxGeometry = ol.Polygon.fromExtent(bbox)
     this.map = new ol.Map({
       controls: [],
@@ -94,7 +98,20 @@ export class StaticMinimap extends React.Component<Props> {
   }
 
   private destroyMap() {
-    this.map.setTarget(null)
+    if (!this.map) {
+      return
+    }
+    this.map.setTarget(null as any)
     this.map = null
   }
 }
+
+function mapStateToProps(state: AppState) {
+  return {
+    map: state.map,
+  }
+}
+
+export default connect<StateProps, undefined>(
+  mapStateToProps,
+)(StaticMinimap)

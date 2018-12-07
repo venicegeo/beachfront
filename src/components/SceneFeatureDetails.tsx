@@ -29,7 +29,7 @@ export const SceneFeatureDetails = ({className, feature}: Props) => {
   const id = normalizeSceneId(feature.id)
 
   return <div className={`${styles.root} ${className || ''}`}>
-    <h1 title={id}>{id}</h1>
+    <h1 title={id || undefined}>{id}</h1>
 
     <dl>
       <dt>Date Captured</dt>

@@ -16,13 +16,13 @@
 
 import {GeoJSON} from 'geojson'
 
-export function shouldSelectedFeatureAutoDeselect(selectedFeature: GeoJSON.Feature<any>, options?: { ignoreTypes?: string[] }) {
+export function shouldSelectedFeatureAutoDeselect(selectedFeature: GeoJSON.Feature<any> | null, options?: { ignoreTypes?: string[] }) {
   // Determine if the selected feature is an ignorable type that should not be auto-deselected on certain route changes
   options = options || {}
 
-  if (selectedFeature) {
+  if (selectedFeature && options.ignoreTypes) {
     for (const type of options.ignoreTypes) {
-      if (selectedFeature.properties.type === type) {
+      if (selectedFeature.properties && selectedFeature.properties.type === type) {
         return false
       }
     }

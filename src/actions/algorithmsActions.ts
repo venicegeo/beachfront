@@ -67,7 +67,7 @@ export const algorithmsActions = {
     const deserialized: any = {}
 
     try {
-      deserialized.records = JSON.parse(sessionStorage.getItem('algorithms_records')) || algorithmsInitialState.records
+      deserialized.records = JSON.parse(sessionStorage.getItem('algorithms_records') || 'null') || algorithmsInitialState.records
     } catch (error) {
       console.warn('Failed to deserialize "algorithms_records"')
     }

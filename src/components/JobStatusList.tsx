@@ -89,6 +89,10 @@ export class JobStatusList extends React.Component<Props, State> {
     if (isExpanded) {
       // Fit the metadata into view once it finishes expanding.
       const row = document.querySelector(`.JobStatus-${job.properties.job_id}`)
+      if (!row) {
+        throw new Error('Could not find job status row!')
+      }
+
       const handleTransitionEnd = (e) => {
         this.scrollToJob(job)
         row.removeEventListener(e.type, handleTransitionEnd)
@@ -110,9 +114,18 @@ export class JobStatusList extends React.Component<Props, State> {
       const offset = [
         '.JobStatusList-root header',
         '.ClassificationBanner-root',
-      ].reduce((rc, s) => rc + document.querySelector(s).clientHeight, 0)
+      ].reduce((rc, s) => {
+        const element = document.querySelector(s)
+        if (!element) {
+          throw new Error('Could not find element!')
+        }
+        return rc + element.clientHeight
+      }, 0)
 
       const box = row.getBoundingClientRect()
+      if (!document.documentElement) {
+        throw new Error('Could not find document element!')
+      }
       const height = window.innerHeight || document.documentElement.clientHeight
 
       if (Math.floor(box.top) <= offset || box.bottom > height - row.clientHeight) {

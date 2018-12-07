@@ -29,10 +29,10 @@ type StateProps = ReturnType<typeof mapStateToProps>
 type Props = StateProps
 
 interface State {
-  hoveredIds?: string[]
-  selectedIds?: string[]
-  sortBy?: string
-  sortReverse?: boolean
+  hoveredIds: string[]
+  selectedIds: string[]
+  sortBy: string
+  sortReverse: boolean
 }
 
 export class ImagerySearchList extends React.Component<Props, State> {
@@ -90,6 +90,10 @@ export class ImagerySearchList extends React.Component<Props, State> {
   }
 
   render() {
+    if (!this.props.catalog.searchResults) {
+      return null
+    }
+
     const scenes = this.props.catalog.searchResults.images.features.sort(this.compare[this.state.sortBy])
 
     if (this.state.sortReverse) {
@@ -145,9 +149,9 @@ export class ImagerySearchList extends React.Component<Props, State> {
                   }}
                   onMouseLeave={() => this.props.map.collections.hovered.clear()}
                 >
-                  <td>{f.properties.sensorName}</td>
-                  <td>{moment.utc(f.properties.acquiredDate).format(DATETIME_FORMAT)}</td>
-                  <td>{f.properties.cloudCover.toFixed(1)}%</td>
+                  <td>{f.properties && f.properties.sensorName}</td>
+                  <td>{f.properties && moment.utc(f.properties.acquiredDate).format(DATETIME_FORMAT)}</td>
+                  <td>{f.properties && f.properties.cloudCover.toFixed(1)}%</td>
                 </tr>
               )
             })}
@@ -158,6 +162,10 @@ export class ImagerySearchList extends React.Component<Props, State> {
   }
 
   private get sourceName() {
+    if (!this.props.catalog.searchResults) {
+      return null
+    }
+
     const features = this.props.catalog.searchResults.images.features as any
     let provider
 
@@ -188,8 +196,17 @@ export class ImagerySearchList extends React.Component<Props, State> {
         `.${styles.results} thead`,
         '.CreateJob-root header',
         '.ClassificationBanner-root',
-      ].reduce((rc, s) => rc + document.querySelector(s).clientHeight, 0)
+      ].reduce((rc, s) => {
+        const element = document.querySelector(s)
+        if (!element) {
+          throw new Error('Could not find element!')
+        }
+        return rc + element.clientHeight
+      }, 0)
       const box = row.getBoundingClientRect()
+      if (!document.documentElement) {
+        throw new Error('Could not find document element!')
+      }
       const height = window.innerHeight || document.documentElement.clientHeight
 
       if (Math.floor(box.top) <= offset || box.bottom > height - row.clientHeight) {

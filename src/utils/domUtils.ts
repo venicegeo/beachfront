@@ -15,6 +15,10 @@
  **/
 
 export function isElementInViewport(elem): boolean {
+  if (!document.documentElement) {
+    throw new Error('Could not find document element!')
+  }
+
   const box = elem.getBoundingClientRect()
   const bannerHeight = 25
   const client = {

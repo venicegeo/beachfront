@@ -67,11 +67,16 @@ export const catalogActions = {
 
   search(args: CatalogSearchArgs = {startIndex: 0, count: 100}) {
     return async (dispatch, getState) => {
+      const state: AppState = getState()
+
+      if (!state.map.bbox) {
+        console.error('Unable to perform search: bbox is null!')
+        return
+      }
+
       dispatch({ type: catalogTypes.CATALOG_SEARCHING })
 
       console.warn('(catalog:search): Discarding parameters `count` (%s) and `startIndex` (%s)', args.count, args.startIndex)
-
-      const state: AppState = getState()
 
       // Wrap bbox X coordinates to stay within the -180/180 range. Some data sources won't return results otherwise.
       const bboxWidth = state.map.bbox[2] - state.map.bbox[0]
@@ -141,13 +146,13 @@ export const catalogActions = {
     const deserialized: any = {}
 
     try {
-      deserialized.searchCriteria = JSON.parse(sessionStorage.getItem('searchCriteria')) || catalogInitialState.searchCriteria
+      deserialized.searchCriteria = JSON.parse(sessionStorage.getItem('searchCriteria') || 'null') || catalogInitialState.searchCriteria
     } catch (error) {
       console.warn('Failed to deserialize "searchCriteria"')
     }
 
     try {
-      deserialized.searchResults = JSON.parse(sessionStorage.getItem('searchResults'))
+      deserialized.searchResults = JSON.parse(sessionStorage.getItem('searchResults') || 'null')
     } catch (error) {
       console.warn('Failed to deserialize "searchResults"')
     }

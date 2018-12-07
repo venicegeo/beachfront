@@ -59,7 +59,7 @@ export function readFeatureGeometry(feature, featureProjection = WEB_MERCATOR, d
   return reader.readGeometry(feature.geometry, {featureProjection, dataProjection})
 }
 
-export function deserializeBbox(serialized) {
+export function deserializeBbox(serialized: Extent | null) {
   if (serialized && serialized.length === 4) {
     return ol.proj.transformExtent(serialized, WGS84, WEB_MERCATOR)
   }

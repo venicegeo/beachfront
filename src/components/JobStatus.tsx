@@ -52,11 +52,11 @@ type PassedProps = {
 type Props = StateProps & DispatchProps & PassedProps
 
 interface State {
-  downloadProgress?: number
-  isControlHover?: boolean
-  isDownloading?: boolean
-  isExpanded?: boolean
-  isRemoving?: boolean
+  downloadProgress: number
+  isControlHover: boolean
+  isDownloading: boolean
+  isExpanded: boolean
+  isRemoving: boolean
 }
 
 export class JobStatus extends React.Component<Props, State> {
@@ -272,8 +272,16 @@ export class JobStatus extends React.Component<Props, State> {
   }
 
   private handleViewOnMapClick(loc: Location) {
+    if (!this.props.map.map) {
+      throw new Error('Map is null!')
+    }
+
     this.props.actions.route.navigateTo({ loc })
     const feature = this.props.jobs.records.find(j => loc.search.includes(j.id))
+    if (!feature) {
+      throw new Error('Could not find feature!')
+    }
+
     this.props.actions.map.panToExtent(featureToExtentWrapped(this.props.map.map, feature))
   }
 

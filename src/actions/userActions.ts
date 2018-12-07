@@ -65,7 +65,7 @@ export const userActions = {
     const deserialized: any = {}
 
     try {
-      deserialized.isSessionExpired = JSON.parse(sessionStorage.getItem('isSessionExpired'))
+      deserialized.isSessionExpired = JSON.parse(sessionStorage.getItem('isSessionExpired') || 'null')
       deserialized.isSessionExpired = (deserialized.isSessionExpired != null) ? deserialized.isSessionExpired : userInitialState.isSessionExpired
     } catch (error) {
       console.warn('Failed to deserialize "isSessionExpired"')

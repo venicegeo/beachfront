@@ -73,13 +73,13 @@ export const apiStatusActions = {
     const deserialized: any = {}
 
     try {
-      deserialized.geoserver = JSON.parse(sessionStorage.getItem('geoserver')) || apiStatusInitialState.geoserver
+      deserialized.geoserver = JSON.parse(sessionStorage.getItem('geoserver') || 'null') || apiStatusInitialState.geoserver
     } catch (error) {
       console.warn('Failed to deserialize "geoserver"')
     }
 
     try {
-      deserialized.enabledPlatforms = JSON.parse(sessionStorage.getItem('enabled_platforms_records')) || apiStatusInitialState.enabledPlatforms
+      deserialized.enabledPlatforms = JSON.parse(sessionStorage.getItem('enabled_platforms_records') || 'null') || apiStatusInitialState.enabledPlatforms
     } catch (error) {
       console.warn('Failed to deserialize "enabled_platforms_records"')
     }

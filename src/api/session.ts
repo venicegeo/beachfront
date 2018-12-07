@@ -20,8 +20,8 @@ import {API_ROOT} from '../config'
 export const DEFAULT_TIMEOUT = 60000
 const DEFAULT_ENTRY_URL = '/'
 
-let _client: AxiosInstance,
-  _onExpired: () => void
+let _client: AxiosInstance | null = null
+let _onExpired: (() => void) | null = null
 
 export function destroy(): void {
   _client = null
@@ -45,7 +45,7 @@ export function initialize(): boolean {
     sessionStorage.removeItem('__entry__')
 
     // Return to original destination
-    history.replaceState(null, null, entry)
+    history.replaceState(null, '', entry)
     return true
   }
 

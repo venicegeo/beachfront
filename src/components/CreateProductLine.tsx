@@ -33,14 +33,14 @@ type DispatchProps = ReturnType<typeof mapDispatchToProps>
 type Props = StateProps & DispatchProps
 
 interface State {
-  algorithm?:              beachfront.Algorithm
-  cloudCover?:             number
-  dateStart?:              string
-  dateStop?:               string
-  isCreating?:             boolean
-  name?:                   string
-  shouldAutogenerateName?: boolean
-  source?:                 string
+  algorithm: beachfront.Algorithm | null
+  cloudCover: number
+  dateStart: string
+  dateStop: string
+  isCreating: boolean
+  name: string
+  shouldAutogenerateName: boolean
+  source: string
 }
 
 export class CreateProductLine extends React.Component<Props, State> {
@@ -87,7 +87,7 @@ export class CreateProductLine extends React.Component<Props, State> {
                 sceneMetadata={{
                   cloudCover: this.state.cloudCover,
                 } as any}
-                selectedId={this.state.algorithm ? this.state.algorithm.id : null}
+                selectedId={this.state.algorithm ? this.state.algorithm.id : undefined}
                 onSelect={this.handleAlgorithmSelect}
                 warningHeading="Check Image Search Filters"
                 warningMessage={`
@@ -132,6 +132,13 @@ export class CreateProductLine extends React.Component<Props, State> {
   }
 
   private handleSubmit() {
+    if (!this.state.algorithm) {
+      throw new Error('Unable to submit: algorithm is null!')
+    }
+    if (!this.props.map.bbox) {
+      throw new Error('Unable to submit: bbox is null!')
+    }
+
     this.props.actions.productLines.create({
       algorithmId: this.state.algorithm.id,
       bbox: this.props.map.bbox,
@@ -148,7 +155,7 @@ export class CreateProductLine extends React.Component<Props, State> {
 // Helpers
 //
 
-function generateName(source: string, algorithm: beachfront.Algorithm) {
+function generateName(source: string, algorithm: beachfront.Algorithm | null) {
   return algorithm ? `${source}_${algorithm.name}`.toUpperCase() : ''
 }
 
