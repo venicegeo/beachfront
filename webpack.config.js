@@ -30,7 +30,7 @@ const __environment__ = process.env.NODE_ENV || 'development'
 const COMPILER_TARGET = process.env.COMPILER_TARGET || (__environment__ === 'development' ? 'es6' : 'es5')
 
 module.exports = {
-  devtool: '#cheap-module-eval-source-map',
+  devtool: 'cheap-module-source-map',
 
   context: __dirname,
   entry: './src/index.tsx',
