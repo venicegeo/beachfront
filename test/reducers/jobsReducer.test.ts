@@ -52,6 +52,7 @@ describe('jobsReducer', () => {
       ...state,
       isFetching: false,
       records: action.records,
+      initialFetchComplete: true,
     })
   })
 

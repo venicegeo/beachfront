@@ -20,6 +20,7 @@ export type JobsState = {
   records: beachfront.Job[]
   isFetching: boolean
   fetchError: any
+  initialFetchComplete: boolean
   isFetchingOne: boolean
   fetchOneError: any
   lastOneFetched: beachfront.Job | null
@@ -35,6 +36,7 @@ export const jobsInitialState = {
   records: Array<beachfront.Job>(),
   isFetching: false,
   fetchError: null,
+  initialFetchComplete: false,
   isFetchingOne: false,
   fetchOneError: null,
   lastOneFetched: null,
@@ -59,6 +61,7 @@ export function jobsReducer(state = jobsInitialState, action: any) {
         ...state,
         isFetching: false,
         records: action.records,
+        initialFetchComplete: true,
       }
     case jobsTypes.JOBS_FETCH_ERROR:
       return {

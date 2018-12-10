@@ -68,7 +68,11 @@ export class JobStatusList extends React.Component<Props, State> {
             </li>
           )}
 
-          {!this.props.jobs.records.length ? (
+          {!this.props.jobs.initialFetchComplete && (
+            <li className={styles.placeholder}>Loading...</li>
+          )}
+
+          {this.props.jobs.initialFetchComplete && !this.props.jobs.records.length ? (
             <li className={styles.placeholder}>You haven't started any Jobs yet</li>
           ) : this.props.jobs.records.sort((job1, job2) => {
             return moment(job1.properties.created_on).isBefore(job2.properties.created_on) ? 1 : -1
