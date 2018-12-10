@@ -30,12 +30,15 @@ import {render} from 'react-dom'
 import {Provider} from 'react-redux'
 import Application from './components/Application'
 import store from './store'
+import {ErrorBoundary} from './components/ErrorBoundary'
 
 const root = document.createElement('div')
 document.body.appendChild(root)
 render(
-  <Provider store={store}>
-    <Application />
-  </Provider>,
+  <ErrorBoundary message={'An uncaught exception has occurred. Please contact the Beachfront team for technical support.'}>
+    <Provider store={store}>
+      <Application />
+    </Provider>
+  </ErrorBoundary>,
   root,
 )
