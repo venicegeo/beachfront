@@ -17,17 +17,19 @@
 import axios from 'axios'
 import MockAdapter from 'axios-mock-adapter'
 import thunk from 'redux-thunk'
-import configureStore from 'redux-mock-store'
+import configureStore, {MockStoreEnhanced} from 'redux-mock-store'
 import * as sinon from 'sinon'
 import {apiStatusActions, apiStatusTypes} from '../../src/actions/apiStatusActions'
 import {apiStatusInitialState} from '../../src/reducers/apiStatusReducer'
 import {getClient} from '../../src/api/session'
+import {SinonSpy} from 'sinon'
+import {AppState, initialState} from '../../src/store'
 
 const mockStore = configureStore([thunk])
-let store
+let store: MockStoreEnhanced<AppState>
 
 const mockAdapter = new MockAdapter(axios)
-let clientSpies = {
+let clientSpies: {[key: string]: SinonSpy} = {
   get: sinon.spy(getClient(), 'get'),
 }
 
@@ -35,10 +37,7 @@ describe('apiStatusActions', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     sessionStorage.clear()
-
-    store = mockStore({
-      apiStatus: apiStatusInitialState,
-    })
+    store = mockStore(initialState) as any
   })
 
   afterEach(() => {
@@ -59,7 +58,7 @@ describe('apiStatusActions', () => {
       }
       mockAdapter.onGet('/').reply(200, mockResponse)
 
-      await store.dispatch(apiStatusActions.fetch())
+      await store.dispatch(apiStatusActions.fetch() as any)
 
       expect(clientSpies.get.callCount).toEqual(1)
       expect(clientSpies.get.args[0]).toEqual(['/'])
@@ -79,7 +78,7 @@ describe('apiStatusActions', () => {
     test('request error', async () => {
       mockAdapter.onGet('/').reply(400)
 
-      await store.dispatch(apiStatusActions.fetch())
+      await store.dispatch(apiStatusActions.fetch() as any)
 
       const actions = store.getActions()
       expect(actions.length).toEqual(2)
@@ -91,7 +90,7 @@ describe('apiStatusActions', () => {
     test('invalid response data', async () => {
       mockAdapter.onGet('/').reply(200)
 
-      await store.dispatch(apiStatusActions.fetch())
+      await store.dispatch(apiStatusActions.fetch() as any)
 
       const actions = store.getActions()
       expect(actions.length).toEqual(2)
@@ -103,7 +102,7 @@ describe('apiStatusActions', () => {
 
   describe('serialize()', () => {
     test('success', async () => {
-      await store.dispatch(apiStatusActions.serialize())
+      await store.dispatch(apiStatusActions.serialize() as any)
 
       const state = store.getState()
 

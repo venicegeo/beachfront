@@ -97,7 +97,7 @@ export class JobStatusList extends React.Component<Props, State> {
         throw new Error('Could not find job status row!')
       }
 
-      const handleTransitionEnd = (e) => {
+      const handleTransitionEnd = (e: Event) => {
         this.scrollToJob(job)
         row.removeEventListener(e.type, handleTransitionEnd)
       }
@@ -112,7 +112,7 @@ export class JobStatusList extends React.Component<Props, State> {
     }
   }
 
-  private scrollToJob(job) {
+  private scrollToJob(job: beachfront.Job) {
     const row = document.querySelector(`.JobStatus-${job.properties.job_id}`)
     if (row) {
       const offset = [
@@ -147,7 +147,7 @@ function mapStateToProps(state: AppState) {
   }
 }
 
-function mapDispatchToProps(dispatch) {
+function mapDispatchToProps(dispatch: Function) {
   return {
     actions: {
       jobs: {

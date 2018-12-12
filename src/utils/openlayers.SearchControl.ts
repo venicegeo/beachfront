@@ -50,7 +50,7 @@ const TEMPLATE_DIALOG = `
 export class SearchControl extends Control {
   private _dialog: any
 
-  constructor(className) {
+  constructor(className: string) {
     const element = document.createElement('div')
     super({element})
     element.className = `${className || ''} ol-unselectable ol-control`
@@ -77,7 +77,7 @@ export class SearchControl extends Control {
       this._dialog.style.borderRadius = '2px'
 
       this._dialog.innerHTML = TEMPLATE_DIALOG
-      this._dialog.addEventListener('submit', (event) => this._formSubmitted(event))
+      this._dialog.addEventListener('submit', (event: Event) => this._formSubmitted(event))
       this._dialog.addEventListener('reset', () => this._formReset())
       this.getMap().getTargetElement().appendChild(this._dialog)
 
@@ -87,7 +87,7 @@ export class SearchControl extends Control {
     return this._dialog
   }
 
-  _formSubmitted(event) {
+  _formSubmitted(event: Event) {
     event.preventDefault()
     const input = this._dialog.querySelector('input')
     const errorMessage = this._dialog.querySelector('.error-message')
@@ -114,8 +114,8 @@ export class SearchControl extends Control {
     errorMessage.style.display = 'none'
   }
 
-  _escPressed(event) {
-    if (event.key === 27) {
+  _escPressed(event: KeyboardEvent) {
+    if (event.key === 'Escape') {
       this._closeDialog()
     }
   }
@@ -138,11 +138,8 @@ class Coordinate {
   latitude: number
   longitude: number
 
-  constructor(latitude, longitude) {
-    const truncate = n => Math.round(n * 1000000) / 1000000
-
-    latitude = parseFloat(latitude)
-    longitude = parseFloat(longitude)
+  constructor(latitude: number, longitude: number) {
+    const truncate = (n: number) => Math.round(n * 1000000) / 1000000
 
     // Validate the inputs
     const invalidConditions: string[] = []
@@ -170,8 +167,8 @@ class Coordinate {
     return Coordinate.formatDms(this)
   }
 
-  static formatDms(coord) {
-    const pad = (input, depth) => ('0000000000' + input).slice(-depth)
+  static formatDms(coord: { latitude: number, longitude: number }) {
+    const pad = (input: number, depth: number) => ('0000000000' + input).slice(-depth)
     const values: any = {}
 
     // Determine the hemispheres
@@ -203,7 +200,7 @@ class Coordinate {
    * @param {int} longitude
    * @returns {Coordinate}
    */
-  static fromDecimal(latitude, longitude) {
+  static fromDecimal(latitude: number, longitude: number) {
     return new Coordinate(latitude, longitude)
   }
 
@@ -220,18 +217,19 @@ class Coordinate {
    * @param {int} longitudeSeconds
    * @returns {Coordinate}
    */
-  static fromDms(latitudeHemisphere, latitudeHours, latitudeMinutes, latitudeSeconds, longitudeHemisphere, longitudeHours, longitudeMinutes, longitudeSeconds) {
+  static fromDms(latitudeHemisphere: string, latitudeHours: number, latitudeMinutes: number, latitudeSeconds: number,
+                 longitudeHemisphere: string, longitudeHours: number, longitudeMinutes: number, longitudeSeconds: number) {
     let latitudeDecimal, longitudeDecimal
 
     // Calculate the latitude
-    latitudeDecimal = parseInt(latitudeHours)
-    latitudeDecimal += parseInt(latitudeMinutes) / 60.0
-    latitudeDecimal += parseInt(latitudeSeconds) / 3600.0
+    latitudeDecimal = Math.floor(latitudeHours)
+    latitudeDecimal += Math.floor(latitudeMinutes) / 60.0
+    latitudeDecimal += Math.floor(latitudeSeconds) / 3600.0
     latitudeDecimal *= ('S' === latitudeHemisphere) ? -1.0 : 1.0
 
-    longitudeDecimal = parseInt(longitudeHours)
-    longitudeDecimal += parseInt(longitudeMinutes) / 60.0
-    longitudeDecimal += parseInt(longitudeSeconds) / 3600.0
+    longitudeDecimal = Math.floor(longitudeHours)
+    longitudeDecimal += Math.floor(longitudeMinutes) / 60.0
+    longitudeDecimal += Math.floor(longitudeSeconds) / 3600.0
     longitudeDecimal *= ('W' === longitudeHemisphere) ? -1.0 : 1.0
 
     return new Coordinate(latitudeDecimal, longitudeDecimal)
@@ -248,7 +246,7 @@ class Coordinate {
    * @param {int} northing
    * @returns {Coordinate}
    */
-  static fromMgrs(zone, latitudeBand, column, row, easting, northing) {
+  static fromMgrs(zone: number, latitudeBand: string, column: string, row: string, easting: number, northing: number) {
     const EASTING_IDS = 'ABCDEFGHJKLMNPQRSTUVWXYZ'
     const NORTHING_IDS = 'ABCDEFGHJKLMNPQRSTUV'
     let utmEasting,
@@ -259,16 +257,16 @@ class Coordinate {
         northingIndex,
         northingModifier,
         eastingModifier,
-        northingOffsets,
+        northingOffsets: {[key: string]: number},
         minimumNorthing
 
     // Normalize the inputs
-    zone = parseInt(zone)
+    zone = Math.floor(zone)
     latitudeBand = latitudeBand.toUpperCase().replace(/\s+/g, '')
     column = column.toUpperCase().replace(/\s+/g, '')
     row = row.toUpperCase().replace(/\s+/g, '')
-    easting = parseInt(easting)
-    northing = parseInt(northing)
+    easting = Math.floor(easting)
+    northing = Math.floor(northing)
 
     /*
      * MGRS TO UTM FORMULA
@@ -350,9 +348,9 @@ class Coordinate {
    * @param {number} northing
    * @returns {Coordinate}
    */
-  static fromUtm(zone, hemisphere, easting, northing) {
-    const deg2rad = n => (n / 180.0 * Math.PI)
-    const rad2deg = n => (n / Math.PI * 180.0)
+  static fromUtm(zone: number, hemisphere: string, easting: number, northing: number) {
+    const deg2rad = (n: number) => (n / 180.0 * Math.PI)
+    const rad2deg = (n: number) => (n / Math.PI * 180.0)
     const SCALE_FACTOR = 0.9996
     const WGS84_ELLIPSOID_MAJAXIS = 6378137.0
     const WGS84_ELLIPSOID_MINAXIS = 6356752.314
@@ -394,10 +392,10 @@ class Coordinate {
         x8poly
 
     // Normalize the inputs
-    zone = parseInt(zone)
+    zone = Math.floor(zone)
     hemisphere = hemisphere.toUpperCase().replace(/\s+/g, '')
-    easting = parseFloat(easting)
-    northing = parseFloat(northing)
+    easting = Math.floor(easting)
+    northing = Math.floor(northing)
 
     /*
      * UTM XY TO DECIMAL FORMULA
@@ -424,10 +422,10 @@ class Coordinate {
     centralMeridian = deg2rad(-183 + (zone * 6))
 
     // Calculate X, Y values from eastern and northing
-    x = (parseFloat(easting) - 500000.0) / SCALE_FACTOR
+    x = (easting - 500000.0) / SCALE_FACTOR
     y = ('S' === hemisphere)
-      ? (parseFloat(northing) - 10000000.0) / SCALE_FACTOR
-      : parseFloat(northing) / SCALE_FACTOR
+      ? (northing - 10000000.0) / SCALE_FACTOR
+      : northing / SCALE_FACTOR
 
     // Hold on to your freakin hat because here we go
     n = (WGS84_ELLIPSOID_MAJAXIS - WGS84_ELLIPSOID_MINAXIS) / (WGS84_ELLIPSOID_MAJAXIS + WGS84_ELLIPSOID_MINAXIS)
@@ -553,7 +551,7 @@ class Coordinate {
    * @param {string} input
    * @returns {Coordinate}
    */
-  static parseAny(input) {
+  static parseAny(input: string) {
     input = input.toUpperCase().replace(/[^A-Z0-9.,\- ]+/g, '')
     if (Coordinate.stringIsDms(input)) { return Coordinate.parseDms(input) }
     if (Coordinate.stringIsMgrs(input)) { return Coordinate.parseMgrs(input) }
@@ -568,9 +566,9 @@ class Coordinate {
    * @param {string} input  Example: "30.123, 30.456"
    * @returns {Coordinate}
    */
-  static parseDecimal(input) {
+  static parseDecimal(input: string) {
     const [latitude, longitude] = input.split(',')
-    return Coordinate.fromDecimal(latitude, longitude)
+    return Coordinate.fromDecimal(parseFloat(latitude), parseFloat(longitude))
   }
 
   /**
@@ -579,7 +577,7 @@ class Coordinate {
    * @param {string} input  Example: "300000N0300000E" or "N300000 E0300000"
    * @returns {Coordinate}
    */
-  static parseDms(input) {
+  static parseDms(input: string) {
     let latitudeHemisphere,
         latitudeHours,
         latitudeMinutes,
@@ -595,25 +593,25 @@ class Coordinate {
 
     // Get the values from both post and prefixed hemispheres
     if ((chunks = input.match(DMS_POSTFIX))) {
-      latitudeHours = chunks[1]
-      latitudeMinutes = chunks[2]
-      latitudeSeconds = chunks[3]
+      latitudeHours = parseFloat(chunks[1])
+      latitudeMinutes = parseFloat(chunks[2])
+      latitudeSeconds = parseFloat(chunks[3])
       latitudeHemisphere = chunks[4]
-      longitudeHours = chunks[5]
-      longitudeMinutes = chunks[6]
-      longitudeSeconds = chunks[7]
+      longitudeHours = parseFloat(chunks[5])
+      longitudeMinutes = parseFloat(chunks[6])
+      longitudeSeconds = parseFloat(chunks[7])
       longitudeHemisphere = chunks[8]
     }
     else if ((chunks = input.match(DMS_PREFIX))) {
       // Less common but equally valid(?)
       latitudeHemisphere = chunks[1]
-      latitudeHours = chunks[2]
-      latitudeMinutes = chunks[3]
-      latitudeSeconds = chunks[4]
+      latitudeHours = parseFloat(chunks[2])
+      latitudeMinutes = parseFloat(chunks[3])
+      latitudeSeconds = parseFloat(chunks[4])
       longitudeHemisphere = chunks[5]
-      longitudeHours = chunks[6]
-      longitudeMinutes = chunks[7]
-      longitudeSeconds = chunks[8]
+      longitudeHours = parseFloat(chunks[6])
+      longitudeMinutes = parseFloat(chunks[7])
+      longitudeSeconds = parseFloat(chunks[8])
     }
     else {
       throw new Error('Could not parse as DMS: ' + input)
@@ -630,15 +628,15 @@ class Coordinate {
    * @param {string} input  Example: "30QDB00000000" or "30QDB 00000000"
    * @returns {Coordinate}
    */
-  static parseMgrs(input) {
-    const [zone, latitudeBand, column, row, location] = input.match(MGRS).slice(1, 7)
+  static parseMgrs(input: string) {
+    const [zone, latitudeBand, column, row, location] = input.match(MGRS)!.slice(1, 7)
 
     // Validate the inputs
     if (location.length % 2 === 0) {
-      const easting = location.substring(0, location.length / 2)
-      const northing = location.substring(location.length / 2)
+      const easting = parseInt(location.substring(0, location.length / 2))
+      const northing = parseInt(location.substring(location.length / 2))
 
-      return Coordinate.fromMgrs(zone, latitudeBand, column, row, easting, northing)
+      return Coordinate.fromMgrs(parseInt(zone), latitudeBand, column, row, easting, northing)
     }
     throw new Error('Invalid MGRS: location must contain even number of digits')
   }
@@ -649,7 +647,7 @@ class Coordinate {
    * @param {string} input  Example: "30T 00000,000000" or "30T 00000 000000" or "00000, 000000 30T"
    * @returns {Coordinate}
    */
-  static parseUtm(input) {
+  static parseUtm(input: string) {
     let chunks,
         zone,
         hemisphere,
@@ -661,19 +659,19 @@ class Coordinate {
       || input.match(UTM_COMMA_PREFIX)
       || input.match(UTM_SPACE_POSTFIX)
       || input.match(UTM_COMMA_POSTFIX)
-    chunks = chunks.slice(1, 5)
+    chunks = chunks!.slice(1, 5)
 
     if (chunks[0].match(/\d+/) && chunks[1].match(/[NS]/i)) {
       // PREFIXED HEMISPHERE
-      zone = chunks[0]
+      zone = parseInt(chunks[0])
       hemisphere = chunks[1]
-      easting = chunks[2]
-      northing = chunks[3]
+      easting = parseInt(chunks[2])
+      northing = parseInt(chunks[3])
     } else {
       // POSTFIXED HEMISPHERE
-      easting = chunks[0]
-      northing = chunks[1]
-      zone = chunks[2]
+      easting = parseInt(chunks[0])
+      northing = parseInt(chunks[1])
+      zone = parseInt(chunks[2])
       hemisphere = chunks[3]
     }
 
@@ -686,7 +684,7 @@ class Coordinate {
    * @param {string} input
    * @returns {boolean}
    */
-  static stringIsDecimal(input) {
+  static stringIsDecimal(input: string) {
     return DECIMAL.test(input)
   }
 
@@ -696,7 +694,7 @@ class Coordinate {
    * @param {string} input
    * @returns {boolean}
    */
-  static stringIsDms(input) {
+  static stringIsDms(input: string) {
     return DMS_POSTFIX.test(input)
       || DMS_PREFIX.test(input)
   }
@@ -707,7 +705,7 @@ class Coordinate {
    * @param {string} input
    * @returns {boolean}
    */
-  static stringIsMgrs(input) {
+  static stringIsMgrs(input: string) {
     return MGRS.test(input)
   }
 
@@ -717,7 +715,7 @@ class Coordinate {
    * @param {string} input
    * @returns {boolean}
    */
-  static stringIsUtm(input) {
+  static stringIsUtm(input: string) {
     return UTM_SPACE_PREFIX.test(input)
       || UTM_COMMA_PREFIX.test(input)
       || UTM_SPACE_POSTFIX.test(input)

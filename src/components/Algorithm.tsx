@@ -28,8 +28,8 @@ type PassedProps = {
   warningHeading?: string
   warningMessage?: string
   errorElement?: React.ReactElement<any>
-  onSelect?(algorithm: beachfront.Algorithm)
-  onSubmit?(algorithm: beachfront.Algorithm)
+  onSelect?: (algorithm: beachfront.Algorithm) => void
+  onSubmit?: (algorithm: beachfront.Algorithm) => void
 }
 type Props = StateProps & PassedProps
 

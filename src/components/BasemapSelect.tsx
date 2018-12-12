@@ -22,7 +22,7 @@ interface Props {
   basemaps: string[]
   className: string
   index: number
-  onChange(index: number)
+  onChange: (index: number) => void
 }
 
 interface State {
@@ -62,7 +62,7 @@ export class BasemapSelect extends React.Component<Props, State> {
     )
   }
 
-  private handleChange(index) {
+  private handleChange(index: number) {
     this.props.onChange(index)
     this.setState({isOpen: false})
   }

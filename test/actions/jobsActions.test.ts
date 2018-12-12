@@ -17,18 +17,19 @@
 import axios from 'axios'
 import MockAdapter from 'axios-mock-adapter'
 import thunk from 'redux-thunk'
-import configureStore from 'redux-mock-store'
+import configureStore, {MockStoreEnhanced} from 'redux-mock-store'
 import * as sinon from 'sinon'
+import {SinonSpy} from 'sinon'
 import {jobsActions, jobsTypes} from '../../src/actions/jobsActions'
-import {jobsInitialState} from '../../src/reducers/jobsReducer'
 import {JOB_ENDPOINT} from '../../src/config'
 import {getClient} from '../../src/api/session'
+import {AppState, initialState} from '../../src/store'
 
 const mockStore = configureStore([thunk])
-let store
+let store: MockStoreEnhanced<AppState>
 
 const mockAdapter = new MockAdapter(axios)
-const clientSpies = {
+const clientSpies: {[key: string]: SinonSpy} = {
   get: sinon.spy(getClient(), 'get'),
   post: sinon.spy(getClient(), 'post'),
   delete: sinon.spy(getClient(), 'delete'),
@@ -37,10 +38,7 @@ const clientSpies = {
 describe('jobsActions', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-
-    store = mockStore({
-      jobs: jobsInitialState,
-    })
+    store = mockStore(initialState) as any
   })
 
   afterEach(() => {
@@ -62,7 +60,7 @@ describe('jobsActions', () => {
       }
       mockAdapter.onGet(JOB_ENDPOINT).reply(200, mockResponseData)
 
-      await store.dispatch(jobsActions.fetch())
+      await store.dispatch(jobsActions.fetch() as any)
 
       expect(clientSpies.get.callCount).toEqual(1)
       expect(clientSpies.get.args[0]).toEqual([JOB_ENDPOINT])
@@ -79,7 +77,7 @@ describe('jobsActions', () => {
     test('request error', async () => {
       mockAdapter.onGet(JOB_ENDPOINT).reply(400)
 
-      await store.dispatch(jobsActions.fetch())
+      await store.dispatch(jobsActions.fetch() as any)
 
       const actions = store.getActions()
       expect(actions.length).toEqual(2)
@@ -91,7 +89,7 @@ describe('jobsActions', () => {
     test('invalid response data', async () => {
       mockAdapter.onGet(JOB_ENDPOINT).reply(200)
 
-      await store.dispatch(jobsActions.fetch())
+      await store.dispatch(jobsActions.fetch() as any)
 
       const actions = store.getActions()
       expect(actions.length).toEqual(2)
@@ -110,7 +108,7 @@ describe('jobsActions', () => {
       const url = `${JOB_ENDPOINT}/${mockJobId}`
       mockAdapter.onGet(url).reply(200, mockResponseData)
 
-      await store.dispatch(jobsActions.fetchOne(mockJobId))
+      await store.dispatch(jobsActions.fetchOne(mockJobId) as any)
 
       expect(clientSpies.get.callCount).toEqual(1)
       expect(clientSpies.get.args[0]).toEqual([url])
@@ -128,7 +126,7 @@ describe('jobsActions', () => {
       const mockJobId = 'a'
       mockAdapter.onGet(`${JOB_ENDPOINT}/${mockJobId}`).reply(400)
 
-      await store.dispatch(jobsActions.fetchOne(mockJobId))
+      await store.dispatch(jobsActions.fetchOne(mockJobId) as any)
 
       const actions = store.getActions()
       expect(actions.length).toEqual(2)
@@ -141,7 +139,7 @@ describe('jobsActions', () => {
       const mockJob = { id: 'a' }
       mockAdapter.onGet(`${JOB_ENDPOINT}/${mockJob.id}`).reply(200)
 
-      await store.dispatch(jobsActions.fetchOne(mockJob.id))
+      await store.dispatch(jobsActions.fetchOne(mockJob.id) as any)
 
       const actions = store.getActions()
       expect(actions.length).toEqual(2)
@@ -165,7 +163,7 @@ describe('jobsActions', () => {
         catalogApiKey: 'catalogApiKey',
         sceneId: 'sceneId',
       }
-      await store.dispatch(jobsActions.createJob(args))
+      await store.dispatch(jobsActions.createJob(args) as any)
 
       expect(clientSpies.post.callCount).toEqual(1)
       expect(clientSpies.post.args[0]).toEqual([
@@ -197,7 +195,7 @@ describe('jobsActions', () => {
         name: 'name',
         catalogApiKey: 'catalogApiKey',
         sceneId: 'sceneId',
-      }))
+      }) as any)
 
       const actions = store.getActions()
       expect(actions.length).toEqual(2)
@@ -215,7 +213,7 @@ describe('jobsActions', () => {
         name: 'name',
         catalogApiKey: 'catalogApiKey',
         sceneId: 'sceneId',
-      }))
+      }) as any)
 
       const actions = store.getActions()
       expect(actions.length).toEqual(2)
@@ -241,7 +239,7 @@ describe('jobsActions', () => {
       const url = `${JOB_ENDPOINT}/${mockJob.id}`
       mockAdapter.onDelete(url).reply(200)
 
-      await store.dispatch(jobsActions.deleteJob(mockJob as any))
+      await store.dispatch(jobsActions.deleteJob(mockJob as any) as any)
 
       expect(clientSpies.delete.callCount).toEqual(1)
       expect(clientSpies.delete.args[0]).toEqual([url])
@@ -259,7 +257,7 @@ describe('jobsActions', () => {
       const mockJob = { id: 'a' }
       mockAdapter.onDelete(`${JOB_ENDPOINT}/${mockJob.id}`).reply(400)
 
-      await store.dispatch(jobsActions.deleteJob(mockJob as any))
+      await store.dispatch(jobsActions.deleteJob(mockJob as any) as any)
 
       const actions = store.getActions()
       expect(actions[0]).toEqual({
@@ -271,7 +269,7 @@ describe('jobsActions', () => {
     })
 
     test('non-request error', async () => {
-      await store.dispatch(jobsActions.deleteJob(null))
+      await store.dispatch(jobsActions.deleteJob(null as any) as any)
 
       const actions = store.getActions()
       expect(actions.length).toEqual(2)

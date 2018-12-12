@@ -14,9 +14,9 @@
  * limitations under the License.
  **/
 
-import {applyMiddleware, combineReducers, createStore} from 'redux'
+import {applyMiddleware, combineReducers, createStore, Middleware} from 'redux'
 import reduxThunk from 'redux-thunk'
-import { createLogger } from 'redux-logger'
+import {createLogger} from 'redux-logger'
 import {userInitialState, userReducer, UserState} from './reducers/userReducer'
 import {catalogInitialState, catalogReducer, CatalogState} from './reducers/catalogReducer'
 import {routeInitialState, routeReducer, RouteState} from './reducers/routeReducer'
@@ -27,11 +27,11 @@ import {algorithmsInitialState, algorithmsReducer, AlgorithmsState} from './redu
 import {apiStatusInitialState, apiStatusReducer, ApiStatusState} from './reducers/apiStatusReducer'
 import {tourInitialState, tourReducer, TourState} from './reducers/tourReducer'
 
-const middleware = [reduxThunk]
+const middleware: Middleware[] = [reduxThunk]
 
 if (process.env.NODE_ENV === 'development') {
   middleware.push(createLogger({
-    predicate: (getState, action) => !action.type.includes('SERIALIZED'),
+    predicate: (_: any, action: any) => !action.type.includes('SERIALIZED'),
     collapsed: true,
   }))
 }
@@ -48,7 +48,7 @@ export interface AppState {
   tour: TourState
 }
 
-const initialState: AppState = {
+export const initialState: AppState = {
   user: userInitialState,
   catalog: catalogInitialState,
   route: routeInitialState,

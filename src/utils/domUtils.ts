@@ -14,7 +14,7 @@
  * limitations under the License.
  **/
 
-export function isElementInViewport(elem): boolean {
+export function isElementInViewport(elem: Element): boolean {
   if (!document.documentElement) {
     throw new Error('Could not find document element!')
   }
@@ -28,8 +28,8 @@ export function isElementInViewport(elem): boolean {
 
   return box.top >= bannerHeight
     && box.left >= 0
-    && parseInt(box.bottom) <= client.height - bannerHeight
-    && parseInt(box.right) <= client.width
+    && box.bottom <= client.height - bannerHeight
+    && box.right <= client.width
 }
 
 export function query(selector: string): HTMLElement {

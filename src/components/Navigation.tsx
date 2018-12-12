@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
+import {AppState} from '../store'
 
 const styles: any = require('./Navigation.css')
 const brand: string = require('../images/brand-experiment2.svg')
@@ -25,7 +26,7 @@ import {USER_GUIDE_URL} from '../config'
 import {routeActions, RouteNavigateToArgs} from '../actions/routeActions'
 import {tourActions} from '../actions/tourActions'
 
-const Icon = ({ path, size = 40 }) => (
+const Icon = ({ path, size = 40 }: { path: string, size?: number }) => (
   <svg className={styles.icon} viewBox={`0 0 ${size} ${size}`}>
     <g className={styles.iconShadow} transform="translate(0, 2)">
       <path d={path} fillRule="evenodd"/>
@@ -121,13 +122,13 @@ function userGuideLink() {
   }
 }
 
-function mapStateToProps(state) {
+function mapStateToProps(state: AppState) {
   return {
     route: state.route,
   }
 }
 
-function mapDispatchToProps(dispatch) {
+function mapDispatchToProps(dispatch: Function) {
   return {
     actions: {
       route: {

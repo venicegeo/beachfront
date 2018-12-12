@@ -60,7 +60,7 @@ export class Timestamp extends React.Component<Props, State> {
     )
   }
 
-  private handleClick(event) {
+  private handleClick(event: React.MouseEvent) {
     event.stopPropagation()
     event.preventDefault()
     this.setState({relative: !this.state.relative})

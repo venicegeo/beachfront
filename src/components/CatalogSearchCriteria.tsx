@@ -229,11 +229,11 @@ export class CatalogSearchCriteria extends React.Component<Props> {
   }
 }
 
-function isValidDate(date) {
+function isValidDate(date: string) {
   return moment.utc(date, DATE_FORMAT, true).isValid()
 }
 
-function isValidDateRange(from, to) {
+function isValidDateRange(from: string, to: string) {
   const fromMoment = moment.utc(from, DATE_FORMAT, true)
   const toMoment = moment.utc(to, DATE_FORMAT, true)
 
@@ -247,7 +247,7 @@ function mapStateToProps(state: AppState) {
   }
 }
 
-function mapDispatchToProps(dispatch) {
+function mapDispatchToProps(dispatch: Function) {
   return {
     actions: {
       catalog: {

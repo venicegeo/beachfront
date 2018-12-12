@@ -14,8 +14,10 @@
  * limitations under the License.
  **/
 
+import {Dispatch} from 'redux'
 import {getClient} from '../api/session'
 import {JOB_ENDPOINT} from '../config'
+import {JobsState} from '../reducers/jobsReducer'
 
 export const jobsTypes = {
   JOBS_FETCHING: 'JOBS_FETCHING',
@@ -43,7 +45,7 @@ export interface JobsCreateJobArgs {
 
 export const jobsActions = {
   fetch() {
-    return async dispatch => {
+    return async (dispatch: Dispatch<JobsState>) => {
       dispatch({ type: jobsTypes.JOBS_FETCHING })
 
       try {
@@ -62,7 +64,7 @@ export const jobsActions = {
   },
 
   fetchOne(jobId: string) {
-    return async dispatch => {
+    return async (dispatch: Dispatch<JobsState>) => {
       dispatch({ type: jobsTypes.JOBS_FETCHING_ONE })
 
       try {
@@ -81,7 +83,7 @@ export const jobsActions = {
   },
 
   createJob(args: JobsCreateJobArgs) {
-    return async dispatch => {
+    return async (dispatch: Dispatch<JobsState>) => {
       dispatch({ type: jobsTypes.JOBS_CREATING_JOB })
 
       try {
@@ -110,7 +112,7 @@ export const jobsActions = {
   },
 
   deleteJob(job: beachfront.Job) {
-    return async dispatch => {
+    return async (dispatch: Dispatch<JobsState>) => {
       dispatch({
         type: jobsTypes.JOBS_DELETING_JOB,
         deletedJob: job,

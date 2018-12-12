@@ -47,7 +47,7 @@ type PassedProps = {
   isActive: boolean
   job: beachfront.Job
   className?: string
-  onToggleExpansion(job: beachfront.Job, isExpanded: boolean)
+  onToggleExpansion: (job: beachfront.Job, isExpanded: boolean) => void
 }
 type Props = StateProps & DispatchProps & PassedProps
 
@@ -82,7 +82,7 @@ export class JobStatus extends React.Component<Props, State> {
     this.toggleExpansion = this.toggleExpansion.bind(this)
   }
 
-  shouldComponentUpdate(nextProps, nextState) {
+  shouldComponentUpdate(nextProps: Props, nextState: State) {
     return ((this.props.isActive !== nextProps.isActive) ||
       (this.props.className !== nextProps.className) ||
       (this.props.job.properties.status !== nextProps.job.properties.status) ||
@@ -247,7 +247,7 @@ export class JobStatus extends React.Component<Props, State> {
     this.props.actions.map.setSelectedFeature(this.props.job)
   }
 
-  private handleDownloadProgress(loaded, total) {
+  private handleDownloadProgress(loaded: number, total: number) {
     this.setState({ downloadProgress: total ? Math.floor(100 * loaded / total) : NaN })
   }
 
@@ -259,7 +259,7 @@ export class JobStatus extends React.Component<Props, State> {
     this.setState({ isDownloading: false })
   }
 
-  private handleDownloadError(_) {
+  private handleDownloadError() {
     this.setState({ isDownloading: false })
   }
 
@@ -310,7 +310,7 @@ function mapStateToProps(state: AppState) {
   }
 }
 
-function mapDispatchToProps(dispatch) {
+function mapDispatchToProps(dispatch: Function) {
   return {
     actions: {
       map: {

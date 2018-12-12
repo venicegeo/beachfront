@@ -56,7 +56,7 @@ export class ProductLine extends React.Component<Props, State> {
     this.handleViewOnMap = this.handleViewOnMap.bind(this)
   }
 
-  componentDidUpdate(_, prevState) {
+  componentDidUpdate(_: Props, prevState: State) {
     if (this.state.isExpanded && (prevState.isExpanded !== this.state.isExpanded || prevState.duration !== this.state.duration)) {
       this.props.actions.productLines.fetchJobs({
         productLineId: this.props.productLine.id,
@@ -124,7 +124,7 @@ export class ProductLine extends React.Component<Props, State> {
     )
   }
 
-  private handleDurationChange(duration) {
+  private handleDurationChange(duration: string) {
     this.setState({ duration })
   }
 
@@ -133,7 +133,7 @@ export class ProductLine extends React.Component<Props, State> {
     // TODO -- scroll to positioning
   }
 
-  private handleJobRowClick(job) {
+  private handleJobRowClick(job: beachfront.Job) {
     if (this.state.selectedJobs.some(j => j.id === job.id)) {
       this.props.actions.map.setSelectedFeature(null)
       this.setState({ selectedJobs: [] })
@@ -156,7 +156,7 @@ export class ProductLine extends React.Component<Props, State> {
 // Helpers
 //
 
-function formatDate(input) {
+function formatDate(input: string) {
   const date = moment(input)
   if (date.isValid()) {
     return date.format('MM/DD/YYYY')
@@ -175,7 +175,7 @@ function generateSinceDate(offset: string, productLine: beachfront.ProductLine) 
     .toISOString()
 }
 
-function mapDispatchToProps(dispatch) {
+function mapDispatchToProps(dispatch: Function) {
   return {
     actions: {
       productLines: {

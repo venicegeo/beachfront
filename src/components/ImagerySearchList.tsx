@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
+import Scene = beachfront.Scene
 
 const styles: any = require('./ImagerySearchList.css')
 const DATETIME_FORMAT = 'YYYY-MM-DD HH:mm'
@@ -21,9 +22,12 @@ import * as React from 'react'
 import {connect} from 'react-redux'
 import * as moment from 'moment'
 import debounce = require('lodash/debounce')
-import * as ol from '../utils/ol'
+import OLCollection from 'ol/collection'
+import OLEvent from 'ol/events/event'
+import OLFeature from 'ol/feature'
 import {SCENE_TILE_PROVIDERS} from '../config'
 import {AppState} from '../store'
+import {Extent} from '../utils/geometries'
 
 type StateProps = ReturnType<typeof mapStateToProps>
 type Props = StateProps
@@ -34,6 +38,8 @@ interface State {
   sortBy: string
   sortReverse: boolean
 }
+
+type CompareObject = Scene & { bbox: Extent }
 
 export class ImagerySearchList extends React.Component<Props, State> {
   private compare: any
@@ -48,23 +54,23 @@ export class ImagerySearchList extends React.Component<Props, State> {
       sortReverse: false,
     }
 
-    const compareAcquiredDate = (a, b) => moment.utc(a.properties.acquiredDate).diff(b.properties.acquiredDate)
-    const compareBbox = (a, b) => b.bbox[3] - a.bbox[3] || a.bbox[0] - b.bbox[0]
-    const compareCloudCover = (a, b) => a.properties.cloudCover - b.properties.cloudCover
-    const compareSensorName = (a, b) => a.properties.sensorName.localeCompare(b.properties.sensorName)
-    const compareId = (a, b) => a.id.localeCompare(b.id)
+    const compareAcquiredDate = (a: CompareObject, b: CompareObject) => moment.utc(a.properties.acquiredDate).diff(b.properties.acquiredDate)
+    const compareBbox = (a: CompareObject, b: CompareObject) => b.bbox[3] - a.bbox[3] || a.bbox[0] - b.bbox[0]
+    const compareCloudCover = (a: CompareObject, b: CompareObject) => a.properties.cloudCover - b.properties.cloudCover
+    const compareSensorName = (a: CompareObject, b: CompareObject) => a.properties.sensorName.localeCompare(b.properties.sensorName)
+    const compareId = (a: CompareObject, b: CompareObject) => a.id.localeCompare(b.id)
 
     this.compare = {
-      acquiredDate(a, b) {
+      acquiredDate(a: CompareObject, b: CompareObject) {
         return compareAcquiredDate(a, b) || compareBbox(a, b) || compareId(a, b)
       },
-      bbox(a, b) {
+      bbox(a: CompareObject, b: CompareObject) {
         return compareBbox(a, b) || compareAcquiredDate(a, b) || compareId(a, b)
       },
-      cloudCover(a, b) {
+      cloudCover(a: CompareObject, b: CompareObject) {
         return compareCloudCover(a, b) || compareAcquiredDate(a, b) || compareId(a, b)
       },
-      sensorName(a, b) {
+      sensorName(a: CompareObject, b: CompareObject) {
         return compareSensorName(a, b) || compareAcquiredDate(a, b) || compareId(a, b)
       },
     }
@@ -77,6 +83,10 @@ export class ImagerySearchList extends React.Component<Props, State> {
   }
 
   componentDidMount() {
+    if (!this.props.map.collections) {
+      throw new Error('Map collections are null!')
+    }
+
     this.props.map.collections.hovered.on(['add', 'remove'], this.setHoveredIds)
     this.props.map.collections.selected.on(['add', 'remove'], this.setSelectedIds)
     this.setHoveredIds()
@@ -85,6 +95,10 @@ export class ImagerySearchList extends React.Component<Props, State> {
   }
 
   componentWillUnmount() {
+    if (!this.props.map.collections) {
+      throw new Error('Map collections are null!')
+    }
+
     this.props.map.collections.hovered.un(['add', 'remove'], this.setHoveredIds)
     this.props.map.collections.selected.un(['add', 'remove'], this.setSelectedIds)
   }
@@ -133,7 +147,7 @@ export class ImagerySearchList extends React.Component<Props, State> {
               <TableHeader name="cloudCover" label="Cloud Cover"/>
             </tr>
           </thead>
-          <tbody onMouseEnter={() => this.props.map.collections.hovered.clear()}>
+          <tbody onMouseEnter={() => this.props.map.collections!.hovered.clear()}>
             {scenes.map(f => {
               return (
                 <tr
@@ -142,12 +156,16 @@ export class ImagerySearchList extends React.Component<Props, State> {
                     this.state.hoveredIds.includes(f.id) && styles.hovered,
                   ].filter(Boolean).join(' ')}
                   key={f.id}
-                  onClick={() => this.props.map.collections.handleSelectFeature(f.id)}
+                  onClick={() => this.props.map.collections!.handleSelectFeature(f.id)}
                   onMouseEnter={() => {
-                    const { imagery, hovered } = this.props.map.collections
-                    hovered.push(imagery.getArray().find(i => i.getId() === f.id))
+                    const { imagery, hovered } = this.props.map.collections!
+                    const feature = imagery.getArray().find(i => i.getId() === f.id)
+                    if (!feature) {
+                      throw new Error('Could not find hovered feature in imagery!')
+                    }
+                    hovered.push(feature)
                   }}
-                  onMouseLeave={() => this.props.map.collections.hovered.clear()}
+                  onMouseLeave={() => this.props.map.collections && this.props.map.collections.hovered.clear()}
                 >
                   <td>{f.properties && f.properties.sensorName}</td>
                   <td>{f.properties && moment.utc(f.properties.acquiredDate).format(DATETIME_FORMAT)}</td>
@@ -178,8 +196,8 @@ export class ImagerySearchList extends React.Component<Props, State> {
     return provider ? provider.name : null
   }
 
-  private getFeatureIds(collection: ol.Collection): string[] {
-    return collection.getArray().map(f => f.getId())
+  private getFeatureIds(collection: OLCollection<OLFeature>): string[] {
+    return collection.getArray().map(f => f.getId()) as string[]
   }
 
   private scrollToSelected() {
@@ -215,15 +233,15 @@ export class ImagerySearchList extends React.Component<Props, State> {
     }
   }
 
-  private setHoveredIds(event?: ol.Select.Event): void {
+  private setHoveredIds(event?: OLEvent): void {
     this.setState((_, props) => ({
-      hoveredIds: this.getFeatureIds(event ? event.target : props.map.collections.hovered),
+      hoveredIds: this.getFeatureIds(event ? (event.target as OLCollection<OLFeature>) : props.map.collections!.hovered),
     }))
   }
 
-  private setSelectedIds(event?: ol.Select.Event): void {
+  private setSelectedIds(event?: OLEvent): void {
     this.setState((_, props) => ({
-      selectedIds: this.getFeatureIds(event ? event.target : props.map.collections.selected),
+      selectedIds: this.getFeatureIds(event ? (event.target as OLCollection<OLFeature>) : props.map.collections!.selected),
     }), this.scrollToSelected)
    }
 

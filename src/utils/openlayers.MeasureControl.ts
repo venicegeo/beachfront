@@ -37,7 +37,7 @@ export class MeasureControl extends Control {
   private _isOpen: boolean
   private _distanceInMeters: number
 
-  constructor(className) {
+  constructor(className: string) {
     const element = document.createElement('div')
     super({ element })
     element.className = `${className || ''} ol-unselectable ol-control`
@@ -180,7 +180,7 @@ function generateDialog() {
   return dialog
 }
 
-function generateInteraction(drawLayer) {
+function generateInteraction(drawLayer: ol.layer.Vector) {
   return new Draw({
     source: drawLayer.getSource(),
     maxPoints: 2,

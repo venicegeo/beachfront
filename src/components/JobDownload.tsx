@@ -27,10 +27,10 @@ interface Props {
   className?: string
   isHover: boolean
   jobId: string
-  onComplete()
-  onError(err: any)
-  onProgress(loaded: number, total: number)
-  onStart()
+  onComplete: () => void
+  onError: (err: any) => void
+  onProgress: (loaded: number, total: number) => void
+  onStart: () => void
 }
 
 interface State {
@@ -46,6 +46,11 @@ interface DownloadType {
   icon: string
   mimetype: string
   name: string
+}
+
+type Download = {
+  loaded?: number
+  total?: number
 }
 
 const JobDownloadErrors = (props: any) => {
@@ -89,7 +94,7 @@ export class JobDownload extends React.Component<Props, State> {
     },
   ]
 
-  downloads = {}
+  downloads: {[key: string]: Download} = {}
 
   constructor(props: Props) {
     super(props)
@@ -195,7 +200,7 @@ export class JobDownload extends React.Component<Props, State> {
     this.setState({ errors: [] })
   }
 
-  private onComplete(key) {
+  private onComplete(key: string) {
     delete this.downloads[key]
     this.setState({
       isActive: this.isDownloading || this.props.isHover && this.state.isOpen,
@@ -208,7 +213,7 @@ export class JobDownload extends React.Component<Props, State> {
     }
   }
 
-  private onError(key, error) {
+  private onError(key: string, error: any) {
     console.warn(`Downloading ${key} failed: ${error.message}`)
     delete this.downloads[key]
     this.setState({
@@ -223,13 +228,13 @@ export class JobDownload extends React.Component<Props, State> {
     }
   }
 
-  private onProgress(key, loaded, total) {
+  private onProgress(key: string, loaded: number, total: number) {
     this.downloads[key] = { loaded, total }
     this.setState({ percentage: this.percentage })
     this.props.onProgress(this.loaded, this.total)
   }
 
-  private onStart(key) {
+  private onStart(key: string) {
     this.downloads[key] = {}
     this.setState({
       isActive: true,

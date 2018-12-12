@@ -17,18 +17,20 @@
 import axios from 'axios'
 import MockAdapter from 'axios-mock-adapter'
 import thunk from 'redux-thunk'
-import configureStore from 'redux-mock-store'
+import configureStore, {MockStoreEnhanced} from 'redux-mock-store'
 import * as sinon from 'sinon'
+import {SinonSpy} from 'sinon'
 import {ALGORITHM_ENDPOINT} from '../../src/config'
 import {algorithmsActions, algorithmsTypes} from '../../src/actions/algorithmsActions'
 import {algorithmsInitialState} from '../../src/reducers/algorithmsReducer'
 import {getClient} from '../../src/api/session'
+import {AppState, initialState} from '../../src/store'
 
 const mockStore = configureStore([thunk])
-let store
+let store: MockStoreEnhanced<AppState>
 
 const mockAdapter = new MockAdapter(axios)
-let clientSpies = {
+let clientSpies: {[key: string]: SinonSpy} = {
   get: sinon.spy(getClient(), 'get'),
 }
 
@@ -36,10 +38,7 @@ describe('algorithmsActions', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     sessionStorage.clear()
-
-    store = mockStore({
-      algorithms: algorithmsInitialState,
-    })
+    store = mockStore(initialState) as any
   })
 
   afterEach(() => {
@@ -74,7 +73,7 @@ describe('algorithmsActions', () => {
       }
       mockAdapter.onGet(ALGORITHM_ENDPOINT).reply(200, mockResponse)
 
-      await store.dispatch(algorithmsActions.fetch())
+      await store.dispatch(algorithmsActions.fetch() as any)
 
       expect(clientSpies.get.callCount).toEqual(1)
       expect(clientSpies.get.args[0]).toEqual([ALGORITHM_ENDPOINT])
@@ -97,7 +96,7 @@ describe('algorithmsActions', () => {
     test('request error', async () => {
       mockAdapter.onGet(ALGORITHM_ENDPOINT).reply(400)
 
-      await store.dispatch(algorithmsActions.fetch())
+      await store.dispatch(algorithmsActions.fetch() as any)
 
       const actions = store.getActions()
       expect(actions.length).toEqual(2)
@@ -109,7 +108,7 @@ describe('algorithmsActions', () => {
     test('non-request error', async () => {
       mockAdapter.onGet(ALGORITHM_ENDPOINT).reply(200)
 
-      await store.dispatch(algorithmsActions.fetch())
+      await store.dispatch(algorithmsActions.fetch() as any)
 
       const actions = store.getActions()
       expect(actions.length).toEqual(2)
@@ -121,7 +120,7 @@ describe('algorithmsActions', () => {
 
   describe('serialize()', () => {
     test('success', async () => {
-      await store.dispatch(algorithmsActions.serialize())
+      await store.dispatch(algorithmsActions.serialize() as any)
 
       expect(sessionStorage.setItem).toHaveBeenCalledTimes(1)
       expect(sessionStorage.setItem).toHaveBeenCalledWith(
@@ -138,7 +137,7 @@ describe('algorithmsActions', () => {
   describe('deserialize()', () => {
     test('success', async () => {
       // Mock local storage.
-      const mockSavedRecords = []
+      const mockSavedRecords: any[] = []
       sessionStorage.setItem('algorithms_records', JSON.stringify(mockSavedRecords))
 
       await store.dispatch(algorithmsActions.deserialize())

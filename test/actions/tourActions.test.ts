@@ -15,23 +15,21 @@
  */
 
 import thunk from 'redux-thunk'
-import configureStore from 'redux-mock-store'
+import configureStore, {MockStoreEnhanced} from 'redux-mock-store'
 import * as sinon from 'sinon'
 import {SinonStub} from 'sinon'
 import {tourActions, tourTypes} from '../../src/actions/tourActions'
 import {tourInitialState} from '../../src/reducers/tourReducer'
 import * as domUtils from '../../src/utils/domUtils'
+import {AppState, initialState} from '../../src/store'
 
 const mockStore = configureStore([thunk])
-let store
+let store: MockStoreEnhanced<AppState>
 
 describe('tourActions', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-
-    store = mockStore({
-      tour: tourInitialState,
-    })
+    store = mockStore(initialState) as any
   })
 
   describe('setSteps()', () => {
@@ -93,16 +91,17 @@ describe('tourActions', () => {
       ]
 
       store = mockStore({
+        ...initialState,
         tour: {
           ...tourInitialState,
           steps: mockSteps,
         },
-      })
+      }) as any
 
-      await store.dispatch(tourActions.goToStep(2))
+      await store.dispatch(tourActions.goToStep(2) as any)
 
-      expect(mockSteps[0].after.callCount).toEqual(1)
-      expect(mockSteps[1].before.callCount).toEqual(1)
+      expect(mockSteps[0].after!.callCount).toEqual(1)
+      expect(mockSteps[1].before!.callCount).toEqual(1)
       expect(scrollIntoViewStub.callCount).toEqual(1)
 
       expect(store.getActions()).toEqual([
@@ -128,13 +127,14 @@ describe('tourActions', () => {
       ]
 
       store = mockStore({
+        ...initialState,
         tour: {
           ...tourInitialState,
           steps: mockSteps,
         },
-      })
+      }) as any
 
-      await store.dispatch(tourActions.goToStep(2))
+      await store.dispatch(tourActions.goToStep(2) as any)
 
       expect(store.getActions()).toEqual([
         { type: tourTypes.TOUR_STEP_CHANGING },
@@ -159,13 +159,14 @@ describe('tourActions', () => {
       ]
 
       store = mockStore({
+        ...initialState,
         tour: {
           ...tourInitialState,
           steps: mockSteps,
         },
-      })
+      }) as any
 
-      await store.dispatch(tourActions.goToStep(2))
+      await store.dispatch(tourActions.goToStep(2) as any)
 
       expect(store.getActions()).toEqual([
         { type: tourTypes.TOUR_STEP_CHANGING },
@@ -178,19 +179,21 @@ describe('tourActions', () => {
 
     test('do nothing if already changing steps', async () => {
       store = mockStore({
+        ...initialState,
         tour: {
           ...tourInitialState,
           changing: true,
         },
-      })
+      }) as any
 
-      await store.dispatch(tourActions.goToStep(2))
+      await store.dispatch(tourActions.goToStep(2) as any)
 
       expect(store.getActions()).toEqual([])
     })
 
     test('show alert if an error occurs when trying to step backwards', async () => {
       store = mockStore({
+        ...initialState,
         tour: {
           ...tourInitialState,
           steps: [
@@ -204,11 +207,11 @@ describe('tourActions', () => {
           ],
           step: 2,
         },
-      })
+      }) as any
 
       const alertSpy = sinon.spy(window, 'alert')
 
-      await store.dispatch(tourActions.goToStep(1))
+      await store.dispatch(tourActions.goToStep(1) as any)
 
       expect(alertSpy.callCount).toEqual(1)
 
@@ -225,6 +228,7 @@ describe('tourActions', () => {
 
     test('handle undefined "before" and "after" gracefully', async () => {
       store = mockStore({
+        ...initialState,
         tour: {
           ...tourInitialState,
           steps: [
@@ -232,9 +236,9 @@ describe('tourActions', () => {
             { step: 2 },
           ],
         },
-      })
+      }) as any
 
-      await store.dispatch(tourActions.goToStep(2))
+      await store.dispatch(tourActions.goToStep(2) as any)
 
       expect(store.getActions()).toEqual([
         { type: tourTypes.TOUR_STEP_CHANGING },
@@ -263,18 +267,19 @@ describe('tourActions', () => {
       ]
 
       store = mockStore({
+        ...initialState,
         tour: {
           ...tourInitialState,
           steps: mockSteps,
         },
-      })
+      }) as any
 
-      await store.dispatch(tourActions.goToStep(3))
+      await store.dispatch(tourActions.goToStep(3) as any)
 
-      expect(mockSteps[0].after.callCount).toEqual(1)
-      expect(mockSteps[1].before.callCount).toEqual(0)
-      expect(mockSteps[1].after.callCount).toEqual(0)
-      expect(mockSteps[2].before.callCount).toEqual(1)
+      expect(mockSteps[0].after!.callCount).toEqual(1)
+      expect(mockSteps[1].before!.callCount).toEqual(0)
+      expect(mockSteps[1].after!.callCount).toEqual(0)
+      expect(mockSteps[2].before!.callCount).toEqual(1)
 
       expect(store.getActions()).toEqual([
         { type: tourTypes.TOUR_STEP_CHANGING },

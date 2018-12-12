@@ -14,7 +14,7 @@
  * limitations under the License.
  **/
 
-export function paginate({startIndex, count, totalCount}) {
+export function paginate({ startIndex, count, totalCount }: { startIndex: number, count: number, totalCount: number}) {
   return {
     page: Math.ceil(startIndex / count) + 1,
     pages: Math.ceil(totalCount / count),

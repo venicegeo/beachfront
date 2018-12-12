@@ -22,8 +22,8 @@ interface Props {
   name:      string
   dateStart: string
   dateStop:  string
-  onNameChange(name: string)
-  onDateChange(dateFrom: string, dateTo: string)
+  onNameChange: (name: string) => void
+  onDateChange: (dateFrom: string, dateTo: string) => void
 }
 
 export const NewProductLineDetails = ({ name, dateStart, dateStop, onNameChange, onDateChange }: Props) => (

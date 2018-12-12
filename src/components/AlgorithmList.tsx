@@ -27,8 +27,8 @@ type PassedProps = {
   selectedId?: string
   warningHeading?: string
   warningMessage?: string
-  onSelect?(algorithm: beachfront.Algorithm)
-  onSubmit?(algorithm: beachfront.Algorithm)
+  onSelect?: (algorithm: beachfront.Algorithm) => void
+  onSubmit?: (algorithm: beachfront.Algorithm) => void
 }
 type Props = StateProps & PassedProps
 
@@ -47,12 +47,12 @@ export const AlgorithmList = (props: Props) => (
             onSelect={props.onSelect}
             onSubmit={props.onSubmit}
             errorElement={props.jobs.createJobError && (
-            <div className={styles.errorMessage}>
-              <h4><i className="fa fa-warning"/> Algorithm failed</h4>
-              <p>{props.jobs.createJobError.response.data}</p>
-              <pre>{props.jobs.createJobError.stack}</pre>
-            </div>
-          )}
+              <div className={styles.errorMessage}>
+                <h4><i className="fa fa-warning"/> Algorithm failed</h4>
+                <p>{props.jobs.createJobError.response.data}</p>
+                <pre>{props.jobs.createJobError.stack}</pre>
+              </div>
+            )}
           />
         </li>
       ))}

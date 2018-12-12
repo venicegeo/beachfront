@@ -17,18 +17,20 @@
 import axios from 'axios'
 import MockAdapter from 'axios-mock-adapter'
 import thunk from 'redux-thunk'
-import configureStore from 'redux-mock-store'
+import configureStore, {MockStoreEnhanced} from 'redux-mock-store'
 import * as sinon from 'sinon'
+import {SinonSpy} from 'sinon'
 import {catalogActions, catalogTypes} from '../../src/actions/catalogActions'
 import {catalogInitialState} from '../../src/reducers/catalogReducer'
 import {IMAGERY_ENDPOINT, SCENE_TILE_PROVIDERS} from '../../src/config'
 import {getClient} from '../../src/api/session'
+import {AppState, initialState} from '../../src/store'
 
 const mockStore = configureStore([thunk])
-let store
+let store: MockStoreEnhanced<AppState>
 
 const mockAdapter = new MockAdapter(axios)
-let clientSpies = {
+let clientSpies: {[key: string]: SinonSpy} = {
   get: sinon.spy(getClient(), 'get'),
 }
 
@@ -38,9 +40,7 @@ describe('catalogActions', () => {
     sessionStorage.clear()
     localStorage.clear()
 
-    store = mockStore({
-      catalog: catalogInitialState,
-    })
+    store = mockStore(initialState) as any
   })
 
   afterEach(() => {
@@ -100,11 +100,11 @@ describe('catalogActions', () => {
   describe('search()', () => {
     test('success', async () => {
       store = mockStore({
-        catalog: catalogInitialState,
+        ...initialState,
         map: {
           bbox: [181, 0, 182, 1],
         },
-      })
+      }) as any
 
       const state = store.getState()
 
@@ -118,7 +118,7 @@ describe('catalogActions', () => {
       const searchUrl = getSearchUrl(state)
       mockAdapter.onGet(searchUrl).reply(200, mockResponse)
 
-      await store.dispatch(catalogActions.search())
+      await store.dispatch(catalogActions.search() as any)
 
       expect(clientSpies.get.callCount).toEqual(1)
       expect(clientSpies.get.args[0]).toEqual([
@@ -158,6 +158,7 @@ describe('catalogActions', () => {
 
     test('tile provider error', async () => {
       store = mockStore({
+        ...initialState,
         catalog: {
           ...catalogInitialState,
           searchCriteria: {
@@ -168,9 +169,9 @@ describe('catalogActions', () => {
         map: {
           bbox: [0, 1, 2, 3],
         },
-      })
+      }) as any
 
-      await store.dispatch(catalogActions.search())
+      await store.dispatch(catalogActions.search() as any)
 
       const actions = store.getActions()
       expect(actions[0]).toEqual({ type: catalogTypes.CATALOG_SEARCHING })
@@ -180,6 +181,7 @@ describe('catalogActions', () => {
 
     test('request error', async () => {
       store = mockStore({
+        ...initialState,
         catalog: {
           ...catalogInitialState,
           client: getClient(),
@@ -187,12 +189,12 @@ describe('catalogActions', () => {
         map: {
           bbox: [0, 1, 2, 3],
         },
-      })
+      }) as any
 
       const state = store.getState()
       mockAdapter.onGet(getSearchUrl(state)).reply(400)
 
-      await store.dispatch(catalogActions.search())
+      await store.dispatch(catalogActions.search() as any)
 
       const actions = store.getActions()
       expect(actions.length).toEqual(2)
@@ -203,6 +205,7 @@ describe('catalogActions', () => {
 
     test('invalid response data', async () => {
       store = mockStore({
+        ...initialState,
         catalog: {
           ...catalogInitialState,
           client: getClient(),
@@ -210,12 +213,12 @@ describe('catalogActions', () => {
         map: {
           bbox: [0, 1, 2, 3],
         },
-      })
+      }) as any
 
       const state = store.getState()
       mockAdapter.onGet(getSearchUrl(state)).reply(200)
 
-      await store.dispatch(catalogActions.search())
+      await store.dispatch(catalogActions.search() as any)
 
       const actions = store.getActions()
       expect(actions.length).toEqual(2)
@@ -228,14 +231,15 @@ describe('catalogActions', () => {
   describe('serialize()', () => {
     test('success', async () => {
       store = mockStore({
+        ...initialState,
         catalog: {
           ...catalogInitialState,
           searchResults: ['a', 'b', 'c'],
           apiKey: 'a',
         },
-      })
+      }) as any
 
-      await store.dispatch(catalogActions.serialize())
+      await store.dispatch(catalogActions.serialize() as any)
 
       const state = store.getState()
 
@@ -337,7 +341,7 @@ describe('catalogActions', () => {
   })
 })
 
-function getSearchUrl(state) {
-  const sceneTileProvider = SCENE_TILE_PROVIDERS.find(p => p.prefix === state.catalog.searchCriteria.source)
+function getSearchUrl(state: AppState) {
+  const sceneTileProvider = SCENE_TILE_PROVIDERS.find(p => p.prefix === state.catalog.searchCriteria.source)!
   return `${IMAGERY_ENDPOINT}/${sceneTileProvider.catalogSection}/discover/${state.catalog.searchCriteria.source}`
 }

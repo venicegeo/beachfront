@@ -14,11 +14,12 @@
  * limitations under the License.
  **/
 
+import {Dispatch} from 'redux'
 import {AppState} from '../store'
 import {IMAGERY_ENDPOINT, SCENE_TILE_PROVIDERS} from '../config'
 import {getClient} from '../api/session'
 import {wrap} from '../utils/math'
-import {catalogInitialState} from '../reducers/catalogReducer'
+import {catalogInitialState, CatalogState} from '../reducers/catalogReducer'
 
 export const catalogTypes = {
   CATALOG_INITIALIZING: 'CATALOG_INITIALIZING',
@@ -46,6 +47,14 @@ export interface CatalogUpdateSearchCriteriaArgs {
   source?: string
 }
 
+type SearchResponse = {
+  data: {
+    features: Array<{
+      id: string
+    }>
+  }
+}
+
 export const catalogActions = {
   setApiKey(apiKey: string) {
     return {
@@ -66,8 +75,8 @@ export const catalogActions = {
   },
 
   search(args: CatalogSearchArgs = {startIndex: 0, count: 100}) {
-    return async (dispatch, getState) => {
-      const state: AppState = getState()
+    return async (dispatch: Dispatch<CatalogState>, getState: () => AppState) => {
+      const state = getState()
 
       if (!state.map.bbox) {
         console.error('Unable to perform search: bbox is null!')
@@ -102,23 +111,22 @@ export const catalogActions = {
             acquiredDate: new Date(state.catalog.searchCriteria.dateFrom).toISOString(),
             maxAcquiredDate: new Date(state.catalog.searchCriteria.dateTo).toISOString(),
           },
-        })
+        }) as SearchResponse
 
         // HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK
         console.warn('(catalog:search) Normalizing bf-ia-broker response')
 
-        const images = response.data
-        images.features.forEach(f => {
+        response.data.features.forEach(f => {
           f.id = state.catalog.searchCriteria.source + ':' + f.id
         })
 
         dispatch({
           type: catalogTypes.CATALOG_SEARCH_SUCCESS,
           searchResults: {
-            images,
-            count: images.features.length,
+            images: response.data,
+            count: response.data.features.length,
             startIndex: 0,
-            totalCount: images.features.length,
+            totalCount: response.data.features.length,
           },
         })
       } catch (error) {
@@ -131,8 +139,8 @@ export const catalogActions = {
   },
 
   serialize() {
-    return (dispatch, getState) => {
-      const state: AppState = getState()
+    return (dispatch: Dispatch<CatalogState>, getState: () => AppState) => {
+      const state = getState()
 
       sessionStorage.setItem('searchCriteria', JSON.stringify(state.catalog.searchCriteria))
       sessionStorage.setItem('searchResults', JSON.stringify(state.catalog.searchResults))

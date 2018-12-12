@@ -14,15 +14,15 @@
  * limitations under the License.
  **/
 
+const styles: any = require('./BrowserSupport.css')
+
 import * as React from 'react'
+import {detect} from 'detect-browser'
 import MAP = require('lodash/map')
 import {SUPPORTED_BROWSERS} from '../config'
 
-const styles: any = require('./BrowserSupport.css')
-const {detect} = require('detect-browser')
-
 interface State {
-  browser: any
+  browser: ReturnType<typeof detect>
   supported: boolean
   hide: boolean
 }
@@ -34,15 +34,15 @@ function getState(): State {
     hide: JSON.parse(localStorage.getItem('dismissBrowserSupport') || 'false'),
   }
 
-  if (rc.browser) {
+  if (rc.browser && rc.browser.name && rc.browser.version) {
     let version = SUPPORTED_BROWSERS[rc.browser.name]
-    rc.supported = version && parseInt(rc.browser.version) >= version
+    rc.supported = (version !== 0) && (parseInt(rc.browser.version) >= version)
   }
 
   return rc
 }
 
-function nameAndVersion(name, version) {
+function nameAndVersion(name: string, version: number) {
   return `${name.charAt(0).toUpperCase()}${name.substring(1)} ${version}`
 }
 
@@ -95,8 +95,8 @@ export class BrowserSupport extends React.Component<{}, State> {
   }
 
   private browserVersion(browser = this.state.browser): string {
-    return browser
-      ? nameAndVersion(browser.name, browser.version)
+    return (browser && browser.name && browser.version)
+      ? nameAndVersion(browser.name, parseInt(browser.version))
       : 'which we could not identify'
   }
 

@@ -23,12 +23,6 @@ const DEFAULT_ENTRY_URL = '/'
 let _client: AxiosInstance | null = null
 let _onExpired: (() => void) | null = null
 
-export function destroy(): void {
-  _client = null
-  _onExpired = null
-  sessionStorage.clear()
-}
-
 export function initialize(): boolean {
 
   // User has already logged on

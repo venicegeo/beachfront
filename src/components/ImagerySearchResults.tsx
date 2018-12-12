@@ -24,7 +24,7 @@ import {AppState} from '../store'
 type StateProps = ReturnType<typeof mapStateToProps>
 type PassedProps = {
   className?: string
-  onPageChange(args: {startIndex: number, count: number})
+  onPageChange: (args: {startIndex: number, count: number}) => void
 }
 type Props = StateProps & PassedProps
 
@@ -43,7 +43,7 @@ export class ImagerySearchResults extends React.Component<Props> {
     )
   }
 
-  private renderContent(imagery) {
+  private renderContent(imagery: beachfront.ImageryCatalogPage) {
     if (this.props.catalog.isSearching) {
       return <div className={styles.searching}>
         <span>Searching for Imagery&hellip;</span>

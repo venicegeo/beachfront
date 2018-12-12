@@ -29,10 +29,10 @@ interface Props {
   icon?: string
   jobId: string
   mimetype?: string
-  onComplete()
-  onError(error: any)
-  onProgress(loaded: number, total: number)
-  onStart()
+  onComplete: () => void
+  onError: (error: any) => void
+  onProgress: (loaded: number, total: number) => void
+  onStart: () => void
 }
 
 interface State {
@@ -129,7 +129,7 @@ export class FileDownloadLink extends React.Component<Props, State> {
     this.props.onComplete()
   }
 
-  private handleError(error) {
+  private handleError(error: any) {
     this.setState({ isDownloading: false })
     this.cancel = null
 
@@ -138,9 +138,12 @@ export class FileDownloadLink extends React.Component<Props, State> {
     }
   }
 
-  private handleProgress({ loaded, total }) {
-    this.setState({ loaded, total })
-    this.props.onProgress(loaded, total)
+  private handleProgress(args: { loaded: number, total: number }) {
+    this.setState({
+      loaded: args.loaded,
+      total: args.total,
+    })
+    this.props.onProgress(args.loaded, args.total)
   }
 
   private triggerDownload() {

@@ -122,10 +122,10 @@ declare namespace NodeJS {
 }
 
 interface NodeRequire {
-  (path: string)
+  (path: string): void
   context(path: string, recursive: boolean, pattern?: RegExp): {
     keys(): string[]
-    (...v: any[]),
+    (...v: any[]): void,
   },
 }
 
