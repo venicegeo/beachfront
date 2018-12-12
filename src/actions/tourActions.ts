@@ -98,7 +98,7 @@ export const tourActions = {
 
         dispatch({
           type: tourTypes.TOUR_STEP_CHANGE_ERROR,
-          error: error.message,
+          error,
         })
 
         return

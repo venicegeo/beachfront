@@ -51,13 +51,13 @@ const SourceName = (props: any) => {
 }
 
 const UserTourErrorMessage = (props: {
-  message: string,
-  tour: UserTour,
+  error: Error | null,
+  onDismiss: () => any
 }) => {
-  return props.message ? <div className={styles.error}>
-    <div className={styles.close} title="Dismiss" onClick={props.tour.props.actions.tour.end}>&times;</div>
+  return props.error ? <div className={styles.error}>
+    <div className={styles.close} title="Dismiss" onClick={props.onDismiss}>&times;</div>
     <div className={styles.header}>Oops!</div>
-    <div className={styles.message}>{props.message}</div>
+    <div className={styles.message}>{props.error.message}</div>
   </div> : null
 }
 
@@ -622,7 +622,7 @@ export class UserTour extends React.Component<Props> {
             steps={this.props.tour.steps}
           />
         </div>
-        <UserTourErrorMessage message={this.props.tour.error || 'An unknown error occurred.'} tour={this}/>
+        <UserTourErrorMessage error={this.props.tour.error} onDismiss={this.props.actions.tour.end}/>
       </div>
     )
   }

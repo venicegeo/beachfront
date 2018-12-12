@@ -20,7 +20,7 @@ export interface TourState {
   inProgress: boolean
   changing: boolean
   step: number
-  error: string | null
+  error: Error | null
   steps: TourStep[]
 }
 
