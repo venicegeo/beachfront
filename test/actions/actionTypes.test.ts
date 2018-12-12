@@ -27,15 +27,15 @@ import {userTypes} from '../../src/actions/userActions'
 describe('action types', () => {
   test('no duplicate types', () => {
     const allTypes: string[] = []
-    Object.keys(algorithmsTypes).forEach(key => allTypes.push(algorithmsTypes[key]))
-    Object.keys(apiStatusTypes).forEach(key => allTypes.push(apiStatusTypes[key]))
-    Object.keys(catalogTypes).forEach(key => allTypes.push(catalogTypes[key]))
-    Object.keys(jobsTypes).forEach(key => allTypes.push(jobsTypes[key]))
-    Object.keys(mapTypes).forEach(key => allTypes.push(mapTypes[key]))
-    Object.keys(productLinesTypes).forEach(key => allTypes.push(productLinesTypes[key]))
-    Object.keys(routeTypes).forEach(key => allTypes.push(routeTypes[key]))
-    Object.keys(tourTypes).forEach(key => allTypes.push(tourTypes[key]))
-    Object.keys(userTypes).forEach(key => allTypes.push(userTypes[key]))
+    Object.keys(algorithmsTypes).forEach(key => allTypes.push((<any>algorithmsTypes)[key]))
+    Object.keys(apiStatusTypes).forEach(key => allTypes.push((<any>apiStatusTypes)[key]))
+    Object.keys(catalogTypes).forEach(key => allTypes.push((<any>catalogTypes)[key]))
+    Object.keys(jobsTypes).forEach(key => allTypes.push((<any>jobsTypes)[key]))
+    Object.keys(mapTypes).forEach(key => allTypes.push((<any>mapTypes)[key]))
+    Object.keys(productLinesTypes).forEach(key => allTypes.push((<any>productLinesTypes)[key]))
+    Object.keys(routeTypes).forEach(key => allTypes.push((<any>routeTypes)[key]))
+    Object.keys(tourTypes).forEach(key => allTypes.push((<any>tourTypes)[key]))
+    Object.keys(userTypes).forEach(key => allTypes.push((<any>userTypes)[key]))
     allTypes.sort()
 
     allTypes.forEach((value: any, index: number) => {
@@ -48,15 +48,15 @@ describe('action types', () => {
   })
 
   test('keys match values', () => {
-    Object.keys(algorithmsTypes).forEach(key => expect(key).toEqual(algorithmsTypes[key]))
-    Object.keys(apiStatusTypes).forEach(key => expect(key).toEqual(apiStatusTypes[key]))
-    Object.keys(catalogTypes).forEach(key => expect(key).toEqual(catalogTypes[key]))
-    Object.keys(jobsTypes).forEach(key => expect(key).toEqual(jobsTypes[key]))
-    Object.keys(mapTypes).forEach(key => expect(key).toEqual(mapTypes[key]))
-    Object.keys(productLinesTypes).forEach(key => expect(key).toEqual(productLinesTypes[key]))
-    Object.keys(routeTypes).forEach(key => expect(key).toEqual(routeTypes[key]))
-    Object.keys(tourTypes).forEach(key => expect(key).toEqual(tourTypes[key]))
-    Object.keys(userTypes).forEach(key => expect(key).toEqual(userTypes[key]))
+    Object.keys(algorithmsTypes).forEach(key => expect(key).toEqual((<any>algorithmsTypes)[key]))
+    Object.keys(apiStatusTypes).forEach(key => expect(key).toEqual((<any>apiStatusTypes)[key]))
+    Object.keys(catalogTypes).forEach(key => expect(key).toEqual((<any>catalogTypes)[key]))
+    Object.keys(jobsTypes).forEach(key => expect(key).toEqual((<any>jobsTypes)[key]))
+    Object.keys(mapTypes).forEach(key => expect(key).toEqual((<any>mapTypes)[key]))
+    Object.keys(productLinesTypes).forEach(key => expect(key).toEqual((<any>productLinesTypes)[key]))
+    Object.keys(routeTypes).forEach(key => expect(key).toEqual((<any>routeTypes)[key]))
+    Object.keys(tourTypes).forEach(key => expect(key).toEqual((<any>tourTypes)[key]))
+    Object.keys(userTypes).forEach(key => expect(key).toEqual((<any>userTypes)[key]))
   })
 
   test('correct prefixes', () => {

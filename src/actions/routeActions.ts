@@ -16,7 +16,7 @@
 
 import {generateRoute} from '../utils/routeUtils'
 
-export const routeTypes: ActionTypes = {
+export const routeTypes = {
   ROUTE_CHANGED: 'ROUTE_CHANGED',
 }
 

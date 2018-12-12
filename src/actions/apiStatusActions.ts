@@ -19,7 +19,7 @@ import {getClient} from '../api/session'
 import {AppState} from '../store'
 import {apiStatusInitialState, ApiStatusState} from '../reducers/apiStatusReducer'
 
-export const apiStatusTypes: ActionTypes = {
+export const apiStatusTypes = {
   API_STATUS_FETCHING: 'API_STATUS_FETCHING',
   API_STATUS_FETCH_SUCCESS: 'API_STATUS_FETCH_SUCCESS',
   API_STATUS_FETCH_ERROR: 'API_STATUS_FETCH_ERROR',

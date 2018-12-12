@@ -20,7 +20,7 @@ import {getClient} from '../api/session'
 import {AppState} from '../store'
 import {algorithmsInitialState, AlgorithmsState} from '../reducers/algorithmsReducer'
 
-export const algorithmsTypes: ActionTypes = {
+export const algorithmsTypes = {
   ALGORITHMS_FETCHING: 'ALGORITHMS_FETCHING',
   ALGORITHMS_FETCH_SUCCESS: 'ALGORITHMS_FETCH_SUCCESS',
   ALGORITHMS_FETCH_ERROR: 'ALGORITHMS_FETCH_ERROR',
