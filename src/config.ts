@@ -57,22 +57,6 @@ export const SCENE_TILE_PROVIDERS = [
     provider: 'Planet',
     url: `https://tiles{0-3}.${PLANET_BASE_URL}/v1/experimental/tiles/Landsat8L1G/__SCENE_ID__/{z}/{x}/{y}.png?api_key=__API_KEY__`,
   },
-  {
-    attributions: '&copy; <a href="https://www.planet.com" target="_blank" rel="noopener">Planet Labs (RapidEye)</a>',
-    maxZoom:  13,
-    name: 'RapidEye',
-    prefix: 'rapideye',
-    provider: 'Planet',
-    url: `https://tiles{0-3}.${PLANET_BASE_URL}/v1/experimental/tiles/REOrthoTile/__SCENE_ID__/{z}/{x}/{y}.png?api_key=__API_KEY__`,
-  },
-  {
-    attributions: '&copy; <a href="https://www.planet.com" target="_blank" rel="noopener">Planet Labs (PlanetScope)</a>',
-    maxZoom:  13,
-    name: 'PlanetScope',
-    prefix: 'planetscope',
-    provider: 'Planet',
-    url: `https://tiles{0-3}.${PLANET_BASE_URL}/v1/experimental/tiles/PSOrthoTile/__SCENE_ID__/{z}/{x}/{y}.png?api_key=__API_KEY__`,
-  },
 ]
 
 export const TOUR = {
