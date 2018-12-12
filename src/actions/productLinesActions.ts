@@ -20,7 +20,7 @@ import {JOB_ENDPOINT, PRODUCTLINE_ENDPOINT} from '../config'
 import {Extent} from '../utils/geometries'
 import {ProductLinesState} from '../reducers/productLinesReducer'
 
-export const productLinesTypes = {
+export const productLinesTypes: ActionTypes = {
   PRODUCT_LINES_FETCHING: 'PRODUCT_LINES_FETCHING',
   PRODUCT_LINES_FETCH_SUCCESS: 'PRODUCT_LINES_FETCH_SUCCESS',
   PRODUCT_LINES_FETCH_ERROR: 'PRODUCT_LINES_FETCH_ERROR',

@@ -19,7 +19,7 @@ import {getClient} from '../api/session'
 import {JOB_ENDPOINT} from '../config'
 import {JobsState} from '../reducers/jobsReducer'
 
-export const jobsTypes = {
+export const jobsTypes: ActionTypes = {
   JOBS_FETCHING: 'JOBS_FETCHING',
   JOBS_FETCH_SUCCESS: 'JOBS_FETCH_SUCCESS',
   JOBS_FETCH_ERROR: 'JOBS_FETCH_ERROR',

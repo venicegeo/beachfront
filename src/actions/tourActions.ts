@@ -19,7 +19,7 @@ import {scrollIntoView} from '../utils/domUtils'
 import {AppState} from '../store'
 import {TourState} from '../reducers/tourReducer'
 
-export const tourTypes = {
+export const tourTypes: ActionTypes = {
   TOUR_STEPS_UPDATED: 'TOUR_STEPS_UPDATED',
   TOUR_STARTED: 'TOUR_STARTED',
   TOUR_ENDED: 'TOUR_ENDED',
