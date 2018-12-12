@@ -121,7 +121,8 @@ export class CreateJob extends React.Component<Props, State> {
 
           {!this.props.map.bbox && (
             <li className={styles.placeholder}>
-              <h3>Draw bounding box to search for imagery</h3>
+              <h3>Draw a bounding box to search for imagery</h3>
+              <h4>Click once to begin drawing the box, and click again to complete it</h4>
             </li>
           )}
         </ul>
