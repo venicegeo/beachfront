@@ -26,7 +26,7 @@ export const STATUS_CANCELLED = 'Cancelled'
 export const STATUS_ACTIVATING = 'Activating'
 export const STATUS_SUBMITTED = 'Submitted'
 
-export const SOURCE_DEFAULT = 'rapideye'
+export const SOURCE_DEFAULT = 'landsat'
 
 // Feature Properties
 export const TYPE_JOB = 'JOB'
