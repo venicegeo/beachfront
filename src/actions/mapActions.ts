@@ -21,7 +21,7 @@ import {Extent, Point} from '../utils/geometries'
 import {Dispatch} from 'redux'
 import {MapCollections, MapState} from '../reducers/mapReducer'
 
-export const mapTypes = {
+export const mapTypes: ActionTypes = {
   MAP_INITIALIZED: 'MAP_INITIALIZED',
   MAP_MODE_UPDATED: 'MAP_MODE_UPDATED',
   MAP_DETECTIONS_UPDATED: 'MAP_DETECTIONS_UPDATED',

@@ -21,7 +21,7 @@ import {getClient} from '../api/session'
 import {wrap} from '../utils/math'
 import {catalogInitialState, CatalogState} from '../reducers/catalogReducer'
 
-export const catalogTypes = {
+export const catalogTypes: ActionTypes = {
   CATALOG_INITIALIZING: 'CATALOG_INITIALIZING',
   CATALOG_INITIALIZE_SUCCESS: 'CATALOG_INITIALIZE_SUCCESS',
   CATALOG_INITIALIZE_ERROR: 'CATALOG_INITIALIZE_ERROR',

@@ -136,13 +136,11 @@ describe('tourActions', () => {
 
       await store.dispatch(tourActions.goToStep(2) as any)
 
-      expect(store.getActions()).toEqual([
-        { type: tourTypes.TOUR_STEP_CHANGING },
-        {
-          type: tourTypes.TOUR_STEP_CHANGE_ERROR,
-          error: 'after error',
-        },
-      ])
+      const actions = store.getActions()
+      expect(actions.length).toEqual(2)
+      expect(actions[0]).toEqual({ type: tourTypes.TOUR_STEP_CHANGING })
+      expect(actions[1].type).toEqual(tourTypes.TOUR_STEP_CHANGE_ERROR)
+      expect(actions[1].error).toEqual(expect.objectContaining({ message: 'after error' }))
     })
 
     test('"before" callback error', async () => {
@@ -168,13 +166,11 @@ describe('tourActions', () => {
 
       await store.dispatch(tourActions.goToStep(2) as any)
 
-      expect(store.getActions()).toEqual([
-        { type: tourTypes.TOUR_STEP_CHANGING },
-        {
-          type: tourTypes.TOUR_STEP_CHANGE_ERROR,
-          error: 'before error',
-        },
-      ])
+      const actions = store.getActions()
+      expect(actions.length).toEqual(2)
+      expect(actions[0]).toEqual({ type: tourTypes.TOUR_STEP_CHANGING })
+      expect(actions[1].type).toEqual(tourTypes.TOUR_STEP_CHANGE_ERROR)
+      expect(actions[1].error).toEqual(expect.objectContaining({ message: 'before error' }))
     })
 
     test('do nothing if already changing steps', async () => {
@@ -200,7 +196,7 @@ describe('tourActions', () => {
             {
               step: 1,
               before: () => {
-                throw Error('error')
+                throw Error('before error')
               },
             },
             { step: 2 },
@@ -215,13 +211,11 @@ describe('tourActions', () => {
 
       expect(alertSpy.callCount).toEqual(1)
 
-      expect(store.getActions()).toEqual([
-        { type: tourTypes.TOUR_STEP_CHANGING },
-        {
-          type: tourTypes.TOUR_STEP_CHANGE_ERROR,
-          error: 'error',
-        },
-      ])
+      const actions = store.getActions()
+      expect(actions.length).toEqual(2)
+      expect(actions[0]).toEqual({ type: tourTypes.TOUR_STEP_CHANGING })
+      expect(actions[1].type).toEqual(tourTypes.TOUR_STEP_CHANGE_ERROR)
+      expect(actions[1].error).toEqual(expect.objectContaining({ message: 'before error' }))
 
       alertSpy.restore()
     })

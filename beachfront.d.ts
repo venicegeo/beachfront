@@ -138,3 +138,7 @@ interface String {
 interface Array<T> {
   includes(value: any, fromIndex?: number): boolean
 }
+
+type ActionTypes = {[key: string]: string}
+
+declare module 'redux-thunk'
