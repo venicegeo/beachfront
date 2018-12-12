@@ -25,7 +25,7 @@ interface Props {
   pathname: string
   search?: string
   title?: string
-  onClick(loc: { pathname: string, search: string, hash: string })
+  onClick: (loc: { pathname: string, search: string, hash: string }) => void
 }
 
 export const Link = ({

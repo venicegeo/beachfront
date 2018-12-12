@@ -67,7 +67,7 @@ export class ScaleControl extends Control {
     })
   }
 
-  private keydown(event) {
+  private keydown(event: React.KeyboardEvent) {
     event.stopPropagation()
 
     switch (event.key) {
@@ -99,7 +99,7 @@ export class ScaleControl extends Control {
   }
 }
 
-function toUnformattedNumber(n) {
+function toUnformattedNumber(n: string) {
   return +n.toString().replace(/[\s,]+|\..*/g, '')
 }
 

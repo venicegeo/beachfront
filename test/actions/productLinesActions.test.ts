@@ -17,19 +17,21 @@
 import axios from 'axios'
 import MockAdapter from 'axios-mock-adapter'
 import thunk from 'redux-thunk'
-import configureStore from 'redux-mock-store'
+import configureStore, {MockStoreEnhanced} from 'redux-mock-store'
 import * as sinon from 'sinon'
+import {SinonSpy} from 'sinon'
 import {productLinesActions, productLinesTypes} from '../../src/actions/productLinesActions'
 import {productLinesInitialState} from '../../src/reducers/productLinesReducer'
 import {JOB_ENDPOINT, PRODUCTLINE_ENDPOINT} from '../../src/config'
 import {getClient} from '../../src/api/session'
 import {Extent} from '../../src/utils/geometries'
+import {AppState, initialState} from '../../src/store'
 
 const mockStore = configureStore([thunk])
-let store
+let store: MockStoreEnhanced<AppState>
 
 const mockAdapter = new MockAdapter(axios)
-const clientSpies = {
+const clientSpies: {[key: string]: SinonSpy} = {
   get: sinon.spy(getClient(), 'get'),
   post: sinon.spy(getClient(), 'post'),
 }
@@ -37,10 +39,7 @@ const clientSpies = {
 describe('productLinesActions', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-
-    store = mockStore({
-      productLines: productLinesInitialState,
-    })
+    store = mockStore(initialState) as any
   })
 
   afterEach(() => {
@@ -62,7 +61,7 @@ describe('productLinesActions', () => {
       }
       mockAdapter.onGet(PRODUCTLINE_ENDPOINT).reply(200, mockResponse)
 
-      await store.dispatch(productLinesActions.fetch())
+      await store.dispatch(productLinesActions.fetch() as any)
 
       expect(clientSpies.get.callCount).toEqual(1)
       expect(clientSpies.get.args[0]).toEqual([PRODUCTLINE_ENDPOINT])
@@ -79,7 +78,7 @@ describe('productLinesActions', () => {
     test('request error', async () => {
       mockAdapter.onGet(PRODUCTLINE_ENDPOINT).reply(400)
 
-      await store.dispatch(productLinesActions.fetch())
+      await store.dispatch(productLinesActions.fetch() as any)
 
       const actions = store.getActions()
       expect(actions.length).toEqual(2)
@@ -91,7 +90,7 @@ describe('productLinesActions', () => {
     test('invalid response data', async () => {
       mockAdapter.onGet(PRODUCTLINE_ENDPOINT).reply(200)
 
-      await store.dispatch(productLinesActions.fetch())
+      await store.dispatch(productLinesActions.fetch() as any)
 
       const actions = store.getActions()
       expect(actions[0].type).toEqual(productLinesTypes.PRODUCT_LINES_FETCHING)
@@ -116,7 +115,7 @@ describe('productLinesActions', () => {
       const url = getJobsEndpoint(productLineId, sinceDate)
       mockAdapter.onGet(url).reply(200, mockResponse)
 
-      await store.dispatch(productLinesActions.fetchJobs({ productLineId, sinceDate }))
+      await store.dispatch(productLinesActions.fetchJobs({ productLineId, sinceDate }) as any)
 
       expect(clientSpies.get.callCount).toEqual(1)
       expect(clientSpies.get.args[0]).toEqual([url])
@@ -135,7 +134,7 @@ describe('productLinesActions', () => {
       const sinceDate = '2'
       mockAdapter.onGet(getJobsEndpoint(productLineId, sinceDate)).reply(400,)
 
-      await store.dispatch(productLinesActions.fetchJobs({ productLineId, sinceDate }))
+      await store.dispatch(productLinesActions.fetchJobs({ productLineId, sinceDate }) as any)
 
       const actions = store.getActions()
       expect(actions[0]).toEqual({ type: productLinesTypes.PRODUCT_LINES_FETCHING_JOBS })
@@ -148,7 +147,7 @@ describe('productLinesActions', () => {
       const sinceDate = '2'
       mockAdapter.onGet(getJobsEndpoint(productLineId, sinceDate)).reply(200)
 
-      await store.dispatch(productLinesActions.fetchJobs({ productLineId, sinceDate }))
+      await store.dispatch(productLinesActions.fetchJobs({ productLineId, sinceDate }) as any)
 
       const actions = store.getActions()
       expect(actions[0].type).toEqual(productLinesTypes.PRODUCT_LINES_FETCHING_JOBS)
@@ -173,7 +172,7 @@ describe('productLinesActions', () => {
         maxCloudCover: 5,
         name: 'e',
       }
-      await store.dispatch(productLinesActions.create(args))
+      await store.dispatch(productLinesActions.create(args) as any)
 
       expect(clientSpies.post.callCount).toBe(1)
       expect(clientSpies.post.args[0]).toEqual([
@@ -207,7 +206,7 @@ describe('productLinesActions', () => {
 
       await store.dispatch(productLinesActions.create({
         bbox: [1, 2, 3, 4],
-      } as any))
+      } as any) as any)
 
       const actions = store.getActions()
       expect(actions[0]).toEqual({ type: productLinesTypes.PRODUCT_LINES_CREATING_PRODUCT_LINE })
@@ -220,7 +219,7 @@ describe('productLinesActions', () => {
 
       await store.dispatch(productLinesActions.create({
         bbox: [1, 2, 3, 4],
-      } as any))
+      } as any) as any)
 
       const actions = store.getActions()
       expect(actions[0].type).toEqual(productLinesTypes.PRODUCT_LINES_CREATING_PRODUCT_LINE)

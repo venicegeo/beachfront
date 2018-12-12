@@ -32,7 +32,7 @@ export type JobsState = {
   createJobError: any
 }
 
-export const jobsInitialState = {
+export const jobsInitialState: JobsState = {
   records: Array<beachfront.Job>(),
   isFetching: false,
   fetchError: null,

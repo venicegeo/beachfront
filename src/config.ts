@@ -41,7 +41,14 @@ export const IMAGERY_ENDPOINT = '/ia'
 export const ALGORITHM_ENDPOINT = '/algorithm'
 export const PRODUCTLINE_ENDPOINT = '/feed'
 
-export const BASEMAP_TILE_PROVIDERS = [
+export interface BasemapTileProvider {
+  name: string
+  url: string
+  attributions: string
+  maxZoom: number
+}
+
+export const BASEMAP_TILE_PROVIDERS: BasemapTileProvider[] = [
   {
     name: 'OSM',
     url: `https://${OSM_BASE_URL}/tiles/default/{z}/{x}/{y}.png64`,
@@ -50,7 +57,19 @@ export const BASEMAP_TILE_PROVIDERS = [
   },
 ]
 
-export const SCENE_TILE_PROVIDERS = [
+export interface SceneTileProvider {
+  attributions: string
+  maxZoom?: number
+  name: string
+  prefix: string
+  catalogSection: string
+  provider: string
+  url: string
+  isXYZProvider: boolean
+  hideApiKeyInput: boolean
+}
+
+export const SCENE_TILE_PROVIDERS: SceneTileProvider[] = [
   {
     attributions: '&copy; <a href="https://www.planet.com" target="_blank" rel="noopener">Planet Labs (Copernicus Sentinel-2)</a>',
     maxZoom:  13,
@@ -148,7 +167,7 @@ export const TOUR = {
 }
 
 // Minimum versions of supported browsers.
-export const SUPPORTED_BROWSERS = {
+export const SUPPORTED_BROWSERS: {[name: string]: number} = {
   chrome: 55,
   firefox: 45,
 }

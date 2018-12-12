@@ -82,7 +82,7 @@ export class Dropdown extends React.Component<Props, State> {
     document.removeEventListener('click', this.handleExternalClick)
   }
 
-  private handleChange(value) {
+  private handleChange(value: string) {
     this.props.onChange(value)
     this.setState({ isOpen: false })
   }

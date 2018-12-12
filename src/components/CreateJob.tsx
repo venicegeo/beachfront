@@ -130,7 +130,7 @@ export class CreateJob extends React.Component<Props, State> {
     )
   }
 
-  private handleSubmit(algorithm) {
+  private handleSubmit(algorithm: beachfront.Algorithm) {
     if (!this.state.selectedScene) {
       throw new Error('Unable to submit: selectedScene is null!')
     }
@@ -148,7 +148,7 @@ export class CreateJob extends React.Component<Props, State> {
     this.setState({ computeMask })
   }
 
-  private handleNameChange(name) {
+  private handleNameChange(name: string) {
     this.setState({ name })
   }
 }
@@ -161,7 +161,7 @@ function mapStateToProps(state: AppState) {
   }
 }
 
-function mapDispatchToProps(dispatch) {
+function mapDispatchToProps(dispatch: Function) {
   return {
     actions: {
       jobs: {

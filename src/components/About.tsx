@@ -68,7 +68,7 @@ export class About extends React.Component<Props> {
   }
 }
 
-function mapDispatchToProps(dispatch) {
+function mapDispatchToProps(dispatch: Function) {
   return {
     actions: {
       route: {

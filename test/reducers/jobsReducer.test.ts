@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {jobsInitialState, jobsReducer} from '../../src/reducers/jobsReducer'
+import {jobsInitialState, jobsReducer, JobsState} from '../../src/reducers/jobsReducer'
 import {jobsTypes} from '../../src/actions/jobsActions'
 
 describe('jobsReducer', () => {
@@ -23,7 +23,7 @@ describe('jobsReducer', () => {
   })
 
   test('JOBS_FETCHING', () => {
-    const state = {
+    const state: JobsState = {
       ...jobsInitialState,
       fetchError: 'a',
     }
@@ -135,7 +135,7 @@ describe('jobsReducer', () => {
 
     const action = { type: jobsTypes.JOBS_CREATING_JOB }
 
-    expect(jobsReducer(state, action)).toEqual({
+    expect(jobsReducer(state as any, action)).toEqual({
       ...state,
       isCreatingJob: true,
       createdJob: null,

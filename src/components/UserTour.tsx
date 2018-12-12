@@ -23,14 +23,14 @@ import {connect} from 'react-redux'
 import {catalogActions, CatalogUpdateSearchCriteriaArgs} from '../actions/catalogActions'
 import {mapActions, MapPanToPointArgs} from '../actions/mapActions'
 import {AppState} from '../store'
-import {RouteNavigateToArgs, routeActions} from '../actions/routeActions'
+import {RouteNavigateToArgs, routeActions, RouteLocation} from '../actions/routeActions'
 import {Extent} from '../utils/geometries'
 import {tourActions, TourStep} from '../actions/tourActions'
 
 const styles: any = require('./UserTour.css')
 
-const Arrow = ({ position }) => {
-  const classnames = {
+const Arrow = ({ position }: { position: string }) => {
+  const classnames: {[key: string]: string} = {
     bottom: 'arrow-up',
     bottomLeft: 'arrow-up',
     left: 'arrow-right',
@@ -119,7 +119,7 @@ export class UserTour extends React.Component<Props> {
           }
         },
         after: () => {
-          const basemaps: any = document.querySelectorAll('.BasemapSelect-options li')
+          const basemaps = document.querySelectorAll('.BasemapSelect-options li') as NodeListOf<HTMLElement>
 
           basemaps.forEach(basemap => {
             if (basemap.textContent === this.basemap) {
@@ -262,7 +262,7 @@ export class UserTour extends React.Component<Props> {
           const search = this.searchCriteria
           const fromElem = query('.CatalogSearchCriteria-captureDateFrom input') as HTMLInputElement
           if (fromElem && fromElem.value !== search.dateFrom) {
-            await this.pace(search.dateFrom, (_, s) => fromElem.value = s)
+            await this.pace(search.dateFrom, (_: any, s: string) => fromElem.value = s)
           }
 
           this.props.actions.catalog.updateSearchCriteria({
@@ -271,7 +271,7 @@ export class UserTour extends React.Component<Props> {
 
           const toElem = query('.CatalogSearchCriteria-captureDateTo input') as HTMLInputElement
           if (toElem && toElem.value !== search.dateTo) {
-            await this.pace(search.dateTo, (_, s) => toElem.value = s)
+            await this.pace(search.dateTo, (_: any, s: string) => toElem.value = s)
           }
 
           this.props.actions.catalog.updateSearchCriteria({
@@ -289,7 +289,7 @@ export class UserTour extends React.Component<Props> {
         </div>,
         after: () => {
           return new Promise(resolve => {
-            function gen(from, to): number[] {
+            function gen(from: number, to: number): number[] {
               const rc: number[] = []
               const sign = Math.sign(to - from)
 
@@ -305,7 +305,7 @@ export class UserTour extends React.Component<Props> {
             if (this.props.catalog.searchCriteria.cloudCover === this.searchCriteria.cloudCover) {
               resolve()
             } else {
-              const fn = (g) => {
+              const fn = (g: number[]) => {
                 const i = g.pop()
 
                 if (i == null) {
@@ -646,7 +646,7 @@ export class UserTour extends React.Component<Props> {
     })
   }
 
-  private navigateTo(props): Promise<any> {
+  private navigateTo(props: string | RouteLocation): Promise<any> {
     const loc = typeof props === 'string' ? { pathname: props } : props
 
     if (loc.pathname === this.props.route.pathname) {
@@ -670,7 +670,7 @@ export class UserTour extends React.Component<Props> {
     }
   }
 
-  private onKeyPress(event) {
+  private onKeyPress(event: React.KeyboardEvent) {
     event.stopPropagation()
 
     switch (event.key) {
@@ -691,7 +691,7 @@ export class UserTour extends React.Component<Props> {
     }
   }
 
-  private pace(text, cb, delay = 100): Promise<string> {
+  private pace(text: string, cb: (a: string, b: string) => void, delay = 100): Promise<string> {
     return new Promise(resolve => {
       let i = 0
       const interval = setInterval(() => {
@@ -768,7 +768,7 @@ function mapStateToProps(state: AppState) {
   }
 }
 
-function mapDispatchToProps(dispatch) {
+function mapDispatchToProps(dispatch: Function) {
   return {
     actions: {
       catalog: {

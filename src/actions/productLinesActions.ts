@@ -14,11 +14,13 @@
  * limitations under the License.
  **/
 
+import {Dispatch} from 'redux'
 import {getClient} from '../api/session'
 import {JOB_ENDPOINT, PRODUCTLINE_ENDPOINT} from '../config'
 import {Extent} from '../utils/geometries'
+import {ProductLinesState} from '../reducers/productLinesReducer'
 
-export const productLinesTypes = {
+export const productLinesTypes: ActionTypes = {
   PRODUCT_LINES_FETCHING: 'PRODUCT_LINES_FETCHING',
   PRODUCT_LINES_FETCH_SUCCESS: 'PRODUCT_LINES_FETCH_SUCCESS',
   PRODUCT_LINES_FETCH_ERROR: 'PRODUCT_LINES_FETCH_ERROR',
@@ -47,7 +49,7 @@ export interface ProductLinesFetchJobsArgs {
 
 export const productLinesActions = {
   fetch() {
-    return async dispatch => {
+    return async (dispatch: Dispatch<ProductLinesState>) => {
       dispatch({ type: productLinesTypes.PRODUCT_LINES_FETCHING })
 
       try {
@@ -66,7 +68,7 @@ export const productLinesActions = {
   },
 
   fetchJobs(args: ProductLinesFetchJobsArgs) {
-    return async dispatch => {
+    return async (dispatch: Dispatch<ProductLinesState>) => {
       dispatch({ type: productLinesTypes.PRODUCT_LINES_FETCHING_JOBS })
 
       try {
@@ -85,7 +87,7 @@ export const productLinesActions = {
   },
 
   create(args: ProductLinesCreateArgs) {
-    return async dispatch => {
+    return async (dispatch: Dispatch<ProductLinesState>) => {
       dispatch({ type: productLinesTypes.PRODUCT_LINES_CREATING_PRODUCT_LINE })
 
       try {

@@ -17,7 +17,6 @@
 const styles: any = require('./Modal.css')
 
 import * as React from 'react'
-const ESCAPE = 27
 
 interface Props {
   className?: string
@@ -57,8 +56,8 @@ export class Modal extends React.Component<Props> {
     this.props.onDismiss()
   }
 
-  private handleKeyPress(event) {
-    if (event.keyCode === ESCAPE) {
+  private handleKeyPress(event: KeyboardEvent) {
+    if (event.key === 'Escape') {
       this.props.onDismiss()
     }
   }

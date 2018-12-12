@@ -14,12 +14,13 @@
  * limitations under the License.
  **/
 
+import {Dispatch} from 'redux'
 import {ALGORITHM_ENDPOINT} from '../config'
 import {getClient} from '../api/session'
 import {AppState} from '../store'
-import {algorithmsInitialState} from '../reducers/algorithmsReducer'
+import {algorithmsInitialState, AlgorithmsState} from '../reducers/algorithmsReducer'
 
-export const algorithmsTypes = {
+export const algorithmsTypes: ActionTypes = {
   ALGORITHMS_FETCHING: 'ALGORITHMS_FETCHING',
   ALGORITHMS_FETCH_SUCCESS: 'ALGORITHMS_FETCH_SUCCESS',
   ALGORITHMS_FETCH_ERROR: 'ALGORITHMS_FETCH_ERROR',
@@ -27,13 +28,25 @@ export const algorithmsTypes = {
   ALGORITHMS_DESERIALIZED: 'ALGORITHMS_DESERIALIZED',
 }
 
+type FetchResponse = {
+  data: {
+    algorithms: Array<{
+      description: string
+      service_id: string
+      max_cloud_cover: number
+      name: string
+      interface: string
+    }>
+  }
+}
+
 export const algorithmsActions = {
   fetch() {
-    return async dispatch => {
+    return async (dispatch: Dispatch<AlgorithmsState>) => {
       dispatch({ type: algorithmsTypes.ALGORITHMS_FETCHING })
 
       try {
-        const response = await getClient().get(ALGORITHM_ENDPOINT)
+        const response = await getClient().get(ALGORITHM_ENDPOINT) as FetchResponse
         dispatch({
           type: algorithmsTypes.ALGORITHMS_FETCH_SUCCESS,
           records: response.data.algorithms.map(record => ({
@@ -54,8 +67,8 @@ export const algorithmsActions = {
   },
 
   serialize() {
-    return (dispatch, getState) => {
-      const state: AppState = getState()
+    return (dispatch: Dispatch<AlgorithmsState>, getState: () => AppState) => {
+      const state = getState()
 
       sessionStorage.setItem('algorithms_records', JSON.stringify(state.algorithms.records))
 

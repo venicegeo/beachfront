@@ -33,8 +33,8 @@ type PassedProps = {
   duration: string
   durations: {value: string, label: string}[]
   selectedJobIds: string[]
-  onDurationChange(value: string)
-  onRowClick(job: beachfront.Job)
+  onDurationChange: (value: string) => void
+  onRowClick: (job: beachfront.Job) => void
 }
 type Props = StateProps & DispatchProps & PassedProps
 
@@ -106,7 +106,7 @@ export const ActivityTable = (props: Props) => (
 // Helpers
 //
 
-function generatePlaceholderRows(count) {
+function generatePlaceholderRows(count: number) {
   const rows: JSX.Element[] = []
   for (let i = 0; i < count; i++) {
     rows.push(
@@ -140,7 +140,7 @@ function mapStateToProps(state: AppState) {
   }
 }
 
-function mapDispatchToProps(dispatch) {
+function mapDispatchToProps(dispatch: Function) {
   return {
     actions: {
       map: {

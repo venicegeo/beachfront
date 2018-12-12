@@ -14,11 +14,12 @@
  * limitations under the License.
  **/
 
+import {Dispatch} from 'redux'
 import {getClient} from '../api/session'
 import {AppState} from '../store'
-import {userInitialState} from '../reducers/userReducer'
+import {userInitialState, UserState} from '../reducers/userReducer'
 
-export const userTypes = {
+export const userTypes: ActionTypes = {
   USER_LOGGED_OUT: 'USER_LOGGED_OUT',
   USER_SESSION_CLEARED: 'USER_SESSION_CLEARED',
   USER_SESSION_LOGGED_OUT: 'USER_SESSION_LOGGED_OUT',
@@ -52,8 +53,8 @@ export const userActions = {
   },
 
   serialize() {
-    return (dispatch, getState) => {
-      const state: AppState = getState()
+    return (dispatch: Dispatch<UserState>, getState: () => AppState) => {
+      const state = getState()
 
       sessionStorage.setItem('isSessionExpired', JSON.stringify(state.user.isSessionExpired))
 

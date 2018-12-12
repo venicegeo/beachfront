@@ -26,7 +26,7 @@ import {userTypes} from '../../src/actions/userActions'
 
 describe('action types', () => {
   test('no duplicate types', () => {
-    const allTypes = []
+    const allTypes: string[] = []
     Object.keys(algorithmsTypes).forEach(key => allTypes.push(algorithmsTypes[key]))
     Object.keys(apiStatusTypes).forEach(key => allTypes.push(apiStatusTypes[key]))
     Object.keys(catalogTypes).forEach(key => allTypes.push(catalogTypes[key]))

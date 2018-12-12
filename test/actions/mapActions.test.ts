@@ -17,7 +17,7 @@
 import axios from 'axios'
 import MockAdapter from 'axios-mock-adapter'
 import thunk from 'redux-thunk'
-import configureStore from 'redux-mock-store'
+import configureStore, {MockStoreEnhanced} from 'redux-mock-store'
 import {mapActions, mapTypes} from '../../src/actions/mapActions'
 import {mapInitialState} from '../../src/reducers/mapReducer'
 import {MODE_DRAW_BBOX, MODE_NORMAL, MODE_PRODUCT_LINES, MODE_SELECT_IMAGERY} from '../../src/components/PrimaryMap'
@@ -26,9 +26,10 @@ import {routeInitialState} from '../../src/reducers/routeReducer'
 import {catalogInitialState} from '../../src/reducers/catalogReducer'
 import {jobsInitialState} from '../../src/reducers/jobsReducer'
 import {productLinesInitialState} from '../../src/reducers/productLinesReducer'
+import {AppState, initialState} from '../../src/store'
 
 const mockStore = configureStore([thunk])
-let store
+let store: MockStoreEnhanced<AppState>
 
 const mockAdapter = new MockAdapter(axios)
 
@@ -36,10 +37,7 @@ describe('catalogActions', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     sessionStorage.clear()
-
-    store = mockStore({
-      map: mapInitialState,
-    })
+    store = mockStore(initialState) as any
   })
 
   afterEach(() => {
@@ -55,7 +53,7 @@ describe('catalogActions', () => {
       const mockMap = 'a'
       const mockCollections = ['a', 'b', 'c']
 
-      await store.dispatch(mapActions.initialized(mockMap as any, mockCollections))
+      await store.dispatch(mapActions.initialized(mockMap as any, mockCollections as any))
 
       expect(store.getActions()).toEqual([
         {
@@ -70,13 +68,14 @@ describe('catalogActions', () => {
   describe('updateMode()', () => {
     test('MODE_NORMAL', async () => {
       store = mockStore({
+        ...initialState,
         route: {
           ...routeInitialState,
           pathname: 'unhandledPathname',
         },
-      })
+      }) as any
 
-      await store.dispatch(mapActions.updateMode())
+      await store.dispatch(mapActions.updateMode() as any)
 
       expect(store.getActions()).toEqual([
         {
@@ -88,6 +87,7 @@ describe('catalogActions', () => {
 
     test('MODE_SELECT_IMAGERY', async () => {
       store = mockStore({
+        ...initialState,
         map: {
           ...mapInitialState,
           bbox: [1, 2, 3, 4],
@@ -100,9 +100,9 @@ describe('catalogActions', () => {
           ...catalogInitialState,
           searchResults: ['a', 'b', 'c'],
         },
-      })
+      }) as any
 
-      await store.dispatch(mapActions.updateMode())
+      await store.dispatch(mapActions.updateMode() as any)
 
       expect(store.getActions()).toEqual([
         {
@@ -114,6 +114,7 @@ describe('catalogActions', () => {
 
     test('MODE_DRAW_BBOX (via /create-job)', async () => {
       store = mockStore({
+        ...initialState,
         map: {
           ...mapInitialState,
           bbox: null,
@@ -126,9 +127,9 @@ describe('catalogActions', () => {
           ...catalogInitialState,
           searchResults: null,
         },
-      })
+      }) as any
 
-      await store.dispatch(mapActions.updateMode())
+      await store.dispatch(mapActions.updateMode() as any)
 
       expect(store.getActions()).toEqual([
         {
@@ -140,13 +141,14 @@ describe('catalogActions', () => {
 
     test('MODE_DRAW_BBOX (via /create-product-line)', async () => {
       store = mockStore({
+        ...initialState,
         route: {
           ...routeInitialState,
           pathname: '/create-product-line',
         },
-      })
+      }) as any
 
-      await store.dispatch(mapActions.updateMode())
+      await store.dispatch(mapActions.updateMode() as any)
 
       expect(store.getActions()).toEqual([
         {
@@ -158,13 +160,14 @@ describe('catalogActions', () => {
 
     test('MODE_PRODUCT_LINES', async () => {
       store = mockStore({
+        ...initialState,
         route: {
           ...routeInitialState,
           pathname: '/product-lines',
         },
-      })
+      }) as any
 
-      await store.dispatch(mapActions.updateMode())
+      await store.dispatch(mapActions.updateMode() as any)
 
       expect(store.getActions()).toEqual([
         {
@@ -204,6 +207,7 @@ describe('catalogActions', () => {
     describe('default case', () => {
       test('success', async () => {
         store = mockStore({
+          ...initialState,
           route: {
             ...routeInitialState,
             pathname: 'unhandledPathname',
@@ -224,9 +228,9 @@ describe('catalogActions', () => {
               { id: 'b' },
             ],
           },
-        })
+        }) as any
 
-        await store.dispatch(mapActions.updateDetections())
+        await store.dispatch(mapActions.updateDetections() as any)
 
         expect(store.getActions()).toEqual([
           {
@@ -246,6 +250,7 @@ describe('catalogActions', () => {
           { id: 'c' },
         ]
         store = mockStore({
+          ...initialState,
           route: {
             ...routeInitialState,
             pathname: 'unhandledPathname',
@@ -262,9 +267,9 @@ describe('catalogActions', () => {
               mockJobs[1],
             ],
           },
-        })
+        }) as any
 
-        await store.dispatch(mapActions.updateDetections())
+        await store.dispatch(mapActions.updateDetections() as any)
 
         expect(store.getActions()).toEqual([])
       })
@@ -274,6 +279,7 @@ describe('catalogActions', () => {
       test('success (with selected feature)', async () => {
         const mockSelectedFeature = { id: 'b' }
         store = mockStore({
+          ...initialState,
           route: {
             ...routeInitialState,
             pathname: '/create-product-line',
@@ -290,9 +296,9 @@ describe('catalogActions', () => {
             detections: [],
             selectedFeature: mockSelectedFeature,
           },
-        })
+        }) as any
 
-        await store.dispatch(mapActions.updateDetections())
+        await store.dispatch(mapActions.updateDetections() as any)
 
         expect(store.getActions()).toEqual([
           {
@@ -310,6 +316,7 @@ describe('catalogActions', () => {
           { id: 'b' },
         ]
         store = mockStore({
+          ...initialState,
           route: {
             ...routeInitialState,
             pathname: '/create-product-line',
@@ -322,9 +329,9 @@ describe('catalogActions', () => {
             ...productLinesInitialState,
             records: mockProductLinesRecords,
           },
-        })
+        }) as any
 
-        await store.dispatch(mapActions.updateDetections())
+        await store.dispatch(mapActions.updateDetections() as any)
 
         expect(store.getActions()).toEqual([
           {
@@ -339,6 +346,7 @@ describe('catalogActions', () => {
       test('success (with selected feature)', async () => {
         const mockSelectedFeature = { id: 'b' }
         store = mockStore({
+          ...initialState,
           route: {
             ...routeInitialState,
             pathname: '/create-product-line',
@@ -355,9 +363,9 @@ describe('catalogActions', () => {
             detections: [],
             selectedFeature: mockSelectedFeature,
           },
-        })
+        }) as any
 
-        await store.dispatch(mapActions.updateDetections())
+        await store.dispatch(mapActions.updateDetections() as any)
 
         expect(store.getActions()).toEqual([
           {
@@ -375,6 +383,7 @@ describe('catalogActions', () => {
           { id: 'b' },
         ]
         store = mockStore({
+          ...initialState,
           route: {
             ...routeInitialState,
             pathname: '/create-product-line',
@@ -387,9 +396,9 @@ describe('catalogActions', () => {
             ...productLinesInitialState,
             records: mockProductLinesRecords,
           },
-        })
+        }) as any
 
-        await store.dispatch(mapActions.updateDetections())
+        await store.dispatch(mapActions.updateDetections() as any)
 
         expect(store.getActions()).toEqual([
           {
@@ -405,6 +414,7 @@ describe('catalogActions', () => {
     describe('default case', () => {
       test('success', async () => {
         store = mockStore({
+          ...initialState,
           route: {
             ...routeInitialState,
             pathname: 'unhandledPathname',
@@ -423,9 +433,9 @@ describe('catalogActions', () => {
               { id: 'b' },
             ],
           },
-        })
+        }) as any
 
-        await store.dispatch(mapActions.updateFrames())
+        await store.dispatch(mapActions.updateFrames() as any)
 
         expect(store.getActions()).toEqual([
           {
@@ -445,6 +455,7 @@ describe('catalogActions', () => {
           { id: 'c' },
         ]
         store = mockStore({
+          ...initialState,
           route: {
             ...routeInitialState,
             pathname: 'unhandledPathname',
@@ -457,9 +468,9 @@ describe('catalogActions', () => {
             ...mapInitialState,
             frames: mockJobs,
           },
-        })
+        }) as any
 
-        await store.dispatch(mapActions.updateFrames())
+        await store.dispatch(mapActions.updateFrames() as any)
 
         expect(store.getActions()).toEqual([])
       })
@@ -473,6 +484,7 @@ describe('catalogActions', () => {
           { id: 'b' },
         ]
         store = mockStore({
+          ...initialState,
           route: {
             ...routeInitialState,
             pathname: '/create-product-line',
@@ -486,9 +498,9 @@ describe('catalogActions', () => {
             frames: [],
             selectedFeature: mockSelectedFeature,
           },
-        })
+        }) as any
 
-        await store.dispatch(mapActions.updateFrames())
+        await store.dispatch(mapActions.updateFrames() as any)
 
         expect(store.getActions()).toEqual([
           {
@@ -507,6 +519,7 @@ describe('catalogActions', () => {
           { id: 'b' },
         ]
         store = mockStore({
+          ...initialState,
           route: {
             ...routeInitialState,
             pathname: '/create-product-line',
@@ -519,9 +532,9 @@ describe('catalogActions', () => {
             ...mapInitialState,
             frames: [],
           },
-        })
+        }) as any
 
-        await store.dispatch(mapActions.updateFrames())
+        await store.dispatch(mapActions.updateFrames() as any)
 
         expect(store.getActions()).toEqual([
           {
@@ -540,6 +553,7 @@ describe('catalogActions', () => {
           { id: 'b' },
         ]
         store = mockStore({
+          ...initialState,
           route: {
             ...routeInitialState,
             pathname: '/product-lines',
@@ -553,9 +567,9 @@ describe('catalogActions', () => {
             frames: [],
             selectedFeature: mockSelectedFeature,
           },
-        })
+        }) as any
 
-        await store.dispatch(mapActions.updateFrames())
+        await store.dispatch(mapActions.updateFrames() as any)
 
         expect(store.getActions()).toEqual([
           {
@@ -574,6 +588,7 @@ describe('catalogActions', () => {
           { id: 'b' },
         ]
         store = mockStore({
+          ...initialState,
           route: {
             ...routeInitialState,
             pathname: '/product-lines',
@@ -586,9 +601,9 @@ describe('catalogActions', () => {
             ...mapInitialState,
             frames: [],
           },
-        })
+        }) as any
 
-        await store.dispatch(mapActions.updateFrames())
+        await store.dispatch(mapActions.updateFrames() as any)
 
         expect(store.getActions()).toEqual([
           {
@@ -603,15 +618,16 @@ describe('catalogActions', () => {
   describe('setSelectedFeature()', () => {
     test('success', async () => {
       store = mockStore({
+        ...initialState,
         map: {
           ...mapInitialState,
           selectedFeature: null,
         },
-      })
+      }) as any
 
       const mockFeature = { id: 'a' }
 
-      await store.dispatch(mapActions.setSelectedFeature(mockFeature as any))
+      await store.dispatch(mapActions.setSelectedFeature(mockFeature as any) as any)
 
       expect(store.getActions()).toEqual([
         {
@@ -624,13 +640,14 @@ describe('catalogActions', () => {
     test('feature already selected', async () => {
       const mockFeature = { id: 'a' }
       store = mockStore({
+        ...initialState,
         map: {
           ...mapInitialState,
           selectedFeature: mockFeature,
         },
-      })
+      }) as any
 
-      await store.dispatch(mapActions.setSelectedFeature(mockFeature as any))
+      await store.dispatch(mapActions.setSelectedFeature(mockFeature as any) as any)
 
       expect(store.getActions()).toEqual([])
     })
@@ -720,6 +737,7 @@ describe('catalogActions', () => {
   describe('serialize()', () => {
     test('success', async () => {
       store = mockStore({
+        ...initialState,
         map: {
           ...mapInitialState,
           view: {
@@ -727,9 +745,9 @@ describe('catalogActions', () => {
           },
           bbox: [181, 0, 182, 1],
         },
-      })
+      }) as any
 
-      await store.dispatch(mapActions.serialize())
+      await store.dispatch(mapActions.serialize() as any)
 
       // Note: coordinates should be wrapped within -180/180.
       expect(sessionStorage.setItem).toHaveBeenCalledTimes(2)
@@ -743,13 +761,14 @@ describe('catalogActions', () => {
 
     test('handle missing "view" gracefully', async () => {
       store = mockStore({
+        ...initialState,
         map: {
           ...mapInitialState,
           bbox: [181, 0, 182, 1],
         },
-      })
+      }) as any
 
-      await store.dispatch(mapActions.serialize())
+      await store.dispatch(mapActions.serialize() as any)
 
       expect(sessionStorage.setItem).toHaveBeenCalledWith('mapView', JSON.stringify(null))
 
@@ -763,14 +782,15 @@ describe('catalogActions', () => {
         extent: [1, 2, 3, 4],
       }
       store = mockStore({
+        ...initialState,
         map: {
           ...mapInitialState,
           view: mockView,
           bbox: [181, 0, 182, 1],
         },
-      })
+      }) as any
 
-      await store.dispatch(mapActions.serialize())
+      await store.dispatch(mapActions.serialize() as any)
 
       expect(sessionStorage.setItem).toHaveBeenCalledWith('mapView', JSON.stringify(mockView))
 
@@ -781,15 +801,16 @@ describe('catalogActions', () => {
 
     test('handle missing "bbox" gracefully', async () => {
       store = mockStore({
+        ...initialState,
         map: {
           ...mapInitialState,
           view: {
             center: [181, 0],
           },
         },
-      })
+      }) as any
 
-      await store.dispatch(mapActions.serialize())
+      await store.dispatch(mapActions.serialize() as any)
 
       expect(sessionStorage.setItem).toHaveBeenCalledWith('bbox', JSON.stringify(null))
 

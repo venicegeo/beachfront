@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
+import {FormEvent} from 'react'
 
 const styles: any = require('./ImagerySearch.css')
 const DATE_FORMAT = 'YYYY-MM-DD'
@@ -87,7 +88,7 @@ export class ImagerySearch extends React.Component<Props> {
     return !(SCENE_TILE_PROVIDERS.find(p => p.prefix === this.props.catalog.searchCriteria.source) || { hideApiKeyInput: false }).hideApiKeyInput
   }
 
-  private handleSubmit(event) {
+  private handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     event.stopPropagation()
     this.props.actions.catalog.search()
@@ -101,7 +102,7 @@ function mapStateToProps(state: AppState) {
   }
 }
 
-function mapDispatchToProps(dispatch) {
+function mapDispatchToProps(dispatch: Function) {
   return {
     actions: {
       catalog: {

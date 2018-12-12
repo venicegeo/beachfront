@@ -158,7 +158,7 @@ export class Application extends React.Component<Props> {
     }
 
     // Single job fetched successfully.
-    if (prevProps.jobs.isFetchingOne && !this.props.jobs.isFetchingOne && !this.props.jobs.fetchOneError) {
+    if (prevProps.jobs.isFetchingOne && !this.props.jobs.isFetchingOne && !this.props.jobs.fetchOneError && this.props.jobs.lastOneFetched) {
       this.props.actions.map.panToPoint({
         point: getFeatureCenter(this.props.jobs.lastOneFetched),
       })
@@ -421,7 +421,7 @@ function mapStateToProps(state: AppState) {
   }
 }
 
-function mapDispatchToProps(dispatch) {
+function mapDispatchToProps(dispatch: Function) {
   return {
     actions: {
       route: {

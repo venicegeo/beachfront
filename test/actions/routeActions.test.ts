@@ -15,21 +15,18 @@
  */
 
 import thunk from 'redux-thunk'
-import configureStore from 'redux-mock-store'
+import configureStore, {MockStoreEnhanced} from 'redux-mock-store'
 import * as sinon from 'sinon'
 import {routeActions, routeTypes} from '../../src/actions/routeActions'
-import {routeInitialState} from '../../src/reducers/routeReducer'
+import {AppState, initialState} from '../../src/store'
 
 const mockStore = configureStore([thunk])
-let store
+let store: MockStoreEnhanced<AppState>
 
 describe('routeActions', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-
-    store = mockStore({
-      route: routeInitialState,
-    })
+    store = mockStore(initialState) as any
   })
 
   describe('navigateTo()', () => {

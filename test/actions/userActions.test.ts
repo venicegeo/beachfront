@@ -15,19 +15,21 @@
  */
 
 import thunk from 'redux-thunk'
-import configureStore from 'redux-mock-store'
+import configureStore, {MockStoreEnhanced} from 'redux-mock-store'
 import * as sinon from 'sinon'
+import {SinonSpy} from 'sinon'
 import {userActions, userTypes} from '../../src/actions/userActions'
 import {userInitialState} from '../../src/reducers/userReducer'
 import MockAdapter from 'axios-mock-adapter'
 import axios from 'axios'
 import {getClient} from '../../src/api/session'
+import {AppState, initialState} from '../../src/store'
 
 const mockStore = configureStore([thunk])
-let store
+let store: MockStoreEnhanced<AppState>
 
 const mockAdapter = new MockAdapter(axios)
-let clientSpies = {
+let clientSpies: {[key: string]: SinonSpy} = {
   get: sinon.spy(getClient(), 'get'),
 }
 
@@ -35,10 +37,7 @@ describe('userActions', () => {
   beforeEach(() => {
     sessionStorage.clear()
     jest.clearAllMocks()
-
-    store = mockStore({
-      user: userInitialState,
-    })
+    store = mockStore(initialState) as any
   })
 
   afterEach(() => {
@@ -119,13 +118,14 @@ describe('userActions', () => {
   describe('serialize()', () => {
     test('success', async () => {
       store = mockStore({
+        ...initialState,
         user: {
           ...userInitialState,
           isSessionExpired: true,
         },
-      })
+      }) as any
 
-      await store.dispatch(userActions.serialize())
+      await store.dispatch(userActions.serialize() as any)
 
       expect(sessionStorage.setItem).toHaveBeenCalledTimes(1)
       expect(sessionStorage.setItem).toHaveBeenCalledWith('isSessionExpired', 'true')

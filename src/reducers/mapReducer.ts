@@ -20,6 +20,20 @@ import {TYPE_JOB} from '../constants'
 import {shouldSelectedFeatureAutoDeselect} from '../utils/mapUtils'
 import {Extent} from '../utils/geometries'
 
+// {
+//   hovered: this.hoverInteraction.getFeatures(),
+//     imagery: this.imageryLayer.getSource().getFeaturesCollection(),
+//   selected: this.selectInteraction.getFeatures(),
+//   handleSelectFeature: this.handleSelectFeature,
+// }
+
+export interface MapCollections {
+  hovered: ol.Collection<ol.Feature>
+  imagery: ol.Collection<ol.Feature>
+  selected: ol.Collection<ol.Feature>
+  handleSelectFeature: (featureOrId: any) => void
+}
+
 export interface MapState {
   map: ol.Map | null
   view: MapView | null
@@ -28,7 +42,7 @@ export interface MapState {
   frames: (beachfront.Job | beachfront.ProductLine)[]
   bbox: Extent | null
   hoveredFeature: beachfront.Job | null
-  collections: any | null
+  collections: MapCollections | null
   selectedFeature: GeoJSON.Feature<any> | null
 }
 

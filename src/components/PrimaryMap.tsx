@@ -19,11 +19,53 @@ const styles: any = require('./PrimaryMap.css')
 const tileErrorPlaceholder: string = require('../images/tile-error.png')
 
 import * as React from 'react'
+import {ReactInstance} from 'react'
 import {findDOMNode} from 'react-dom'
 import {connect} from 'react-redux'
 import debounce = require('lodash/debounce')
 import throttle = require('lodash/throttle')
-import * as ol from '../utils/ol'
+import {GeoJSON} from 'geojson'
+import {ImageLoadFunctionType} from 'openlayers'
+import OLBaseLayer from 'ol/layer/base'
+import OLCollection from 'ol/collection'
+import OLCondition from 'ol/events/condition'
+import OLControl from 'ol/control'
+import OLCoordinate from 'ol/coordinate'
+import OLDragRotate from 'ol/interaction/dragrotate'
+import OLDraw from 'ol/interaction/draw'
+import OLExtent from 'ol/extent'
+import OLEvent from 'ol/events/event'
+import OLFeature from 'ol/feature'
+import OLFill from 'ol/style/fill'
+import OLGeoJSON from 'ol/format/geojson'
+import OLImageLayer from 'ol/layer/image'
+import OLImageStatic from 'ol/source/imagestatic'
+import OLImageTile from 'ol/imagetile'
+import OLInteraction from 'ol/interaction'
+import OLLayer from 'ol/layer/layer'
+import OLLineString from 'ol/geom/linestring'
+import OLMap from 'ol/map'
+import OLMapBrowserEvent from 'ol/mapbrowserevent'
+import OLMapBrowserPointerEvent from 'ol/mapbrowserpointerevent'
+import OLMousePosition from 'ol/control/mouseposition'
+import OLOverlay from 'ol/overlay'
+import OLPoint from 'ol/geom/point'
+import OLPolygon from 'ol/geom/polygon'
+import OLProj from 'ol/proj'
+import OLRegularShape from 'ol/style/regularshape'
+import OLScaleLine from 'ol/control/scaleline'
+import OLSelect from 'ol/interaction/select'
+import OLStyle from 'ol/style/style'
+import OLStroke from 'ol/style/stroke'
+import OLText from 'ol/style/text'
+import OLTile from 'ol/tile'
+import OLTileLayer from 'ol/layer/tile'
+import OLTileWMS from 'ol/source/tilewms'
+import OLVectorLayer from 'ol/layer/vector'
+import OLVectorSource from 'ol/source/vector'
+import OLView from 'ol/view'
+import OLXYZ from 'ol/source/xyz'
+import OLZoomSlider from 'ol/control/zoomslider'
 import {ExportControl} from '../utils/openlayers.ExportControl'
 import {SearchControl} from '../utils/openlayers.SearchControl'
 import {MeasureControl} from '../utils/openlayers.MeasureControl'
@@ -50,7 +92,7 @@ import {
   BASEMAP_TILE_PROVIDERS,
   SCENE_TILE_PROVIDERS,
   GEOSERVER_WORKSPACE_NAME,
-  GEOSERVER_LAYERGROUP_NAME,
+  GEOSERVER_LAYERGROUP_NAME, BasemapTileProvider, SceneTileProvider,
 } from '../config'
 import {
   STATUS_ACTIVE,
@@ -71,6 +113,7 @@ import {
 } from '../constants'
 import {AppState} from '../store'
 import {mapActions} from '../actions/mapActions'
+import {MapCollections} from '../reducers/mapReducer'
 import {userActions} from '../actions/userActions'
 import {catalogActions, CatalogSearchArgs} from '../actions/catalogActions'
 
@@ -121,25 +164,33 @@ export interface MapView {
   extent?: Extent
 }
 
+interface Tile extends OLTile {
+  loadingError: boolean
+}
+
+interface ImageTile extends OLImageTile {
+  loadingError: boolean
+}
+
 export class PrimaryMap extends React.Component<Props, State> {
   refs: any
 
-  private basemapLayers: ol.Tile[]
-  private bboxDrawInteraction: ol.Draw
-  private detectionsLayers: {[key: string]: ol.Tile}
-  private drawLayer: ol.VectorLayer
-  private featureDetailsOverlay: ol.Overlay
+  private basemapLayers: OLTileLayer[]
+  private bboxDrawInteraction: OLDraw
+  private detectionsLayers: {[key: string]: OLTileLayer}
+  private drawLayer: OLVectorLayer
+  private featureDetailsOverlay: OLOverlay
   private featureId: number | string | null
-  private frameLayer: ol.VectorLayer
-  private frameFillLayer: ol.VectorLayer
-  private pinLayer: ol.VectorLayer
-  private highlightLayer: ol.VectorLayer
-  private hoverInteraction: ol.Select
-  private imageSearchResultsOverlay: ol.Overlay
-  private imageryLayer: ol.VectorLayer
-  private map: ol.Map
-  private previewLayers: {[key: string]: ol.Tile}
-  private selectInteraction: ol.Select
+  private frameLayer: OLVectorLayer
+  private frameFillLayer: OLVectorLayer
+  private pinLayer: OLVectorLayer
+  private highlightLayer: OLVectorLayer
+  private hoverInteraction: OLSelect
+  private imageSearchResultsOverlay: OLOverlay
+  private imageryLayer: OLVectorLayer
+  private map: OLMap
+  private previewLayers: {[key: string]: OLLayer}
+  private selectInteraction: OLSelect
   private skipNextViewUpdate: boolean
 
   constructor(props: Props) {
@@ -192,7 +243,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     }
 
     // Used by tests
-    window['primaryMap'] = this  // tslint:disable-line
+    (window as any)['primaryMap'] = this  // tslint:disable-line
 
     this.props.actions.map.initialized(this.map, {
       hovered: this.hoverInteraction.getFeatures(),
@@ -317,7 +368,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     )
   }
 
-  handleSelectFeature(feature_or_id) {
+  handleSelectFeature(feature_or_id: OLFeature | string) {
     const feature: any = typeof feature_or_id === 'string'
       ? this.imageryLayer.getSource().getFeatureById(feature_or_id)
       : feature_or_id
@@ -331,12 +382,12 @@ export class PrimaryMap extends React.Component<Props, State> {
         const selections = this.selectInteraction.getFeatures()
         selections.clear()
         selections.push(jobFeature)
-        this.props.actions.map.setSelectedFeature(toGeoJSON(jobFeature) as beachfront.Job)
+        this.props.actions.map.setSelectedFeature((toGeoJSON(jobFeature) as unknown) as beachfront.Job)
         break
       case TYPE_JOB:
       case TYPE_SCENE:
         this.featureId = feature.ol_uid
-        this.props.actions.map.setSelectedFeature(toGeoJSON(feature) as beachfront.Scene)
+        this.props.actions.map.setSelectedFeature((toGeoJSON(feature) as unknown) as beachfront.Scene)
         break
       default:
         // Not a valid "selectable" feature
@@ -416,7 +467,7 @@ export class PrimaryMap extends React.Component<Props, State> {
   private emitViewChange() {
     const view = this.map.getView()
     const {basemapIndex} = this.state
-    const center = ol.proj.transform(view.getCenter(), WEB_MERCATOR, WGS84)
+    const center = OLProj.transform(view.getCenter(), WEB_MERCATOR, WGS84)
     const zoom = view.getZoom() || MIN_ZOOM  // HACK -- sometimes getZoom returns undefined...
 
     // Don't emit false positives
@@ -437,13 +488,13 @@ export class PrimaryMap extends React.Component<Props, State> {
 
     // Check if we should re-render any manually looped elements.
     if (this.props.map.selectedFeature) {
-      let selectedFeatureCenter = ol.extent.getCenter(featureToExtent(this.props.map.selectedFeature))
-      selectedFeatureCenter = ol.proj.transform(selectedFeatureCenter, WEB_MERCATOR, WGS84)
+      let selectedFeatureCenter = OLExtent.getCenter(featureToExtent(this.props.map.selectedFeature))
+      selectedFeatureCenter = OLProj.transform(selectedFeatureCenter, WEB_MERCATOR, WGS84)
       selectedFeatureHalfWrapIndex = getWrapIndex(this.map, selectedFeatureCenter)
     }
 
     if (this.props.map.bbox) {
-      let bboxCenter = ol.extent.getCenter(this.props.map.bbox)
+      let bboxCenter = OLExtent.getCenter(this.props.map.bbox)
       bboxHalfWrapIndex = getWrapIndex(this.map, bboxCenter)
     }
 
@@ -462,12 +513,12 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.props.actions.map.setSelectedFeature(null)
   }
 
-  private handleBasemapChange(index) {
+  private handleBasemapChange(index: number) {
     this.setState({basemapIndex: index})
     this.emitViewChange()
   }
 
-  private handleDrawEnd(event) {
+  private handleDrawEnd(event: OLEvent & { feature: OLFeature }) {
     const geometry = event.feature.getGeometry()
     let bbox = serializeBbox(geometry.getExtent())
 
@@ -487,7 +538,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.setState({ isMeasuring: true })
   }
 
-  private handleLoadError(event) {
+  private handleLoadError(event: OLEvent & { tile: Tile }) {
     const tile = event.tile
 
     this.setState({ loadingRefCount: Math.max(0, this.state.loadingRefCount - 1) })
@@ -506,14 +557,14 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.setState({ loadingRefCount: Math.max(0, this.state.loadingRefCount - 1) })
   }
 
-  private handleMouseMove(event) {
+  private handleMouseMove(event: OLMapBrowserEvent) {
     if (this.state.isMeasuring || this.props.map.mode === MODE_DRAW_BBOX) {
       this.refs.container.classList.remove(styles.isHoveringFeature)
       return
     }
 
     let foundFeature = false
-    this.map.forEachFeatureAtPixel(event.pixel, (feature) => {
+    this.map.forEachFeatureAtPixel(event.pixel, feature => {
       switch (feature.get(KEY_TYPE)) {
         case TYPE_DIVOT_INBOARD:
         case TYPE_DIVOT_OUTBOARD:
@@ -531,11 +582,12 @@ export class PrimaryMap extends React.Component<Props, State> {
     }
   }
 
-  private handleSelect(event) {
+  private handleSelect(event: OLSelect.Event) {
     if (event.selected.length || event.deselected.length) {
-      let index = event.selected.findIndex(f => f.ol_uid === this.featureId) + 1
+      let index = event.selected.findIndex((f: any) => f.ol_uid === this.featureId) + 1
 
-      if (!event.mapBrowserEvent.pointerEvent.shiftKey) {
+      const pointerEvent = (event.mapBrowserEvent as OLMapBrowserPointerEvent).pointerEvent as any
+      if (!pointerEvent.shiftKey) {
         index += event.selected.length - (index ? 2 : 1)
       }
 
@@ -566,7 +618,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.featureDetailsOverlay = generateFeatureDetailsOverlay(this.refs.featureDetails)
     this.imageSearchResultsOverlay = generateImageSearchResultsOverlay(this.refs.imageSearchResults)
 
-    this.map = new ol.Map({
+    this.map = new OLMap({
       controls: generateControls(),
       interactions: generateBaseInteractions().extend([
         this.bboxDrawInteraction,
@@ -582,11 +634,11 @@ export class PrimaryMap extends React.Component<Props, State> {
         this.imageryLayer,
         this.pinLayer,
         this.highlightLayer,
-      ],
+      ] as OLBaseLayer[],
       target: this.refs.container,
-      view: new ol.View({
-        center: ol.proj.fromLonLat(DEFAULT_CENTER, WEB_MERCATOR),
-        extent: ol.proj.transformExtent(VIEW_BOUNDS, WGS84, WEB_MERCATOR),
+      view: new OLView({
+        center: OLProj.fromLonLat(DEFAULT_CENTER, WEB_MERCATOR),
+        extent: OLProj.transformExtent(VIEW_BOUNDS, WGS84, WEB_MERCATOR),
         minZoom: MIN_ZOOM,
         maxZoom: MAX_ZOOM,
         zoom: MIN_ZOOM,
@@ -634,7 +686,7 @@ export class PrimaryMap extends React.Component<Props, State> {
       })
     } else if (center) {
       view.animate({
-        center: view.constrainCenter(ol.proj.transform(center, WGS84, WEB_MERCATOR)),
+        center: view.constrainCenter(OLProj.transform(center, WGS84, WEB_MERCATOR)),
         zoom,
         duration,
       })
@@ -659,11 +711,11 @@ export class PrimaryMap extends React.Component<Props, State> {
     // Render detections.
     const insertionIndex = this.map.getLayers().getArray().indexOf(this.frameLayer)
     this.props.map.detections.forEach(detection => {
-      let layer: ol.Tile
+      let layer: OLTileLayer
 
       let extent = featureToExtentWrapped(this.map, detection)
-      layer = new ol.Tile({
-        source: generateDetectionsSource(this.props.apiStatus.geoserver.wmsUrl, detection),
+      layer = new OLTileLayer({
+        source: generateDetectionsSource(this.props.apiStatus.geoserver.wmsUrl!, detection),
         extent,
       })
 
@@ -678,7 +730,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.clearPins()
 
     const source = this.pinLayer.getSource()
-    const reader = new ol.GeoJSON()
+    const reader = new OLGeoJSON()
 
     this.props.map.frames.forEach(raw => {
       const frame = reader.readFeature(raw, {
@@ -687,12 +739,12 @@ export class PrimaryMap extends React.Component<Props, State> {
       })
 
       const frameExtent = calculateExtent(frame.getGeometry())
-      const topRight = ol.extent.getTopRight(ol.extent.buffer(frameExtent, STEM_OFFSET))
-      const center = ol.extent.getCenter(frameExtent)
+      const topRight = OLExtent.getTopRight(OLExtent.buffer(frameExtent, STEM_OFFSET))
+      const center = OLExtent.getCenter(frameExtent)
       const id = frame.getId()
 
-      const stem = new ol.Feature({
-        geometry: new ol.LineString([
+      const stem = new OLFeature({
+        geometry: new OLLineString([
           center,
           topRight,
         ]),
@@ -702,7 +754,7 @@ export class PrimaryMap extends React.Component<Props, State> {
       stem.set(KEY_OWNER_ID, id)
       source.addFeature(stem)
 
-      const divotInboard = new ol.Feature({ geometry: new ol.Point(center) })
+      const divotInboard = new OLFeature({ geometry: new OLPoint(center) })
       divotInboard.set(KEY_TYPE, TYPE_DIVOT_INBOARD)
       divotInboard.set(KEY_OWNER_ID, id)
       source.addFeature(divotInboard)
@@ -715,7 +767,7 @@ export class PrimaryMap extends React.Component<Props, State> {
       */
       // HACK
       const addDivotOutboard = (coordinates: Point) => {
-        const divotOutboard = new ol.Feature({ geometry: new ol.Point(coordinates) })
+        const divotOutboard = new OLFeature({ geometry: new OLPoint(coordinates) })
         divotOutboard.set(KEY_TYPE, TYPE_DIVOT_OUTBOARD)
         divotOutboard.set(KEY_OWNER_ID, id)
         divotOutboard.set(KEY_STATUS, raw.properties.status)
@@ -731,13 +783,13 @@ export class PrimaryMap extends React.Component<Props, State> {
       }
       // END HACK
 
-      const name = new ol.Feature({ geometry: new ol.Point(topRight) })
+      const name = new OLFeature({ geometry: new OLPoint(topRight) })
       name.set(KEY_TYPE, TYPE_LABEL_MAJOR)
       name.set(KEY_OWNER_ID, id)
       name.set(KEY_NAME, raw.properties.name.toUpperCase())
       source.addFeature(name)
 
-      const status = new ol.Feature({ geometry: new ol.Point(topRight) })
+      const status = new OLFeature({ geometry: new OLPoint(topRight) })
       status.set(KEY_TYPE, TYPE_LABEL_MINOR)
       status.set(KEY_OWNER_ID, id)
       status.set(KEY_STATUS, raw.properties.status)
@@ -751,7 +803,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.clearFrames()
 
     const source = this.frameLayer.getSource()
-    const reader = new ol.GeoJSON()
+    const reader = new OLGeoJSON()
 
     this.props.map.frames.forEach(raw => {
       const frame = reader.readFeature(raw, {
@@ -767,7 +819,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     this.clearFrameFills()
 
     const source = this.frameFillLayer.getSource()
-    const reader = new ol.GeoJSON()
+    const reader = new OLGeoJSON()
 
     this.props.map.frames.forEach(raw => {
       const frame = reader.readFeature(raw, {
@@ -786,8 +838,8 @@ export class PrimaryMap extends React.Component<Props, State> {
     frames.forEach(feature => {
       const isSelected = (this.props.map.selectedFeature && this.props.map.selectedFeature.id === feature.getId())
 
-      feature.setStyle(new ol.Style({
-        stroke: new ol.Stroke({
+      feature.setStyle(new OLStyle({
+        stroke: new OLStroke({
           color: isSelected ? 'black' : 'transparent',
           width: 2,
         }),
@@ -798,13 +850,13 @@ export class PrimaryMap extends React.Component<Props, State> {
     framesFills.forEach(feature => {
       const isSelected = (this.props.map.selectedFeature && this.props.map.selectedFeature.id === feature.getId())
 
-      feature.setStyle(new ol.Style({
-        stroke: new ol.Stroke({
+      feature.setStyle(new OLStyle({
+        stroke: new OLStroke({
           color: isSelected ? 'transparent' : 'rgba(0, 0, 0, .4)',
           lineDash: isSelected ? undefined : [10, 10],
           width: 1,
         }),
-        fill: new ol.Fill({
+        fill: new OLFill({
           color: (isClose || isSelected) ? 'transparent' : 'hsla(202, 100%, 85%, 0.5)',
         }),
       }))
@@ -816,43 +868,43 @@ export class PrimaryMap extends React.Component<Props, State> {
       feature.setStyle(() => {
         switch (feature.get(KEY_TYPE)) {
           case TYPE_DIVOT_INBOARD:
-            return new ol.Style({
-              image: new ol.RegularShape({
+            return new OLStyle({
+              image: new OLRegularShape({
                 angle: Math.PI / 4,
                 points: 4,
                 radius: 5,
-                fill: new ol.Fill({
+                fill: new OLFill({
                   color: 'black',
                 }),
               }),
             })
           case TYPE_DIVOT_OUTBOARD:
-            return new ol.Style({
-              image: new ol.RegularShape({
+            return new OLStyle({
+              image: new OLRegularShape({
                 angle: Math.PI / 4,
                 points: 4,
                 radius: isSelected ? 15 : 10,
-                stroke: new ol.Stroke({
+                stroke: new OLStroke({
                   color: 'black',
                   width: isSelected ? 2 : 1,
                 }),
-                fill: new ol.Fill({
+                fill: new OLFill({
                   color: getColorForStatus(feature.get(KEY_STATUS)),
                 }),
               }),
               zIndex: isSelected ? 1 : undefined,
             })
           case TYPE_STEM:
-            return new ol.Style({
-              stroke: new ol.Stroke({
+            return new OLStyle({
+              stroke: new OLStroke({
                 color: 'black',
                 width: 1,
               }),
             })
           case TYPE_LABEL_MAJOR:
-            return new ol.Style({
-              text: new ol.Text({
-                fill: new ol.Fill({
+            return new OLStyle({
+              text: new OLText({
+                fill: new OLFill({
                   color: isClose || isSelected ? 'black' : 'transparent',
                 }),
                 offsetX: 13,
@@ -867,9 +919,9 @@ export class PrimaryMap extends React.Component<Props, State> {
             const name = feature.get(KEY_NAME)
             const sceneId = normalizeSceneId(feature.get(KEY_SCENE_ID))
 
-            return new ol.Style({
-              text: new ol.Text({
-                fill: new ol.Fill({
+            return new OLStyle({
+              text: new OLText({
+                fill: new OLFill({
                   color: isClose ? 'rgba(0,0,0,.6)' : 'transparent',
                 }),
                 offsetX: 13,
@@ -884,7 +936,7 @@ export class PrimaryMap extends React.Component<Props, State> {
               }),
             })
           default:
-            return new ol.Style()
+            return new OLStyle()
         }
       })
     })
@@ -899,7 +951,7 @@ export class PrimaryMap extends React.Component<Props, State> {
       return
     }
 
-    const reader = new ol.GeoJSON()
+    const reader = new OLGeoJSON()
     const feature = reader.readFeature(geojson, {
       dataProjection: WGS84,
       featureProjection: WEB_MERCATOR,
@@ -909,7 +961,7 @@ export class PrimaryMap extends React.Component<Props, State> {
   }
 
   private renderImagery() {
-    const reader = new ol.GeoJSON()
+    const reader = new OLGeoJSON()
     const source = this.imageryLayer.getSource()
 
     source.setAttributions(undefined as any)
@@ -950,12 +1002,12 @@ export class PrimaryMap extends React.Component<Props, State> {
     let position
     if (this.props.catalog.searchResults.count) {
       // Pager
-      position = ol.extent.getBottomRight(bbox)
+      position = OLExtent.getBottomRight(bbox)
       this.imageSearchResultsOverlay.setPosition(position)
       this.imageSearchResultsOverlay.setPositioning('top-right')
     } else {
       // No results
-      position = ol.extent.getCenter(bbox)
+      position = OLExtent.getCenter(bbox)
       this.imageSearchResultsOverlay.setPosition(position)
       this.imageSearchResultsOverlay.setPositioning('center-center')
     }
@@ -964,7 +1016,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     if (autoPan) {
       // Only auto-pan if the overlay is outside of the view.
       const viewExtent = this.map.getView().calculateExtent(this.map.getSize())
-      if (!ol.extent.containsCoordinate(viewExtent, position)) {
+      if (!OLExtent.containsCoordinate(viewExtent, position)) {
         this.map.getView().animate({
           center: position,
           duration: 1000,
@@ -982,7 +1034,7 @@ export class PrimaryMap extends React.Component<Props, State> {
 
     bbox = extentWrapped(this.map, bbox)
 
-    const feature = new ol.Feature({ geometry: ol.Polygon.fromExtent(bbox) })
+    const feature = new OLFeature({ geometry: OLPolygon.fromExtent(bbox) })
     this.drawLayer.getSource().addFeature(feature)
   }
 
@@ -1013,15 +1065,15 @@ export class PrimaryMap extends React.Component<Props, State> {
         return
       }
 
-      let layer: ol.Tile
+      let layer: OLLayer
 
       if (provider.isXYZProvider) {
-        layer = new ol.Tile({
+        layer = new OLTileLayer({
           source: generateXYZScenePreviewSource(provider, externalId, this.props.catalog.apiKey),
           extent: f.extentWrapped,
         })
       } else {
-        layer = new ol.Image({
+        layer = new OLImageLayer({
           source: generateImageStaticScenePreviewSource(provider, externalId, f.extentWrapped, this.props.catalog.apiKey),
         })
       }
@@ -1044,7 +1096,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     })
   }
 
-  private subscribeToLoadEvents(layer) {
+  private subscribeToLoadEvents(layer: OLLayer) {
     const source = layer.getSource()
     source.on('tileloadstart', this.handleLoadStart)
     source.on('tileloadend', this.handleLoadStop)
@@ -1098,18 +1150,18 @@ export class PrimaryMap extends React.Component<Props, State> {
       return  // Nothing to do
     }
 
-    const reader = new ol.GeoJSON()
+    const reader = new OLGeoJSON()
     const feature = reader.readFeature(this.props.map.selectedFeature, {
       dataProjection: WGS84,
       featureProjection: WEB_MERCATOR,
     })
-    const anchor = ol.extent.getTopRight(featureToExtentWrapped(this.map, this.props.map.selectedFeature))
+    const anchor = OLExtent.getTopRight(featureToExtentWrapped(this.map, this.props.map.selectedFeature))
     features.push(feature)
     this.featureDetailsOverlay.setPosition(anchor)
   }
 }
 
-function animateLayerExit(layer) {
+function animateLayerExit(layer: OLLayer) {
   return new Promise(resolve => {
     const step = 0.075
     let opacity = 1
@@ -1128,13 +1180,14 @@ function animateLayerExit(layer) {
   })
 }
 
-function generateBasemapLayers(providers) {
+function generateBasemapLayers(providers: BasemapTileProvider[]) {
   return providers.map((provider, index) => {
-    const source = new ol.XYZ(Object.assign({}, provider, {
+    const source = new OLXYZ({
+      ...provider,
       crossOrigin: 'anonymous',
       tileLoadFunction,
-    }))
-    const layer = new ol.Tile({source})
+    })
+    const layer = new OLTileLayer({source})
 
     layer.setProperties({ name: provider.name, visible: index === 0 })
 
@@ -1143,26 +1196,26 @@ function generateBasemapLayers(providers) {
 }
 
 function generateBaseInteractions() {
-  return ol.interaction.defaults().extend([
-    new ol.DragRotate({
-      condition: ol.condition.altKeyOnly,
+  return OLInteraction.defaults().extend([
+    new OLDragRotate({
+      condition: OLCondition.altKeyOnly,
     }),
   ])
 }
 
 function generateControls() {
-  return ol.control.defaults({
+  return OLControl.defaults({
     attributionOptions: {
       collapsible: false,
     },
   }).extend([
-    new ol.ScaleLine({
+    new OLScaleLine({
       minWidth: 250,
       units: 'nautical',
     }),
-    new ol.ZoomSlider(),
-    new ol.MousePosition({
-      coordinateFormat: ol.coordinate.toStringHDMS,
+    new OLZoomSlider(),
+    new OLMousePosition({
+      coordinateFormat: OLCoordinate.toStringHDMS,
       projection: WGS84,
     }),
     new ExportControl(styles.export),
@@ -1172,8 +1225,8 @@ function generateControls() {
   ])
 }
 
-function generateDetectionsSource(wmsUrl, feature: beachfront.Job|beachfront.ProductLine) {
-  return new ol.TileWMS({
+function generateDetectionsSource(wmsUrl: string, feature: beachfront.Job|beachfront.ProductLine) {
+  return new OLTileWMS({
     tileLoadFunction: detectionTileLoadFunction,
     crossOrigin: 'anonymous',
     url: wmsUrl,
@@ -1195,15 +1248,15 @@ function getIdForFeature(feature: beachfront.Job|beachfront.ProductLine) {
 }
 
 function generateDrawLayer() {
-  return new ol.VectorLayer({
-    source: new ol.VectorSource({
+  return new OLVectorLayer({
+    source: new OLVectorSource({
       wrapX: false,
     }),
-    style: new ol.Style({
-      fill: new ol.Fill({
+    style: new OLStyle({
+      fill: new OLFill({
         color: 'hsla(202, 70%, 50%, 0.35)',
       }),
-      stroke: new ol.Stroke({
+      stroke: new OLStroke({
         color: 'hsla(202, 70%, 50%, 0.7)',
         width: 1,
         lineDash: [5, 5],
@@ -1212,22 +1265,22 @@ function generateDrawLayer() {
   })
 }
 
-function generateBboxDrawInteraction(drawLayer) {
-  const draw = new ol.Draw({
+function generateBboxDrawInteraction(drawLayer: OLVectorLayer) {
+  const draw = new OLDraw({
     source: drawLayer.getSource(),
     maxPoints: 2,
     type: 'LineString',
-    geometryFunction(coordinates: any, geometry: ol.Polygon) {
+    geometryFunction(coordinates: any, geometry: OLPolygon) {
       if (!geometry) {
-        geometry = new ol.Polygon(null as any)
+        geometry = new OLPolygon(null as any)
       }
       const [[x1, y1], [x2, y2]] = coordinates
       geometry.setCoordinates([[[x1, y1], [x1, y2], [x2, y2], [x2, y1], [x1, y1]]])
       return geometry
     },
-    style: new ol.Style({
-      image: new ol.RegularShape({
-        stroke: new ol.Stroke({
+    style: new OLStyle({
+      image: new OLRegularShape({
+        stroke: new OLStroke({
           color: 'black',
           width: 1,
         }),
@@ -1236,10 +1289,10 @@ function generateBboxDrawInteraction(drawLayer) {
         radius2: 0,
         angle: 0,
       }),
-      fill: new ol.Fill({
+      fill: new OLFill({
         color: 'hsla(202, 70%, 50%, .6)',
       }),
-      stroke: new ol.Stroke({
+      stroke: new OLStroke({
         color: 'hsl(202, 70%, 50%)',
         width: 1,
         lineDash: [5, 5],
@@ -1252,8 +1305,8 @@ function generateBboxDrawInteraction(drawLayer) {
   return draw
 }
 
-function generateFeatureDetailsOverlay(componentRef) {
-  return new ol.Overlay({
+function generateFeatureDetailsOverlay(componentRef: ReactInstance) {
+  return new OLOverlay({
     element:     findDOMNode(componentRef) as Element,
     id:          'featureDetails',
     positioning: 'top-left',
@@ -1262,26 +1315,26 @@ function generateFeatureDetailsOverlay(componentRef) {
 }
 
 function generateHighlightLayer() {
-  return new ol.VectorLayer({
-    source: new ol.VectorSource(),
-    style: new ol.Style({
-      fill: new ol.Fill({
+  return new OLVectorLayer({
+    source: new OLVectorSource(),
+    style: new OLStyle({
+      fill: new OLFill({
         color: 'hsla(90, 100%, 30%, .5)',
       }),
-      stroke: new ol.Stroke({
+      stroke: new OLStroke({
         color: 'hsla(90, 100%, 30%, .6)',
       }),
     }),
   })
 }
 
-function generateHoverInteraction(...layers) {
-  return new ol.Select({
+function generateHoverInteraction(...layers: OLLayer[]) {
+  return new OLSelect({
     layers,
     multi: true,
-    condition: e => ol.condition.pointerMove(e) && ol.condition.noModifierKeys(e),
-    style: new ol.Style({
-      stroke: new ol.Stroke({
+    condition: e => OLCondition.pointerMove(e) && OLCondition.noModifierKeys(e),
+    style: new OLStyle({
+      stroke: new OLStroke({
         color: 'hsla(200, 70%, 90%, 0.8)',
         width: 4,
       }),
@@ -1290,8 +1343,8 @@ function generateHoverInteraction(...layers) {
 }
 
 function generateFrameLayer() {
-  const layer = new ol.VectorLayer({
-    source: new ol.VectorSource(),
+  const layer = new OLVectorLayer({
+    source: new OLVectorSource(),
   })
 
   layer.setZIndex(2)
@@ -1300,14 +1353,14 @@ function generateFrameLayer() {
 }
 
 function generateFrameFillLayer() {
-  return new ol.VectorLayer({
-    source: new ol.VectorSource(),
+  return new OLVectorLayer({
+    source: new OLVectorSource(),
   })
 }
 
 function generatePinLayer() {
-  const layer = new ol.VectorLayer({
-    source: new ol.VectorSource(),
+  const layer = new OLVectorLayer({
+    source: new OLVectorSource(),
   })
 
   layer.setZIndex(3)
@@ -1316,13 +1369,13 @@ function generatePinLayer() {
 }
 
 function generateImageryLayer() {
-  return new ol.VectorLayer({
-    source: new ol.VectorSource({ features: new ol.Collection() }),
-    style: new ol.Style({
-      fill: new ol.Fill({
+  return new OLVectorLayer({
+    source: new OLVectorSource({ features: new OLCollection() }),
+    style: new OLStyle({
+      fill: new OLFill({
         color: 'rgba(0, 0, 0, 0.08)',
       }),
-      stroke: new ol.Stroke({
+      stroke: new OLStroke({
         color: 'rgba(0, 0, 0, 0.32)',
         width: 1,
       }),
@@ -1330,61 +1383,63 @@ function generateImageryLayer() {
   })
 }
 
-function generateImageSearchResultsOverlay(componentRef) {
-  return new ol.Overlay({
+function generateImageSearchResultsOverlay(componentRef: ReactInstance) {
+  return new OLOverlay({
     element:   findDOMNode(componentRef) as Element,
     id:        'imageSearchResults',
     stopEvent: false,
   })
 }
 
-function generateXYZScenePreviewSource(provider, imageId, apiKey) {
-  return new ol.XYZ(Object.assign({}, provider, {
+function generateXYZScenePreviewSource(provider: SceneTileProvider, imageId: string, apiKey: string) {
+  return new OLXYZ({
+    ...provider,
     crossOrigin: 'anonymous',
     tileLoadFunction,
     url: provider.url.replace('__SCENE_ID__', imageId).replace('__API_KEY__', apiKey),
     maxZoom: 12,
-  }))
+  })
 }
 
-function generateImageStaticScenePreviewSource(provider, imageId, extent, apiKey) {
-  return new ol.ImageStatic(Object.assign({}, provider, {
+function generateImageStaticScenePreviewSource(provider: SceneTileProvider, imageId: string, extent: Extent, apiKey: string) {
+  return new OLImageStatic({
+    ...provider,
     crossOrigin: 'anonymous',
-    imageLoadFunction: tileLoadFunction,
+    imageLoadFunction: tileLoadFunction as ImageLoadFunctionType,
     projection: WEB_MERCATOR,
     url: provider.url.replace('__SCENE_ID__', imageId).replace('__API_KEY__', apiKey),
     imageExtent: extent,
-  }))
+  })
 }
 
-function generateSelectInteraction(...layers) {
-  return new ol.Select({
+function generateSelectInteraction(...layers: OLLayer[]) {
+  return new OLSelect({
     layers,
     multi: true,
-    condition: e => ol.condition.click(e) && (
-      ol.condition.noModifierKeys(e) || ol.condition.shiftKeyOnly(e)
+    condition: e => OLCondition.click(e) && (
+      OLCondition.noModifierKeys(e) || OLCondition.shiftKeyOnly(e)
     ),
-    style: (feature: ol.Feature) => {
+    style: (feature: OLFeature) => {
       switch (feature.get(KEY_TYPE)) {
         case TYPE_JOB:
-          return new ol.Style()
+          return new OLStyle()
         default:
-          return new ol.Style({
-            stroke: new ol.Stroke({
+          return new OLStyle({
+            stroke: new OLStroke({
               color: 'black',
               width: 2,
             }),
           })
       }
     },
-    toggleCondition: ol.condition.never,
-    filter: (feature: ol.Feature) => {
+    toggleCondition: OLCondition.never,
+    filter: (feature: OLFeature) => {
       return isFeatureTypeSelectable(feature)
     },
   })
 }
 
-function getColorForStatus(status) {
+function getColorForStatus(status: string) {
   switch (status) {
     case STATUS_ACTIVE: return 'hsl(200, 94%, 54%)'
     case STATUS_SUBMITTED:
@@ -1401,7 +1456,7 @@ function getColorForStatus(status) {
   }
 }
 
-function isFeatureTypeSelectable(feature) {
+function isFeatureTypeSelectable(feature: OLFeature) {
   switch (feature.get(KEY_TYPE)) {
     // Ignore the selection events for inboard divots and stems
     case TYPE_DIVOT_INBOARD:
@@ -1412,19 +1467,23 @@ function isFeatureTypeSelectable(feature) {
   }
 }
 
-function tileLoadFunction(imageTile, src) {
+function tileLoadFunction(imageTile: ImageTile, src: string) {
+  const image = imageTile.getImage() as any
+
   if (imageTile.loadingError) {
     delete imageTile.loadingError
-    imageTile.getImage().src = tileErrorPlaceholder
+    image.src = tileErrorPlaceholder
   } else {
-    imageTile.getImage().src = src
+    image.src = src
   }
 }
 
-function detectionTileLoadFunction(imageTile, src) {
+function detectionTileLoadFunction(imageTile: ImageTile, src: string) {
+  const image = imageTile.getImage() as any
+
   if (imageTile.loadingError) {
     delete imageTile.loadingError
-    imageTile.getImage().src = tileErrorPlaceholder
+    image.src = tileErrorPlaceholder
   } else {
     const client = new XMLHttpRequest()
     client.open('GET', src)
@@ -1438,13 +1497,13 @@ function detectionTileLoadFunction(imageTile, src) {
       const arrayBufferView = new Uint8Array(client.response)
       const blob = new Blob([arrayBufferView], { type: 'image/png' })
       const urlCreator = window.URL
-      imageTile.getImage().src = urlCreator.createObjectURL(blob)
+      image.src = urlCreator.createObjectURL(blob)
     }
     client.send()
   }
 }
 
-function getCookie(name) {
+function getCookie(name: string) {
   const match = document.cookie.match(new RegExp(name + '=([^;]+)'))
   if (match) {
     return match[1]
@@ -1462,11 +1521,11 @@ function mapStateToProps(state: AppState) {
   }
 }
 
-function mapDispatchToProps(dispatch) {
+function mapDispatchToProps(dispatch: Function) {
   return {
     actions: {
       map: {
-        initialized: (map: ol.Map, collections: any) => dispatch(mapActions.initialized(map, collections)),
+        initialized: (map: OLMap, collections: MapCollections) => dispatch(mapActions.initialized(map, collections)),
         updateBbox: (bbox: Extent | null) => dispatch(mapActions.updateBbox(bbox)),
         updateView: (view: MapView) => dispatch(mapActions.updateView(view)),
         setSelectedFeature: (feature: GeoJSON.Feature<any> | null) => dispatch(mapActions.setSelectedFeature(feature)),

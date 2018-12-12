@@ -18,8 +18,10 @@ import {MapView, MODE_DRAW_BBOX, MODE_NORMAL, MODE_PRODUCT_LINES, MODE_SELECT_IM
 import {wrap} from '../utils/math'
 import {AppState} from '../store'
 import {Extent, Point} from '../utils/geometries'
+import {Dispatch} from 'redux'
+import {MapCollections, MapState} from '../reducers/mapReducer'
 
-export const mapTypes = {
+export const mapTypes: ActionTypes = {
   MAP_INITIALIZED: 'MAP_INITIALIZED',
   MAP_MODE_UPDATED: 'MAP_MODE_UPDATED',
   MAP_DETECTIONS_UPDATED: 'MAP_DETECTIONS_UPDATED',
@@ -41,7 +43,7 @@ export interface MapPanToPointArgs {
 }
 
 export const mapActions = {
-  initialized(map: ol.Map, collections: any) {
+  initialized(map: ol.Map, collections: MapCollections) {
     return {
       type: mapTypes.MAP_INITIALIZED,
       map,
@@ -50,8 +52,8 @@ export const mapActions = {
   },
 
   updateMode() {
-    return (dispatch, getState) => {
-      const state: AppState = getState()
+    return (dispatch: Dispatch<MapState>, getState: () => AppState) => {
+      const state = getState()
 
       let mode: string
       switch (state.route.pathname) {
@@ -87,8 +89,8 @@ export const mapActions = {
   },
 
   updateDetections() {
-    return (dispatch, getState) => {
-      const state: AppState = getState()
+    return (dispatch: Dispatch<MapState>, getState: () => AppState) => {
+      const state = getState()
 
       let detections: beachfront.Job[] | beachfront.ProductLine[]
       switch (state.route.pathname) {
@@ -123,8 +125,8 @@ export const mapActions = {
   },
 
   updateFrames() {
-    return (dispatch, getState) => {
-      const state: AppState = getState()
+    return (dispatch: Dispatch<MapState>, getState: () => AppState) => {
+      const state = getState()
 
       let frames: beachfront.Job[] | beachfront.ProductLine[]
       switch (state.route.pathname) {
@@ -159,8 +161,8 @@ export const mapActions = {
   },
 
   setSelectedFeature(feature: GeoJSON.Feature<any> | null) {
-    return (dispatch, getState) => {
-      const state: AppState = getState()
+    return (dispatch: Dispatch<MapState>, getState: () => AppState) => {
+      const state = getState()
 
       if (state.map.selectedFeature === feature) {
         return  // Nothing to do
@@ -208,8 +210,8 @@ export const mapActions = {
   },
 
   serialize() {
-    return (dispatch, getState) => {
-      const state: AppState = getState()
+    return (dispatch: Dispatch<MapState>, getState: () => AppState) => {
+      const state = getState()
 
       /*
       Wrap map center to keep it within the -180/180 range. Otherwise the map may scroll awkardly on initial load to get

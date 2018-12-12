@@ -18,8 +18,17 @@ const styles: any = require('./StaticMinimap.css')
 
 import * as React from 'react'
 import {connect} from 'react-redux'
-import * as ol from '../utils/ol'
-
+import OLFeature from 'ol/feature'
+import OLFill from 'ol/style/fill'
+import OLMap from 'ol/map'
+import OLPolygon from 'ol/geom/polygon'
+import OLStyle from 'ol/style/style'
+import OLStroke from 'ol/style/stroke'
+import OLTileLayer from 'ol/layer/tile'
+import OLVectorLayer from 'ol/layer/vector'
+import OLVectorSource from 'ol/source/vector'
+import OLView from 'ol/view'
+import OLXYZ from 'ol/source/xyz'
 import {BASEMAP_TILE_PROVIDERS} from '../config'
 import {deserializeBbox} from '../utils/geometries'
 import {AppState} from '../store'
@@ -32,7 +41,7 @@ type Props = StateProps
 export class StaticMinimap extends React.Component<Props> {
   refs: any
 
-  private map: ol.Map | null
+  private map: OLMap | null
 
   componentDidMount() {
     this.initializeMap()
@@ -57,28 +66,28 @@ export class StaticMinimap extends React.Component<Props> {
     if (!bbox) {
       throw new Error('Unable to initialize map: bbox is null!')
     }
-    const bboxGeometry = ol.Polygon.fromExtent(bbox)
-    this.map = new ol.Map({
+    const bboxGeometry = OLPolygon.fromExtent(bbox)
+    this.map = new OLMap({
       controls: [],
       interactions: [],
       layers: [
-        new ol.Tile({
-          source: new ol.XYZ(DEFAULT_TILE_PROVIDER),
+        new OLTileLayer({
+          source: new OLXYZ(DEFAULT_TILE_PROVIDER),
         }),
-        new ol.VectorLayer({
-          source: new ol.VectorSource({
+        new OLVectorLayer({
+          source: new OLVectorSource({
             wrapX: false,
             features: [
-              new ol.Feature({
+              new OLFeature({
                 geometry: bboxGeometry,
               }),
             ],
           }),
-          style: new ol.Style({
-            fill: new ol.Fill({
+          style: new OLStyle({
+            fill: new OLFill({
               color: 'hsla(202, 70%, 50%, .3)',
             }),
-            stroke: new ol.Stroke({
+            stroke: new OLStroke({
               color: 'hsla(202, 70%, 50%, .7)',
               lineCap: 'square',
               lineJoin: 'square',
@@ -88,7 +97,7 @@ export class StaticMinimap extends React.Component<Props> {
         }),
       ],
       target: this.refs.target,
-      view: new ol.View({
+      view: new OLView({
         center: [0, 0],
         zoom: 1,
         maxZoom: 6,

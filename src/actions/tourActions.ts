@@ -14,10 +14,12 @@
  * limitations under the License.
  **/
 
+import {Dispatch} from 'redux'
 import {scrollIntoView} from '../utils/domUtils'
 import {AppState} from '../store'
+import {TourState} from '../reducers/tourReducer'
 
-export const tourTypes = {
+export const tourTypes: ActionTypes = {
   TOUR_STEPS_UPDATED: 'TOUR_STEPS_UPDATED',
   TOUR_STARTED: 'TOUR_STARTED',
   TOUR_ENDED: 'TOUR_ENDED',
@@ -29,14 +31,14 @@ export const tourTypes = {
 export interface TourStep {
   step: number
   selector: string
-  title: any
-  body: any
-  position?: string
-  hideArrow?: boolean
-  verticalOffset?: number
+  title: string | JSX.Element
+  body: string | JSX.Element
   horizontalOffset?: number
-  before?(): void
-  after?(): void
+  verticalOffset?: number
+  position?: 'left' | 'right' | 'top' | 'topLeft' | 'bottom' | 'bottomLeft'
+  hideArrow?: boolean
+  before?: () => void
+  after?: () => void
 }
 
 export const tourActions = {
@@ -56,8 +58,8 @@ export const tourActions = {
   },
 
   goToStep(step: number) {
-    return async (dispatch, getState) => {
-      const state: AppState = getState()
+    return async (dispatch: Dispatch<TourState>, getState: () => AppState) => {
+      const state = getState()
 
       if (state.tour.changing) {
         console.warn('Tour step is in process of changing.')

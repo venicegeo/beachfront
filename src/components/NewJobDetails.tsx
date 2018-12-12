@@ -21,8 +21,8 @@ import * as React from 'react'
 interface Props {
   computeMask: boolean
   name: string
-  onComputeMaskChange(value: boolean)
-  onNameChange(value: string)
+  onComputeMaskChange: (value: boolean) => void
+  onNameChange: (value: string) => void
 }
 
 export const NewJobDetails = (props: Props) => (

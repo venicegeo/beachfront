@@ -49,7 +49,7 @@ export class SessionLoggedOut extends React.Component<Props> {
   }
 }
 
-function mapDispatchToProps(dispatch) {
+function mapDispatchToProps(dispatch: Function) {
   return {
     actions: {
       user: {

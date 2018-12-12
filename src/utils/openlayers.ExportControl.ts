@@ -19,7 +19,9 @@ import proj from 'ol/proj'
 import * as moment from 'moment'
 
 export class ExportControl extends Control {
-  constructor(className) {
+  element: Element
+
+  constructor(className: string) {
     const element = document.createElement('div')
     super({element})
     element.className = `${className || ''} ol-unselectable ol-control`
@@ -38,7 +40,7 @@ export class ExportControl extends Control {
     const timestamp = moment().format('llll')
 
     hyperlink.setAttribute('download', `BEACHFRONT_EXPORT_${timestamp}.png`)
-    map.once('postcompose', event => {
+    map.once('postcompose', (event: ol.render.Event) => {
       const canvas = event.context.canvas
       const imageData = event.context.getImageData(0, 0, canvas.width, canvas.height)
       const newCanvas = document.createElement('canvas')
