@@ -140,5 +140,3 @@ interface Array<T> {
 }
 
 type ActionTypes = {[key: string]: string}
-
-declare module 'redux-thunk'

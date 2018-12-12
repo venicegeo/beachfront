@@ -14,7 +14,7 @@
  * limitations under the License.
  **/
 
-import {applyMiddleware, combineReducers, createStore} from 'redux'
+import {applyMiddleware, combineReducers, createStore, Middleware} from 'redux'
 import reduxThunk from 'redux-thunk'
 import {createLogger} from 'redux-logger'
 import {userInitialState, userReducer, UserState} from './reducers/userReducer'
@@ -27,7 +27,7 @@ import {algorithmsInitialState, algorithmsReducer, AlgorithmsState} from './redu
 import {apiStatusInitialState, apiStatusReducer, ApiStatusState} from './reducers/apiStatusReducer'
 import {tourInitialState, tourReducer, TourState} from './reducers/tourReducer'
 
-const middleware = [reduxThunk]
+const middleware: Middleware[] = [reduxThunk]
 
 if (process.env.NODE_ENV === 'development') {
   middleware.push(createLogger({
