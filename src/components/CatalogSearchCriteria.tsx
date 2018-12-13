@@ -21,9 +21,10 @@ const date_format = DATE_FORMAT.toLowerCase()
 import * as React from 'react'
 import {FormEvent} from 'react'
 import {connect} from 'react-redux'
-import {AxiosError} from 'axios'
-import StaticMinimap from './StaticMinimap'
+import {AxiosError, AxiosResponse} from 'axios'
 import * as moment from 'moment'
+import {getClient} from '../api/session'
+import StaticMinimap from './StaticMinimap'
 import {SCENE_TILE_PROVIDERS} from '../config'
 import {catalogActions, CatalogUpdateSearchCriteriaArgs} from '../actions/catalogActions'
 import {AppState} from '../store'
@@ -37,6 +38,8 @@ type PassedProps = {
 type Props = StateProps & DispatchProps & PassedProps
 
 export class CatalogSearchCriteria extends React.Component<Props> {
+  private apiKeyFormFileName = 'APIKeyForm.xls'
+
   constructor(props: Props) {
     super(props)
 
@@ -46,6 +49,7 @@ export class CatalogSearchCriteria extends React.Component<Props> {
     this.handleDateOfCaptureToChange = this.handleDateOfCaptureToChange.bind(this)
     this.handleCloudCoverChange = this.handleCloudCoverChange.bind(this)
     this.renderErrorElement = this.renderErrorElement.bind(this)
+    this.downloadApiKeyDocument = this.downloadApiKeyDocument.bind(this)
   }
 
   render() {
@@ -87,6 +91,11 @@ export class CatalogSearchCriteria extends React.Component<Props> {
               onChange={this.handleApiKeyChange}
             />
           </label>}
+        {!this.props.catalog.apiKey && (
+          <div className={styles.apiKeyInfo}>
+            <span>To obtain an API key, please fill out <a href={`/${this.apiKeyFormFileName}`} onClick={this.downloadApiKeyDocument}>this document</a> and follow its instructions.</span>
+          </div>
+        )}
 
         {(typeof this.props.catalog.searchCriteria.dateFrom !== 'undefined' && typeof this.props.catalog.searchCriteria.dateTo !== 'undefined') && (
           <div>
@@ -226,6 +235,33 @@ export class CatalogSearchCriteria extends React.Component<Props> {
         <pre>{stacktrace}</pre>
       </div>
     )
+  }
+
+  private async downloadApiKeyDocument(e: React.MouseEvent) {
+    e.preventDefault()
+
+    let response: AxiosResponse
+    try {
+      response = await getClient().get('/application/planet', {
+        responseType: 'blob',
+      })
+    } catch (err) {
+      alert(err.message)
+      return
+    }
+
+    // Create the file url.
+    const fileData = new Blob([response.data], {type: response.headers['content-type']})
+    const file = window.URL.createObjectURL(fileData)
+
+    // Download the file.
+    const a = document.createElement('a') as HTMLAnchorElement
+    a.href = file
+    a.download = this.apiKeyFormFileName
+    a.click()
+
+    // Clean up the downloaded file url (to avoid memory leaks).
+    window.URL.revokeObjectURL(file)
   }
 }
 
