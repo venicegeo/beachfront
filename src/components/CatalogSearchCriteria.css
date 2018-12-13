@@ -76,3 +76,9 @@
   text-align: left;
   white-space: nowrap;
 }
+
+.apiKeyInfo {
+  padding: 0 5rem;
+  font-size: 1.1rem;
+  text-align: center;
+}
