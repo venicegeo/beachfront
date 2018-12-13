@@ -44,7 +44,7 @@ describe('tourReducer', () => {
 
     const action = { type: tourTypes.TOUR_STARTED }
 
-    expect(tourReducer(state, action)).toEqual({
+    expect(tourReducer(state as any, action)).toEqual({
       ...state,
       inProgress: true,
       changing: false,
@@ -63,7 +63,7 @@ describe('tourReducer', () => {
 
     const action = { type: tourTypes.TOUR_ENDED }
 
-    expect(tourReducer(state, action)).toEqual({
+    expect(tourReducer(state as any, action)).toEqual({
       ...state,
       inProgress: false,
       changing: false,
