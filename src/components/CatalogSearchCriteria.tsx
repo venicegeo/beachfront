@@ -41,7 +41,7 @@ interface Props {
   onSourceChange(source: string)
 }
 
-const apiKeyFormFileName = 'APIKeyForm.xls'
+const apiKeyFormFileName = 'APIKeyForm.xlsx'
 
 export const CatalogSearchCriteria = (props: Props) => (
   <div className={styles.root}>
