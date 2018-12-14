@@ -85,6 +85,12 @@
   padding-right: 0 !important;
 }
 
+.apiKeyInfo {
+  padding: 0 5rem;
+  font-size: 1.1rem;
+  text-align: center;
+}
+
 .apiKeyInput {
   font-family: TextSecurityDisc, sans-serif;
 }
