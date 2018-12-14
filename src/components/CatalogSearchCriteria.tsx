@@ -38,7 +38,7 @@ type PassedProps = {
 type Props = StateProps & DispatchProps & PassedProps
 
 export class CatalogSearchCriteria extends React.Component<Props> {
-  private apiKeyFormFileName = 'APIKeyForm.xls'
+  private apiKeyFormFileName = 'APIKeyForm.xlsx'
 
   constructor(props: Props) {
     super(props)
