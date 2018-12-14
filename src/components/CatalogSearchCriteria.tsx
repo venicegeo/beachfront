@@ -19,8 +19,10 @@ const DATE_FORMAT = 'YYYY-MM-DD'
 const date_format = DATE_FORMAT.toLowerCase()
 
 import * as React from 'react'
-import {StaticMinimap} from './StaticMinimap'
+import {AxiosResponse} from 'axios'
 import * as moment from 'moment'
+import {getClient} from '../api/session'
+import {StaticMinimap} from './StaticMinimap'
 import {SCENE_TILE_PROVIDERS} from '../config'
 
 interface Props {
@@ -38,6 +40,8 @@ interface Props {
   onDateChange?(dateFrom: string, dateTo: string)
   onSourceChange(source: string)
 }
+
+const apiKeyFormFileName = 'APIKeyForm.xlsx'
 
 export const CatalogSearchCriteria = (props: Props) => (
   <div className={styles.root}>
@@ -71,6 +75,11 @@ export const CatalogSearchCriteria = (props: Props) => (
         onChange={event => props.onApiKeyChange((event.target as HTMLInputElement).value)}
       />
     </label>
+    {!props.apiKey && (
+      <div className={styles.apiKeyInfo}>
+        <span>To obtain an API key, please fill out <a href={`/${apiKeyFormFileName}`} onClick={downloadApiKeyDocument}>this document</a> and follow its instructions.</span>
+      </div>
+    )}
 
     {(typeof props.dateFrom !== 'undefined' && typeof props.dateTo !== 'undefined') && (
       <div>
@@ -133,6 +142,33 @@ export const CatalogSearchCriteria = (props: Props) => (
     </label>
   </div>
 )
+
+async function downloadApiKeyDocument(e: React.MouseEvent) {
+  e.preventDefault()
+
+  let response: AxiosResponse
+  try {
+    response = await getClient().get('/application/planet', {
+      responseType: 'blob',
+    })
+  } catch (err) {
+    alert(err.message)
+    return
+  }
+
+  // Create the file url.
+  const fileData = new Blob([response.data], {type: response.headers['content-type']})
+  const file = window.URL.createObjectURL(fileData)
+
+  // Download the file.
+  const a = document.createElement('a') as HTMLAnchorElement
+  a.href = file
+  a.download = apiKeyFormFileName
+  a.click()
+
+  // Clean up the downloaded file url (to avoid memory leaks).
+  window.URL.revokeObjectURL(file)
+}
 
 function isValidDate(date) {
   return moment.utc(date, DATE_FORMAT, true).isValid()
