@@ -93,7 +93,7 @@ export class CatalogSearchCriteria extends React.Component<Props> {
           </label>}
         {!this.props.catalog.apiKey && (
           <div className={styles.apiKeyInfo}>
-            <span>To obtain an API key, please fill out <a href={`/${this.apiKeyFormFileName}`} onClick={this.downloadApiKeyDocument}>this document</a> and follow its instructions.</span>
+            <span>An API key is required. To obtain an API key, please fill out <a href={`/${this.apiKeyFormFileName}`} onClick={this.downloadApiKeyDocument}>this document</a> and follow its instructions.</span>
           </div>
         )}
 
