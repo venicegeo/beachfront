@@ -53,6 +53,9 @@ export class CatalogSearchCriteria extends React.Component<Props> {
   }
 
   render() {
+    const selectedSceneTileProvider = SCENE_TILE_PROVIDERS.find(p => p.prefix === this.props.catalog.searchCriteria.source)
+    const hideApiKeyInput = (selectedSceneTileProvider) ? selectedSceneTileProvider.hideApiKeyInput : false
+
     return (
       <div className={styles.root}>
         <div className={styles.minimap}>
@@ -78,7 +81,7 @@ export class CatalogSearchCriteria extends React.Component<Props> {
               ))}
           </select>
         </label>
-        {(SCENE_TILE_PROVIDERS.find(p => p.prefix === this.props.catalog.searchCriteria.source) || { hideApiKeyInput: false }).hideApiKeyInput ? '' :
+        {hideApiKeyInput ? '' :
           <label className={styles.apiKey}>
             <span>API Key</span>
             <input
@@ -91,7 +94,7 @@ export class CatalogSearchCriteria extends React.Component<Props> {
               onChange={this.handleApiKeyChange}
             />
           </label>}
-        {!this.props.catalog.apiKey && (
+        {!(hideApiKeyInput || this.props.catalog.apiKey) && (
           <div className={styles.apiKeyInfo}>
             <span>An API key is required. To obtain an API key, please fill out <a href={`/${this.apiKeyFormFileName}`} onClick={this.downloadApiKeyDocument}>this document</a> and follow its instructions.</span>
           </div>
