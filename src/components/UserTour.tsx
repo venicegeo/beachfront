@@ -494,7 +494,7 @@ export class UserTour extends React.Component<Props> {
           const elem = query('.JobStatusList-root .JobStatus-isActive')
 
           if (!elem.classList.contains('JobStatus-isExpanded')) {
-            const details = elem.querySelector('.JobStatus-details') as HTMLElement
+            const details = elem.querySelector('.JobStatus-caret') as HTMLElement
             details.click()
           }
         },
@@ -553,7 +553,7 @@ export class UserTour extends React.Component<Props> {
           const elem = query('.JobStatusList-root .JobStatus-isActive')
 
           if (!elem.classList.contains('JobStatus-isExpanded')) {
-            (elem.querySelector('.JobStatus-details') as HTMLElement).click()
+            (elem.querySelector('.JobStatus-caret') as HTMLElement).click()
           }
         },
       },
@@ -639,7 +639,7 @@ export class UserTour extends React.Component<Props> {
         if (!elem || Array.from(elem.classList).find(n => n === 'JobStatus-isExpanded')) {
           resolve()
         } else {
-          (elem.querySelector('.JobStatus-details') as any).click()
+          (elem.querySelector('.JobStatus-caret') as any).click()
           setTimeout(resolve, 250)
         }
       }).catch(msg => reject(msg))
