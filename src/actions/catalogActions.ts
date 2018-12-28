@@ -136,7 +136,7 @@ export namespace CatalogActions {
     static type = 'CATALOG_API_KEY_UPDATED'
     type = ApiKeyUpdated.type
     constructor(public payload: {
-      apiKey: typeof catalogInitialState.apiKey
+      apiKey: CatalogState['apiKey']
     }) {}
   }
 
@@ -162,7 +162,7 @@ export namespace CatalogActions {
     static type = 'CATALOG_SEARCH_SUCCESS'
     type = SearchSuccess.type
     constructor(public payload: {
-      searchResults: NonNullable<typeof catalogInitialState.searchResults>
+      searchResults: NonNullable<CatalogState['searchResults']>
     }) {}
   }
 
@@ -170,7 +170,7 @@ export namespace CatalogActions {
     static type = 'CATALOG_SEARCH_ERROR'
     type = SearchError.type
     constructor(public payload: {
-      error: typeof catalogInitialState.searchError
+      error: CatalogState['searchError']
     }) {}
   }
 
@@ -183,9 +183,9 @@ export namespace CatalogActions {
     static type = 'CATALOG_DESERIALIZED'
     type = Deserialized.type
     constructor(public payload: {
-      searchCriteria: typeof catalogInitialState.searchCriteria
-      searchResults: typeof catalogInitialState.searchResults
-      apiKey: typeof catalogInitialState.apiKey
+      searchCriteria: CatalogState['searchCriteria']
+      searchResults: CatalogState['searchResults']
+      apiKey: CatalogState['apiKey']
     }) {}
   }
 }

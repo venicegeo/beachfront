@@ -18,7 +18,7 @@ import {Action, Dispatch} from 'redux'
 import {getClient} from '../api/session'
 import {JOB_ENDPOINT, PRODUCTLINE_ENDPOINT} from '../config'
 import {Extent} from '../utils/geometries'
-import {ProductLinesState, productLinesInitialState} from '../reducers/productLinesReducer'
+import {ProductLinesState} from '../reducers/productLinesReducer'
 
 export namespace ProductLines {
   export function fetch() {
@@ -89,7 +89,7 @@ export namespace ProductLinesActions {
     static type = 'PRODUCT_LINES_FETCH_SUCCESS'
     type = FetchSuccess.type
     constructor(public payload: {
-      records: typeof productLinesInitialState.records
+      records: ProductLinesState['records']
     }) {}
   }
 
@@ -97,7 +97,7 @@ export namespace ProductLinesActions {
     static type = 'PRODUCT_LINES_FETCH_ERROR'
     type = FetchError.type
     constructor(public payload: {
-      error: typeof productLinesInitialState.fetchError
+      error: ProductLinesState['fetchError']
     }) {}
   }
 
@@ -110,7 +110,7 @@ export namespace ProductLinesActions {
     static type = 'PRODUCT_LINES_FETCH_JOBS_SUCCESS'
     type = FetchJobsSuccess.type
     constructor(public payload: {
-      jobs: typeof productLinesInitialState.jobs
+      jobs: ProductLinesState['jobs']
     }) {}
   }
 
@@ -118,7 +118,7 @@ export namespace ProductLinesActions {
     static type = 'PRODUCT_LINES_FETCH_JOBS_ERROR'
     type = FetchJobsError.type
     constructor(public payload: {
-      error: typeof productLinesInitialState.fetchJobsError
+      error: ProductLinesState['fetchJobsError']
     }) {}
   }
 
@@ -131,7 +131,7 @@ export namespace ProductLinesActions {
     static type = 'PRODUCT_LINES_CREATE_PRODUCT_LINE_SUCCESS'
     type = CreateProductLineSuccess.type
     constructor(public payload: {
-      createdProductLine: NonNullable<typeof productLinesInitialState.createdProductLine>
+      createdProductLine: NonNullable<ProductLinesState['createdProductLine']>
     }) {}
   }
 
@@ -139,7 +139,7 @@ export namespace ProductLinesActions {
     static type = 'PRODUCT_LINES_CREATE_PRODUCT_LINE_ERROR'
     type = CreateProductLineError.type
     constructor(public payload: {
-      error: typeof productLinesInitialState.createProductLineError
+      error: ProductLinesState['createProductLineError']
     }) {}
   }
 }

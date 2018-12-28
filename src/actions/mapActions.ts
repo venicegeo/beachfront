@@ -20,7 +20,7 @@ import {wrap} from '../utils/math'
 import {AppState} from '../store'
 import {Extent, Point} from '../utils/geometries'
 import {Action, Dispatch} from 'redux'
-import {MapCollections, mapInitialState, MapState} from '../reducers/mapReducer'
+import {MapCollections, MapState} from '../reducers/mapReducer'
 
 export namespace Map {
   export function initialized(map: ol.Map, collections: MapCollections) {
@@ -218,8 +218,8 @@ export namespace MapActions {
     static type = 'MAP_INITIALIZED'
     type = Initialized.type
     constructor(public payload: {
-      map: NonNullable<typeof mapInitialState.map>
-      collections: NonNullable<typeof mapInitialState.collections>
+      map: NonNullable<MapState['map']>
+      collections: NonNullable<MapState['collections']>
     }) {}
   }
 
@@ -227,7 +227,7 @@ export namespace MapActions {
     static type = 'MAP_MODE_UPDATED'
     type = ModeUpdated.type
     constructor(public payload: {
-      mode: typeof mapInitialState.mode
+      mode: MapState['mode']
     }) {}
   }
 
@@ -235,7 +235,7 @@ export namespace MapActions {
     static type = 'MAP_DETECTIONS_UPDATED'
     type = DetectionsUpdated.type
     constructor(public payload: {
-      detections: typeof mapInitialState.detections
+      detections: MapState['detections']
     }) {}
   }
 
@@ -243,7 +243,7 @@ export namespace MapActions {
     static type = 'MAP_FRAMES_UPDATED'
     type = FramesUpdated.type
     constructor(public payload: {
-      frames: typeof mapInitialState.frames
+      frames: MapState['frames']
     }) {}
   }
 
@@ -251,7 +251,7 @@ export namespace MapActions {
     static type = 'MAP_BBOX_UPDATED'
     type = BboxUpdated.type
     constructor(public payload: {
-      bbox: typeof mapInitialState.bbox
+      bbox: MapState['bbox']
     }) {}
   }
 
@@ -264,7 +264,7 @@ export namespace MapActions {
     static type = 'MAP_SELECTED_FEATURE_UPDATED'
     type = SelectedFeatureUpdated.type
     constructor(public payload: {
-      selectedFeature: typeof mapInitialState.selectedFeature
+      selectedFeature: MapState['selectedFeature']
     }) {}
   }
 
@@ -272,7 +272,7 @@ export namespace MapActions {
     static type = 'MAP_HOVERED_FEATURE_UPDATED'
     type = HoveredFeatureUpdated.type
     constructor(public payload: {
-      hoveredFeature: typeof mapInitialState.hoveredFeature
+      hoveredFeature: MapState['hoveredFeature']
     }) {}
   }
 
@@ -280,7 +280,7 @@ export namespace MapActions {
     static type = 'MAP_VIEW_UPDATED'
     type = ViewUpdated.type
     constructor(public payload: {
-      view: NonNullable<typeof mapInitialState.view>
+      view: NonNullable<MapState['view']>
     }) {}
   }
 
@@ -310,8 +310,8 @@ export namespace MapActions {
     static type = 'MAP_DESERIALIZED'
     type = Deserialized.type
     constructor(public payload: {
-      bbox: typeof mapInitialState.bbox
-      view: typeof mapInitialState.view
+      bbox: MapState['bbox']
+      view: MapState['view']
     }) {}
   }
 }

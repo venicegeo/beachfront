@@ -97,7 +97,7 @@ export namespace UserActions {
     static type = 'USER_DESERIALIZED'
     type = Deserialized.type
     constructor(public payload: {
-      isSessionExpired: typeof userInitialState.isSessionExpired
+      isSessionExpired: UserState['isSessionExpired']
     }) {}
   }
 }

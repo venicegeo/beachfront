@@ -81,8 +81,8 @@ export namespace ApiStatusActions {
     static type = 'API_STATUS_FETCH_SUCCESS'
     type = FetchSuccess.type
     constructor(public payload: {
-      geoserver: typeof apiStatusInitialState.geoserver
-      enabledPlatforms: typeof apiStatusInitialState.enabledPlatforms
+      geoserver: ApiStatusState['geoserver']
+      enabledPlatforms: ApiStatusState['enabledPlatforms']
     }) {}
   }
 
@@ -90,7 +90,7 @@ export namespace ApiStatusActions {
     static type = 'API_STATUS_FETCH_ERROR'
     type = FetchError.type
     constructor(public payload: {
-      error: typeof apiStatusInitialState.fetchError
+      error: ApiStatusState['fetchError']
     }) {}
   }
 
@@ -103,8 +103,8 @@ export namespace ApiStatusActions {
     static type = 'API_STATUS_DESERIALIZED'
     type = Deserialized.type
     constructor(public payload: {
-      geoserver: typeof apiStatusInitialState.geoserver
-      enabledPlatforms: typeof apiStatusInitialState.enabledPlatforms
+      geoserver: ApiStatusState['geoserver']
+      enabledPlatforms: ApiStatusState['enabledPlatforms']
     }) {}
   }
 }

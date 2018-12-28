@@ -76,7 +76,7 @@ export namespace AlgorithmsActions {
     static type = 'ALGORITHMS_FETCH_SUCCESS'
     type = FetchSuccess.type
     constructor(public payload: {
-      records: typeof algorithmsInitialState.records
+      records: AlgorithmsState['records']
     }) {}
   }
 
@@ -84,7 +84,7 @@ export namespace AlgorithmsActions {
     static type = 'ALGORITHMS_FETCH_ERROR'
     type = FetchError.type
     constructor(public payload: {
-      error: typeof algorithmsInitialState.fetchError
+      error: AlgorithmsState['fetchError']
     }) {}
   }
 
@@ -97,7 +97,7 @@ export namespace AlgorithmsActions {
     static type = 'ALGORITHMS_DESERIALIZED'
     type = Deserialized.type
     constructor(public payload: {
-      records: typeof algorithmsInitialState.records
+      records: AlgorithmsState['records']
     }) {}
   }
 }

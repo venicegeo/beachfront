@@ -16,7 +16,7 @@
 
 import {Action} from 'redux'
 import {generateRoute} from '../utils/routeUtils'
-import {routeInitialState} from '../reducers/routeReducer'
+import {RouteState} from '../reducers/routeReducer'
 
 export namespace Route {
   export function navigateTo(args: RouteNavigateToArgs) {
@@ -47,12 +47,12 @@ export namespace RouteActions {
     static type = 'ROUTE_CHANGED'
     type = Changed.type
     constructor(public payload: {
-      hash: typeof routeInitialState.hash
-      href: typeof routeInitialState.href
-      jobIds: typeof routeInitialState.jobIds
-      pathname: typeof routeInitialState.pathname
-      search: typeof routeInitialState.search
-      selectedFeature: typeof routeInitialState.selectedFeature
+      hash: RouteState['hash']
+      href: RouteState['href']
+      jobIds: RouteState['jobIds']
+      pathname: RouteState['pathname']
+      search: RouteState['search']
+      selectedFeature: RouteState['selectedFeature']
     }) {}
   }
 }

@@ -17,7 +17,7 @@
 import {Action, Dispatch} from 'redux'
 import {scrollIntoView} from '../utils/domUtils'
 import {AppState} from '../store'
-import {tourInitialState, TourState} from '../reducers/tourReducer'
+import {TourState} from '../reducers/tourReducer'
 
 export namespace Tour {
   export function setSteps(steps: TourStep[]) {
@@ -86,7 +86,7 @@ export namespace TourActions {
     static type = 'TOUR_STEPS_UPDATED'
     type = StepsUpdated.type
     constructor(public payload: {
-      steps: typeof tourInitialState.steps
+      steps: TourState['steps']
     }) {}
   }
 
@@ -109,7 +109,7 @@ export namespace TourActions {
     static type = 'TOUR_STEP_CHANGE_SUCCESS'
     type = StepChangeSuccess.type
     constructor(public payload: {
-      step: typeof tourInitialState.step
+      step: TourState['step']
     }) {}
   }
 
@@ -117,7 +117,7 @@ export namespace TourActions {
     static type = 'TOUR_STEP_CHANGE_ERROR'
     type = StepChangeError.type
     constructor(public payload: {
-      error: typeof tourInitialState.error
+      error: TourState['error']
     }) {}
   }
 }

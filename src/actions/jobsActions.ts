@@ -17,7 +17,7 @@
 import {Action, Dispatch} from 'redux'
 import {getClient} from '../api/session'
 import {JOB_ENDPOINT} from '../config'
-import {jobsInitialState, JobsState} from '../reducers/jobsReducer'
+import {JobsState} from '../reducers/jobsReducer'
 
 export namespace Jobs {
   export function fetch() {
@@ -99,7 +99,7 @@ export namespace JobsActions {
     static type = 'JOBS_FETCH_SUCCESS'
     type = FetchSuccess.type
     constructor(public payload: {
-      records: typeof jobsInitialState.records,
+      records: JobsState['records']
     }) {}
   }
 
@@ -107,7 +107,7 @@ export namespace JobsActions {
     static type = 'JOBS_FETCH_ERROR'
     type = FetchError.type
     constructor(public payload: {
-      error: typeof jobsInitialState.fetchError,
+      error: JobsState['fetchError']
     }) {}
   }
 
@@ -120,7 +120,7 @@ export namespace JobsActions {
     static type = 'JOBS_FETCH_ONE_SUCCESS'
     type = FetchOneSuccess.type
     constructor(public payload: {
-      record: typeof jobsInitialState.records[0],
+      record: JobsState['records'][0]
     }) {}
   }
 
@@ -128,7 +128,7 @@ export namespace JobsActions {
     static type = 'JOBS_FETCH_ONE_ERROR'
     type = FetchOneError.type
     constructor(public payload: {
-      error: typeof jobsInitialState.fetchOneError,
+      error: JobsState['fetchOneError']
     }) {}
   }
 
@@ -141,7 +141,7 @@ export namespace JobsActions {
     static type = 'JOBS_CREATE_JOB_SUCCESS'
     type = CreateJobSuccess.type
     constructor(public payload: {
-      createdJob: NonNullable<typeof jobsInitialState.createdJob>
+      createdJob: NonNullable<JobsState['createdJob']>
     }) {}
   }
 
@@ -149,7 +149,7 @@ export namespace JobsActions {
     static type = 'JOBS_CREATE_JOB_ERROR'
     type = CreateJobError.type
     constructor(public payload: {
-      error: typeof jobsInitialState.createJobError
+      error: JobsState['createJobError']
     }) {}
   }
 
@@ -162,7 +162,7 @@ export namespace JobsActions {
     static type = 'JOBS_DELETING_JOB'
     type = DeletingJob.type
     constructor(public payload: {
-      deletedJob: NonNullable<typeof jobsInitialState.deletedJob>
+      deletedJob: NonNullable<JobsState['deletedJob']>
     }) {}
   }
 
@@ -175,7 +175,7 @@ export namespace JobsActions {
     static type = 'JOBS_DELETE_JOB_ERROR'
     type = DeleteJobError.type
     constructor(public payload: {
-      error: typeof jobsInitialState.deleteJobError
+      error: JobsState['deleteJobError']
     }) {}
   }
 }
