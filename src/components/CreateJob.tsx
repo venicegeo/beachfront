@@ -26,7 +26,7 @@ import {PrimaryMap} from './PrimaryMap'
 import {normalizeSceneId} from './SceneFeatureDetails'
 import {TYPE_SCENE} from '../constants'
 import {AppState} from '../store'
-import {jobsActions, JobsCreateJobArgs} from '../actions/jobsActions'
+import {Jobs, JobsCreateJobArgs} from '../actions/jobsActions'
 
 type StateProps = ReturnType<typeof mapStateToProps>
 type DispatchProps = ReturnType<typeof mapDispatchToProps>
@@ -72,7 +72,7 @@ export class CreateJob extends React.Component<Props, State> {
 
         // Reset the algorithm error.
         if (this.props.jobs.createJobError) {
-          this.props.actions.jobs.dismissCreateJobError()
+          this.props.dispatch.jobs.dismissCreateJobError()
         }
       }
 
@@ -135,7 +135,7 @@ export class CreateJob extends React.Component<Props, State> {
       throw new Error('Unable to submit: selectedScene is null!')
     }
 
-    this.props.actions.jobs.createJob({
+    this.props.dispatch.jobs.createJob({
       algorithmId: algorithm.id,
       computeMask: this.state.computeMask,
       name: this.state.name,
@@ -163,10 +163,10 @@ function mapStateToProps(state: AppState) {
 
 function mapDispatchToProps(dispatch: Function) {
   return {
-    actions: {
+    dispatch: {
       jobs: {
-        createJob: (args: JobsCreateJobArgs) => dispatch(jobsActions.createJob(args)),
-        dismissCreateJobError: () => dispatch(jobsActions.dismissCreateJobError()),
+        createJob: (args: JobsCreateJobArgs) => dispatch(Jobs.createJob(args)),
+        dismissCreateJobError: () => dispatch(Jobs.dismissCreateJobError()),
       },
     },
   }

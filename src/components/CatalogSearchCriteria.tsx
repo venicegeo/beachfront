@@ -26,9 +26,9 @@ import * as moment from 'moment'
 import {getClient} from '../api/session'
 import StaticMinimap from './StaticMinimap'
 import {SCENE_TILE_PROVIDERS} from '../config'
-import {catalogActions, CatalogUpdateSearchCriteriaArgs} from '../actions/catalogActions'
+import {Catalog, CatalogUpdateSearchCriteriaArgs} from '../actions/catalogActions'
 import {AppState} from '../store'
-import {mapActions} from '../actions/mapActions'
+import {Map} from '../actions/mapActions'
 
 type StateProps = ReturnType<typeof mapStateToProps>
 type DispatchProps = ReturnType<typeof mapDispatchToProps>
@@ -57,7 +57,7 @@ export class CatalogSearchCriteria extends React.Component<Props> {
       <div className={styles.root}>
         <div className={styles.minimap}>
           <StaticMinimap />
-          <div className={styles.clearBbox} onClick={this.props.actions.map.clearBbox}>
+          <div className={styles.clearBbox} onClick={this.props.dispatch.map.clearBbox}>
             <i className="fa fa-times-circle"/> Clear
           </div>
         </div>
@@ -156,29 +156,29 @@ export class CatalogSearchCriteria extends React.Component<Props> {
   }
 
   private handleSourceChange(e: FormEvent) {
-    this.props.actions.catalog.updateSearchCriteria({
+    this.props.dispatch.catalog.updateSearchCriteria({
       source: (e.target as HTMLSelectElement).value,
     })
   }
 
   private handleApiKeyChange(e: FormEvent) {
-    this.props.actions.catalog.setApiKey((e.target as HTMLInputElement).value)
+    this.props.dispatch.catalog.setApiKey((e.target as HTMLInputElement).value)
   }
 
   private handleDateOfCaptureFromChange(e: FormEvent) {
-    this.props.actions.catalog.updateSearchCriteria({
+    this.props.dispatch.catalog.updateSearchCriteria({
       dateFrom: (e.target as HTMLInputElement).value,
     })
   }
 
   private handleDateOfCaptureToChange(e: FormEvent) {
-    this.props.actions.catalog.updateSearchCriteria({
+    this.props.dispatch.catalog.updateSearchCriteria({
       dateTo: (e.target as HTMLInputElement).value,
     })
   }
 
   private handleCloudCoverChange(e: FormEvent) {
-    this.props.actions.catalog.updateSearchCriteria({
+    this.props.dispatch.catalog.updateSearchCriteria({
       cloudCover: parseInt((e.target as HTMLInputElement).value, 10),
     })
   }
@@ -285,15 +285,15 @@ function mapStateToProps(state: AppState) {
 
 function mapDispatchToProps(dispatch: Function) {
   return {
-    actions: {
+    dispatch: {
       catalog: {
-        setApiKey: (apiKey: string) => dispatch(catalogActions.setApiKey(apiKey)),
+        setApiKey: (apiKey: string) => dispatch(Catalog.setApiKey(apiKey)),
         updateSearchCriteria: (args: CatalogUpdateSearchCriteriaArgs) => (
-          dispatch(catalogActions.updateSearchCriteria(args))
+          dispatch(Catalog.updateSearchCriteria(args))
         ),
       },
       map: {
-        clearBbox: () => dispatch(mapActions.clearBbox()),
+        clearBbox: () => dispatch(Map.clearBbox()),
       },
     },
   }

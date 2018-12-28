@@ -20,7 +20,7 @@ import thunk from 'redux-thunk'
 import configureStore, {MockStoreEnhanced} from 'redux-mock-store'
 import * as sinon from 'sinon'
 import {SinonSpy} from 'sinon'
-import {catalogActions, catalogTypes} from '../../src/actions/catalogActions'
+import {Catalog, CatalogActions} from '../../src/actions/catalogActions'
 import {catalogInitialState} from '../../src/reducers/catalogReducer'
 import {IMAGERY_ENDPOINT, SCENE_TILE_PROVIDERS} from '../../src/config'
 import {getClient} from '../../src/api/session'
@@ -55,12 +55,14 @@ describe('catalogActions', () => {
 
   describe('setApiKey()', () => {
     test('success', async () => {
-      await store.dispatch(catalogActions.setApiKey('a'))
+      await store.dispatch(Catalog.setApiKey('a'))
 
       expect(store.getActions()).toEqual([
         {
-          type: catalogTypes.CATALOG_API_KEY_UPDATED,
-          apiKey: 'a',
+          type: CatalogActions.ApiKeyUpdated.type,
+          payload: {
+            apiKey: 'a',
+          },
         },
       ])
     })
@@ -75,12 +77,14 @@ describe('catalogActions', () => {
         source: 'source',
       }
 
-      await store.dispatch(catalogActions.updateSearchCriteria(searchCriteria))
+      await store.dispatch(Catalog.updateSearchCriteria(searchCriteria))
 
       expect(store.getActions()).toEqual([
         {
-          type: catalogTypes.CATALOG_SEARCH_CRITERIA_UPDATED,
-          searchCriteria,
+          type: CatalogActions.SearchCriteriaUpdated.type,
+          payload: {
+            searchCriteria,
+          },
         },
       ])
     })
@@ -88,11 +92,11 @@ describe('catalogActions', () => {
 
   describe('resetSearchCriteria()', () => {
     test('success', async () => {
-      await store.dispatch(catalogActions.resetSearchCriteria())
+      await store.dispatch(Catalog.resetSearchCriteria())
 
       const actions = store.getActions()
       expect(actions).toEqual([
-        { type: catalogTypes.CATALOG_SEARCH_CRITERIA_RESET },
+        { type: CatalogActions.SearchCriteriaReset.type },
       ])
     })
   })
@@ -118,7 +122,7 @@ describe('catalogActions', () => {
       const searchUrl = getSearchUrl(state)
       mockAdapter.onGet(searchUrl).reply(200, mockResponse)
 
-      await store.dispatch(catalogActions.search() as any)
+      await store.dispatch(Catalog.search() as any)
 
       expect(clientSpies.get.callCount).toEqual(1)
       expect(clientSpies.get.args[0]).toEqual([
@@ -136,21 +140,23 @@ describe('catalogActions', () => {
 
       const actions = store.getActions()
       expect(actions).toEqual([
-        { type: catalogTypes.CATALOG_SEARCHING },
+        { type: CatalogActions.Searching.type },
         {
-          type: catalogTypes.CATALOG_SEARCH_SUCCESS,
-          searchResults: {
-            images: {
-              features: mockResponse.features.map(f => {
-                return {
-                  ...f,
-                  id: state.catalog.searchCriteria.source + ':' + f.id,
-                }
-              }),
+          type: CatalogActions.SearchSuccess.type,
+          payload: {
+            searchResults: {
+              images: {
+                features: mockResponse.features.map(f => {
+                  return {
+                    ...f,
+                    id: state.catalog.searchCriteria.source + ':' + f.id,
+                  }
+                }),
+              },
+              count: mockResponse.features.length,
+              startIndex: 0,
+              totalCount: mockResponse.features.length,
             },
-            count: mockResponse.features.length,
-            startIndex: 0,
-            totalCount: mockResponse.features.length,
           },
         },
       ])
@@ -171,12 +177,12 @@ describe('catalogActions', () => {
         },
       }) as any
 
-      await store.dispatch(catalogActions.search() as any)
+      await store.dispatch(Catalog.search() as any)
 
       const actions = store.getActions()
-      expect(actions[0]).toEqual({ type: catalogTypes.CATALOG_SEARCHING })
-      expect(actions[1].type).toEqual(catalogTypes.CATALOG_SEARCH_ERROR)
-      expect(actions[1].error).toBeDefined()
+      expect(actions[0]).toEqual({ type: CatalogActions.Searching.type })
+      expect(actions[1].type).toEqual(CatalogActions.SearchError.type)
+      expect(actions[1].payload).toHaveProperty('error')
     })
 
     test('request error', async () => {
@@ -194,13 +200,13 @@ describe('catalogActions', () => {
       const state = store.getState()
       mockAdapter.onGet(getSearchUrl(state)).reply(400)
 
-      await store.dispatch(catalogActions.search() as any)
+      await store.dispatch(Catalog.search() as any)
 
       const actions = store.getActions()
       expect(actions.length).toEqual(2)
-      expect(actions[0]).toEqual({ type: catalogTypes.CATALOG_SEARCHING })
-      expect(actions[1].type).toEqual(catalogTypes.CATALOG_SEARCH_ERROR)
-      expect(actions[1].error).toBeDefined()
+      expect(actions[0]).toEqual({ type: CatalogActions.Searching.type })
+      expect(actions[1].type).toEqual(CatalogActions.SearchError.type)
+      expect(actions[1].payload).toHaveProperty('error')
     })
 
     test('invalid response data', async () => {
@@ -218,13 +224,19 @@ describe('catalogActions', () => {
       const state = store.getState()
       mockAdapter.onGet(getSearchUrl(state)).reply(200)
 
-      await store.dispatch(catalogActions.search() as any)
+      await store.dispatch(Catalog.search() as any)
 
       const actions = store.getActions()
       expect(actions.length).toEqual(2)
-      expect(actions[0]).toEqual({ type: catalogTypes.CATALOG_SEARCHING })
-      expect(actions[1].type).toEqual(catalogTypes.CATALOG_SEARCH_ERROR)
-      expect(actions[1].error).toBeDefined()
+      expect(actions[0]).toEqual({ type: CatalogActions.Searching.type })
+      expect(actions[1].type).toEqual(CatalogActions.SearchError.type)
+      expect(actions[1].payload).toHaveProperty('error')
+    })
+
+    test('map bbox not set', async () => {
+      await store.dispatch(Catalog.search() as any)
+      const actions = store.getActions()
+      expect(actions.length).toEqual(0)
     })
   })
 
@@ -239,7 +251,7 @@ describe('catalogActions', () => {
         },
       }) as any
 
-      await store.dispatch(catalogActions.serialize() as any)
+      await store.dispatch(Catalog.serialize() as any)
 
       const state = store.getState()
 
@@ -251,7 +263,7 @@ describe('catalogActions', () => {
       expect(localStorage.setItem).toHaveBeenCalledWith('catalog_apiKey', state.catalog.apiKey)
 
       expect(store.getActions()).toEqual([
-        { type: catalogTypes.CATALOG_SERIALIZED },
+        { type: CatalogActions.Serialized.type },
       ])
     })
   })
@@ -273,7 +285,7 @@ describe('catalogActions', () => {
       sessionStorage.setItem('searchResults', JSON.stringify(mockStorage.searchResults))
       localStorage.setItem('catalog_apiKey', mockStorage.catalog_apiKey)
 
-      await store.dispatch(catalogActions.deserialize())
+      await store.dispatch(Catalog.deserialize())
 
       expect(sessionStorage.getItem).toHaveBeenCalledTimes(2)
       expect(sessionStorage.getItem).toHaveBeenCalledWith('searchCriteria')
@@ -284,8 +296,8 @@ describe('catalogActions', () => {
 
       expect(store.getActions()).toEqual([
         {
-          type: catalogTypes.CATALOG_DESERIALIZED,
-          deserialized: {
+          type: CatalogActions.Deserialized.type,
+          payload: {
             searchCriteria: mockStorage.searchCriteria,
             searchResults: mockStorage.searchResults,
             apiKey: mockStorage.catalog_apiKey,
@@ -295,7 +307,7 @@ describe('catalogActions', () => {
     })
 
     test('no saved data', async () => {
-      await store.dispatch(catalogActions.deserialize())
+      await store.dispatch(Catalog.deserialize())
 
       expect(sessionStorage.getItem).toHaveBeenCalledTimes(2)
       expect(sessionStorage.getItem).toHaveBeenCalledWith('searchCriteria')
@@ -306,8 +318,8 @@ describe('catalogActions', () => {
 
       expect(store.getActions()).toEqual([
         {
-          type: catalogTypes.CATALOG_DESERIALIZED,
-          deserialized: {
+          type: CatalogActions.Deserialized.type,
+          payload: {
             searchCriteria: catalogInitialState.searchCriteria,
             searchResults: null,
             apiKey: catalogInitialState.apiKey,
@@ -320,7 +332,7 @@ describe('catalogActions', () => {
       sessionStorage.setItem('searchCriteria', 'badJson')
       sessionStorage.setItem('searchResults', 'badJson')
 
-      await store.dispatch(catalogActions.deserialize())
+      await store.dispatch(Catalog.deserialize())
 
       expect(sessionStorage.getItem).toHaveBeenCalledTimes(2)
       expect(sessionStorage.getItem).toHaveBeenCalledWith('searchCriteria')
@@ -331,9 +343,11 @@ describe('catalogActions', () => {
 
       expect(store.getActions()).toEqual([
         {
-          type: catalogTypes.CATALOG_DESERIALIZED,
-          deserialized: {
+          type: CatalogActions.Deserialized.type,
+          payload: {
             apiKey: catalogInitialState.apiKey,
+            searchCriteria: catalogInitialState.searchCriteria,
+            searchResults: catalogInitialState.searchResults,
           },
         },
       ])

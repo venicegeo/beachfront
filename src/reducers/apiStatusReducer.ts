@@ -14,7 +14,8 @@
  * limitations under the License.
  **/
 
-import {apiStatusTypes} from '../actions/apiStatusActions'
+import {ApiStatusActions as Actions} from '../actions/apiStatusActions'
+import {Action} from 'redux'
 
 export interface ApiStatusState {
   geoserver: {
@@ -34,32 +35,39 @@ export const apiStatusInitialState: ApiStatusState = {
   fetchError: null,
 }
 
-export function apiStatusReducer(state = apiStatusInitialState, action: any) {
+export function apiStatusReducer(state = apiStatusInitialState, action: Action): ApiStatusState {
   switch (action.type) {
-    case apiStatusTypes.API_STATUS_DESERIALIZED:
-      return {
-        ...state,
-        ...action.deserialized,
-      }
-    case apiStatusTypes.API_STATUS_FETCHING:
+    case Actions.Fetching.type:
       return {
         ...state,
         isFetching: true,
         fetchError: null,
       }
-    case apiStatusTypes.API_STATUS_FETCH_SUCCESS:
+    case Actions.FetchSuccess.type: {
+      const payload = (action as Actions.FetchSuccess).payload
       return {
         ...state,
         isFetching: false,
-        geoserver: action.geoserver,
-        enabledPlatforms: action.enabledPlatforms,
+        geoserver: payload.geoserver,
+        enabledPlatforms: payload.enabledPlatforms,
       }
-    case apiStatusTypes.API_STATUS_FETCH_ERROR:
+    }
+    case Actions.FetchError.type: {
+      const payload = (action as Actions.FetchError).payload
       return {
         ...state,
         isFetching: false,
-        fetchError: action.error,
+        fetchError: payload.error,
       }
+    }
+    case Actions.Deserialized.type: {
+      const payload = (action as Actions.Deserialized).payload
+      return {
+        ...state,
+        geoserver: payload.geoserver,
+        enabledPlatforms: payload.enabledPlatforms,
+      }
+    }
     default:
       return state
   }

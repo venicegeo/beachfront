@@ -21,7 +21,7 @@ import {connect} from 'react-redux'
 import JobStatus from './JobStatus'
 import * as moment from 'moment'
 import {AppState} from '../store'
-import {jobsActions} from '../actions/jobsActions'
+import {Jobs} from '../actions/jobsActions'
 
 type StateProps = ReturnType<typeof mapStateToProps>
 type DispatchProps = ReturnType<typeof mapDispatchToProps>
@@ -64,7 +64,7 @@ export class JobStatusList extends React.Component<Props, State> {
             <li className={styles.communicationError}>
               <h4><i className="fa fa-warning"/> Communication Error</h4>
               <p>Cannot communicate with the server. (<code>{this.props.jobs.fetchError.toString()}</code>)</p>
-              <button onClick={this.props.actions.jobs.fetch}>Retry</button>
+              <button onClick={this.props.dispatch.jobs.fetch}>Retry</button>
             </li>
           )}
 
@@ -149,9 +149,9 @@ function mapStateToProps(state: AppState) {
 
 function mapDispatchToProps(dispatch: Function) {
   return {
-    actions: {
+    dispatch: {
       jobs: {
-        fetch: () => dispatch(jobsActions.fetch()),
+        fetch: () => dispatch(Jobs.fetch()),
       },
     },
   }

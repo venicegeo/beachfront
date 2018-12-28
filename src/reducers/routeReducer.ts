@@ -14,7 +14,8 @@
  * limitations under the License.
  **/
 
-import {routeTypes} from '../actions/routeActions'
+import {Action} from 'redux'
+import {RouteActions as Actions} from '../actions/routeActions'
 import {generateRoute} from '../utils/routeUtils'
 
 export interface RouteState {
@@ -28,18 +29,20 @@ export interface RouteState {
 
 export const routeInitialState: RouteState = generateRoute(location)
 
-export function routeReducer(state = routeInitialState, action: any): RouteState {
+export function routeReducer(state = routeInitialState, action: Action): RouteState {
   switch (action.type) {
-    case routeTypes.ROUTE_CHANGED:
+    case Actions.Changed.type: {
+      const payload = (action as Actions.Changed).payload
       return {
         ...state,
-        hash: action.hash,
-        href: action.href,
-        jobIds: action.jobIds,
-        pathname: action.pathname,
-        search: action.search,
-        selectedFeature: action.selectedFeature,
+        hash: payload.hash,
+        href: payload.href,
+        jobIds: payload.jobIds,
+        pathname: payload.pathname,
+        search: payload.search,
+        selectedFeature: payload.selectedFeature,
       }
+    }
     default:
       return state
   }

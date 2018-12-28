@@ -14,7 +14,8 @@
  * limitations under the License.
  **/
 
-import {TourStep, tourTypes} from '../actions/tourActions'
+import {Action} from 'redux'
+import {TourActions as Actions, TourStep} from '../actions/tourActions'
 
 export interface TourState {
   inProgress: boolean
@@ -32,14 +33,16 @@ export const tourInitialState: TourState = {
   steps: [],
 }
 
-export function tourReducer(state = tourInitialState, action: any) {
+export function tourReducer(state = tourInitialState, action: Action): TourState {
   switch (action.type) {
-    case tourTypes.TOUR_STEPS_UPDATED:
+    case Actions.StepsUpdated.type: {
+      const payload = (action as Actions.StepsUpdated).payload
       return {
         ...state,
-        steps: action.steps,
+        steps: payload.steps,
       }
-    case tourTypes.TOUR_STARTED:
+    }
+    case Actions.Started.type:
       return {
         ...state,
         inProgress: true,
@@ -47,30 +50,34 @@ export function tourReducer(state = tourInitialState, action: any) {
         step: 1,
         error: null,
       }
-    case tourTypes.TOUR_ENDED:
+    case Actions.Ended.type:
       return {
         ...state,
         inProgress: false,
         changing: false,
         error: null,
       }
-    case tourTypes.TOUR_STEP_CHANGING:
+    case Actions.StepChanging.type:
       return {
         ...state,
         changing: true,
       }
-    case tourTypes.TOUR_STEP_CHANGE_SUCCESS:
+    case Actions.StepChangeSuccess.type: {
+      const payload = (action as Actions.StepChangeSuccess).payload
       return {
         ...state,
         changing: false,
-        step: action.step,
+        step: payload.step,
       }
-    case tourTypes.TOUR_STEP_CHANGE_ERROR:
+    }
+    case Actions.StepChangeError.type: {
+      const payload = (action as Actions.StepChangeError).payload
       return {
         ...state,
         changing: false,
-        error: action.error,
+        error: payload.error,
       }
+    }
     default:
       return state
   }

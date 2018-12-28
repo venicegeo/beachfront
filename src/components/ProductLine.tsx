@@ -20,9 +20,9 @@ import * as React from 'react'
 import {connect} from 'react-redux'
 import * as moment from 'moment'
 import ActivityTable from './ActivityTable'
-import {ProductLinesFetchJobsArgs, productLinesActions} from '../actions/productLinesActions'
-import {mapActions, MapPanToPointArgs} from '../actions/mapActions'
-import {getFeatureCenter} from '../utils/geometries'
+import {ProductLinesFetchJobsArgs, ProductLines} from '../actions/productLinesActions'
+import {Map} from '../actions/mapActions'
+import {getFeatureCenter, Point} from '../utils/geometries'
 
 const LAST_24_HOURS = {value: 'PT24H', label: 'Last 24 Hours'}
 const LAST_7_DAYS = {value: 'P7D', label: 'Last 7 Days'}
@@ -58,13 +58,13 @@ export class ProductLine extends React.Component<Props, State> {
 
   componentDidUpdate(_: Props, prevState: State) {
     if (this.state.isExpanded && (prevState.isExpanded !== this.state.isExpanded || prevState.duration !== this.state.duration)) {
-      this.props.actions.productLines.fetchJobs({
+      this.props.dispatch.productLines.fetchJobs({
         productLineId: this.props.productLine.id,
         sinceDate: generateSinceDate(this.state.duration, this.props.productLine),
       })
     }
     if (prevState.isExpanded && !this.state.isExpanded && this.state.selectedJobs.length) {
-      this.props.actions.map.setSelectedFeature(null)
+      this.props.dispatch.map.setSelectedFeature(null)
     }
   }
 
@@ -135,17 +135,17 @@ export class ProductLine extends React.Component<Props, State> {
 
   private handleJobRowClick(job: beachfront.Job) {
     if (this.state.selectedJobs.some(j => j.id === job.id)) {
-      this.props.actions.map.setSelectedFeature(null)
+      this.props.dispatch.map.setSelectedFeature(null)
       this.setState({ selectedJobs: [] })
     }
     else {
-      this.props.actions.map.setSelectedFeature(job)
+      this.props.dispatch.map.setSelectedFeature(job)
       this.setState({ selectedJobs: [job] })
     }
   }
 
   private handleViewOnMap() {
-    this.props.actions.map.panToPoint({
+    this.props.dispatch.map.panToPoint({
       point: getFeatureCenter(this.props.productLine),
       zoom: 3.5,
     })
@@ -177,13 +177,13 @@ function generateSinceDate(offset: string, productLine: beachfront.ProductLine) 
 
 function mapDispatchToProps(dispatch: Function) {
   return {
-    actions: {
+    dispatch: {
       productLines: {
-        fetchJobs: (args: ProductLinesFetchJobsArgs) => dispatch(productLinesActions.fetchJobs(args)),
+        fetchJobs: (args: ProductLinesFetchJobsArgs) => dispatch(ProductLines.fetchJobs(args)),
       },
       map: {
-        setSelectedFeature: (feature: GeoJSON.Feature<any> | null) => dispatch(mapActions.setSelectedFeature(feature)),
-        panToPoint: (args: MapPanToPointArgs) => dispatch(mapActions.panToPoint(args)),
+        setSelectedFeature: (feature: GeoJSON.Feature<any> | null) => dispatch(Map.setSelectedFeature(feature)),
+        panToPoint: (args: { point: Point, zoom?: number }) => dispatch(Map.panToPoint(args)),
       },
     },
   }

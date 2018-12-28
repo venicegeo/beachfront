@@ -14,28 +14,36 @@
  * limitations under the License.
  */
 
-import {algorithmsTypes} from '../../src/actions/algorithmsActions'
-import {apiStatusTypes} from '../../src/actions/apiStatusActions'
-import {catalogTypes} from '../../src/actions/catalogActions'
-import {jobsTypes} from '../../src/actions/jobsActions'
-import {mapTypes} from '../../src/actions/mapActions'
-import {productLinesTypes} from '../../src/actions/productLinesActions'
-import {routeTypes} from '../../src/actions/routeActions'
-import {tourTypes} from '../../src/actions/tourActions'
-import {userTypes} from '../../src/actions/userActions'
+import {AlgorithmsActions} from '../../src/actions/algorithmsActions'
+import {ApiStatusActions} from '../../src/actions/apiStatusActions'
+import {CatalogActions} from '../../src/actions/catalogActions'
+import {JobsActions} from '../../src/actions/jobsActions'
+import {MapActions} from '../../src/actions/mapActions'
+import {ProductLinesActions} from '../../src/actions/productLinesActions'
+import {RouteActions} from '../../src/actions/routeActions'
+import {TourActions} from '../../src/actions/tourActions'
+import {UserActions} from '../../src/actions/userActions'
+
+const ActionsGroups = [
+  AlgorithmsActions,
+  ApiStatusActions,
+  CatalogActions,
+  JobsActions,
+  MapActions,
+  ProductLinesActions,
+  RouteActions,
+  TourActions,
+  UserActions,
+]
 
 describe('action types', () => {
   test('no duplicate types', () => {
     const allTypes: string[] = []
-    Object.keys(algorithmsTypes).forEach(key => allTypes.push((<any>algorithmsTypes)[key]))
-    Object.keys(apiStatusTypes).forEach(key => allTypes.push((<any>apiStatusTypes)[key]))
-    Object.keys(catalogTypes).forEach(key => allTypes.push((<any>catalogTypes)[key]))
-    Object.keys(jobsTypes).forEach(key => allTypes.push((<any>jobsTypes)[key]))
-    Object.keys(mapTypes).forEach(key => allTypes.push((<any>mapTypes)[key]))
-    Object.keys(productLinesTypes).forEach(key => allTypes.push((<any>productLinesTypes)[key]))
-    Object.keys(routeTypes).forEach(key => allTypes.push((<any>routeTypes)[key]))
-    Object.keys(tourTypes).forEach(key => allTypes.push((<any>tourTypes)[key]))
-    Object.keys(userTypes).forEach(key => allTypes.push((<any>userTypes)[key]))
+    ActionsGroups.map(actionsGroup => {
+      Object.keys(actionsGroup).forEach(key => {
+        allTypes.push((actionsGroup as any)[key].type)
+      })
+    })
     allTypes.sort()
 
     allTypes.forEach((value: any, index: number) => {
@@ -47,27 +55,34 @@ describe('action types', () => {
     })
   })
 
-  test('keys match values', () => {
-    Object.keys(algorithmsTypes).forEach(key => expect(key).toEqual((<any>algorithmsTypes)[key]))
-    Object.keys(apiStatusTypes).forEach(key => expect(key).toEqual((<any>apiStatusTypes)[key]))
-    Object.keys(catalogTypes).forEach(key => expect(key).toEqual((<any>catalogTypes)[key]))
-    Object.keys(jobsTypes).forEach(key => expect(key).toEqual((<any>jobsTypes)[key]))
-    Object.keys(mapTypes).forEach(key => expect(key).toEqual((<any>mapTypes)[key]))
-    Object.keys(productLinesTypes).forEach(key => expect(key).toEqual((<any>productLinesTypes)[key]))
-    Object.keys(routeTypes).forEach(key => expect(key).toEqual((<any>routeTypes)[key]))
-    Object.keys(tourTypes).forEach(key => expect(key).toEqual((<any>tourTypes)[key]))
-    Object.keys(userTypes).forEach(key => expect(key).toEqual((<any>userTypes)[key]))
+  test('static types match instance types', () => {
+    ActionsGroups.map(actionsGroup => {
+      Object.keys(actionsGroup).forEach(key => {
+        const actionClass = (actionsGroup as any)[key]
+        const action = new actionClass({})
+        expect(actionClass.type).toEqual(action.type)
+      })
+    })
   })
 
   test('correct prefixes', () => {
-    Object.keys(algorithmsTypes).forEach(key => expect(key).toEqual(expect.stringMatching(/^ALGORITHMS_/)))
-    Object.keys(apiStatusTypes).forEach(key => expect(key).toEqual(expect.stringMatching(/^API_STATUS_/)))
-    Object.keys(catalogTypes).forEach(key => expect(key).toEqual(expect.stringMatching(/^CATALOG_/)))
-    Object.keys(jobsTypes).forEach(key => expect(key).toEqual(expect.stringMatching(/^JOBS_/)))
-    Object.keys(mapTypes).forEach(key => expect(key).toEqual(expect.stringMatching(/^MAP_/)))
-    Object.keys(productLinesTypes).forEach(key => expect(key).toEqual(expect.stringMatching(/^PRODUCT_LINES_/)))
-    Object.keys(routeTypes).forEach(key => expect(key).toEqual(expect.stringMatching(/^ROUTE_/)))
-    Object.keys(tourTypes).forEach(key => expect(key).toEqual(expect.stringMatching(/^TOUR_/)))
-    Object.keys(userTypes).forEach(key => expect(key).toEqual(expect.stringMatching(/^USER_/)))
+    const expectedPrefixes = [
+      { group: AlgorithmsActions, prefix: 'ALGORITHMS' },
+      { group: ApiStatusActions, prefix: 'API_STATUS' },
+      { group: CatalogActions, prefix: 'CATALOG' },
+      { group: JobsActions, prefix: 'JOBS' },
+      { group: MapActions, prefix: 'MAP' },
+      { group: ProductLinesActions, prefix: 'PRODUCT_LINES' },
+      { group: RouteActions, prefix: 'ROUTE' },
+      { group: TourActions, prefix: 'TOUR' },
+      { group: UserActions, prefix: 'USER' },
+    ]
+
+    expectedPrefixes.map(expected => {
+      Object.keys(expected.group).forEach(key => {
+        const actionClass = (expected.group as any)[key]
+        expect(actionClass.type).toEqual(expect.stringMatching(new RegExp(`^${expected.prefix}_`)))
+      })
+    })
   })
 })

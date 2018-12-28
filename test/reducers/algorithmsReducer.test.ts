@@ -15,25 +15,11 @@
  */
 
 import {algorithmsInitialState, algorithmsReducer} from '../../src/reducers/algorithmsReducer'
-import {algorithmsTypes} from '../../src/actions/algorithmsActions'
+import {AlgorithmsActions} from '../../src/actions/algorithmsActions'
 
 describe('algorithmsReducer', () => {
   test('initial state', () => {
-    expect(algorithmsReducer(undefined, {})).toEqual(algorithmsInitialState)
-  })
-
-  test('ALGORITHMS_DESERIALIZED', () => {
-    const action = {
-      type: algorithmsTypes.ALGORITHMS_DESERIALIZED,
-      deserialized: {
-        a: 'a',
-      },
-    }
-
-    expect(algorithmsReducer(algorithmsInitialState, action)).toEqual({
-      ...algorithmsInitialState,
-      ...action.deserialized,
-    })
+    expect(algorithmsReducer(undefined, { type: null })).toEqual(algorithmsInitialState)
   })
 
   test('ALGORITHMS_FETCHING', () => {
@@ -42,7 +28,7 @@ describe('algorithmsReducer', () => {
       fetchError: 'a',
     }
 
-    const action = { type: algorithmsTypes.ALGORITHMS_FETCHING }
+    const action = { type: AlgorithmsActions.Fetching.type }
 
     expect(algorithmsReducer(state, action)).toEqual({
       ...state,
@@ -58,14 +44,16 @@ describe('algorithmsReducer', () => {
     }
 
     const action = {
-      type: algorithmsTypes.ALGORITHMS_FETCH_SUCCESS,
-      records: [1, 2, 3],
+      type: AlgorithmsActions.FetchSuccess.type,
+      payload: {
+        records: [1, 2, 3],
+      },
     }
 
     expect(algorithmsReducer(state, action)).toEqual({
       ...state,
       isFetching: false,
-      records: action.records,
+      records: action.payload.records,
     })
   })
 
@@ -76,14 +64,30 @@ describe('algorithmsReducer', () => {
     }
 
     const action = {
-      type: algorithmsTypes.ALGORITHMS_FETCH_ERROR,
-      error: 'a',
+      type: AlgorithmsActions.FetchError.type,
+      payload: {
+        error: 'a',
+      },
     }
 
     expect(algorithmsReducer(state, action)).toEqual({
       ...state,
       isFetching: false,
-      fetchError: action.error,
+      fetchError: action.payload.error,
+    })
+  })
+
+  test('ALGORITHMS_DESERIALIZED', () => {
+    const action = {
+      type: AlgorithmsActions.Deserialized.type,
+      payload: {
+        records: 'a',
+      },
+    }
+
+    expect(algorithmsReducer(algorithmsInitialState, action)).toEqual({
+      ...algorithmsInitialState,
+      records: action.payload.records,
     })
   })
 })

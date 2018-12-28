@@ -19,7 +19,7 @@ const styles = require('./SessionExpired.css')
 import * as React from 'react'
 import {connect} from 'react-redux'
 import {Modal} from './Modal'
-import {userActions} from '../actions/userActions'
+import {User} from '../actions/userActions'
 
 type DispatchProps = ReturnType<typeof mapDispatchToProps>
 type Props = DispatchProps
@@ -45,15 +45,15 @@ export class SessionExpired extends React.Component<Props> {
   }
 
   private handleDismiss() {
-    this.props.actions.user.clearSession()
+    this.props.dispatch.user.clearSession()
   }
 }
 
 function mapDispatchToProps(dispatch: Function) {
   return {
-    actions: {
+    dispatch: {
       user: {
-        clearSession: () => dispatch(userActions.clearSession()),
+        clearSession: () => dispatch(User.clearSession()),
       },
     },
   }

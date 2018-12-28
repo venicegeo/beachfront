@@ -14,22 +14,134 @@
  * limitations under the License.
  **/
 
-import {Dispatch} from 'redux'
+import {Action, Dispatch} from 'redux'
 import {getClient} from '../api/session'
 import {JOB_ENDPOINT, PRODUCTLINE_ENDPOINT} from '../config'
 import {Extent} from '../utils/geometries'
-import {ProductLinesState} from '../reducers/productLinesReducer'
+import {ProductLinesState, productLinesInitialState} from '../reducers/productLinesReducer'
 
-export const productLinesTypes: ActionTypes = {
-  PRODUCT_LINES_FETCHING: 'PRODUCT_LINES_FETCHING',
-  PRODUCT_LINES_FETCH_SUCCESS: 'PRODUCT_LINES_FETCH_SUCCESS',
-  PRODUCT_LINES_FETCH_ERROR: 'PRODUCT_LINES_FETCH_ERROR',
-  PRODUCT_LINES_FETCHING_JOBS: 'PRODUCT_LINES_FETCHING_JOBS',
-  PRODUCT_LINES_FETCH_JOBS_SUCCESS: 'PRODUCT_LINES_FETCH_JOBS_SUCCESS',
-  PRODUCT_LINES_FETCH_JOBS_ERROR: 'PRODUCT_LINES_FETCH_JOBS_ERROR',
-  PRODUCT_LINES_CREATING_PRODUCT_LINE: 'PRODUCT_LINES_CREATING_PRODUCT_LINE',
-  PRODUCT_LINES_CREATE_PRODUCT_LINE_SUCCESS: 'PRODUCT_LINES_CREATE_PRODUCT_LINE_SUCCESS',
-  PRODUCT_LINES_CREATE_PRODUCT_LINE_ERROR: 'PRODUCT_LINES_CREATE_PRODUCT_LINE_ERROR',
+export namespace ProductLines {
+  export function fetch() {
+    return async (dispatch: Dispatch<ProductLinesState>) => {
+      dispatch({...new ProductLinesActions.Fetching()})
+
+      try {
+        const response = await getClient().get(PRODUCTLINE_ENDPOINT) as FetchResponse
+        dispatch({...new ProductLinesActions.FetchSuccess({
+          records: response.data.productlines.features,
+        })})
+      } catch (error) {
+        dispatch({...new ProductLinesActions.FetchError({ error })})
+      }
+    }
+  }
+
+  export function fetchJobs(args: ProductLinesFetchJobsArgs) {
+    return async (dispatch: Dispatch<ProductLinesState>) => {
+      dispatch({...new ProductLinesActions.FetchingJobs()})
+
+      try {
+        const response = await getClient().get(`${JOB_ENDPOINT}/by_productline/${args.productLineId}?since=${args.sinceDate}`) as FetchJobsResponse
+        dispatch({...new ProductLinesActions.FetchJobsSuccess({
+          jobs: response.data.jobs.features,
+        })})
+      } catch (error) {
+        dispatch({...new ProductLinesActions.FetchJobsError({ error })})
+      }
+    }
+  }
+
+  export function create(args: ProductLinesCreateArgs) {
+    return async (dispatch: Dispatch<ProductLinesState>) => {
+      dispatch({...new ProductLinesActions.CreatingProductLine()})
+
+      try {
+        const response = await getClient().post(PRODUCTLINE_ENDPOINT, {
+          algorithm_id: args.algorithmId,
+          category: args.category,
+          max_cloud_cover: args.maxCloudCover,
+          min_x: args.bbox[0],
+          min_y: args.bbox[1],
+          max_x: args.bbox[2],
+          max_y: args.bbox[3],
+          name: args.name,
+          spatial_filter_id: null,
+          start_on: args.dateStart,
+          stop_on: args.dateStop,
+        }) as CreateProductLineResponse
+        dispatch({...new ProductLinesActions.CreateProductLineSuccess({
+          createdProductLine: response.data.productline,
+        })})
+      } catch (error) {
+        dispatch({...new ProductLinesActions.CreateProductLineError({ error })})
+      }
+    }
+  }
+}
+
+export namespace ProductLinesActions {
+  export class Fetching implements Action {
+    static type = 'PRODUCT_LINES_FETCHING'
+    type = Fetching.type
+  }
+
+  export class FetchSuccess implements Action {
+    static type = 'PRODUCT_LINES_FETCH_SUCCESS'
+    type = FetchSuccess.type
+    constructor(public payload: {
+      records: typeof productLinesInitialState.records
+    }) {}
+  }
+
+  export class FetchError implements Action {
+    static type = 'PRODUCT_LINES_FETCH_ERROR'
+    type = FetchError.type
+    constructor(public payload: {
+      error: typeof productLinesInitialState.fetchError
+    }) {}
+  }
+
+  export class FetchingJobs implements Action {
+    static type = 'PRODUCT_LINES_FETCHING_JOBS'
+    type = FetchingJobs.type
+  }
+
+  export class FetchJobsSuccess implements Action {
+    static type = 'PRODUCT_LINES_FETCH_JOBS_SUCCESS'
+    type = FetchJobsSuccess.type
+    constructor(public payload: {
+      jobs: typeof productLinesInitialState.jobs
+    }) {}
+  }
+
+  export class FetchJobsError implements Action {
+    static type = 'PRODUCT_LINES_FETCH_JOBS_ERROR'
+    type = FetchJobsError.type
+    constructor(public payload: {
+      error: typeof productLinesInitialState.fetchJobsError
+    }) {}
+  }
+
+  export class CreatingProductLine implements Action {
+    static type = 'PRODUCT_LINES_CREATING_PRODUCT_LINE'
+    type = CreatingProductLine.type
+  }
+
+  export class CreateProductLineSuccess implements Action {
+    static type = 'PRODUCT_LINES_CREATE_PRODUCT_LINE_SUCCESS'
+    type = CreateProductLineSuccess.type
+    constructor(public payload: {
+      createdProductLine: NonNullable<typeof productLinesInitialState.createdProductLine>
+    }) {}
+  }
+
+  export class CreateProductLineError implements Action {
+    static type = 'PRODUCT_LINES_CREATE_PRODUCT_LINE_ERROR'
+    type = CreateProductLineError.type
+    constructor(public payload: {
+      error: typeof productLinesInitialState.createProductLineError
+    }) {}
+  }
 }
 
 export interface ProductLinesCreateArgs {
@@ -47,73 +159,24 @@ export interface ProductLinesFetchJobsArgs {
   sinceDate: string
 }
 
-export const productLinesActions = {
-  fetch() {
-    return async (dispatch: Dispatch<ProductLinesState>) => {
-      dispatch({ type: productLinesTypes.PRODUCT_LINES_FETCHING })
-
-      try {
-        const response = await getClient().get(PRODUCTLINE_ENDPOINT)
-        dispatch({
-          type: productLinesTypes.PRODUCT_LINES_FETCH_SUCCESS,
-          records: response.data.productlines.features,
-        })
-      } catch (error) {
-        dispatch({
-          type: productLinesTypes.PRODUCT_LINES_FETCH_ERROR,
-          error,
-        })
-      }
+interface FetchResponse {
+  data: {
+    productlines: {
+      features: beachfront.ProductLine[]
     }
-  },
+  }
+}
 
-  fetchJobs(args: ProductLinesFetchJobsArgs) {
-    return async (dispatch: Dispatch<ProductLinesState>) => {
-      dispatch({ type: productLinesTypes.PRODUCT_LINES_FETCHING_JOBS })
-
-      try {
-        const response = await getClient().get(`${JOB_ENDPOINT}/by_productline/${args.productLineId}?since=${args.sinceDate}`)
-        dispatch({
-          type: productLinesTypes.PRODUCT_LINES_FETCH_JOBS_SUCCESS,
-          jobs: response.data.jobs.features,
-        })
-      } catch (error) {
-        dispatch({
-          type: productLinesTypes.PRODUCT_LINES_FETCH_JOBS_ERROR,
-          error,
-        })
-      }
+interface FetchJobsResponse {
+  data: {
+    jobs: {
+      features: beachfront.Job[]
     }
-  },
+  }
+}
 
-  create(args: ProductLinesCreateArgs) {
-    return async (dispatch: Dispatch<ProductLinesState>) => {
-      dispatch({ type: productLinesTypes.PRODUCT_LINES_CREATING_PRODUCT_LINE })
-
-      try {
-        const response = await getClient().post(PRODUCTLINE_ENDPOINT, {
-          algorithm_id: args.algorithmId,
-          category: args.category,
-          max_cloud_cover: args.maxCloudCover,
-          min_x: args.bbox[0],
-          min_y: args.bbox[1],
-          max_x: args.bbox[2],
-          max_y: args.bbox[3],
-          name: args.name,
-          spatial_filter_id: null,
-          start_on: args.dateStart,
-          stop_on: args.dateStop,
-        })
-        dispatch({
-          type: productLinesTypes.PRODUCT_LINES_CREATE_PRODUCT_LINE_SUCCESS,
-          createdProductLine: response.data.productline,
-        })
-      } catch (error) {
-        dispatch({
-          type: productLinesTypes.PRODUCT_LINES_CREATE_PRODUCT_LINE_ERROR,
-          error,
-        })
-      }
-    }
-  },
+interface CreateProductLineResponse {
+  data: {
+    productline: beachfront.ProductLine
+  }
 }

@@ -14,8 +14,9 @@
  * limitations under the License.
  **/
 
-import {catalogTypes} from '../actions/catalogActions'
-import {mapTypes} from '../actions/mapActions'
+import {Action} from 'redux'
+import {CatalogActions as Actions} from '../actions/catalogActions'
+import {MapActions} from '../actions/mapActions'
 import * as moment from 'moment'
 import {SOURCE_DEFAULT} from '../constants'
 
@@ -47,50 +48,62 @@ export const catalogInitialState: CatalogState = {
   searchResults: null,
 }
 
-export function catalogReducer(state = catalogInitialState, action: any): CatalogState {
+export function catalogReducer(state = catalogInitialState, action: Action): CatalogState {
   switch (action.type) {
-    case catalogTypes.CATALOG_DESERIALIZED:
+    case Actions.ApiKeyUpdated.type: {
+      const payload = (action as Actions.ApiKeyUpdated).payload
       return {
         ...state,
-        ...action.deserialized,
+        apiKey: payload.apiKey,
       }
-    case catalogTypes.CATALOG_API_KEY_UPDATED:
-      return {
-        ...state,
-        apiKey: action.apiKey,
-      }
-    case catalogTypes.CATALOG_SEARCH_CRITERIA_UPDATED:
+    }
+    case Actions.SearchCriteriaUpdated.type: {
+      const payload = (action as Actions.SearchCriteriaUpdated).payload
       return {
         ...state,
         searchCriteria: {
           ...state.searchCriteria,
-          ...action.searchCriteria,
+          ...payload.searchCriteria,
         },
       }
-    case catalogTypes.CATALOG_SEARCH_CRITERIA_RESET:
+    }
+    case Actions.SearchCriteriaReset.type:
       return {
         ...state,
         searchCriteria: catalogInitialState.searchCriteria,
       }
-    case catalogTypes.CATALOG_SEARCHING:
+    case Actions.Searching.type:
       return {
         ...state,
         isSearching: true,
         searchError: null,
       }
-    case catalogTypes.CATALOG_SEARCH_SUCCESS:
+    case Actions.SearchSuccess.type: {
+      const payload = (action as Actions.SearchSuccess).payload
       return {
         ...state,
         isSearching: false,
-        searchResults: action.searchResults,
+        searchResults: payload.searchResults,
       }
-    case catalogTypes.CATALOG_SEARCH_ERROR:
+    }
+    case Actions.SearchError.type: {
+      const payload = (action as Actions.SearchError).payload
       return {
         ...state,
         isSearching: false,
-        searchError: action.error,
+        searchError: payload.error,
       }
-    case mapTypes.MAP_BBOX_CLEARED:
+    }
+    case Actions.Deserialized.type: {
+      const payload = (action as Actions.Deserialized).payload
+      return {
+        ...state,
+        searchCriteria: payload.searchCriteria,
+        searchResults: payload.searchResults,
+        apiKey: payload.apiKey,
+      }
+    }
+    case MapActions.BboxCleared.type:
       return {
         ...state,
         searchResults: null,

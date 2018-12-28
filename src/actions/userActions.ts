@@ -14,67 +14,90 @@
  * limitations under the License.
  **/
 
-import {Dispatch} from 'redux'
+import {Action, Dispatch} from 'redux'
 import {getClient} from '../api/session'
 import {AppState} from '../store'
 import {userInitialState, UserState} from '../reducers/userReducer'
 
-export const userTypes: ActionTypes = {
-  USER_LOGGED_OUT: 'USER_LOGGED_OUT',
-  USER_SESSION_CLEARED: 'USER_SESSION_CLEARED',
-  USER_SESSION_LOGGED_OUT: 'USER_SESSION_LOGGED_OUT',
-  USER_SESSION_EXPIRED: 'USER_SESSION_EXPIRED',
-  USER_SERIALIZED: 'USER_SERIALIZED',
-  USER_DESERIALIZED: 'USER_DESERIALIZED',
-}
+export namespace User {
+  export function logout() {
+    return {...new UserActions.LoggedOut()}
+  }
 
-export const userActions = {
-  logout() {
-    return { type: userTypes.USER_LOGGED_OUT }
-  },
-
-  clearSession() {
+  export function clearSession() {
     sessionStorage.clear()
-    return { type: userTypes.USER_SESSION_CLEARED }
-  },
+    return {...new UserActions.SessionCleared()}
+  }
 
-  sessionLogout() {
+  export function sessionLogout() {
     sessionStorage.clear()
 
     getClient().get(`/oauth/logout`).then(response => {
       window.location.href = response.data
     })
 
-    return { type: userTypes.USER_SESSION_LOGGED_OUT }
-  },
+    return {...new UserActions.SessionLoggedOut()}
+  }
 
-  sessionExpired() {
-    return { type: userTypes.USER_SESSION_EXPIRED }
-  },
+  export function sessionExpired() {
+    return {...new UserActions.SessionExpired()}
+  }
 
-  serialize() {
+  export function serialize() {
     return (dispatch: Dispatch<UserState>, getState: () => AppState) => {
       const state = getState()
 
       sessionStorage.setItem('isSessionExpired', JSON.stringify(state.user.isSessionExpired))
 
-      dispatch({ type: userTypes.USER_SERIALIZED })
+      dispatch({...new UserActions.Serialized()})
     }
-  },
+  }
 
-  deserialize() {
-    const deserialized: any = {}
-
+  export function deserialize() {
+    let isSessionExpired: boolean | null = null
     try {
-      deserialized.isSessionExpired = JSON.parse(sessionStorage.getItem('isSessionExpired') || 'null')
-      deserialized.isSessionExpired = (deserialized.isSessionExpired != null) ? deserialized.isSessionExpired : userInitialState.isSessionExpired
+      isSessionExpired = JSON.parse(sessionStorage.getItem('isSessionExpired') || 'null')
     } catch (error) {
       console.warn('Failed to deserialize "isSessionExpired"')
     }
 
-    return {
-      type: userTypes.USER_DESERIALIZED,
-      deserialized,
-    }
-  },
+    return {...new UserActions.Deserialized({
+      isSessionExpired: (isSessionExpired != null) ? isSessionExpired : userInitialState.isSessionExpired,
+    })}
+  }
+}
+
+export namespace UserActions {
+  export class LoggedOut implements Action {
+    static type = 'USER_LOGGED_OUT'
+    type = LoggedOut.type
+  }
+
+  export class SessionCleared implements Action {
+    static type = 'USER_SESSION_CLEARED'
+    type = SessionCleared.type
+  }
+
+  export class SessionLoggedOut implements Action {
+    static type = 'USER_SESSION_LOGGED_OUT'
+    type = SessionLoggedOut.type
+  }
+
+  export class SessionExpired implements Action {
+    static type = 'USER_SESSION_EXPIRED'
+    type = SessionExpired.type
+  }
+
+  export class Serialized implements Action {
+    static type = 'USER_SERIALIZED'
+    type = Serialized.type
+  }
+
+  export class Deserialized implements Action {
+    static type = 'USER_DESERIALIZED'
+    type = Deserialized.type
+    constructor(public payload: {
+      isSessionExpired: typeof userInitialState.isSessionExpired
+    }) {}
+  }
 }

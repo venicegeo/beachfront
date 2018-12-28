@@ -25,7 +25,7 @@ import CatalogSearchCriteria from './CatalogSearchCriteria'
 import {LoadingAnimation} from './LoadingAnimation'
 import { SCENE_TILE_PROVIDERS } from '../config'
 import {AppState} from '../store'
-import {catalogActions, CatalogSearchArgs} from '../actions/catalogActions'
+import {Catalog, CatalogSearchArgs} from '../actions/catalogActions'
 
 type StateProps = ReturnType<typeof mapStateToProps>
 type DispatchProps = ReturnType<typeof mapDispatchToProps>
@@ -51,7 +51,7 @@ export class ImagerySearch extends React.Component<Props> {
           <div className={styles.controls}>
             <button
               type="button"
-              onClick={this.props.actions.catalog.resetSearchCriteria}
+              onClick={this.props.dispatch.catalog.resetSearchCriteria}
             >
               Reset Defaults
             </button>
@@ -91,7 +91,7 @@ export class ImagerySearch extends React.Component<Props> {
   private handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     event.stopPropagation()
-    this.props.actions.catalog.search()
+    this.props.dispatch.catalog.search()
   }
 }
 
@@ -104,10 +104,10 @@ function mapStateToProps(state: AppState) {
 
 function mapDispatchToProps(dispatch: Function) {
   return {
-    actions: {
+    dispatch: {
       catalog: {
-        resetSearchCriteria: () => dispatch(catalogActions.resetSearchCriteria()),
-        search: (args?: CatalogSearchArgs) => dispatch(catalogActions.search(args)),
+        resetSearchCriteria: () => dispatch(Catalog.resetSearchCriteria()),
+        search: (args?: CatalogSearchArgs) => dispatch(Catalog.search(args)),
       },
     },
   }

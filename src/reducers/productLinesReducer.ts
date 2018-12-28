@@ -14,7 +14,8 @@
  * limitations under the License.
  **/
 
-import {productLinesTypes} from '../actions/productLinesActions'
+import {Action} from 'redux'
+import {ProductLinesActions as Actions} from '../actions/productLinesActions'
 
 export interface ProductLinesState {
   records: beachfront.ProductLine[]
@@ -40,64 +41,76 @@ export const productLinesInitialState: ProductLinesState = {
   createProductLineError: null,
 }
 
-export function productLinesReducer(state = productLinesInitialState, action: any) {
+export function productLinesReducer(state = productLinesInitialState, action: Action): ProductLinesState {
   switch (action.type) {
-    case productLinesTypes.PRODUCT_LINES_FETCHING:
+    case Actions.Fetching.type:
       return {
         ...state,
         isFetching: true,
         fetchError: null,
       }
-    case productLinesTypes.PRODUCT_LINES_FETCH_SUCCESS:
+    case Actions.FetchSuccess.type: {
+      const payload = (action as Actions.FetchSuccess).payload
       return {
         ...state,
         isFetching: false,
-        records: action.records,
+        records: payload.records,
       }
-    case productLinesTypes.PRODUCT_LINES_FETCH_ERROR:
+    }
+    case Actions.FetchError.type: {
+      const payload = (action as Actions.FetchError).payload
       return {
         ...state,
         isFetching: false,
-        fetchError: action.error,
+        fetchError: payload.error,
       }
-    case productLinesTypes.PRODUCT_LINES_FETCHING_JOBS:
+    }
+    case Actions.FetchingJobs.type:
       return {
         ...state,
         isFetchingJobs: true,
         fetchJobsError: null,
       }
-    case productLinesTypes.PRODUCT_LINES_FETCH_JOBS_SUCCESS:
+    case Actions.FetchJobsSuccess.type: {
+      const payload = (action as Actions.FetchJobsSuccess).payload
       return {
         ...state,
         isFetchingJobs: false,
-        jobs: action.jobs,
+        jobs: payload.jobs,
       }
-    case productLinesTypes.PRODUCT_LINES_FETCH_JOBS_ERROR:
+    }
+    case Actions.FetchJobsError.type: {
+      const payload = (action as Actions.FetchJobsError).payload
       return {
         ...state,
         isFetchingJobs: false,
-        fetchJobsError: action.error,
+        fetchJobsError: payload.error,
       }
-    case productLinesTypes.PRODUCT_LINES_CREATING_PRODUCT_LINE:
+    }
+    case Actions.CreatingProductLine.type:
       return {
         ...state,
         isCreatingProductLine: true,
         createdProductLine: null,
         createProductLineError: null,
       }
-    case productLinesTypes.PRODUCT_LINES_CREATE_PRODUCT_LINE_SUCCESS:
+    case Actions.CreateProductLineSuccess.type: {
+      const payload = (action as Actions.CreateProductLineSuccess).payload
       return {
         ...state,
         isCreatingProductLine: false,
-        createdProductLine: action.createdProductLine,
-        records: [...state.records, action.createdProductLine],
+        createdProductLine: payload.createdProductLine,
+        records: [...state.records, payload.createdProductLine],
       }
-    case productLinesTypes.PRODUCT_LINES_CREATE_PRODUCT_LINE_ERROR:
+    }
+    case Actions.CreateProductLineError.type: {
+      const payload = (action as Actions.CreateProductLineError).payload
       return {
         ...state,
         isCreatingProductLine: false,
-        createProductLineError: action.error,
+        createProductLineError: payload.error,
       }
+    }
     default:
       return state
   }

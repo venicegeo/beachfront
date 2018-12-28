@@ -19,7 +19,7 @@ import MockAdapter from 'axios-mock-adapter'
 import thunk from 'redux-thunk'
 import configureStore, {MockStoreEnhanced} from 'redux-mock-store'
 import * as sinon from 'sinon'
-import {apiStatusActions, apiStatusTypes} from '../../src/actions/apiStatusActions'
+import {ApiStatus, ApiStatusActions} from '../../src/actions/apiStatusActions'
 import {apiStatusInitialState} from '../../src/reducers/apiStatusReducer'
 import {getClient} from '../../src/api/session'
 import {SinonSpy} from 'sinon'
@@ -58,19 +58,21 @@ describe('apiStatusActions', () => {
       }
       mockAdapter.onGet('/').reply(200, mockResponse)
 
-      await store.dispatch(apiStatusActions.fetch() as any)
+      await store.dispatch(ApiStatus.fetch() as any)
 
       expect(clientSpies.get.callCount).toEqual(1)
       expect(clientSpies.get.args[0]).toEqual(['/'])
 
       expect(store.getActions()).toEqual([
-        { type: apiStatusTypes.API_STATUS_FETCHING },
+        { type: ApiStatusActions.Fetching.type },
         {
-          type: apiStatusTypes.API_STATUS_FETCH_SUCCESS,
-          geoserver: {
-            wmsUrl: mockResponse.geoserver + '/wms',
+          type: ApiStatusActions.FetchSuccess.type,
+          payload: {
+            geoserver: {
+              wmsUrl: mockResponse.geoserver + '/wms',
+            },
+            enabledPlatforms: mockResponse['enabled-platforms'],
           },
-          enabledPlatforms: mockResponse['enabled-platforms'],
         },
       ])
     })
@@ -78,31 +80,31 @@ describe('apiStatusActions', () => {
     test('request error', async () => {
       mockAdapter.onGet('/').reply(400)
 
-      await store.dispatch(apiStatusActions.fetch() as any)
+      await store.dispatch(ApiStatus.fetch() as any)
 
       const actions = store.getActions()
       expect(actions.length).toEqual(2)
-      expect(actions[0]).toEqual({ type: apiStatusTypes.API_STATUS_FETCHING })
-      expect(actions[1].type).toEqual(apiStatusTypes.API_STATUS_FETCH_ERROR)
-      expect(actions[1].error).toBeDefined()
+      expect(actions[0]).toEqual({ type: ApiStatusActions.Fetching.type })
+      expect(actions[1].type).toEqual(ApiStatusActions.FetchError.type)
+      expect(actions[1].payload).toHaveProperty('error')
     })
 
     test('invalid response data', async () => {
       mockAdapter.onGet('/').reply(200)
 
-      await store.dispatch(apiStatusActions.fetch() as any)
+      await store.dispatch(ApiStatus.fetch() as any)
 
       const actions = store.getActions()
       expect(actions.length).toEqual(2)
-      expect(actions[0]).toEqual({ type: apiStatusTypes.API_STATUS_FETCHING })
-      expect(actions[1].type).toEqual(apiStatusTypes.API_STATUS_FETCH_ERROR)
-      expect(actions[1].error).toBeDefined()
+      expect(actions[0]).toEqual({ type: ApiStatusActions.Fetching.type })
+      expect(actions[1].type).toEqual(ApiStatusActions.FetchError.type)
+      expect(actions[1].payload).toHaveProperty('error')
     })
   })
 
   describe('serialize()', () => {
     test('success', async () => {
-      await store.dispatch(apiStatusActions.serialize() as any)
+      await store.dispatch(ApiStatus.serialize() as any)
 
       const state = store.getState()
 
@@ -117,7 +119,7 @@ describe('apiStatusActions', () => {
       )
 
       expect(store.getActions()).toEqual([
-        { type: apiStatusTypes.API_STATUS_SERIALIZED },
+        { type: ApiStatusActions.Serialized.type },
       ])
     })
   })
@@ -132,7 +134,7 @@ describe('apiStatusActions', () => {
       sessionStorage.setItem('geoserver', JSON.stringify(mockStorage.geoserver))
       sessionStorage.setItem('enabled_platforms_records', JSON.stringify(mockStorage.enabled_platforms_records))
 
-      await store.dispatch(apiStatusActions.deserialize())
+      await store.dispatch(ApiStatus.deserialize())
 
       expect(sessionStorage.getItem).toHaveBeenCalledTimes(2)
       expect(sessionStorage.getItem).toHaveBeenCalledWith('geoserver')
@@ -140,8 +142,8 @@ describe('apiStatusActions', () => {
 
       expect(store.getActions()).toEqual([
         {
-          type: apiStatusTypes.API_STATUS_DESERIALIZED,
-          deserialized: {
+          type: ApiStatusActions.Deserialized.type,
+          payload: {
             geoserver: mockStorage.geoserver,
             enabledPlatforms: mockStorage.enabled_platforms_records,
           },
@@ -150,7 +152,7 @@ describe('apiStatusActions', () => {
     })
 
     test('no saved data', async () => {
-      await store.dispatch(apiStatusActions.deserialize())
+      await store.dispatch(ApiStatus.deserialize())
 
       expect(sessionStorage.getItem).toHaveBeenCalledTimes(2)
       expect(sessionStorage.getItem).toHaveBeenCalledWith('geoserver')
@@ -158,8 +160,8 @@ describe('apiStatusActions', () => {
 
       expect(store.getActions()).toEqual([
         {
-          type: apiStatusTypes.API_STATUS_DESERIALIZED,
-          deserialized: {
+          type: ApiStatusActions.Deserialized.type,
+          payload: {
             geoserver: apiStatusInitialState.geoserver,
             enabledPlatforms: apiStatusInitialState.enabledPlatforms,
           },
@@ -172,7 +174,7 @@ describe('apiStatusActions', () => {
       sessionStorage.setItem('geoserver', 'badJson')
       sessionStorage.setItem('enabled_platforms_records', 'badJson')
 
-      await store.dispatch(apiStatusActions.deserialize())
+      await store.dispatch(ApiStatus.deserialize())
 
       // Deserialize should gracefully handle errors.
       expect(sessionStorage.getItem).toHaveBeenCalledTimes(2)
@@ -181,8 +183,11 @@ describe('apiStatusActions', () => {
 
       expect(store.getActions()).toEqual([
         {
-          type: apiStatusTypes.API_STATUS_DESERIALIZED,
-          deserialized: {},
+          type: ApiStatusActions.Deserialized.type,
+          payload: {
+            enabledPlatforms: apiStatusInitialState.enabledPlatforms,
+            geoserver: apiStatusInitialState.geoserver,
+          },
         },
       ])
     })

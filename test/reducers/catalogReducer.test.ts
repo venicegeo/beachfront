@@ -15,49 +15,38 @@
  */
 
 import {catalogInitialState, catalogReducer} from '../../src/reducers/catalogReducer'
-import {catalogTypes} from '../../src/actions/catalogActions'
-import {mapTypes} from '../../src/actions/mapActions'
-import * as moment from 'moment'
+import {CatalogActions} from '../../src/actions/catalogActions'
+import {MapActions} from '../../src/actions/mapActions'
 
 describe('catalogReducer', () => {
   test('initialState', () => {
-    expect(catalogReducer(undefined, {})).toEqual(catalogInitialState)
+    expect(catalogReducer(undefined, { type: null })).toEqual(catalogInitialState)
   })
 
-  test('CATALOG_DESERIALIZED', () => {
+  test('CATALOG_API_KEY_UPDATED', () => {
     const action = {
-      type: catalogTypes.CATALOG_DESERIALIZED,
-      deserialized: {
-        a: 'a',
+      type: CatalogActions.ApiKeyUpdated.type,
+      payload: {
+        apiKey: 'a',
       },
     }
 
     expect(catalogReducer(catalogInitialState, action)).toEqual({
       ...catalogInitialState,
-      ...action.deserialized,
-    })
-  })
-
-  test('CATALOG_API_KEY_UPDATED', () => {
-    const action = {
-      type: catalogTypes.CATALOG_API_KEY_UPDATED,
-      apiKey: 'a',
-    }
-
-    expect(catalogReducer(catalogInitialState, action)).toEqual({
-      ...catalogInitialState,
-      apiKey: action.apiKey,
+      apiKey: action.payload.apiKey,
     })
   })
 
   test('CATALOG_SEARCH_CRITERIA_UPDATED', () => {
     const action = {
-      type: catalogTypes.CATALOG_SEARCH_CRITERIA_UPDATED,
-      searchCriteria: {
-        cloudCover: 1,
-        dateFrom: moment(),
-        dateTo: moment(),
-        source: 'a',
+      type: CatalogActions.SearchCriteriaUpdated.type,
+      payload: {
+        searchCriteria: {
+          cloudCover: 'a',
+          dateFrom: 'b',
+          dateTo: 'c',
+          source: 'd',
+        },
       },
     }
 
@@ -65,7 +54,7 @@ describe('catalogReducer', () => {
       ...catalogInitialState,
       searchCriteria: {
         ...catalogInitialState.searchCriteria,
-        ...action.searchCriteria,
+        ...action.payload.searchCriteria,
       },
     })
   })
@@ -74,14 +63,14 @@ describe('catalogReducer', () => {
     const state = {
       ...catalogInitialState,
       searchCriteria: {
-        cloudCover: 1,
-        dateFrom: moment(),
-        dateTo: moment(),
-        source: 'a',
+        cloudCover: 'a',
+        dateFrom: 'b',
+        dateTo: 'c',
+        source: 'd',
       },
     } as any
 
-    const action = { type: catalogTypes.CATALOG_SEARCH_CRITERIA_RESET }
+    const action = { type: CatalogActions.SearchCriteriaReset.type }
 
     expect(catalogReducer(state, action)).toEqual({
       ...state,
@@ -95,7 +84,7 @@ describe('catalogReducer', () => {
       searchError: 'a',
     }
 
-    const action = { type: catalogTypes.CATALOG_SEARCHING }
+    const action = { type: CatalogActions.Searching.type }
 
     expect(catalogReducer(state, action)).toEqual({
       ...state,
@@ -111,14 +100,16 @@ describe('catalogReducer', () => {
     }
 
     const action = {
-      type: catalogTypes.CATALOG_SEARCH_SUCCESS,
-      searchResults: [1, 2, 3],
+      type: CatalogActions.SearchSuccess.type,
+      payload: {
+        searchResults: 'a',
+      },
     }
 
     expect(catalogReducer(state, action)).toEqual({
       ...state,
       isSearching: false,
-      searchResults: action.searchResults,
+      searchResults: action.payload.searchResults,
     })
   })
 
@@ -129,25 +120,45 @@ describe('catalogReducer', () => {
     }
 
     const action = {
-      type: catalogTypes.CATALOG_SEARCH_ERROR,
-      error: 'a',
+      type: CatalogActions.SearchError.type,
+      payload: {
+        error: 'a',
+      },
     }
 
     expect(catalogReducer(state, action)).toEqual({
       ...state,
       isSearching: false,
-      searchError: action.error,
+      searchError: action.payload.error,
+    })
+  })
+
+  test('CATALOG_DESERIALIZED', () => {
+    const action = {
+      type: CatalogActions.Deserialized.type,
+      payload: {
+        searchCriteria: 'a',
+        searchResults: 'b',
+        apiKey: 'c',
+      },
+    }
+
+    expect(catalogReducer(catalogInitialState, action)).toEqual({
+      ...catalogInitialState,
+      searchCriteria: action.payload.searchCriteria,
+      searchResults: action.payload.searchResults,
+      apiKey: action.payload.apiKey,
     })
   })
 
   test('MAP_BBOX_CLEARED', () => {
     const state = {
       ...catalogInitialState,
-      searchResults: [1, 2, 3],
-      searchError: 'a',
+      searchResults: 'a',
+      searchError: 'b',
     } as any
 
-    const action = { type: mapTypes.MAP_BBOX_CLEARED }
+    const action = { type: MapActions.BboxCleared.type }
 
     expect(catalogReducer(state, action)).toEqual({
       ...state,

@@ -14,50 +14,25 @@
  * limitations under the License.
  **/
 
-import {Dispatch} from 'redux'
+import {Action, Dispatch} from 'redux'
 import {scrollIntoView} from '../utils/domUtils'
 import {AppState} from '../store'
-import {TourState} from '../reducers/tourReducer'
+import {tourInitialState, TourState} from '../reducers/tourReducer'
 
-export const tourTypes: ActionTypes = {
-  TOUR_STEPS_UPDATED: 'TOUR_STEPS_UPDATED',
-  TOUR_STARTED: 'TOUR_STARTED',
-  TOUR_ENDED: 'TOUR_ENDED',
-  TOUR_STEP_CHANGING: 'TOUR_STEP_CHANGING',
-  TOUR_STEP_CHANGE_ERROR: 'TOUR_STEP_CHANGE_ERROR',
-  TOUR_STEP_CHANGE_SUCCESS: 'TOUR_STEP_CHANGE_SUCCESS',
-}
+export namespace Tour {
+  export function setSteps(steps: TourStep[]) {
+    return {...new TourActions.StepsUpdated({ steps })}
+  }
 
-export interface TourStep {
-  step: number
-  selector: string
-  title: string | JSX.Element
-  body: string | JSX.Element
-  horizontalOffset?: number
-  verticalOffset?: number
-  position?: 'left' | 'right' | 'top' | 'topLeft' | 'bottom' | 'bottomLeft'
-  hideArrow?: boolean
-  before?: () => void
-  after?: () => void
-}
+  export function start() {
+    return {...new TourActions.Started()}
+  }
 
-export const tourActions = {
-  setSteps(steps: TourStep[]) {
-    return {
-      type: tourTypes.TOUR_STEPS_UPDATED,
-      steps,
-    }
-  },
+  export function end() {
+    return {...new TourActions.Ended()}
+  }
 
-  start() {
-    return { type: tourTypes.TOUR_STARTED }
-  },
-
-  end() {
-    return { type: tourTypes.TOUR_ENDED }
-  },
-
-  goToStep(step: number) {
+  export function goToStep(step: number) {
     return async (dispatch: Dispatch<TourState>, getState: () => AppState) => {
       const state = getState()
 
@@ -79,7 +54,7 @@ export const tourActions = {
         return
       }
 
-      dispatch({ type: tourTypes.TOUR_STEP_CHANGING })
+      dispatch({...new TourActions.StepChanging()})
 
       try {
         if (curStep.after) {
@@ -96,18 +71,66 @@ export const tourActions = {
           alert("Sorry, it seems you can't go back from here.")
         }
 
-        dispatch({
-          type: tourTypes.TOUR_STEP_CHANGE_ERROR,
-          error,
-        })
+        dispatch({...new TourActions.StepChangeError({ error })})
 
         return
       }
 
-      dispatch({
-        type: tourTypes.TOUR_STEP_CHANGE_SUCCESS,
-        step,
-      })
+      dispatch({...new TourActions.StepChangeSuccess({ step })})
     }
-  },
+  }
+}
+
+export namespace TourActions {
+  export class StepsUpdated implements Action {
+    static type = 'TOUR_STEPS_UPDATED'
+    type = StepsUpdated.type
+    constructor(public payload: {
+      steps: typeof tourInitialState.steps
+    }) {}
+  }
+
+  export class Started implements Action {
+    static type = 'TOUR_STARTED'
+    type = Started.type
+  }
+
+  export class Ended implements Action {
+    static type = 'TOUR_ENDED'
+    type = Ended.type
+  }
+
+  export class StepChanging implements Action {
+    static type = 'TOUR_STEP_CHANGING'
+    type = StepChanging.type
+  }
+
+  export class StepChangeSuccess implements Action {
+    static type = 'TOUR_STEP_CHANGE_SUCCESS'
+    type = StepChangeSuccess.type
+    constructor(public payload: {
+      step: typeof tourInitialState.step
+    }) {}
+  }
+
+  export class StepChangeError implements Action {
+    static type = 'TOUR_STEP_CHANGE_ERROR'
+    type = StepChangeError.type
+    constructor(public payload: {
+      error: typeof tourInitialState.error
+    }) {}
+  }
+}
+
+export interface TourStep {
+  step: number
+  selector: string
+  title: string | JSX.Element
+  body: string | JSX.Element
+  horizontalOffset?: number
+  verticalOffset?: number
+  position?: 'left' | 'right' | 'top' | 'topLeft' | 'bottom' | 'bottomLeft'
+  hideArrow?: boolean
+  before?: () => void
+  after?: () => void
 }

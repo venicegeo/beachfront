@@ -17,7 +17,7 @@
 import thunk from 'redux-thunk'
 import configureStore, {MockStoreEnhanced} from 'redux-mock-store'
 import * as sinon from 'sinon'
-import {routeActions, routeTypes} from '../../src/actions/routeActions'
+import {Route, RouteActions} from '../../src/actions/routeActions'
 import {AppState, initialState} from '../../src/store'
 
 const mockStore = configureStore([thunk])
@@ -40,7 +40,7 @@ describe('routeActions', () => {
 
       const pushStateSpy = sinon.spy(history, 'pushState')
 
-      await store.dispatch(routeActions.navigateTo({ loc } as any))
+      await store.dispatch(Route.navigateTo({ loc } as any))
 
       const href = `${loc.pathname}${loc.search}${loc.hash}`
 
@@ -49,13 +49,15 @@ describe('routeActions', () => {
 
       expect(store.getActions()).toEqual([
         {
-          type: routeTypes.ROUTE_CHANGED,
-          pathname: loc.pathname,
-          search: loc.search,
-          hash: loc.hash,
-          selectedFeature: loc.selectedFeature,
-          href,
-          jobIds: ['1', '2', '3'],
+          type: RouteActions.Changed.type,
+          payload: {
+            pathname: loc.pathname,
+            search: loc.search,
+            hash: loc.hash,
+            selectedFeature: loc.selectedFeature,
+            href,
+            jobIds: ['1', '2', '3'],
+          },
         },
       ])
 
@@ -63,17 +65,19 @@ describe('routeActions', () => {
     })
 
     test('defaults', async () => {
-      await store.dispatch(routeActions.navigateTo({ loc: {} }))
+      await store.dispatch(Route.navigateTo({ loc: {} }))
 
       expect(store.getActions()).toEqual([
         {
-          type: routeTypes.ROUTE_CHANGED,
-          pathname: '/',
-          search: '',
-          hash: '',
-          selectedFeature: null,
-          href: '/',
-          jobIds: [],
+          type: RouteActions.Changed.type,
+          payload: {
+            pathname: '/',
+            search: '',
+            hash: '',
+            selectedFeature: null,
+            href: '/',
+            jobIds: [],
+          },
         },
       ])
     })
@@ -81,7 +85,7 @@ describe('routeActions', () => {
     test('pushHistory: false', async () => {
       const pushStateSpy = sinon.spy(history, 'pushState')
 
-      await store.dispatch(routeActions.navigateTo(({
+      await store.dispatch(Route.navigateTo(({
         loc: {},
         pushHistory: false,
       })))

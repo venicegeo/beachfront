@@ -24,7 +24,7 @@ import {LoadingAnimation} from './LoadingAnimation'
 import {normalizeSceneId} from './SceneFeatureDetails'
 import {JOB_ENDPOINT} from '../config'
 import {AppState} from '../store'
-import {mapActions} from '../actions/mapActions'
+import {Map} from '../actions/mapActions'
 
 type StateProps = ReturnType<typeof mapStateToProps>
 type DispatchProps = ReturnType<typeof mapDispatchToProps>
@@ -68,8 +68,8 @@ export const ActivityTable = (props: Props) => (
             key={job.id}
             className={props.selectedJobIds.includes(job.id) ? styles.isActive : ''}
             onClick={() => props.onRowClick(job)}
-            onMouseEnter={() => props.actions.map.setHoveredFeature(job)}
-            onMouseLeave={() => props.actions.map.setHoveredFeature(null)}
+            onMouseEnter={() => props.dispatch.map.setHoveredFeature(job)}
+            onMouseLeave={() => props.dispatch.map.setHoveredFeature(null)}
           >
             <td>{getSceneId(job)}</td>
             {/*<td>{getCapturedOn(job)}</td>
@@ -142,10 +142,10 @@ function mapStateToProps(state: AppState) {
 
 function mapDispatchToProps(dispatch: Function) {
   return {
-    actions: {
+    dispatch: {
       map: {
         setHoveredFeature: (hoveredFeature: beachfront.Job | null) => (
-          dispatch(mapActions.setHoveredFeature(hoveredFeature))
+          dispatch(Map.setHoveredFeature(hoveredFeature))
         ),
       },
     },

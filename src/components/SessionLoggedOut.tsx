@@ -19,7 +19,7 @@ const styles = require('./SessionLoggedOut.css')
 import * as React from 'react'
 import {connect} from 'react-redux'
 import {Modal} from './Modal'
-import {userActions} from '../actions/userActions'
+import {User} from '../actions/userActions'
 
 type DispatchProps = ReturnType<typeof mapDispatchToProps>
 type Props = DispatchProps
@@ -45,15 +45,15 @@ export class SessionLoggedOut extends React.Component<Props> {
   }
 
   private handleInitialize() {
-    this.props.actions.user.sessionLogout()
+    this.props.dispatch.user.sessionLogout()
   }
 }
 
 function mapDispatchToProps(dispatch: Function) {
   return {
-    actions: {
+    dispatch: {
       user: {
-        sessionLogout: () => dispatch(userActions.sessionLogout()),
+        sessionLogout: () => dispatch(User.sessionLogout()),
       },
     },
   }

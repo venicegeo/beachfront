@@ -14,7 +14,8 @@
  * limitations under the License.
  **/
 
-import {algorithmsTypes} from '../actions/algorithmsActions'
+import {Action} from 'redux'
+import {AlgorithmsActions as Actions} from '../actions/algorithmsActions'
 
 export interface AlgorithmsState {
   records: beachfront.Algorithm[]
@@ -28,31 +29,37 @@ export const algorithmsInitialState: AlgorithmsState = {
   fetchError: null,
 }
 
-export function algorithmsReducer(state = algorithmsInitialState, action: any) {
+export function algorithmsReducer(state = algorithmsInitialState, action: Action): AlgorithmsState {
   switch (action.type) {
-    case algorithmsTypes.ALGORITHMS_DESERIALIZED:
-      return {
-        ...state,
-        ...action.deserialized,
-      }
-    case algorithmsTypes.ALGORITHMS_FETCHING:
+    case Actions.Fetching.type:
       return {
         ...state,
         isFetching: true,
         fetchError: null,
       }
-    case algorithmsTypes.ALGORITHMS_FETCH_SUCCESS:
+    case Actions.FetchSuccess.type: {
+      const payload = (action as Actions.FetchSuccess).payload
       return {
         ...state,
         isFetching: false,
-        records: action.records,
+        records: payload.records,
       }
-    case algorithmsTypes.ALGORITHMS_FETCH_ERROR:
+    }
+    case Actions.FetchError.type: {
+      const payload = (action as Actions.FetchError).payload
       return {
         ...state,
         isFetching: false,
-        fetchError: action.error,
+        fetchError: payload.error,
       }
+    }
+    case Actions.Deserialized.type: {
+      const payload = (action as Actions.Deserialized).payload
+      return {
+        ...state,
+        records: payload.records,
+      }
+    }
     default:
       return state
   }

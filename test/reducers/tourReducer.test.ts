@@ -15,22 +15,24 @@
  */
 
 import {tourInitialState, tourReducer} from '../../src/reducers/tourReducer'
-import {tourTypes} from '../../src/actions/tourActions'
+import {TourActions} from '../../src/actions/tourActions'
 
 describe('tourReducer', () => {
   test('initialState', () => {
-    expect(tourReducer(undefined, {})).toEqual(tourInitialState)
+    expect(tourReducer(undefined, { type: null })).toEqual(tourInitialState)
   })
 
   test('TOUR_STEPS_UPDATED', () => {
     const action = {
-      type: tourTypes.TOUR_STEPS_UPDATED,
-      steps: [1, 2, 3],
+      type: TourActions.StepsUpdated.type,
+      payload: {
+        steps: 'a',
+      },
     }
 
     expect(tourReducer(tourInitialState, action)).toEqual({
       ...tourInitialState,
-      steps: action.steps,
+      steps: action.payload.steps,
     })
   })
 
@@ -40,9 +42,9 @@ describe('tourReducer', () => {
       changing: true,
       step: 5,
       error: 'a',
-    }
+    } as any
 
-    const action = { type: tourTypes.TOUR_STARTED }
+    const action = { type: TourActions.Started.type }
 
     expect(tourReducer(state, action)).toEqual({
       ...state,
@@ -59,9 +61,9 @@ describe('tourReducer', () => {
       inProgress: true,
       changing: true,
       error: 'a',
-    }
+    } as any
 
-    const action = { type: tourTypes.TOUR_ENDED }
+    const action = { type: TourActions.Ended.type }
 
     expect(tourReducer(state, action)).toEqual({
       ...state,
@@ -72,7 +74,7 @@ describe('tourReducer', () => {
   })
 
   test('TOUR_STEP_CHANGING', () => {
-    const action = { type: tourTypes.TOUR_STEP_CHANGING }
+    const action = { type: TourActions.StepChanging.type }
 
     expect(tourReducer(tourInitialState, action)).toEqual({
       ...tourInitialState,
@@ -87,14 +89,16 @@ describe('tourReducer', () => {
     }
 
     const action = {
-      type: tourTypes.TOUR_STEP_CHANGE_SUCCESS,
-      step: 2,
+      type: TourActions.StepChangeSuccess.type,
+      payload: {
+        step: 'a',
+      },
     }
 
     expect(tourReducer(state, action)).toEqual({
       ...state,
       changing: false,
-      step: action.step,
+      step: action.payload.step,
     })
   })
 
@@ -105,14 +109,16 @@ describe('tourReducer', () => {
     }
 
     const action = {
-      type: tourTypes.TOUR_STEP_CHANGE_ERROR,
-      error: 'a',
+      type: TourActions.StepChangeError.type,
+      payload: {
+        error: 'a',
+      },
     }
 
     expect(tourReducer(state, action)).toEqual({
       ...state,
       changing: false,
-      error: action.error,
+      error: action.payload.error,
     })
   })
 })

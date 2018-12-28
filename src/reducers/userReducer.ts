@@ -14,7 +14,8 @@
  * limitations under the License.
  **/
 
-import {userTypes} from '../actions/userActions'
+import {Action} from 'redux'
+import {UserActions as Actions} from '../actions/userActions'
 import * as session from '../api/session'
 
 export interface UserState {
@@ -31,36 +32,38 @@ export const userInitialState: UserState = {
   catalogApiKey: '',
 }
 
-export function userReducer(state = userInitialState, action: any): UserState {
+export function userReducer(state = userInitialState, action: Action): UserState {
   switch (action.type) {
-    case userTypes.USER_DESERIALIZED:
-      return {
-        ...state,
-        ...action.deserialized,
-      }
-    case userTypes.USER_LOGGED_OUT:
+    case Actions.LoggedOut.type:
       return {
         ...state,
         isLoggedIn: false,
         isSessionLoggedOut: true,
       }
-    case userTypes.USER_SESSION_CLEARED:
+    case Actions.SessionCleared.type:
       return {
         ...state,
         isLoggedIn: false,
         isSessionExpired: false,
       }
-    case userTypes.USER_SESSION_LOGGED_OUT:
+    case Actions.SessionLoggedOut.type:
       return {
         ...state,
         isLoggedIn: false,
         isSessionLoggedOut: false,
       }
-    case userTypes.USER_SESSION_EXPIRED:
+    case Actions.SessionExpired.type:
       return {
         ...state,
         isSessionExpired: true,
       }
+    case Actions.Deserialized.type: {
+      const payload = (action as Actions.Deserialized).payload
+      return {
+        ...state,
+        isSessionExpired: payload.isSessionExpired,
+      }
+    }
     default:
       return state
   }

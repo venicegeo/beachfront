@@ -16,16 +16,16 @@
 
 import * as React from 'react'
 import {TYPE_SCENE} from '../constants'
-import Tour from 'react-user-tour'
+import ReactUserTour from 'react-user-tour'
 import {TOUR} from '../config'
 import {query} from '../utils/domUtils'
 import {connect} from 'react-redux'
-import {catalogActions, CatalogUpdateSearchCriteriaArgs} from '../actions/catalogActions'
-import {mapActions, MapPanToPointArgs} from '../actions/mapActions'
+import {Catalog, CatalogUpdateSearchCriteriaArgs} from '../actions/catalogActions'
+import {Map} from '../actions/mapActions'
 import {AppState} from '../store'
-import {RouteNavigateToArgs, routeActions, RouteLocation} from '../actions/routeActions'
-import {Extent} from '../utils/geometries'
-import {tourActions, TourStep} from '../actions/tourActions'
+import {RouteNavigateToArgs, Route, RouteLocation} from '../actions/routeActions'
+import {Extent, Point} from '../utils/geometries'
+import {Tour, TourStep} from '../actions/tourActions'
 
 const styles: any = require('./UserTour.css')
 
@@ -94,7 +94,7 @@ export class UserTour extends React.Component<Props> {
   }
 
   componentDidMount() {
-    this.props.actions.tour.setSteps([
+    this.props.dispatch.tour.setSteps([
       {
         step: 1,
         selector: '.Navigation-linkTour',
@@ -141,13 +141,13 @@ export class UserTour extends React.Component<Props> {
         </div>,
         before: () => this.navigateTo('/'),
         after: async () => {
-          this.props.actions.catalog.resetSearchCriteria()
-          this.props.actions.catalog.serialize()
+          this.props.dispatch.catalog.resetSearchCriteria()
+          this.props.dispatch.catalog.serialize()
 
           await this.navigateTo('/')
 
           // Pan to the center of the bound box that we will highlight later.
-          this.props.actions.map.panToPoint({
+          this.props.dispatch.map.panToPoint({
             point: [
               (this.bbox[0] + this.bbox[2]) / 2,
               (this.bbox[1] + this.bbox[3]) / 2,
@@ -176,7 +176,7 @@ export class UserTour extends React.Component<Props> {
           But we&apos;ll do it for you this time.
         </div>,
         before: async () => {
-          this.props.actions.map.clearBbox()
+          this.props.dispatch.map.clearBbox()
           await this.navigateTo('/create-job')
         },
         after: () => {
@@ -192,7 +192,7 @@ export class UserTour extends React.Component<Props> {
               const interval = setInterval(() => {
                 ++i
 
-                this.props.actions.map.updateBbox([
+                this.props.dispatch.map.updateBbox([
                   this.bbox[0],
                   this.bbox[1],
                   this.bbox[0] + i / n * (this.bbox[2] - this.bbox[0]),
@@ -201,13 +201,13 @@ export class UserTour extends React.Component<Props> {
 
                 if (i >= n) {
                   clearInterval(interval)
-                  this.props.actions.map.updateBbox(this.bbox)
+                  this.props.dispatch.map.updateBbox(this.bbox)
                   resolve()
                 }
               }, duration / n)
             }
 
-            this.props.actions.map.updateBbox(this.bbox)
+            this.props.dispatch.map.updateBbox(this.bbox)
           })
         },
       },
@@ -221,7 +221,7 @@ export class UserTour extends React.Component<Props> {
         </div>,
         after: () => {
           if (this.props.catalog.searchCriteria.source !== this.searchCriteria.source) {
-            this.props.actions.catalog.updateSearchCriteria({
+            this.props.dispatch.catalog.updateSearchCriteria({
               source: this.searchCriteria.source,
             })
           }
@@ -247,7 +247,7 @@ export class UserTour extends React.Component<Props> {
         </div>,
         after: () => {
           const input = query(`.${styles.apiKey} input`) as HTMLInputElement
-          this.props.actions.catalog.setApiKey(input.value)
+          this.props.dispatch.catalog.setApiKey(input.value)
         },
       },
       {
@@ -265,7 +265,7 @@ export class UserTour extends React.Component<Props> {
             await this.pace(search.dateFrom, (_: any, s: string) => fromElem.value = s)
           }
 
-          this.props.actions.catalog.updateSearchCriteria({
+          this.props.dispatch.catalog.updateSearchCriteria({
             dateFrom: search.dateFrom,
           })
 
@@ -274,7 +274,7 @@ export class UserTour extends React.Component<Props> {
             await this.pace(search.dateTo, (_: any, s: string) => toElem.value = s)
           }
 
-          this.props.actions.catalog.updateSearchCriteria({
+          this.props.dispatch.catalog.updateSearchCriteria({
             dateTo: search.dateTo,
           })
         },
@@ -312,7 +312,7 @@ export class UserTour extends React.Component<Props> {
                   setTimeout(resolve, 100)
                 } else {
                   setTimeout(() => {
-                    this.props.actions.catalog.updateSearchCriteria({
+                    this.props.dispatch.catalog.updateSearchCriteria({
                       cloudCover: i,
                     })
 
@@ -403,7 +403,7 @@ export class UserTour extends React.Component<Props> {
             if (feature.properties) {
               feature.properties.type = TYPE_SCENE
             }
-            this.props.actions.map.setSelectedFeature(feature)
+            this.props.dispatch.map.setSelectedFeature(feature)
             setTimeout(resolve, 100)
           })
         },
@@ -609,20 +609,20 @@ export class UserTour extends React.Component<Props> {
           onKeyPress={this.onKeyPress}
           style={{ display: this.props.tour.error ? 'none' : 'block' }}
         >
-          <Tour
+          <ReactUserTour
             active={this.props.tour.inProgress}
             arrow={Arrow}
             buttonStyle={{}}
             closeButtonText="&#10799;"
-            onBack={this.props.actions.tour.goToStep}
-            onCancel={this.props.actions.tour.end}
-            onNext={this.props.actions.tour.goToStep}
+            onBack={this.props.dispatch.tour.goToStep}
+            onCancel={this.props.dispatch.tour.end}
+            onNext={this.props.dispatch.tour.goToStep}
             ref="tour"
             step={this.props.tour.step}
             steps={this.props.tour.steps}
           />
         </div>
-        <UserTourErrorMessage error={this.props.tour.error} onDismiss={this.props.actions.tour.end}/>
+        <UserTourErrorMessage error={this.props.tour.error} onDismiss={this.props.dispatch.tour.end}/>
       </div>
     )
   }
@@ -653,7 +653,7 @@ export class UserTour extends React.Component<Props> {
       return Promise.resolve(loc.pathname)
     } else {
       return new Promise((resolve, reject) => {
-        this.props.actions.route.navigateTo({ loc })
+        this.props.dispatch.route.navigateTo({ loc })
 
         const timeout = 30000
         const t0 = Date.now()
@@ -684,7 +684,7 @@ export class UserTour extends React.Component<Props> {
         break
       }
       case 'Escape': {
-        this.props.actions.tour.end()
+        this.props.dispatch.tour.end()
 
         break
       }
@@ -770,30 +770,30 @@ function mapStateToProps(state: AppState) {
 
 function mapDispatchToProps(dispatch: Function) {
   return {
-    actions: {
+    dispatch: {
       catalog: {
-        resetSearchCriteria: () => dispatch(catalogActions.resetSearchCriteria()),
+        resetSearchCriteria: () => dispatch(Catalog.resetSearchCriteria()),
         updateSearchCriteria: (args: CatalogUpdateSearchCriteriaArgs) => (
-          dispatch(catalogActions.updateSearchCriteria(args))
+          dispatch(Catalog.updateSearchCriteria(args))
         ),
-        setApiKey: (apiKey: string) => dispatch(catalogActions.setApiKey(apiKey)),
-        serialize: () => dispatch(catalogActions.serialize()),
+        setApiKey: (apiKey: string) => dispatch(Catalog.setApiKey(apiKey)),
+        serialize: () => dispatch(Catalog.serialize()),
       },
       map: {
-        panToPoint: (args: MapPanToPointArgs) => dispatch(mapActions.panToPoint(args)),
-        updateBbox: (bbox: Extent) => dispatch(mapActions.updateBbox(bbox)),
-        clearBbox: () => dispatch(mapActions.clearBbox()),
+        panToPoint: (args: { point: Point, zoom?: number }) => dispatch(Map.panToPoint(args)),
+        updateBbox: (bbox: Extent) => dispatch(Map.updateBbox(bbox)),
+        clearBbox: () => dispatch(Map.clearBbox()),
         setSelectedFeature: (feature: GeoJSON.Feature<any> | null) => (
-          dispatch(mapActions.setSelectedFeature(feature))
+          dispatch(Map.setSelectedFeature(feature))
         ),
       },
       route: {
-        navigateTo: (args: RouteNavigateToArgs) => dispatch(routeActions.navigateTo(args)),
+        navigateTo: (args: RouteNavigateToArgs) => dispatch(Route.navigateTo(args)),
       },
       tour: {
-        setSteps: (steps: TourStep[]) => dispatch(tourActions.setSteps(steps)),
-        end: () => dispatch(tourActions.end()),
-        goToStep: (step: number) => dispatch(tourActions.goToStep(step)),
+        setSteps: (steps: TourStep[]) => dispatch(Tour.setSteps(steps)),
+        end: () => dispatch(Tour.end()),
+        goToStep: (step: number) => dispatch(Tour.goToStep(step)),
       },
     },
   }
