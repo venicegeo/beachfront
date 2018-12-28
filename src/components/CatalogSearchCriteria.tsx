@@ -94,7 +94,7 @@ export class CatalogSearchCriteria extends React.Component<Props> {
               onChange={this.handleApiKeyChange}
             />
           </label>}
-        {!(hideApiKeyInput || this.props.catalog.apiKey) && (
+        {(!hideApiKeyInput && !this.props.catalog.apiKey) && (
           <div className={styles.apiKeyInfo}>
             <span>An API key is required. To obtain an API key, please fill out <a href={`/${this.apiKeyFormFileName}`} onClick={this.downloadApiKeyDocument}>this document</a> and follow its instructions.</span>
           </div>
