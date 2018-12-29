@@ -22,10 +22,10 @@ import {Extent} from '../utils/geometries'
 import {Action} from 'redux'
 
 export interface MapCollections {
-  hovered: ol.Collection<ol.Feature>
-  imagery: ol.Collection<ol.Feature>
-  selected: ol.Collection<ol.Feature>
-  handleSelectFeature: (featureOrId: any) => void
+  readonly hovered: ol.Collection<ol.Feature>
+  readonly imagery: ol.Collection<ol.Feature>
+  readonly selected: ol.Collection<ol.Feature>
+  readonly handleSelectFeature: (featureOrId: any) => void
 }
 
 export interface MapState {

@@ -18,12 +18,12 @@ import {ApiStatusActions as Actions} from '../actions/apiStatusActions'
 import {Action} from 'redux'
 
 export interface ApiStatusState {
-  geoserver: {
-    wmsUrl: string | null
+  readonly geoserver: {
+    readonly wmsUrl: string | null
   }
-  enabledPlatforms: string[]
-  isFetching: boolean
-  fetchError: any
+  readonly enabledPlatforms: string[]
+  readonly isFetching: boolean
+  readonly fetchError: any
 }
 
 export const apiStatusInitialState: ApiStatusState = {

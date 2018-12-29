@@ -18,11 +18,11 @@ import {Action} from 'redux'
 import {TourActions as Actions, TourStep} from '../actions/tourActions'
 
 export interface TourState {
-  inProgress: boolean
-  changing: boolean
-  step: number
-  error: Error | null
-  steps: TourStep[]
+  readonly inProgress: boolean
+  readonly changing: boolean
+  readonly step: number
+  readonly error: Error | null
+  readonly steps: TourStep[]
 }
 
 export const tourInitialState: TourState = {

@@ -19,12 +19,12 @@ import {RouteActions as Actions} from '../actions/routeActions'
 import {generateRoute} from '../utils/routeUtils'
 
 export interface RouteState {
-  hash: string
-  href: string
-  jobIds: string[]
-  pathname: string
-  search: string
-  selectedFeature: GeoJSON.Feature<any> | null
+  readonly hash: string
+  readonly href: string
+  readonly jobIds: string[]
+  readonly pathname: string
+  readonly search: string
+  readonly selectedFeature: GeoJSON.Feature<any> | null
 }
 
 export const routeInitialState: RouteState = generateRoute(location)
