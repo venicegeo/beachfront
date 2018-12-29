@@ -19,6 +19,7 @@ import {CatalogActions as Actions} from '../actions/catalogActions'
 import {MapActions} from '../actions/mapActions'
 import * as moment from 'moment'
 import {SOURCE_DEFAULT} from '../constants'
+import {RequestError} from '../utils/requestError'
 
 const DATE_FORMAT = 'YYYY-MM-DD'
 
@@ -31,7 +32,7 @@ export interface CatalogState {
     readonly dateTo: string
     readonly source: string
   },
-  readonly searchError: any
+  readonly searchError: RequestError | null
   readonly searchResults: beachfront.ImageryCatalogPage | null
 }
 

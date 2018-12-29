@@ -16,21 +16,22 @@
 
 import {Action} from 'redux'
 import {JobsActions as Actions} from '../actions/jobsActions'
+import {RequestError} from '../utils/requestError'
 
 export type JobsState = {
   readonly records: beachfront.Job[]
   readonly isFetching: boolean
-  readonly fetchError: any
+  readonly fetchError: RequestError | null
   readonly initialFetchComplete: boolean
   readonly isFetchingOne: boolean
-  readonly fetchOneError: any
+  readonly fetchOneError: RequestError | null
   readonly lastOneFetched: beachfront.Job | null
   readonly isDeletingJob: boolean
   readonly deletedJob: beachfront.Job | null
-  readonly deleteJobError: any
+  readonly deleteJobError: RequestError | null
   readonly isCreatingJob: boolean
   readonly createdJob: beachfront.Job | null
-  readonly createJobError: any
+  readonly createJobError: RequestError | null
 }
 
 export const jobsInitialState: JobsState = {

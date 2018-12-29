@@ -16,11 +16,12 @@
 
 import {Action} from 'redux'
 import {AlgorithmsActions as Actions} from '../actions/algorithmsActions'
+import {RequestError} from '../utils/requestError'
 
 export interface AlgorithmsState {
   readonly records: beachfront.Algorithm[]
   readonly isFetching: boolean
-  readonly fetchError: any
+  readonly fetchError: RequestError | null
 }
 
 export const algorithmsInitialState: AlgorithmsState = {
