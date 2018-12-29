@@ -19,10 +19,10 @@ import {UserActions as Actions} from '../actions/userActions'
 import * as session from '../api/session'
 
 export interface UserState {
-  isLoggedIn: boolean
-  isSessionExpired: boolean
-  isSessionLoggedOut: boolean
-  catalogApiKey: string
+  readonly isLoggedIn: boolean
+  readonly isSessionExpired: boolean
+  readonly isSessionLoggedOut: boolean
+  readonly catalogApiKey: string
 }
 
 export const userInitialState: UserState = {

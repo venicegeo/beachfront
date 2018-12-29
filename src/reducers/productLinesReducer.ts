@@ -18,15 +18,15 @@ import {Action} from 'redux'
 import {ProductLinesActions as Actions} from '../actions/productLinesActions'
 
 export interface ProductLinesState {
-  records: beachfront.ProductLine[]
-  isFetching: boolean
-  fetchError: any
-  jobs: beachfront.Job[]
-  isFetchingJobs: boolean
-  fetchJobsError: any
-  isCreatingProductLine: boolean
-  createdProductLine: beachfront.ProductLine | null
-  createProductLineError: any
+  readonly records: beachfront.ProductLine[]
+  readonly isFetching: boolean
+  readonly fetchError: any
+  readonly jobs: beachfront.Job[]
+  readonly isFetchingJobs: boolean
+  readonly fetchJobsError: any
+  readonly isCreatingProductLine: boolean
+  readonly createdProductLine: beachfront.ProductLine | null
+  readonly createProductLineError: any
 }
 
 export const productLinesInitialState: ProductLinesState = {

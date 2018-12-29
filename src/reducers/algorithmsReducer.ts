@@ -18,9 +18,9 @@ import {Action} from 'redux'
 import {AlgorithmsActions as Actions} from '../actions/algorithmsActions'
 
 export interface AlgorithmsState {
-  records: beachfront.Algorithm[]
-  isFetching: boolean
-  fetchError: any
+  readonly records: beachfront.Algorithm[]
+  readonly isFetching: boolean
+  readonly fetchError: any
 }
 
 export const algorithmsInitialState: AlgorithmsState = {

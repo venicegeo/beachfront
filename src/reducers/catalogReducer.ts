@@ -23,16 +23,16 @@ import {SOURCE_DEFAULT} from '../constants'
 const DATE_FORMAT = 'YYYY-MM-DD'
 
 export interface CatalogState {
-  apiKey: string
-  isSearching: boolean
-  searchCriteria: {
-    cloudCover: number
-    dateFrom: string
-    dateTo: string
-    source: string
+  readonly apiKey: string
+  readonly isSearching: boolean
+  readonly searchCriteria: {
+    readonly cloudCover: number
+    readonly dateFrom: string
+    readonly dateTo: string
+    readonly source: string
   },
-  searchError: any
-  searchResults: beachfront.ImageryCatalogPage | null
+  readonly searchError: any
+  readonly searchResults: beachfront.ImageryCatalogPage | null
 }
 
 export const catalogInitialState: CatalogState = {
