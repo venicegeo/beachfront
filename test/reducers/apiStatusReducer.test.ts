@@ -15,25 +15,11 @@
  */
 
 import {apiStatusInitialState, apiStatusReducer} from '../../src/reducers/apiStatusReducer'
-import {apiStatusTypes} from '../../src/actions/apiStatusActions'
+import {ApiStatusActions} from '../../src/actions/apiStatusActions'
 
 describe('apiStatusReducer', () => {
   test('initial state', () => {
-    expect(apiStatusReducer(undefined, {})).toEqual(apiStatusInitialState)
-  })
-
-  test('API_STATUS_DESERIALIZED', () => {
-    const action = {
-      type: apiStatusTypes.API_STATUS_DESERIALIZED,
-      deserialized: {
-        a: 'a',
-      },
-    }
-
-    expect(apiStatusReducer(apiStatusInitialState, action)).toEqual({
-      ...apiStatusInitialState,
-      ...action.deserialized,
-    })
+    expect(apiStatusReducer(undefined, { type: null })).toEqual(apiStatusInitialState)
   })
 
   test('API_STATUS_FETCHING', () => {
@@ -42,7 +28,7 @@ describe('apiStatusReducer', () => {
       fetchError: 'a',
     }
 
-    const action = { type: apiStatusTypes.API_STATUS_FETCHING }
+    const action = { type: ApiStatusActions.Fetching.type }
 
     expect(apiStatusReducer(state, action)).toEqual({
       ...state,
@@ -58,18 +44,20 @@ describe('apiStatusReducer', () => {
     }
 
     const action = {
-      type: apiStatusTypes.API_STATUS_FETCH_SUCCESS,
-      geoserver: {
-        wmsUrl: 'a',
+      type: ApiStatusActions.FetchSuccess.type,
+      payload: {
+        geoserver: {
+          wmsUrl: 'a',
+        },
+        enabledPlatforms: ['a', 'b', 'c'],
       },
-      enabledPlatforms: ['a', 'b', 'c'],
     }
 
     expect(apiStatusReducer(state, action)).toEqual({
       ...state,
       isFetching: false,
-      geoserver: action.geoserver,
-      enabledPlatforms: action.enabledPlatforms,
+      geoserver: action.payload.geoserver,
+      enabledPlatforms: action.payload.enabledPlatforms,
     })
   })
 
@@ -80,14 +68,32 @@ describe('apiStatusReducer', () => {
     }
 
     const action = {
-      type: apiStatusTypes.API_STATUS_FETCH_ERROR,
-      error: 'a',
+      type: ApiStatusActions.FetchError.type,
+      payload: {
+        error: 'a',
+      },
     }
 
     expect(apiStatusReducer(state, action)).toEqual({
       ...state,
       isFetching: false,
-      fetchError: action.error,
+      fetchError: action.payload.error,
+    })
+  })
+
+  test('API_STATUS_DESERIALIZED', () => {
+    const action = {
+      type: ApiStatusActions.Deserialized.type,
+      payload: {
+        geoserver: 'a',
+        enabledPlatforms: 'b',
+      },
+    }
+
+    expect(apiStatusReducer(apiStatusInitialState, action)).toEqual({
+      ...apiStatusInitialState,
+      geoserver: action.payload.geoserver,
+      enabledPlatforms: action.payload.enabledPlatforms,
     })
   })
 })

@@ -15,25 +15,11 @@
  */
 
 import {userInitialState, userReducer} from '../../src/reducers/userReducer'
-import {userTypes} from '../../src/actions/userActions'
+import {UserActions} from '../../src/actions/userActions'
 
 describe('userReducer', () => {
   test('initialState', () => {
-    expect(userReducer(undefined, {})).toEqual(userInitialState)
-  })
-
-  test('USER_DESERIALIZED', () => {
-    const action = {
-      type: userTypes.USER_DESERIALIZED,
-      deserialized: {
-        a: 'a',
-      },
-    }
-
-    expect(userReducer(userInitialState, action)).toEqual({
-      ...userInitialState,
-      ...action.deserialized,
-    })
+    expect(userReducer(undefined, { type: null })).toEqual(userInitialState)
   })
 
   test('USER_LOGGED_OUT', () => {
@@ -42,7 +28,7 @@ describe('userReducer', () => {
       isLoggedIn: true,
     }
 
-    const action = { type: userTypes.USER_LOGGED_OUT }
+    const action = { type: UserActions.LoggedOut.type }
 
     expect(userReducer(state, action)).toEqual({
       ...state,
@@ -58,7 +44,7 @@ describe('userReducer', () => {
       isSessionExpired: true,
     }
 
-    const action = { type: userTypes.USER_SESSION_CLEARED }
+    const action = { type: UserActions.SessionCleared.type }
 
     expect(userReducer(state, action)).toEqual({
       ...state,
@@ -74,7 +60,7 @@ describe('userReducer', () => {
       isSessionLoggedOut: true,
     }
 
-    const action = { type: userTypes.USER_SESSION_LOGGED_OUT }
+    const action = { type: UserActions.SessionLoggedOut.type }
 
     expect(userReducer(state, action)).toEqual({
       ...state,
@@ -84,11 +70,25 @@ describe('userReducer', () => {
   })
 
   test('USER_SESSION_EXPIRED', () => {
-    const action = { type: userTypes.USER_SESSION_EXPIRED }
+    const action = { type: UserActions.SessionExpired.type }
 
     expect(userReducer(userInitialState, action)).toEqual({
       ...userInitialState,
       isSessionExpired: true,
+    })
+  })
+
+  test('USER_DESERIALIZED', () => {
+    const action = {
+      type: UserActions.Deserialized.type,
+      payload: {
+        isSessionExpired: 'a',
+      },
+    }
+
+    expect(userReducer(userInitialState, action)).toEqual({
+      ...userInitialState,
+      isSessionExpired: action.payload.isSessionExpired,
     })
   })
 })

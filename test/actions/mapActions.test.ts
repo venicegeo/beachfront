@@ -18,7 +18,7 @@ import axios from 'axios'
 import MockAdapter from 'axios-mock-adapter'
 import thunk from 'redux-thunk'
 import configureStore, {MockStoreEnhanced} from 'redux-mock-store'
-import {mapActions, mapTypes} from '../../src/actions/mapActions'
+import {Map, MapActions} from '../../src/actions/mapActions'
 import {mapInitialState} from '../../src/reducers/mapReducer'
 import {MODE_DRAW_BBOX, MODE_NORMAL, MODE_PRODUCT_LINES, MODE_SELECT_IMAGERY} from '../../src/components/PrimaryMap'
 import {Extent, Point} from '../../src/utils/geometries'
@@ -53,13 +53,15 @@ describe('catalogActions', () => {
       const mockMap = 'a'
       const mockCollections = ['a', 'b', 'c']
 
-      await store.dispatch(mapActions.initialized(mockMap as any, mockCollections as any))
+      await store.dispatch(Map.initialized(mockMap as any, mockCollections as any))
 
       expect(store.getActions()).toEqual([
         {
-          type: mapTypes.MAP_INITIALIZED,
-          map: mockMap,
-          collections: mockCollections,
+          type: MapActions.Initialized.type,
+          payload: {
+            map: mockMap,
+            collections: mockCollections,
+          },
         },
       ])
     })
@@ -75,12 +77,14 @@ describe('catalogActions', () => {
         },
       }) as any
 
-      await store.dispatch(mapActions.updateMode() as any)
+      await store.dispatch(Map.updateMode() as any)
 
       expect(store.getActions()).toEqual([
         {
-          type: mapTypes.MAP_MODE_UPDATED,
-          mode: MODE_NORMAL,
+          type: MapActions.ModeUpdated.type,
+          payload: {
+            mode: MODE_NORMAL,
+          },
         },
       ])
     })
@@ -102,12 +106,14 @@ describe('catalogActions', () => {
         },
       }) as any
 
-      await store.dispatch(mapActions.updateMode() as any)
+      await store.dispatch(Map.updateMode() as any)
 
       expect(store.getActions()).toEqual([
         {
-          type: mapTypes.MAP_MODE_UPDATED,
-          mode: MODE_SELECT_IMAGERY,
+          type: MapActions.ModeUpdated.type,
+          payload: {
+            mode: MODE_SELECT_IMAGERY,
+          },
         },
       ])
     })
@@ -129,12 +135,14 @@ describe('catalogActions', () => {
         },
       }) as any
 
-      await store.dispatch(mapActions.updateMode() as any)
+      await store.dispatch(Map.updateMode() as any)
 
       expect(store.getActions()).toEqual([
         {
-          type: mapTypes.MAP_MODE_UPDATED,
-          mode: MODE_DRAW_BBOX,
+          type: MapActions.ModeUpdated.type,
+          payload: {
+            mode: MODE_DRAW_BBOX,
+          },
         },
       ])
     })
@@ -148,12 +156,14 @@ describe('catalogActions', () => {
         },
       }) as any
 
-      await store.dispatch(mapActions.updateMode() as any)
+      await store.dispatch(Map.updateMode() as any)
 
       expect(store.getActions()).toEqual([
         {
-          type: mapTypes.MAP_MODE_UPDATED,
-          mode: MODE_DRAW_BBOX,
+          type: MapActions.ModeUpdated.type,
+          payload: {
+            mode: MODE_DRAW_BBOX,
+          },
         },
       ])
     })
@@ -167,12 +177,14 @@ describe('catalogActions', () => {
         },
       }) as any
 
-      await store.dispatch(mapActions.updateMode() as any)
+      await store.dispatch(Map.updateMode() as any)
 
       expect(store.getActions()).toEqual([
         {
-          type: mapTypes.MAP_MODE_UPDATED,
-          mode: MODE_PRODUCT_LINES,
+          type: MapActions.ModeUpdated.type,
+          payload: {
+            mode: MODE_PRODUCT_LINES,
+          },
         },
       ])
     })
@@ -182,12 +194,14 @@ describe('catalogActions', () => {
     test('success', async () => {
       const mockBbox = [1, 2, 3, 4]
 
-      await store.dispatch(mapActions.updateBbox(mockBbox as any))
+      await store.dispatch(Map.updateBbox(mockBbox as any))
 
       expect(store.getActions()).toEqual([
         {
-          type: mapTypes.MAP_BBOX_UPDATED,
-          bbox: mockBbox,
+          type: MapActions.BboxUpdated.type,
+          payload: {
+            bbox: mockBbox,
+          },
         },
       ])
     })
@@ -195,10 +209,10 @@ describe('catalogActions', () => {
 
   describe('clearBbox()', () => {
     test('success', async () => {
-      await store.dispatch(mapActions.clearBbox())
+      await store.dispatch(Map.clearBbox())
 
       expect(store.getActions()).toEqual([
-        { type: mapTypes.MAP_BBOX_CLEARED },
+        { type: MapActions.BboxCleared.type },
       ])
     })
   })
@@ -230,15 +244,17 @@ describe('catalogActions', () => {
           },
         }) as any
 
-        await store.dispatch(mapActions.updateDetections() as any)
+        await store.dispatch(Map.updateDetections() as any)
 
         expect(store.getActions()).toEqual([
           {
-            type: mapTypes.MAP_DETECTIONS_UPDATED,
-            detections: [
-              { id: 'a' },
-              { id: 'c' },
-            ],
+            type: MapActions.DetectionsUpdated.type,
+            payload: {
+              detections: [
+                { id: 'a' },
+                { id: 'c' },
+              ],
+            },
           },
         ])
       })
@@ -269,7 +285,7 @@ describe('catalogActions', () => {
           },
         }) as any
 
-        await store.dispatch(mapActions.updateDetections() as any)
+        await store.dispatch(Map.updateDetections() as any)
 
         expect(store.getActions()).toEqual([])
       })
@@ -298,14 +314,16 @@ describe('catalogActions', () => {
           },
         }) as any
 
-        await store.dispatch(mapActions.updateDetections() as any)
+        await store.dispatch(Map.updateDetections() as any)
 
         expect(store.getActions()).toEqual([
           {
-            type: mapTypes.MAP_DETECTIONS_UPDATED,
-            detections: [
-              mockSelectedFeature,
-            ],
+            type: MapActions.DetectionsUpdated.type,
+            payload: {
+              detections: [
+                mockSelectedFeature,
+              ],
+            },
           },
         ])
       })
@@ -331,12 +349,14 @@ describe('catalogActions', () => {
           },
         }) as any
 
-        await store.dispatch(mapActions.updateDetections() as any)
+        await store.dispatch(Map.updateDetections() as any)
 
         expect(store.getActions()).toEqual([
           {
-            type: mapTypes.MAP_DETECTIONS_UPDATED,
-            detections: mockProductLinesRecords,
+            type: MapActions.DetectionsUpdated.type,
+            payload: {
+              detections: mockProductLinesRecords,
+            },
           },
         ])
       })
@@ -365,14 +385,16 @@ describe('catalogActions', () => {
           },
         }) as any
 
-        await store.dispatch(mapActions.updateDetections() as any)
+        await store.dispatch(Map.updateDetections() as any)
 
         expect(store.getActions()).toEqual([
           {
-            type: mapTypes.MAP_DETECTIONS_UPDATED,
-            detections: [
-              mockSelectedFeature,
-            ],
+            type: MapActions.DetectionsUpdated.type,
+            payload: {
+              detections: [
+                mockSelectedFeature,
+              ],
+            },
           },
         ])
       })
@@ -398,12 +420,14 @@ describe('catalogActions', () => {
           },
         }) as any
 
-        await store.dispatch(mapActions.updateDetections() as any)
+        await store.dispatch(Map.updateDetections() as any)
 
         expect(store.getActions()).toEqual([
           {
-            type: mapTypes.MAP_DETECTIONS_UPDATED,
-            detections: mockProductLinesRecords,
+            type: MapActions.DetectionsUpdated.type,
+            payload: {
+              detections: mockProductLinesRecords,
+            },
           },
         ])
       })
@@ -435,15 +459,17 @@ describe('catalogActions', () => {
           },
         }) as any
 
-        await store.dispatch(mapActions.updateFrames() as any)
+        await store.dispatch(Map.updateFrames() as any)
 
         expect(store.getActions()).toEqual([
           {
-            type: mapTypes.MAP_FRAMES_UPDATED,
-            frames: [
-              { id: 'a' },
-              { id: 'c' },
-            ],
+            type: MapActions.FramesUpdated.type,
+            payload: {
+              frames: [
+                { id: 'a' },
+                { id: 'c' },
+              ],
+            },
           },
         ])
       })
@@ -470,7 +496,7 @@ describe('catalogActions', () => {
           },
         }) as any
 
-        await store.dispatch(mapActions.updateFrames() as any)
+        await store.dispatch(Map.updateFrames() as any)
 
         expect(store.getActions()).toEqual([])
       })
@@ -500,15 +526,17 @@ describe('catalogActions', () => {
           },
         }) as any
 
-        await store.dispatch(mapActions.updateFrames() as any)
+        await store.dispatch(Map.updateFrames() as any)
 
         expect(store.getActions()).toEqual([
           {
-            type: mapTypes.MAP_FRAMES_UPDATED,
-            frames: [
-              mockSelectedFeature,
-              ...mockProductLines,
-            ],
+            type: MapActions.FramesUpdated.type,
+            payload: {
+              frames: [
+                mockSelectedFeature,
+                ...mockProductLines,
+              ],
+            },
           },
         ])
       })
@@ -534,12 +562,14 @@ describe('catalogActions', () => {
           },
         }) as any
 
-        await store.dispatch(mapActions.updateFrames() as any)
+        await store.dispatch(Map.updateFrames() as any)
 
         expect(store.getActions()).toEqual([
           {
-            type: mapTypes.MAP_FRAMES_UPDATED,
-            frames: mockProductLines,
+            type: MapActions.FramesUpdated.type,
+            payload: {
+              frames: mockProductLines,
+            },
           },
         ])
       })
@@ -569,15 +599,17 @@ describe('catalogActions', () => {
           },
         }) as any
 
-        await store.dispatch(mapActions.updateFrames() as any)
+        await store.dispatch(Map.updateFrames() as any)
 
         expect(store.getActions()).toEqual([
           {
-            type: mapTypes.MAP_FRAMES_UPDATED,
-            frames: [
-              mockSelectedFeature,
-              ...mockProductLines,
-            ],
+            type: MapActions.FramesUpdated.type,
+            payload: {
+              frames: [
+                mockSelectedFeature,
+                ...mockProductLines,
+              ],
+            },
           },
         ])
       })
@@ -603,12 +635,14 @@ describe('catalogActions', () => {
           },
         }) as any
 
-        await store.dispatch(mapActions.updateFrames() as any)
+        await store.dispatch(Map.updateFrames() as any)
 
         expect(store.getActions()).toEqual([
           {
-            type: mapTypes.MAP_FRAMES_UPDATED,
-            frames: mockProductLines,
+            type: MapActions.FramesUpdated.type,
+            payload: {
+              frames: mockProductLines,
+            },
           },
         ])
       })
@@ -627,12 +661,14 @@ describe('catalogActions', () => {
 
       const mockFeature = { id: 'a' }
 
-      await store.dispatch(mapActions.setSelectedFeature(mockFeature as any) as any)
+      await store.dispatch(Map.setSelectedFeature(mockFeature as any) as any)
 
       expect(store.getActions()).toEqual([
         {
-          type: mapTypes.MAP_SELECTED_FEATURE_UPDATED,
-          selectedFeature: mockFeature,
+          type: MapActions.SelectedFeatureUpdated.type,
+          payload: {
+            selectedFeature: mockFeature,
+          },
         },
       ])
     })
@@ -647,7 +683,7 @@ describe('catalogActions', () => {
         },
       }) as any
 
-      await store.dispatch(mapActions.setSelectedFeature(mockFeature as any) as any)
+      await store.dispatch(Map.setSelectedFeature(mockFeature as any) as any)
 
       expect(store.getActions()).toEqual([])
     })
@@ -657,12 +693,14 @@ describe('catalogActions', () => {
     test('success', async () => {
       const mockFeature = { id: 'a' }
 
-      await store.dispatch(mapActions.setHoveredFeature(mockFeature as any))
+      await store.dispatch(Map.setHoveredFeature(mockFeature as any))
 
       expect(store.getActions()).toEqual([
         {
-          type: mapTypes.MAP_HOVERED_FEATURE_UPDATED,
-          hoveredFeature: mockFeature,
+          type: MapActions.HoveredFeatureUpdated.type,
+          payload: {
+            hoveredFeature: mockFeature,
+          },
         },
       ])
     })
@@ -672,12 +710,14 @@ describe('catalogActions', () => {
     test('success', async () => {
       const mockView = { some: 'data' }
 
-      await store.dispatch(mapActions.updateView(mockView as any))
+      await store.dispatch(Map.updateView(mockView as any))
 
       expect(store.getActions()).toEqual([
         {
-          type: mapTypes.MAP_VIEW_UPDATED,
-          view: mockView,
+          type: MapActions.ViewUpdated.type,
+          payload: {
+            view: mockView,
+          },
         },
       ])
     })
@@ -688,16 +728,18 @@ describe('catalogActions', () => {
       const point = [1, 2] as Point
       const zoom = 3
 
-      await store.dispatch(mapActions.panToPoint({
+      await store.dispatch(Map.panToPoint({
         point,
         zoom,
       }))
 
       expect(store.getActions()).toEqual([
         {
-          type: mapTypes.MAP_PAN_TO_POINT,
-          point,
-          zoom,
+          type: MapActions.PanToPoint.type,
+          payload: {
+            point,
+            zoom,
+          },
         },
       ])
     })
@@ -705,15 +747,17 @@ describe('catalogActions', () => {
     test('default zoom', async () => {
       const point = [1, 2] as Point
 
-      await store.dispatch(mapActions.panToPoint({
+      await store.dispatch(Map.panToPoint({
         point,
       }))
 
       expect(store.getActions()).toEqual([
         {
-          type: mapTypes.MAP_PAN_TO_POINT,
-          point,
-          zoom: 10,
+          type: MapActions.PanToPoint.type,
+          payload: {
+            point,
+            zoom: 10,
+          },
         },
       ])
     })
@@ -723,12 +767,14 @@ describe('catalogActions', () => {
     test('success', async () => {
       const extent = [1, 2, 3, 4] as Extent
 
-      await store.dispatch(mapActions.panToExtent(extent))
+      await store.dispatch(Map.panToExtent(extent))
 
       expect(store.getActions()).toEqual([
         {
-          type: mapTypes.MAP_PAN_TO_EXTENT,
-          extent,
+          type: MapActions.PanToExtent.type,
+          payload: {
+            extent,
+          },
         },
       ])
     })
@@ -747,7 +793,7 @@ describe('catalogActions', () => {
         },
       }) as any
 
-      await store.dispatch(mapActions.serialize() as any)
+      await store.dispatch(Map.serialize() as any)
 
       // Note: coordinates should be wrapped within -180/180.
       expect(sessionStorage.setItem).toHaveBeenCalledTimes(2)
@@ -755,7 +801,7 @@ describe('catalogActions', () => {
       expect(sessionStorage.setItem).toHaveBeenCalledWith('mapView', JSON.stringify({ center: [-179, 0] }))
 
       expect(store.getActions()).toEqual([
-        { type: mapTypes.MAP_SERIALIZED },
+        { type: MapActions.Serialized.type },
       ])
     })
 
@@ -768,12 +814,12 @@ describe('catalogActions', () => {
         },
       }) as any
 
-      await store.dispatch(mapActions.serialize() as any)
+      await store.dispatch(Map.serialize() as any)
 
       expect(sessionStorage.setItem).toHaveBeenCalledWith('mapView', JSON.stringify(null))
 
       expect(store.getActions()).toEqual([
-        { type: mapTypes.MAP_SERIALIZED },
+        { type: MapActions.Serialized.type },
       ])
     })
 
@@ -790,12 +836,12 @@ describe('catalogActions', () => {
         },
       }) as any
 
-      await store.dispatch(mapActions.serialize() as any)
+      await store.dispatch(Map.serialize() as any)
 
       expect(sessionStorage.setItem).toHaveBeenCalledWith('mapView', JSON.stringify(mockView))
 
       expect(store.getActions()).toEqual([
-        { type: mapTypes.MAP_SERIALIZED },
+        { type: MapActions.Serialized.type },
       ])
     })
 
@@ -810,12 +856,12 @@ describe('catalogActions', () => {
         },
       }) as any
 
-      await store.dispatch(mapActions.serialize() as any)
+      await store.dispatch(Map.serialize() as any)
 
       expect(sessionStorage.setItem).toHaveBeenCalledWith('bbox', JSON.stringify(null))
 
       expect(store.getActions()).toEqual([
-        { type: mapTypes.MAP_SERIALIZED },
+        { type: MapActions.Serialized.type },
       ])
     })
   })
@@ -831,7 +877,7 @@ describe('catalogActions', () => {
       sessionStorage.setItem('bbox', JSON.stringify(mockStorage.bbox))
       sessionStorage.setItem('mapView', JSON.stringify(mockStorage.mapView))
 
-      await store.dispatch(mapActions.deserialize())
+      await store.dispatch(Map.deserialize())
 
       expect(sessionStorage.getItem).toHaveBeenCalledTimes(2)
       expect(sessionStorage.getItem).toHaveBeenCalledWith('bbox')
@@ -839,10 +885,28 @@ describe('catalogActions', () => {
 
       expect(store.getActions()).toEqual([
         {
-          type: mapTypes.MAP_DESERIALIZED,
-          deserialized: {
+          type: MapActions.Deserialized.type,
+          payload: {
             bbox: mockStorage.bbox,
             view: mockStorage.mapView,
+          },
+        },
+      ])
+    })
+
+    test('no saved data', async () => {
+      await store.dispatch(Map.deserialize())
+
+      expect(sessionStorage.getItem).toHaveBeenCalledTimes(2)
+      expect(sessionStorage.getItem).toHaveBeenCalledWith('bbox')
+      expect(sessionStorage.getItem).toHaveBeenCalledWith('mapView')
+
+      expect(store.getActions()).toEqual([
+        {
+          type: MapActions.Deserialized.type,
+          payload: {
+            bbox: null,
+            view: null,
           },
         },
       ])
@@ -852,7 +916,7 @@ describe('catalogActions', () => {
       sessionStorage.setItem('bbox', 'badJson')
       sessionStorage.setItem('mapView', 'badJson')
 
-      await store.dispatch(mapActions.deserialize())
+      await store.dispatch(Map.deserialize())
 
       expect(sessionStorage.getItem).toHaveBeenCalledTimes(2)
       expect(sessionStorage.getItem).toHaveBeenCalledWith('bbox')
@@ -860,8 +924,11 @@ describe('catalogActions', () => {
 
       expect(store.getActions()).toEqual([
         {
-          type: mapTypes.MAP_DESERIALIZED,
-          deserialized: {},
+          type: MapActions.Deserialized.type,
+          payload: {
+            bbox: mapInitialState.bbox,
+            view: mapInitialState.view,
+          },
         },
       ])
     })

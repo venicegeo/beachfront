@@ -20,7 +20,7 @@ import thunk from 'redux-thunk'
 import configureStore, {MockStoreEnhanced} from 'redux-mock-store'
 import * as sinon from 'sinon'
 import {SinonSpy} from 'sinon'
-import {jobsActions, jobsTypes} from '../../src/actions/jobsActions'
+import {Jobs, JobsActions} from '../../src/actions/jobsActions'
 import {JOB_ENDPOINT} from '../../src/config'
 import {getClient} from '../../src/api/session'
 import {AppState, initialState} from '../../src/store'
@@ -60,16 +60,18 @@ describe('jobsActions', () => {
       }
       mockAdapter.onGet(JOB_ENDPOINT).reply(200, mockResponseData)
 
-      await store.dispatch(jobsActions.fetch() as any)
+      await store.dispatch(Jobs.fetch() as any)
 
       expect(clientSpies.get.callCount).toEqual(1)
       expect(clientSpies.get.args[0]).toEqual([JOB_ENDPOINT])
 
       expect(store.getActions()).toEqual([
-        { type: jobsTypes.JOBS_FETCHING },
+        { type: JobsActions.Fetching.type },
         {
-          type: jobsTypes.JOBS_FETCH_SUCCESS,
-          records: mockResponseData.jobs.features,
+          type: JobsActions.FetchSuccess.type,
+          payload: {
+            records: mockResponseData.jobs.features,
+          },
         },
       ])
     })
@@ -77,25 +79,25 @@ describe('jobsActions', () => {
     test('request error', async () => {
       mockAdapter.onGet(JOB_ENDPOINT).reply(400)
 
-      await store.dispatch(jobsActions.fetch() as any)
+      await store.dispatch(Jobs.fetch() as any)
 
       const actions = store.getActions()
       expect(actions.length).toEqual(2)
-      expect(actions[0]).toEqual({ type: jobsTypes.JOBS_FETCHING })
-      expect(actions[1].type).toEqual(jobsTypes.JOBS_FETCH_ERROR)
-      expect(actions[1].error).toBeDefined()
+      expect(actions[0]).toEqual({ type: JobsActions.Fetching.type })
+      expect(actions[1].type).toEqual(JobsActions.FetchError.type)
+      expect(actions[1].payload).toHaveProperty('error')
     })
 
     test('invalid response data', async () => {
       mockAdapter.onGet(JOB_ENDPOINT).reply(200)
 
-      await store.dispatch(jobsActions.fetch() as any)
+      await store.dispatch(Jobs.fetch() as any)
 
       const actions = store.getActions()
       expect(actions.length).toEqual(2)
-      expect(actions[0]).toEqual({ type: jobsTypes.JOBS_FETCHING })
-      expect(actions[1].type).toEqual(jobsTypes.JOBS_FETCH_ERROR)
-      expect(actions[1].error).toBeDefined()
+      expect(actions[0]).toEqual({ type: JobsActions.Fetching.type })
+      expect(actions[1].type).toEqual(JobsActions.FetchError.type)
+      expect(actions[1].payload).toHaveProperty('error')
     })
   })
 
@@ -108,16 +110,18 @@ describe('jobsActions', () => {
       const url = `${JOB_ENDPOINT}/${mockJobId}`
       mockAdapter.onGet(url).reply(200, mockResponseData)
 
-      await store.dispatch(jobsActions.fetchOne(mockJobId) as any)
+      await store.dispatch(Jobs.fetchOne(mockJobId) as any)
 
       expect(clientSpies.get.callCount).toEqual(1)
       expect(clientSpies.get.args[0]).toEqual([url])
 
       expect(store.getActions()).toEqual([
-        { type: jobsTypes.JOBS_FETCHING_ONE },
+        { type: JobsActions.FetchingOne.type },
         {
-          type: jobsTypes.JOBS_FETCH_ONE_SUCCESS,
-          record: mockResponseData.job,
+          type: JobsActions.FetchOneSuccess.type,
+          payload: {
+            record: mockResponseData.job,
+          },
         },
       ])
     })
@@ -126,26 +130,26 @@ describe('jobsActions', () => {
       const mockJobId = 'a'
       mockAdapter.onGet(`${JOB_ENDPOINT}/${mockJobId}`).reply(400)
 
-      await store.dispatch(jobsActions.fetchOne(mockJobId) as any)
+      await store.dispatch(Jobs.fetchOne(mockJobId) as any)
 
       const actions = store.getActions()
       expect(actions.length).toEqual(2)
-      expect(actions[0]).toEqual({ type: jobsTypes.JOBS_FETCHING_ONE })
-      expect(actions[1].type).toEqual(jobsTypes.JOBS_FETCH_ONE_ERROR)
-      expect(actions[1].error).toBeDefined()
+      expect(actions[0]).toEqual({ type: JobsActions.FetchingOne.type })
+      expect(actions[1].type).toEqual(JobsActions.FetchOneError.type)
+      expect(actions[1].payload).toHaveProperty('error')
     })
 
     test('invalid response data', async () => {
       const mockJob = { id: 'a' }
       mockAdapter.onGet(`${JOB_ENDPOINT}/${mockJob.id}`).reply(200)
 
-      await store.dispatch(jobsActions.fetchOne(mockJob.id) as any)
+      await store.dispatch(Jobs.fetchOne(mockJob.id) as any)
 
       const actions = store.getActions()
       expect(actions.length).toEqual(2)
-      expect(actions[0]).toEqual({ type: jobsTypes.JOBS_FETCHING_ONE })
-      expect(actions[1].type).toEqual(jobsTypes.JOBS_FETCH_ONE_ERROR)
-      expect(actions[1].error).toBeDefined()
+      expect(actions[0]).toEqual({ type: JobsActions.FetchingOne.type })
+      expect(actions[1].type).toEqual(JobsActions.FetchOneError.type)
+      expect(actions[1].payload).toHaveProperty('error')
     })
   })
 
@@ -163,7 +167,7 @@ describe('jobsActions', () => {
         catalogApiKey: 'catalogApiKey',
         sceneId: 'sceneId',
       }
-      await store.dispatch(jobsActions.createJob(args) as any)
+      await store.dispatch(Jobs.createJob(args) as any)
 
       expect(clientSpies.post.callCount).toEqual(1)
       expect(clientSpies.post.args[0]).toEqual([
@@ -178,10 +182,12 @@ describe('jobsActions', () => {
       ])
 
       expect(store.getActions()).toEqual([
-        { type: jobsTypes.JOBS_CREATING_JOB },
+        { type: JobsActions.CreatingJob.type },
         {
-          type: jobsTypes.JOBS_CREATE_JOB_SUCCESS,
-          createdJob: mockResponseData.job,
+          type: JobsActions.CreateJobSuccess.type,
+          payload: {
+            createdJob: mockResponseData.job,
+          },
         },
       ])
     })
@@ -189,7 +195,7 @@ describe('jobsActions', () => {
     test('request error', async () => {
       mockAdapter.onPost(JOB_ENDPOINT).reply(400)
 
-      await store.dispatch(jobsActions.createJob({
+      await store.dispatch(Jobs.createJob({
         algorithmId: 'algorithmId',
         computeMask: true,
         name: 'name',
@@ -199,15 +205,15 @@ describe('jobsActions', () => {
 
       const actions = store.getActions()
       expect(actions.length).toEqual(2)
-      expect(actions[0]).toEqual({ type: jobsTypes.JOBS_CREATING_JOB })
-      expect(actions[1].type).toEqual(jobsTypes.JOBS_CREATE_JOB_ERROR)
-      expect(actions[1].error).toBeDefined()
+      expect(actions[0]).toEqual({ type: JobsActions.CreatingJob.type })
+      expect(actions[1].type).toEqual(JobsActions.CreateJobError.type)
+      expect(actions[1].payload).toHaveProperty('error')
     })
 
     test('invalid response data', async () => {
       mockAdapter.onPost(JOB_ENDPOINT).reply(200)
 
-      await store.dispatch(jobsActions.createJob({
+      await store.dispatch(Jobs.createJob({
         algorithmId: 'algorithmId',
         computeMask: true,
         name: 'name',
@@ -217,18 +223,18 @@ describe('jobsActions', () => {
 
       const actions = store.getActions()
       expect(actions.length).toEqual(2)
-      expect(actions[0]).toEqual({ type: jobsTypes.JOBS_CREATING_JOB })
-      expect(actions[1].type).toEqual(jobsTypes.JOBS_CREATE_JOB_ERROR)
-      expect(actions[1].error).toBeDefined()
+      expect(actions[0]).toEqual({ type: JobsActions.CreatingJob.type })
+      expect(actions[1].type).toEqual(JobsActions.CreateJobError.type)
+      expect(actions[1].payload).toHaveProperty('error')
     })
   })
 
   describe('dismissCreateJobError()', () => {
     test('success', async () => {
-      await store.dispatch(jobsActions.dismissCreateJobError())
+      await store.dispatch(Jobs.dismissCreateJobError())
 
       expect(store.getActions()).toEqual([
-        { type: jobsTypes.JOBS_CREATE_JOB_ERROR_DISMISSED },
+        { type: JobsActions.CreateJobErrorDismissed.type },
       ])
     })
   })
@@ -239,17 +245,19 @@ describe('jobsActions', () => {
       const url = `${JOB_ENDPOINT}/${mockJob.id}`
       mockAdapter.onDelete(url).reply(200)
 
-      await store.dispatch(jobsActions.deleteJob(mockJob as any) as any)
+      await store.dispatch(Jobs.deleteJob(mockJob as any) as any)
 
       expect(clientSpies.delete.callCount).toEqual(1)
       expect(clientSpies.delete.args[0]).toEqual([url])
 
       expect(store.getActions()).toEqual([
         {
-          type: jobsTypes.JOBS_DELETING_JOB,
-          deletedJob: mockJob,
+          type: JobsActions.DeletingJob.type,
+          payload: {
+            deletedJob: mockJob,
+          },
         },
-        { type: jobsTypes.JOBS_DELETE_JOB_SUCCESS },
+        { type: JobsActions.DeleteJobSuccess.type },
       ])
     })
 
@@ -257,28 +265,32 @@ describe('jobsActions', () => {
       const mockJob = { id: 'a' }
       mockAdapter.onDelete(`${JOB_ENDPOINT}/${mockJob.id}`).reply(400)
 
-      await store.dispatch(jobsActions.deleteJob(mockJob as any) as any)
+      await store.dispatch(Jobs.deleteJob(mockJob as any) as any)
 
       const actions = store.getActions()
       expect(actions[0]).toEqual({
-        type: jobsTypes.JOBS_DELETING_JOB,
-        deletedJob: mockJob,
+        type: JobsActions.DeletingJob.type,
+        payload: {
+          deletedJob: mockJob,
+        },
       })
-      expect(actions[1].type).toEqual(jobsTypes.JOBS_DELETE_JOB_ERROR)
-      expect(actions[1].error).toBeDefined()
+      expect(actions[1].type).toEqual(JobsActions.DeleteJobError.type)
+      expect(actions[1].payload).toHaveProperty('error')
     })
 
     test('non-request error', async () => {
-      await store.dispatch(jobsActions.deleteJob(null as any) as any)
+      await store.dispatch(Jobs.deleteJob(null as any) as any)
 
       const actions = store.getActions()
       expect(actions.length).toEqual(2)
       expect(actions[0]).toEqual({
-        type: jobsTypes.JOBS_DELETING_JOB,
-        deletedJob: null,
+        type: JobsActions.DeletingJob.type,
+        payload: {
+          deletedJob: null,
+        },
       })
-      expect(actions[1].type).toEqual(jobsTypes.JOBS_DELETE_JOB_ERROR)
-      expect(actions[1].error).toBeDefined()
+      expect(actions[1].type).toEqual(JobsActions.DeleteJobError.type)
+      expect(actions[1].payload).toHaveProperty('error')
     })
   })
 })

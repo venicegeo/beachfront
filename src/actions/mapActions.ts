@@ -14,44 +14,23 @@
  * limitations under the License.
  **/
 
+import {GeoJSON} from 'geojson'
 import {MapView, MODE_DRAW_BBOX, MODE_NORMAL, MODE_PRODUCT_LINES, MODE_SELECT_IMAGERY} from '../components/PrimaryMap'
 import {wrap} from '../utils/math'
 import {AppState} from '../store'
 import {Extent, Point} from '../utils/geometries'
-import {Dispatch} from 'redux'
+import {Action, Dispatch} from 'redux'
 import {MapCollections, MapState} from '../reducers/mapReducer'
 
-export const mapTypes: ActionTypes = {
-  MAP_INITIALIZED: 'MAP_INITIALIZED',
-  MAP_MODE_UPDATED: 'MAP_MODE_UPDATED',
-  MAP_DETECTIONS_UPDATED: 'MAP_DETECTIONS_UPDATED',
-  MAP_FRAMES_UPDATED: 'MAP_FRAMES_UPDATED',
-  MAP_BBOX_UPDATED: 'MAP_BBOX_UPDATED',
-  MAP_BBOX_CLEARED: 'MAP_BBOX_CLEARED',
-  MAP_SELECTED_FEATURE_UPDATED: 'MAP_SELECTED_FEATURE_UPDATED',
-  MAP_HOVERED_FEATURE_UPDATED: 'MAP_HOVERED_FEATURE_UPDATED',
-  MAP_VIEW_UPDATED: 'MAP_VIEW_UPDATED',
-  MAP_PAN_TO_POINT: 'MAP_PAN_TO_POINT',
-  MAP_PAN_TO_EXTENT: 'MAP_PAN_TO_EXTENT',
-  MAP_SERIALIZED: 'MAP_SERIALIZED',
-  MAP_DESERIALIZED: 'MAP_DESERIALIZED',
-}
-
-export interface MapPanToPointArgs {
-  point: Point
-  zoom?: number
-}
-
-export const mapActions = {
-  initialized(map: ol.Map, collections: MapCollections) {
-    return {
-      type: mapTypes.MAP_INITIALIZED,
+export namespace Map {
+  export function initialized(map: ol.Map, collections: MapCollections) {
+    return {...new MapActions.Initialized({
       map,
       collections,
-    }
-  },
+    })}
+  }
 
-  updateMode() {
+  export function updateMode() {
     return (dispatch: Dispatch<MapState>, getState: () => AppState) => {
       const state = getState()
 
@@ -70,25 +49,19 @@ export const mapActions = {
           mode = MODE_NORMAL
       }
 
-      dispatch({
-        type: mapTypes.MAP_MODE_UPDATED,
-        mode,
-      })
+      dispatch({...new MapActions.ModeUpdated({ mode })})
     }
-  },
+  }
 
-  updateBbox(bbox: Extent | null) {
-    return {
-      type: mapTypes.MAP_BBOX_UPDATED,
-      bbox,
-    }
-  },
+  export function updateBbox(bbox: Extent | null) {
+    return {...new MapActions.BboxUpdated({ bbox })}
+  }
 
-  clearBbox() {
-    return { type: mapTypes.MAP_BBOX_CLEARED }
-  },
+  export function clearBbox() {
+    return {...new MapActions.BboxCleared()}
+  }
 
-  updateDetections() {
+  export function updateDetections() {
     return (dispatch: Dispatch<MapState>, getState: () => AppState) => {
       const state = getState()
 
@@ -116,15 +89,12 @@ export const mapActions = {
       }
 
       if (detectionsChanged) {
-        dispatch({
-          type: mapTypes.MAP_DETECTIONS_UPDATED,
-          detections,
-        })
+        dispatch({...new MapActions.DetectionsUpdated({ detections })})
       }
     }
-  },
+  }
 
-  updateFrames() {
+  export function updateFrames() {
     return (dispatch: Dispatch<MapState>, getState: () => AppState) => {
       const state = getState()
 
@@ -152,15 +122,12 @@ export const mapActions = {
       }
 
       if (framesChanged) {
-        dispatch({
-          type: mapTypes.MAP_FRAMES_UPDATED,
-          frames,
-        })
+        dispatch({...new MapActions.FramesUpdated({ frames })})
       }
     }
-  },
+  }
 
-  setSelectedFeature(feature: GeoJSON.Feature<any> | null) {
+  export function setSelectedFeature(feature: GeoJSON.Feature<any> | null) {
     return (dispatch: Dispatch<MapState>, getState: () => AppState) => {
       const state = getState()
 
@@ -168,48 +135,32 @@ export const mapActions = {
         return  // Nothing to do
       }
 
-      dispatch({
-        type: mapTypes.MAP_SELECTED_FEATURE_UPDATED,
+      dispatch({...new MapActions.SelectedFeatureUpdated({
         selectedFeature: feature,
-      })
+      })})
     }
-  },
+  }
 
-  setHoveredFeature(hoveredFeature: beachfront.Job | null) {
-    return {
-      type: mapTypes.MAP_HOVERED_FEATURE_UPDATED,
-      hoveredFeature,
-    }
-  },
+  export function setHoveredFeature(hoveredFeature: beachfront.Job | null) {
+    return {...new MapActions.HoveredFeatureUpdated({ hoveredFeature })}
+  }
 
-  updateView(view: MapView) {
-    return {
-      type: mapTypes.MAP_VIEW_UPDATED,
-      view,
-    }
-  },
+  export function updateView(view: MapView) {
+    return {...new MapActions.ViewUpdated({ view })}
+  }
 
-  panToPoint(args: MapPanToPointArgs) {
-    args = {
-      ...args,
-      zoom: args.zoom || 10,
-    }
+  export function panToPoint({ point, zoom = 10 }: { point: Point, zoom?: number }) {
+    return {...new MapActions.PanToPoint({
+      point,
+      zoom,
+    })}
+  }
 
-    return {
-      type: mapTypes.MAP_PAN_TO_POINT,
-      point: args.point,
-      zoom: args.zoom,
-    }
-  },
+  export function panToExtent(extent: Extent) {
+    return {...new MapActions.PanToExtent({ extent })}
+  }
 
-  panToExtent(extent: Extent) {
-    return {
-      type: mapTypes.MAP_PAN_TO_EXTENT,
-      extent,
-    }
-  },
-
-  serialize() {
+  export function serialize() {
     return (dispatch: Dispatch<MapState>, getState: () => AppState) => {
       const state = getState()
 
@@ -219,7 +170,7 @@ export const mapActions = {
      */
       let mapView: MapView | null = null
       if (state.map.view) {
-        mapView = {...state.map.view}
+        mapView = { ...state.map.view }
         if (mapView.center) {
           mapView.center[0] = wrap(mapView.center[0], -180, 180)
         }
@@ -236,28 +187,131 @@ export const mapActions = {
       sessionStorage.setItem('bbox', JSON.stringify(bbox))
       sessionStorage.setItem('mapView', JSON.stringify(mapView))
 
-      dispatch({ type: mapTypes.MAP_SERIALIZED })
+      dispatch({...new MapActions.Serialized()})
     }
-  },
+  }
 
-  deserialize() {
-    const deserialized: any = {}
-
+  export function deserialize() {
+    let bbox: Extent | null = null
     try {
-      deserialized.bbox = JSON.parse(sessionStorage.getItem('bbox') || 'null')
+      bbox = JSON.parse(sessionStorage.getItem('bbox') || 'null')
     } catch (error) {
       console.warn('Failed to deserialize "bbox"')
     }
 
+    let view: MapView | null = null
     try {
-      deserialized.view = JSON.parse(sessionStorage.getItem('mapView') || 'null')
+      view = JSON.parse(sessionStorage.getItem('mapView') || 'null')
     } catch (error) {
       console.warn('Failed to deserialize "mapView"')
     }
 
-    return {
-      type: mapTypes.MAP_DESERIALIZED,
-      deserialized,
-    }
-  },
+    return {...new MapActions.Deserialized({
+      bbox,
+      view,
+    })}
+  }
+}
+
+export namespace MapActions {
+  export class Initialized implements Action {
+    static type = 'MAP_INITIALIZED'
+    type = Initialized.type
+    constructor(public payload: {
+      map: NonNullable<MapState['map']>
+      collections: NonNullable<MapState['collections']>
+    }) {}
+  }
+
+  export class ModeUpdated implements Action {
+    static type = 'MAP_MODE_UPDATED'
+    type = ModeUpdated.type
+    constructor(public payload: {
+      mode: MapState['mode']
+    }) {}
+  }
+
+  export class DetectionsUpdated implements Action {
+    static type = 'MAP_DETECTIONS_UPDATED'
+    type = DetectionsUpdated.type
+    constructor(public payload: {
+      detections: MapState['detections']
+    }) {}
+  }
+
+  export class FramesUpdated implements Action {
+    static type = 'MAP_FRAMES_UPDATED'
+    type = FramesUpdated.type
+    constructor(public payload: {
+      frames: MapState['frames']
+    }) {}
+  }
+
+  export class BboxUpdated implements Action {
+    static type = 'MAP_BBOX_UPDATED'
+    type = BboxUpdated.type
+    constructor(public payload: {
+      bbox: MapState['bbox']
+    }) {}
+  }
+
+  export class BboxCleared implements Action {
+    static type = 'MAP_BBOX_CLEARED'
+    type = BboxCleared.type
+  }
+
+  export class SelectedFeatureUpdated implements Action {
+    static type = 'MAP_SELECTED_FEATURE_UPDATED'
+    type = SelectedFeatureUpdated.type
+    constructor(public payload: {
+      selectedFeature: MapState['selectedFeature']
+    }) {}
+  }
+
+  export class HoveredFeatureUpdated implements Action {
+    static type = 'MAP_HOVERED_FEATURE_UPDATED'
+    type = HoveredFeatureUpdated.type
+    constructor(public payload: {
+      hoveredFeature: MapState['hoveredFeature']
+    }) {}
+  }
+
+  export class ViewUpdated implements Action {
+    static type = 'MAP_VIEW_UPDATED'
+    type = ViewUpdated.type
+    constructor(public payload: {
+      view: NonNullable<MapState['view']>
+    }) {}
+  }
+
+  export class PanToPoint implements Action {
+    static type = 'MAP_PAN_TO_POINT'
+    type = PanToPoint.type
+    constructor(public payload: {
+      point: Point
+      zoom: number
+    }) {}
+  }
+
+  export class PanToExtent implements Action {
+    static type = 'MAP_PAN_TO_EXTENT'
+    type = PanToExtent.type
+    constructor(public payload: {
+      extent: Extent
+    }) {}
+  }
+
+  export class Serialized implements Action {
+    static type = 'MAP_SERIALIZED'
+    type = Serialized.type
+  }
+
+  export class Deserialized implements Action {
+    static type = 'MAP_DESERIALIZED'
+    type = Deserialized.type
+    constructor(public payload: {
+      bbox: MapState['bbox']
+      view: MapState['view']
+    }) {}
+  }
 }

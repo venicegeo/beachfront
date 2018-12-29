@@ -15,157 +15,153 @@
  */
 
 import {mapInitialState, mapReducer} from '../../src/reducers/mapReducer'
-import {mapTypes} from '../../src/actions/mapActions'
+import {MapActions} from '../../src/actions/mapActions'
 import {TYPE_JOB} from '../../src/constants'
 
 describe('mapReducer', () => {
   test('initialState', () => {
-    expect(mapReducer(undefined, {})).toEqual(mapInitialState)
+    expect(mapReducer(undefined, { type: null })).toEqual(mapInitialState)
   })
 
   test('MAP_INITIALIZED', () => {
     const action = {
-      type: mapTypes.MAP_INITIALIZED,
-      map: 'a',
-      collections: [1, 2, 3],
-    } as any
-
-    expect(mapReducer(mapInitialState, action)).toEqual({
-      ...mapInitialState,
-      map: action.map,
-      collections: action.collections,
-    })
-  })
-
-  test('MAP_DESERIALIZED', () => {
-    const action = {
-      type: mapTypes.MAP_DESERIALIZED,
-      deserialized: {
-        a: 'a',
+      type: MapActions.Initialized.type,
+      payload: {
+        map: 'a',
+        collections: 'b',
       },
     }
 
     expect(mapReducer(mapInitialState, action)).toEqual({
       ...mapInitialState,
-      ...action.deserialized,
+      map: action.payload.map,
+      collections: action.payload.collections,
     })
   })
 
   test('MAP_MODE_UPDATED', () => {
     const action = {
-      type: mapTypes.MAP_MODE_UPDATED,
-      mode: 'a',
+      type: MapActions.ModeUpdated.type,
+      payload: {
+        mode: 'a',
+      },
     }
 
     expect(mapReducer(mapInitialState, action)).toEqual({
       ...mapInitialState,
-      mode: action.mode,
+      mode: action.payload.mode,
     })
   })
 
   test('MAP_BBOX_UPDATED', () => {
     const action = {
-      type: mapTypes.MAP_BBOX_UPDATED,
-      bbox: [1, 2, 3, 4],
+      type: MapActions.BboxUpdated.type,
+      payload: {
+        bbox: 'a',
+      },
     }
 
     expect(mapReducer(mapInitialState, action)).toEqual({
       ...mapInitialState,
-      bbox: action.bbox,
+      bbox: action.payload.bbox,
     })
   })
 
   test('MAP_BBOX_CLEARED', () => {
     const state = {
       ...mapInitialState,
-      bbox: [1, 2, 3, 4],
-      searchResults: 'a',
-      searchError: 'a',
+      bbox: 'a',
       selectedFeature: {
         properties: {
-          type: 'NON_IGNORED_TYPE',
+          type: 'd',
         },
       },
     } as any
 
-    const action = { type: mapTypes.MAP_BBOX_CLEARED }
+    const action = { type: MapActions.BboxCleared.type }
 
-    // Should auto deselect job.
+    // Should auto deselect feature.
     expect(mapReducer(state, action)).toEqual({
       ...state,
       bbox: null,
-      searchResults: null,
-      searchError: null,
       selectedFeature: null,
     })
 
-    // Should not auto-deselect job.
+    // Should not auto-deselect feature.
     state.selectedFeature.properties.type = TYPE_JOB
     expect(mapReducer(state, action)).toEqual({
       ...state,
       bbox: null,
-      searchResults: null,
-      searchError: null,
     })
   })
 
   test('MAP_DETECTIONS_UPDATED', () => {
     const action = {
-      type: mapTypes.MAP_DETECTIONS_UPDATED,
-      detections: [1, 2, 3],
+      type: MapActions.DetectionsUpdated.type,
+      payload: {
+        detections: 'a',
+      },
     }
 
     expect(mapReducer(mapInitialState, action)).toEqual({
       ...mapInitialState,
-      detections: action.detections,
+      detections: action.payload.detections,
     })
   })
 
   test('MAP_FRAMES_UPDATED', () => {
     const action = {
-      type: mapTypes.MAP_FRAMES_UPDATED,
-      frames: [1, 2, 3],
+      type: MapActions.FramesUpdated.type,
+      payload: {
+        frames: 'a',
+      },
     }
 
     expect(mapReducer(mapInitialState, action)).toEqual({
       ...mapInitialState,
-      frames: action.frames,
+      frames: action.payload.frames,
     })
   })
 
   test('MAP_SELECTED_FEATURE_UPDATED', () => {
     const action = {
-      type: mapTypes.MAP_SELECTED_FEATURE_UPDATED,
-      selectedFeature: 'a',
+      type: MapActions.SelectedFeatureUpdated.type,
+      payload: {
+        selectedFeature: 'a',
+      },
     }
 
     expect(mapReducer(mapInitialState, action)).toEqual({
       ...mapInitialState,
-      selectedFeature: action.selectedFeature,
+      selectedFeature: action.payload.selectedFeature,
     })
   })
 
   test('MAP_HOVERED_FEATURE_UPDATED', () => {
     const action = {
-      type: mapTypes.MAP_HOVERED_FEATURE_UPDATED,
-      hoveredFeature: 'a',
+      type: MapActions.HoveredFeatureUpdated.type,
+      payload: {
+        hoveredFeature: 'a',
+      },
     }
 
     expect(mapReducer(mapInitialState, action)).toEqual({
       ...mapInitialState,
-      hoveredFeature: action.hoveredFeature,
+      hoveredFeature: action.payload.hoveredFeature,
     })
   })
 
   test('MAP_VIEW_UPDATED', () => {
     const action = {
-      type: mapTypes.MAP_VIEW_UPDATED,
-      view: 'a',
+      type: MapActions.ViewUpdated.type,
+      payload: {
+        view: 'a',
+      },
     }
 
     expect(mapReducer(mapInitialState, action)).toEqual({
       ...mapInitialState,
-      view: action.view,
+      view: action.payload.view,
     })
   })
 
@@ -173,25 +169,27 @@ describe('mapReducer', () => {
     const state = {
       ...mapInitialState,
       view: {
-        basemapIndex: 0,
+        basemapIndex: 'a',
         point: null,
         zoom: null,
-        extent: [1, 2, 3, 4],
+        extent: 'b',
       },
     } as any
 
     const action = {
-      type: mapTypes.MAP_PAN_TO_POINT,
-      point: [1, 2],
-      zoom: 1,
+      type: MapActions.PanToPoint.type,
+      payload: {
+        point: 'c',
+        zoom: 'd',
+      },
     }
 
     expect(mapReducer(state, action)).toEqual({
       ...state,
       view: {
         ...state.view,
-        center: action.point,
-        zoom: action.zoom,
+        center: action.payload.point,
+        zoom: action.payload.zoom,
         extent: null,
       },
     })
@@ -201,26 +199,44 @@ describe('mapReducer', () => {
     const state = {
       ...mapInitialState,
       view: {
-        basemapIndex: 0,
-        point: [1, 2],
-        zoom: 1,
+        basemapIndex: 'a',
+        point: 'b',
+        zoom: 'c',
         extent: null,
       },
     } as any
 
     const action = {
-      type: mapTypes.MAP_PAN_TO_EXTENT,
-      extent: [1, 2, 3, 4],
+      type: MapActions.PanToExtent.type,
+      payload: {
+        extent: 'd',
+      },
     }
 
     expect(mapReducer(state, action)).toEqual({
       ...state,
       view: {
         ...state.view,
-        extent: action.extent,
+        extent: action.payload.extent,
         center: null,
         zoom: null,
       },
+    })
+  })
+
+  test('MAP_DESERIALIZED', () => {
+    const action = {
+      type: MapActions.Deserialized.type,
+      payload: {
+        bbox: 'a',
+        view: 'b',
+      },
+    }
+
+    expect(mapReducer(mapInitialState, action)).toEqual({
+      ...mapInitialState,
+      bbox: action.payload.bbox,
+      view: action.payload.view,
     })
   })
 })

@@ -18,7 +18,7 @@ import thunk from 'redux-thunk'
 import configureStore, {MockStoreEnhanced} from 'redux-mock-store'
 import * as sinon from 'sinon'
 import {SinonSpy} from 'sinon'
-import {userActions, userTypes} from '../../src/actions/userActions'
+import {User, UserActions} from '../../src/actions/userActions'
 import {userInitialState} from '../../src/reducers/userReducer'
 import MockAdapter from 'axios-mock-adapter'
 import axios from 'axios'
@@ -61,22 +61,22 @@ describe('userActions', () => {
 
   describe('logout()', () => {
     test('success', async () => {
-      await store.dispatch(userActions.logout())
+      await store.dispatch(User.logout())
 
       expect(store.getActions()).toEqual([
-        { type: userTypes.USER_LOGGED_OUT },
+        { type: UserActions.LoggedOut.type },
       ])
     })
   })
 
   describe('clearSession()', () => {
     test('success', async () => {
-      await store.dispatch(userActions.clearSession())
+      await store.dispatch(User.clearSession())
 
       expect(sessionStorage.clear).toHaveBeenCalledTimes(1)
 
       expect(store.getActions()).toEqual([
-        { type: userTypes.USER_SESSION_CLEARED },
+        { type: UserActions.SessionCleared.type },
       ])
     })
   })
@@ -86,14 +86,14 @@ describe('userActions', () => {
       const mockResponse = '/path'
       mockAdapter.onGet('oauth/logout').reply(200, mockResponse)
 
-      await store.dispatch(userActions.sessionLogout())
+      await store.dispatch(User.sessionLogout())
 
       expect(sessionStorage.clear).toHaveBeenCalledTimes(1)
       expect(clientSpies.get.callCount).toEqual(1)
       expect(clientSpies.get.args[0]).toEqual(['/oauth/logout'])
 
       expect(store.getActions()).toEqual([
-        { type: userTypes.USER_SESSION_LOGGED_OUT },
+        { type: UserActions.SessionLoggedOut.type },
       ])
 
       await new Promise<void>(resolve => {
@@ -107,10 +107,10 @@ describe('userActions', () => {
 
   describe('sessionExpired()', () => {
     test('success', async () => {
-      await store.dispatch(userActions.sessionExpired())
+      await store.dispatch(User.sessionExpired())
 
       expect(store.getActions()).toEqual([
-        { type: userTypes.USER_SESSION_EXPIRED },
+        { type: UserActions.SessionExpired.type },
       ])
     })
   })
@@ -125,13 +125,13 @@ describe('userActions', () => {
         },
       }) as any
 
-      await store.dispatch(userActions.serialize() as any)
+      await store.dispatch(User.serialize() as any)
 
       expect(sessionStorage.setItem).toHaveBeenCalledTimes(1)
       expect(sessionStorage.setItem).toHaveBeenCalledWith('isSessionExpired', 'true')
 
       expect(store.getActions()).toEqual([
-        { type: userTypes.USER_SERIALIZED },
+        { type: UserActions.Serialized.type },
       ])
     })
   })
@@ -141,15 +141,15 @@ describe('userActions', () => {
       // Mock local storage.
       sessionStorage.setItem('isSessionExpired', 'true')
 
-      await store.dispatch(userActions.deserialize())
+      await store.dispatch(User.deserialize())
 
       expect(sessionStorage.getItem).toHaveBeenCalledTimes(1)
       expect(sessionStorage.getItem).toHaveBeenCalledWith('isSessionExpired')
 
       expect(store.getActions()).toEqual([
         {
-          type: userTypes.USER_DESERIALIZED,
-          deserialized: {
+          type: UserActions.Deserialized.type,
+          payload: {
             isSessionExpired: true,
           },
         },
@@ -157,15 +157,15 @@ describe('userActions', () => {
     })
 
     test('no saved data', async () => {
-      await store.dispatch(userActions.deserialize())
+      await store.dispatch(User.deserialize())
 
       expect(sessionStorage.getItem).toHaveBeenCalledTimes(1)
       expect(sessionStorage.getItem).toHaveBeenCalledWith('isSessionExpired')
 
       expect(store.getActions()).toEqual([
         {
-          type: userTypes.USER_DESERIALIZED,
-          deserialized: {
+          type: UserActions.Deserialized.type,
+          payload: {
             isSessionExpired: userInitialState.isSessionExpired,
           },
         }
@@ -176,7 +176,7 @@ describe('userActions', () => {
       // Mock local storage.
       sessionStorage.setItem('isSessionExpired', 'badJson')
 
-      await store.dispatch(userActions.deserialize())
+      await store.dispatch(User.deserialize())
 
       // Deserialize should gracefully handle errors.
       expect(sessionStorage.getItem).toHaveBeenCalledTimes(1)
@@ -184,8 +184,10 @@ describe('userActions', () => {
 
       expect(store.getActions()).toEqual([
         {
-          type: userTypes.USER_DESERIALIZED,
-          deserialized: {},
+          type: UserActions.Deserialized.type,
+          payload: {
+            isSessionExpired: userInitialState.isSessionExpired,
+          },
         },
       ])
     })

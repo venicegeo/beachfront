@@ -21,7 +21,7 @@ import * as React from 'react'
 import {connect} from 'react-redux'
 import {Modal} from './Modal'
 import {BrowsersSupported} from './BrowserSupport'
-import {routeActions, RouteNavigateToArgs} from '../actions/routeActions'
+import {Route, RouteNavigateToArgs} from '../actions/routeActions'
 
 type DispatchProps = ReturnType<typeof mapDispatchToProps>
 type Props = DispatchProps
@@ -60,7 +60,7 @@ export class About extends React.Component<Props> {
   }
 
   private handleDismiss() {
-    this.props.actions.route.navigateTo({
+    this.props.dispatch.route.navigateTo({
       loc: {
         pathname: '/',
       },
@@ -70,9 +70,9 @@ export class About extends React.Component<Props> {
 
 function mapDispatchToProps(dispatch: Function) {
   return {
-    actions: {
+    dispatch: {
       route: {
-        navigateTo: (args: RouteNavigateToArgs) => dispatch(routeActions.navigateTo(args)),
+        navigateTo: (args: RouteNavigateToArgs) => dispatch(Route.navigateTo(args)),
       },
     },
   }

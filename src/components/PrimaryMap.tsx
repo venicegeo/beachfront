@@ -112,10 +112,10 @@ import {
   WGS84,
 } from '../constants'
 import {AppState} from '../store'
-import {mapActions} from '../actions/mapActions'
+import {Map} from '../actions/mapActions'
 import {MapCollections} from '../reducers/mapReducer'
-import {userActions} from '../actions/userActions'
-import {catalogActions, CatalogSearchArgs} from '../actions/catalogActions'
+import {User} from '../actions/userActions'
+import {Catalog, CatalogSearchArgs} from '../actions/catalogActions'
 
 const DEFAULT_CENTER: Point = [-10, 0]
 const MIN_ZOOM = 2.5
@@ -159,9 +159,9 @@ interface State {
 
 export interface MapView {
   basemapIndex: number
-  center?: Point
-  zoom?: number
-  extent?: Extent
+  center: Point | null
+  zoom: number | null
+  extent: Extent | null
 }
 
 interface Tile extends OLTile {
@@ -245,7 +245,7 @@ export class PrimaryMap extends React.Component<Props, State> {
     // Used by tests
     (window as any)['primaryMap'] = this  // tslint:disable-line
 
-    this.props.actions.map.initialized(this.map, {
+    this.props.dispatch.map.initialized(this.map, {
       hovered: this.hoverInteraction.getFeatures(),
       imagery: this.imageryLayer.getSource().getFeaturesCollection(),
       selected: this.selectInteraction.getFeatures(),
@@ -382,12 +382,12 @@ export class PrimaryMap extends React.Component<Props, State> {
         const selections = this.selectInteraction.getFeatures()
         selections.clear()
         selections.push(jobFeature)
-        this.props.actions.map.setSelectedFeature((toGeoJSON(jobFeature) as unknown) as beachfront.Job)
+        this.props.dispatch.map.setSelectedFeature((toGeoJSON(jobFeature) as unknown) as beachfront.Job)
         break
       case TYPE_JOB:
       case TYPE_SCENE:
         this.featureId = feature.ol_uid
-        this.props.actions.map.setSelectedFeature((toGeoJSON(feature) as unknown) as beachfront.Scene)
+        this.props.dispatch.map.setSelectedFeature((toGeoJSON(feature) as unknown) as beachfront.Scene)
         break
       default:
         // Not a valid "selectable" feature
@@ -399,12 +399,12 @@ export class PrimaryMap extends React.Component<Props, State> {
   }
 
   private handlePageChange(args: {startIndex: number, count: number}) {
-    this.props.actions.catalog.search(args)
+    this.props.dispatch.catalog.search(args)
   }
 
   private handleSignOutClick() {
     if (confirm('Are you sure you want to sign out of Beachfront?')) {
-      this.props.actions.user.logout()
+      this.props.dispatch.user.logout()
     }
   }
 
@@ -480,7 +480,12 @@ export class PrimaryMap extends React.Component<Props, State> {
     }
 
     this.skipNextViewUpdate = true
-    this.props.actions.map.updateView({ basemapIndex, center, zoom })
+    this.props.dispatch.map.updateView({
+      basemapIndex,
+      center,
+      zoom,
+      extent: null,
+    })
   }
 
   private handleMapMoveEnd() {
@@ -510,7 +515,7 @@ export class PrimaryMap extends React.Component<Props, State> {
   }
 
   private emitDeselectAll() {
-    this.props.actions.map.setSelectedFeature(null)
+    this.props.dispatch.map.setSelectedFeature(null)
   }
 
   private handleBasemapChange(index: number) {
@@ -522,12 +527,12 @@ export class PrimaryMap extends React.Component<Props, State> {
     const geometry = event.feature.getGeometry()
     let bbox = serializeBbox(geometry.getExtent())
 
-    this.props.actions.map.updateBbox(bbox)
+    this.props.dispatch.map.updateBbox(bbox)
   }
 
   private handleDrawStart() {
     this.clearDraw()
-    this.props.actions.map.updateBbox(null)
+    this.props.dispatch.map.updateBbox(null)
   }
 
   private handleMeasureEnd() {
@@ -689,7 +694,7 @@ export class PrimaryMap extends React.Component<Props, State> {
         center: view.constrainCenter(OLProj.transform(center, WGS84, WEB_MERCATOR)),
         zoom,
         duration,
-      })
+      } as any)
     }
   }
 
@@ -1523,18 +1528,18 @@ function mapStateToProps(state: AppState) {
 
 function mapDispatchToProps(dispatch: Function) {
   return {
-    actions: {
+    dispatch: {
       map: {
-        initialized: (map: OLMap, collections: MapCollections) => dispatch(mapActions.initialized(map, collections)),
-        updateBbox: (bbox: Extent | null) => dispatch(mapActions.updateBbox(bbox)),
-        updateView: (view: MapView) => dispatch(mapActions.updateView(view)),
-        setSelectedFeature: (feature: GeoJSON.Feature<any> | null) => dispatch(mapActions.setSelectedFeature(feature)),
+        initialized: (map: OLMap, collections: MapCollections) => dispatch(Map.initialized(map, collections)),
+        updateBbox: (bbox: Extent | null) => dispatch(Map.updateBbox(bbox)),
+        updateView: (view: MapView) => dispatch(Map.updateView(view)),
+        setSelectedFeature: (feature: GeoJSON.Feature<any> | null) => dispatch(Map.setSelectedFeature(feature)),
       },
       catalog: {
-        search: (args?: CatalogSearchArgs) => dispatch(catalogActions.search(args)),
+        search: (args?: CatalogSearchArgs) => dispatch(Catalog.search(args)),
       },
       user: {
-        logout: () => dispatch(userActions.logout()),
+        logout: () => dispatch(User.logout()),
       },
     },
   }

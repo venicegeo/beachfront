@@ -26,7 +26,7 @@ import {
   SOURCE_DEFAULT,
 } from '../constants'
 import {AppState} from '../store'
-import {ProductLinesCreateArgs, productLinesActions} from '../actions/productLinesActions'
+import {ProductLinesCreateArgs, ProductLines} from '../actions/productLinesActions'
 
 type StateProps = ReturnType<typeof mapStateToProps>
 type DispatchProps = ReturnType<typeof mapDispatchToProps>
@@ -139,7 +139,7 @@ export class CreateProductLine extends React.Component<Props, State> {
       throw new Error('Unable to submit: bbox is null!')
     }
 
-    this.props.actions.productLines.create({
+    this.props.dispatch.productLines.create({
       algorithmId: this.state.algorithm.id,
       bbox: this.props.map.bbox,
       category: null,
@@ -168,9 +168,9 @@ function mapStateToProps(state: AppState) {
 
 function mapDispatchToProps(dispatch: Function) {
   return {
-    actions: {
+    dispatch: {
       productLines: {
-        create: (args: ProductLinesCreateArgs) => dispatch(productLinesActions.create(args)),
+        create: (args: ProductLinesCreateArgs) => dispatch(ProductLines.create(args)),
       },
     },
   }

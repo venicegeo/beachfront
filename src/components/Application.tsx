@@ -33,7 +33,7 @@ import ProductLineList from './ProductLineList'
 import SessionExpired from './SessionExpired'
 import SessionLoggedOut from './SessionLoggedOut'
 import * as sessionService from '../api/session'
-import {Extent, getFeatureCenter} from '../utils/geometries'
+import {Extent, getFeatureCenter, Point} from '../utils/geometries'
 import {
   RECORD_POLLING_INTERVAL,
   SESSION_IDLE_INTERVAL,
@@ -46,14 +46,14 @@ import UserTour from './UserTour'
 import {
   TYPE_JOB,
 } from '../constants'
-import {userActions} from '../actions/userActions'
-import {catalogActions, CatalogSearchArgs} from '../actions/catalogActions'
-import {RouteNavigateToArgs, routeActions} from '../actions/routeActions'
-import {mapActions, MapPanToPointArgs} from '../actions/mapActions'
-import {jobsActions} from '../actions/jobsActions'
+import {User} from '../actions/userActions'
+import {Catalog, CatalogSearchArgs} from '../actions/catalogActions'
+import {RouteNavigateToArgs, Route} from '../actions/routeActions'
+import {Map} from '../actions/mapActions'
+import {Jobs} from '../actions/jobsActions'
 import {AppState} from '../store'
-import {algorithmsActions} from '../actions/algorithmsActions'
-import {apiStatusActions} from '../actions/apiStatusActions'
+import {Algorithms} from '../actions/algorithmsActions'
+import {ApiStatus} from '../actions/apiStatusActions'
 import {shouldSelectedFeatureAutoDeselect} from '../utils/mapUtils'
 import {scrollIntoView} from '../utils/domUtils'
 
@@ -94,7 +94,7 @@ export class Application extends React.Component<Props> {
     if (prevProps.route.pathname !== this.props.route.pathname ||
         prevProps.map.bbox !== this.props.map.bbox ||
         prevProps.catalog.searchResults !== this.props.catalog.searchResults) {
-      this.props.actions.map.updateMode()
+      this.props.dispatch.map.updateMode()
     }
 
     // Route changed.
@@ -116,7 +116,7 @@ export class Application extends React.Component<Props> {
         }
       }
 
-      this.props.actions.map.setSelectedFeature(selectedFeature)
+      this.props.dispatch.map.setSelectedFeature(selectedFeature)
     }
 
     // Map data refreshed.
@@ -124,8 +124,8 @@ export class Application extends React.Component<Props> {
         prevProps.map.selectedFeature !== this.props.map.selectedFeature ||
         prevProps.jobs !== this.props.jobs ||
         prevProps.route !== this.props.route) {
-      this.props.actions.map.updateDetections()
-      this.props.actions.map.updateFrames()
+      this.props.dispatch.map.updateDetections()
+      this.props.dispatch.map.updateFrames()
     }
 
     // Selected feature changed.
@@ -136,7 +136,7 @@ export class Application extends React.Component<Props> {
         search = `?jobId=${selectedFeature.id}`
       }
 
-      this.props.actions.route.navigateTo({
+      this.props.dispatch.route.navigateTo({
         loc: {
           pathname: this.props.route.pathname,
           search,
@@ -151,7 +151,7 @@ export class Application extends React.Component<Props> {
       let [jobId] = this.props.route.jobIds
 
       if (jobId && !this.props.map.selectedFeature) {
-        this.props.actions.map.setSelectedFeature(this.props.jobs.records.find(job => job.id === jobId) || null)
+        this.props.dispatch.map.setSelectedFeature(this.props.jobs.records.find(job => job.id === jobId) || null)
       }
 
       this.importJobsIfNeeded()
@@ -159,14 +159,14 @@ export class Application extends React.Component<Props> {
 
     // Single job fetched successfully.
     if (prevProps.jobs.isFetchingOne && !this.props.jobs.isFetchingOne && !this.props.jobs.fetchOneError && this.props.jobs.lastOneFetched) {
-      this.props.actions.map.panToPoint({
+      this.props.dispatch.map.panToPoint({
         point: getFeatureCenter(this.props.jobs.lastOneFetched),
       })
     }
 
     // Job created successfully.
     if (prevProps.jobs.isCreatingJob && !this.props.jobs.isCreatingJob && this.props.jobs.createdJob) {
-      this.props.actions.route.navigateTo({
+      this.props.dispatch.route.navigateTo({
         loc: {
           pathname: '/jobs',
           search: '?jobId=' + this.props.jobs.createdJob.id,
@@ -177,7 +177,7 @@ export class Application extends React.Component<Props> {
     // Job deleted successfully.
     if (prevProps.jobs.isDeletingJob && !this.props.jobs.isDeletingJob && !this.props.jobs.deleteJobError && this.props.jobs.deletedJob) {
       if (this.props.route.jobIds.includes(this.props.jobs.deletedJob.id)) {
-        this.props.actions.route.navigateTo({
+        this.props.dispatch.route.navigateTo({
           loc: {
             pathname: this.props.route.pathname,
             search: this.props.route.search.replace(new RegExp('\\??jobId=' + this.props.jobs.deletedJob.id), ''),
@@ -186,7 +186,7 @@ export class Application extends React.Component<Props> {
       }
 
       if (this.props.map.selectedFeature && this.props.map.selectedFeature.id === this.props.jobs.deletedJob.id) {
-        this.props.actions.map.setSelectedFeature(null)
+        this.props.dispatch.map.setSelectedFeature(null)
       }
     }
 
@@ -194,7 +194,7 @@ export class Application extends React.Component<Props> {
     if (prevProps.productLines.isCreatingProductLine &&
         !this.props.productLines.isCreatingProductLine &&
         !this.props.productLines.createProductLineError) {
-      this.props.actions.route.navigateTo({
+      this.props.dispatch.route.navigateTo({
         loc: {
           pathname: '/product-lines',
         },
@@ -205,7 +205,7 @@ export class Application extends React.Component<Props> {
     if (!prevProps.catalog.isSearching && this.props.catalog.isSearching) {
       const shouldDeselect = shouldSelectedFeatureAutoDeselect(this.props.map.selectedFeature, { ignoreTypes: [TYPE_JOB] })
       if (shouldDeselect) {
-        this.props.actions.map.setSelectedFeature(null)
+        this.props.dispatch.map.setSelectedFeature(null)
       }
     }
 
@@ -232,7 +232,7 @@ export class Application extends React.Component<Props> {
     document.addEventListener('mousemove', this.resetTimer)
     document.addEventListener('keyup', this.resetTimer)
 
-    this.props.actions.map.updateMode()
+    this.props.dispatch.map.updateMode()
   }
 
   render() {
@@ -315,17 +315,17 @@ export class Application extends React.Component<Props> {
       if (this.props.jobs.records.find(j => j.id === jobId)) {
         return
       }
-      this.props.actions.jobs.fetchOne(jobId)
+      this.props.dispatch.jobs.fetchOne(jobId)
     })
   }
 
   private initializeServices() {
-    this.props.actions.apiStatus.fetch()
-    this.props.actions.algorithms.fetch()
+    this.props.dispatch.apiStatus.fetch()
+    this.props.dispatch.algorithms.fetch()
   }
 
   private refreshRecords() {
-    this.props.actions.jobs.fetch()
+    this.props.dispatch.jobs.fetch()
   }
 
   //
@@ -345,7 +345,7 @@ export class Application extends React.Component<Props> {
       const lastActivity = moment(localStorage.getItem(SESSION_IDLE_STORE) || undefined)
       const timeSinceLast = moment().utc().diff(lastActivity, SESSION_IDLE_UNITS)
       if (timeSinceLast >= SESSION_IDLE_TIMEOUT) {
-        this.props.actions.user.logout()
+        this.props.dispatch.user.logout()
       }
     }
   }
@@ -366,7 +366,7 @@ export class Application extends React.Component<Props> {
   }
 
   private startBackgroundTasks() {
-    sessionService.onExpired(this.props.actions.user.sessionExpired)
+    sessionService.onExpired(this.props.dispatch.user.sessionExpired)
 
     console.log('(application:startBackgroundTasks) starting job/productline polling at %s second intervals', Math.ceil(RECORD_POLLING_INTERVAL / 1000))
     this.pollingInstance = setInterval(this.refreshRecords.bind(this), RECORD_POLLING_INTERVAL)
@@ -381,7 +381,7 @@ export class Application extends React.Component<Props> {
   private subscribeToHistoryEvents() {
     window.addEventListener('popstate', () => {
       if (this.props.route.href !== location.pathname + location.search + location.hash) {
-        this.props.actions.route.navigateTo({
+        this.props.dispatch.route.navigateTo({
           loc: location,
           pushHistory: false,
         })
@@ -390,19 +390,19 @@ export class Application extends React.Component<Props> {
   }
 
   private serialize() {
-    this.props.actions.user.serialize()
-    this.props.actions.catalog.serialize()
-    this.props.actions.map.serialize()
-    this.props.actions.algorithms.serialize()
-    this.props.actions.apiStatus.serialize()
+    this.props.dispatch.user.serialize()
+    this.props.dispatch.catalog.serialize()
+    this.props.dispatch.map.serialize()
+    this.props.dispatch.algorithms.serialize()
+    this.props.dispatch.apiStatus.serialize()
   }
 
   private deserialize() {
-    this.props.actions.user.deserialize()
-    this.props.actions.catalog.deserialize()
-    this.props.actions.map.deserialize()
-    this.props.actions.algorithms.deserialize()
-    this.props.actions.apiStatus.deserialize()
+    this.props.dispatch.user.deserialize()
+    this.props.dispatch.catalog.deserialize()
+    this.props.dispatch.map.deserialize()
+    this.props.dispatch.algorithms.deserialize()
+    this.props.dispatch.apiStatus.deserialize()
   }
 }
 
@@ -423,44 +423,44 @@ function mapStateToProps(state: AppState) {
 
 function mapDispatchToProps(dispatch: Function) {
   return {
-    actions: {
+    dispatch: {
       route: {
-        navigateTo: (args: RouteNavigateToArgs) => dispatch(routeActions.navigateTo(args)),
+        navigateTo: (args: RouteNavigateToArgs) => dispatch(Route.navigateTo(args)),
       },
       user: {
-        logout: () => dispatch(userActions.logout()),
-        sessionExpired: () => dispatch(userActions.sessionExpired()),
-        serialize: () => dispatch(userActions.serialize()),
-        deserialize: () => dispatch(userActions.deserialize()),
+        logout: () => dispatch(User.logout()),
+        sessionExpired: () => dispatch(User.sessionExpired()),
+        serialize: () => dispatch(User.serialize()),
+        deserialize: () => dispatch(User.deserialize()),
       },
       catalog: {
-        search: (args: CatalogSearchArgs) => dispatch(catalogActions.search(args)),
-        serialize: () => dispatch(catalogActions.serialize()),
-        deserialize: () => dispatch(catalogActions.deserialize()),
+        search: (args: CatalogSearchArgs) => dispatch(Catalog.search(args)),
+        serialize: () => dispatch(Catalog.serialize()),
+        deserialize: () => dispatch(Catalog.deserialize()),
       },
       map: {
-        updateMode: () => dispatch(mapActions.updateMode()),
-        updateDetections: () => dispatch(mapActions.updateDetections()),
-        updateFrames: () => dispatch(mapActions.updateFrames()),
-        setSelectedFeature: (feature: GeoJSON.Feature<any> | null) => dispatch(mapActions.setSelectedFeature(feature)),
-        panToPoint: (args: MapPanToPointArgs) => dispatch(mapActions.panToPoint(args)),
-        panToExtent: (extent: Extent) => dispatch(mapActions.panToExtent(extent)),
-        serialize: () => dispatch(mapActions.serialize()),
-        deserialize: () => dispatch(mapActions.deserialize()),
+        updateMode: () => dispatch(Map.updateMode()),
+        updateDetections: () => dispatch(Map.updateDetections()),
+        updateFrames: () => dispatch(Map.updateFrames()),
+        setSelectedFeature: (feature: GeoJSON.Feature<any> | null) => dispatch(Map.setSelectedFeature(feature)),
+        panToPoint: (args: { point: Point, zoom?: number }) => dispatch(Map.panToPoint(args)),
+        panToExtent: (extent: Extent) => dispatch(Map.panToExtent(extent)),
+        serialize: () => dispatch(Map.serialize()),
+        deserialize: () => dispatch(Map.deserialize()),
       },
       jobs: {
-        fetch: () => dispatch(jobsActions.fetch()),
-        fetchOne: (jobId: string) => dispatch(jobsActions.fetchOne(jobId)),
+        fetch: () => dispatch(Jobs.fetch()),
+        fetchOne: (jobId: string) => dispatch(Jobs.fetchOne(jobId)),
       },
       algorithms: {
-        fetch: () => dispatch(algorithmsActions.fetch()),
-        serialize: () => dispatch(algorithmsActions.serialize()),
-        deserialize: () => dispatch(algorithmsActions.deserialize()),
+        fetch: () => dispatch(Algorithms.fetch()),
+        serialize: () => dispatch(Algorithms.serialize()),
+        deserialize: () => dispatch(Algorithms.deserialize()),
       },
       apiStatus: {
-        fetch: () => dispatch(apiStatusActions.fetch()),
-        serialize: () => dispatch(apiStatusActions.serialize()),
-        deserialize: () => dispatch(apiStatusActions.deserialize()),
+        fetch: () => dispatch(ApiStatus.fetch()),
+        serialize: () => dispatch(ApiStatus.serialize()),
+        deserialize: () => dispatch(ApiStatus.deserialize()),
       },
     },
   }

@@ -20,7 +20,7 @@ import thunk from 'redux-thunk'
 import configureStore, {MockStoreEnhanced} from 'redux-mock-store'
 import * as sinon from 'sinon'
 import {SinonSpy} from 'sinon'
-import {productLinesActions, productLinesTypes} from '../../src/actions/productLinesActions'
+import {ProductLines, ProductLinesActions} from '../../src/actions/productLinesActions'
 import {JOB_ENDPOINT, PRODUCTLINE_ENDPOINT} from '../../src/config'
 import {getClient} from '../../src/api/session'
 import {Extent} from '../../src/utils/geometries'
@@ -60,16 +60,18 @@ describe('productLinesActions', () => {
       }
       mockAdapter.onGet(PRODUCTLINE_ENDPOINT).reply(200, mockResponse)
 
-      await store.dispatch(productLinesActions.fetch() as any)
+      await store.dispatch(ProductLines.fetch() as any)
 
       expect(clientSpies.get.callCount).toEqual(1)
       expect(clientSpies.get.args[0]).toEqual([PRODUCTLINE_ENDPOINT])
 
       expect(store.getActions()).toEqual([
-        { type: productLinesTypes.PRODUCT_LINES_FETCHING },
+        { type: ProductLinesActions.Fetching.type },
         {
-          type: productLinesTypes.PRODUCT_LINES_FETCH_SUCCESS,
-          records: mockResponse.productlines.features,
+          type: ProductLinesActions.FetchSuccess.type,
+          payload: {
+            records: mockResponse.productlines.features,
+          },
         },
       ])
     })
@@ -77,24 +79,24 @@ describe('productLinesActions', () => {
     test('request error', async () => {
       mockAdapter.onGet(PRODUCTLINE_ENDPOINT).reply(400)
 
-      await store.dispatch(productLinesActions.fetch() as any)
+      await store.dispatch(ProductLines.fetch() as any)
 
       const actions = store.getActions()
       expect(actions.length).toEqual(2)
-      expect(actions[0]).toEqual({ type: productLinesTypes.PRODUCT_LINES_FETCHING })
-      expect(actions[1].type).toEqual(productLinesTypes.PRODUCT_LINES_FETCH_ERROR)
-      expect(actions[1].error).toBeDefined()
+      expect(actions[0]).toEqual({ type: ProductLinesActions.Fetching.type })
+      expect(actions[1].type).toEqual(ProductLinesActions.FetchError.type)
+      expect(actions[1].payload).toHaveProperty('error')
     })
 
     test('invalid response data', async () => {
       mockAdapter.onGet(PRODUCTLINE_ENDPOINT).reply(200)
 
-      await store.dispatch(productLinesActions.fetch() as any)
+      await store.dispatch(ProductLines.fetch() as any)
 
       const actions = store.getActions()
-      expect(actions[0].type).toEqual(productLinesTypes.PRODUCT_LINES_FETCHING)
-      expect(actions[1].type).toEqual(productLinesTypes.PRODUCT_LINES_FETCH_ERROR)
-      expect(actions[1].error).toBeDefined()
+      expect(actions[0].type).toEqual(ProductLinesActions.Fetching.type)
+      expect(actions[1].type).toEqual(ProductLinesActions.FetchError.type)
+      expect(actions[1].payload).toHaveProperty('error')
     })
   })
 
@@ -114,16 +116,18 @@ describe('productLinesActions', () => {
       const url = getJobsEndpoint(productLineId, sinceDate)
       mockAdapter.onGet(url).reply(200, mockResponse)
 
-      await store.dispatch(productLinesActions.fetchJobs({ productLineId, sinceDate }) as any)
+      await store.dispatch(ProductLines.fetchJobs({ productLineId, sinceDate }) as any)
 
       expect(clientSpies.get.callCount).toEqual(1)
       expect(clientSpies.get.args[0]).toEqual([url])
 
       expect(store.getActions()).toEqual([
-        { type: productLinesTypes.PRODUCT_LINES_FETCHING_JOBS },
+        { type: ProductLinesActions.FetchingJobs.type },
         {
-          type: productLinesTypes.PRODUCT_LINES_FETCH_JOBS_SUCCESS,
-          jobs: mockResponse.jobs.features,
+          type: ProductLinesActions.FetchJobsSuccess.type,
+          payload: {
+            jobs: mockResponse.jobs.features,
+          },
         },
       ])
     })
@@ -133,12 +137,12 @@ describe('productLinesActions', () => {
       const sinceDate = '2'
       mockAdapter.onGet(getJobsEndpoint(productLineId, sinceDate)).reply(400,)
 
-      await store.dispatch(productLinesActions.fetchJobs({ productLineId, sinceDate }) as any)
+      await store.dispatch(ProductLines.fetchJobs({ productLineId, sinceDate }) as any)
 
       const actions = store.getActions()
-      expect(actions[0]).toEqual({ type: productLinesTypes.PRODUCT_LINES_FETCHING_JOBS })
-      expect(actions[1].type).toEqual(productLinesTypes.PRODUCT_LINES_FETCH_JOBS_ERROR)
-      expect(actions[1].error).toBeDefined()
+      expect(actions[0]).toEqual({ type: ProductLinesActions.FetchingJobs.type })
+      expect(actions[1].type).toEqual(ProductLinesActions.FetchJobsError.type)
+      expect(actions[1].payload).toHaveProperty('error')
     })
 
     test('invalid response data', async () => {
@@ -146,12 +150,12 @@ describe('productLinesActions', () => {
       const sinceDate = '2'
       mockAdapter.onGet(getJobsEndpoint(productLineId, sinceDate)).reply(200)
 
-      await store.dispatch(productLinesActions.fetchJobs({ productLineId, sinceDate }) as any)
+      await store.dispatch(ProductLines.fetchJobs({ productLineId, sinceDate }) as any)
 
       const actions = store.getActions()
-      expect(actions[0].type).toEqual(productLinesTypes.PRODUCT_LINES_FETCHING_JOBS)
-      expect(actions[1].type).toEqual(productLinesTypes.PRODUCT_LINES_FETCH_JOBS_ERROR)
-      expect(actions[1].error).toBeDefined()
+      expect(actions[0].type).toEqual(ProductLinesActions.FetchingJobs.type)
+      expect(actions[1].type).toEqual(ProductLinesActions.FetchJobsError.type)
+      expect(actions[1].payload).toHaveProperty('error')
     })
   })
 
@@ -171,7 +175,7 @@ describe('productLinesActions', () => {
         maxCloudCover: 5,
         name: 'e',
       }
-      await store.dispatch(productLinesActions.create(args) as any)
+      await store.dispatch(ProductLines.create(args) as any)
 
       expect(clientSpies.post.callCount).toBe(1)
       expect(clientSpies.post.args[0]).toEqual([
@@ -192,10 +196,12 @@ describe('productLinesActions', () => {
       ])
 
       expect(store.getActions()).toEqual([
-        { type: productLinesTypes.PRODUCT_LINES_CREATING_PRODUCT_LINE },
+        { type: ProductLinesActions.CreatingProductLine.type },
         {
-          type: productLinesTypes.PRODUCT_LINES_CREATE_PRODUCT_LINE_SUCCESS,
-          createdProductLine: mockResponse.productline,
+          type: ProductLinesActions.CreateProductLineSuccess.type,
+          payload: {
+            createdProductLine: mockResponse.productline,
+          },
         },
       ])
     })
@@ -203,27 +209,27 @@ describe('productLinesActions', () => {
     test('request error', async () => {
       mockAdapter.onPost(PRODUCTLINE_ENDPOINT).reply(400)
 
-      await store.dispatch(productLinesActions.create({
+      await store.dispatch(ProductLines.create({
         bbox: [1, 2, 3, 4],
       } as any) as any)
 
       const actions = store.getActions()
-      expect(actions[0]).toEqual({ type: productLinesTypes.PRODUCT_LINES_CREATING_PRODUCT_LINE })
-      expect(actions[1].type).toEqual(productLinesTypes.PRODUCT_LINES_CREATE_PRODUCT_LINE_ERROR)
-      expect(actions[1].error).toBeDefined()
+      expect(actions[0]).toEqual({ type: ProductLinesActions.CreatingProductLine.type })
+      expect(actions[1].type).toEqual(ProductLinesActions.CreateProductLineError.type)
+      expect(actions[1].payload).toHaveProperty('error')
     })
 
     test('invalid response data', async () => {
       mockAdapter.onPost(PRODUCTLINE_ENDPOINT).reply(200)
 
-      await store.dispatch(productLinesActions.create({
+      await store.dispatch(ProductLines.create({
         bbox: [1, 2, 3, 4],
       } as any) as any)
 
       const actions = store.getActions()
-      expect(actions[0].type).toEqual(productLinesTypes.PRODUCT_LINES_CREATING_PRODUCT_LINE)
-      expect(actions[1].type).toEqual(productLinesTypes.PRODUCT_LINES_CREATE_PRODUCT_LINE_ERROR)
-      expect(actions[1].error).toBeDefined()
+      expect(actions[0].type).toEqual(ProductLinesActions.CreatingProductLine.type)
+      expect(actions[1].type).toEqual(ProductLinesActions.CreateProductLineError.type)
+      expect(actions[1].payload).toHaveProperty('error')
     })
   })
 

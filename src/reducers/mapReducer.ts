@@ -14,18 +14,12 @@
  * limitations under the License.
  **/
 
-import {mapTypes} from '../actions/mapActions'
+import {MapActions as Actions} from '../actions/mapActions'
 import {MapView, MODE_NORMAL} from '../components/PrimaryMap'
 import {TYPE_JOB} from '../constants'
 import {shouldSelectedFeatureAutoDeselect} from '../utils/mapUtils'
 import {Extent} from '../utils/geometries'
-
-// {
-//   hovered: this.hoverInteraction.getFeatures(),
-//     imagery: this.imageryLayer.getSource().getFeaturesCollection(),
-//   selected: this.selectInteraction.getFeatures(),
-//   handleSelectFeature: this.handleSelectFeature,
-// }
+import {Action} from 'redux'
 
 export interface MapCollections {
   hovered: ol.Collection<ol.Feature>
@@ -58,30 +52,31 @@ export const mapInitialState: MapState = {
   selectedFeature: null,
 }
 
-export function mapReducer(state = mapInitialState, action: any) {
+export function mapReducer(state = mapInitialState, action: Action): MapState {
   switch (action.type) {
-    case mapTypes.MAP_INITIALIZED:
+    case Actions.Initialized.type: {
+      const payload = (action as Actions.Initialized).payload
       return {
         ...state,
-        map: action.map,
-        collections: action.collections,
+        map: payload.map,
+        collections: payload.collections,
       }
-    case mapTypes.MAP_DESERIALIZED:
+    }
+    case Actions.ModeUpdated.type: {
+      const payload = (action as Actions.ModeUpdated).payload
       return {
         ...state,
-        ...action.deserialized,
+        mode: payload.mode,
       }
-    case mapTypes.MAP_MODE_UPDATED:
+    }
+    case Actions.BboxUpdated.type: {
+      const payload = (action as Actions.BboxUpdated).payload
       return {
         ...state,
-        mode: action.mode,
+        bbox: payload.bbox,
       }
-    case mapTypes.MAP_BBOX_UPDATED:
-      return {
-        ...state,
-        bbox: action.bbox,
-      }
-    case mapTypes.MAP_BBOX_CLEARED: {
+    }
+    case Actions.BboxCleared.type: {
       let selectedFeature = state.selectedFeature
       if (shouldSelectedFeatureAutoDeselect(selectedFeature, { ignoreTypes: [TYPE_JOB] })) {
         selectedFeature = null
@@ -90,56 +85,76 @@ export function mapReducer(state = mapInitialState, action: any) {
       return {
         ...state,
         bbox: null,
-        searchResults: null,
-        searchError: null,
         selectedFeature,
       }
     }
-    case mapTypes.MAP_DETECTIONS_UPDATED:
+    case Actions.DetectionsUpdated.type: {
+      const payload = (action as Actions.DetectionsUpdated).payload
       return {
         ...state,
-        detections: action.detections,
+        detections: payload.detections,
       }
-    case mapTypes.MAP_FRAMES_UPDATED:
+    }
+    case Actions.FramesUpdated.type: {
+      const payload = (action as Actions.FramesUpdated).payload
       return {
         ...state,
-        frames: action.frames,
+        frames: payload.frames,
       }
-    case mapTypes.MAP_SELECTED_FEATURE_UPDATED:
+    }
+    case Actions.SelectedFeatureUpdated.type: {
+      const payload = (action as Actions.SelectedFeatureUpdated).payload
       return {
         ...state,
-        selectedFeature: action.selectedFeature,
+        selectedFeature: payload.selectedFeature,
       }
-    case mapTypes.MAP_HOVERED_FEATURE_UPDATED:
+    }
+    case Actions.HoveredFeatureUpdated.type: {
+      const payload = (action as Actions.HoveredFeatureUpdated).payload
       return {
         ...state,
-        hoveredFeature: action.hoveredFeature,
+        hoveredFeature: payload.hoveredFeature,
       }
-    case mapTypes.MAP_VIEW_UPDATED:
+    }
+    case Actions.ViewUpdated.type: {
+      const payload = (action as Actions.ViewUpdated).payload
       return {
         ...state,
-        view: action.view,
+        view: payload.view,
       }
-    case mapTypes.MAP_PAN_TO_POINT:
+    }
+    case Actions.PanToPoint.type: {
+      const payload = (action as Actions.PanToPoint).payload
       return {
         ...state,
         view: {
-          ...state.view,
-          center: action.point,
-          zoom: action.zoom,
+          ...state.view!,
+          center: payload.point,
+          zoom: payload.zoom,
           extent: null,
         },
       }
-    case mapTypes.MAP_PAN_TO_EXTENT:
+    }
+    case Actions.PanToExtent.type: {
+      const payload = (action as Actions.PanToExtent).payload
       return {
         ...state,
         view: {
-          ...state.view,
-          extent: action.extent,
+          ...state.view!,
+          extent: payload.extent,
           center: null,
           zoom: null,
         },
       }
+    }
+    case Actions.Deserialized.type: {
+      const payload = (action as Actions.Deserialized).payload
+      return {
+        ...state,
+        bbox: payload.bbox,
+        view: payload.view,
+      }
+    }
     default:
       return state
   }

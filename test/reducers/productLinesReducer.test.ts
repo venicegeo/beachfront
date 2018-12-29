@@ -15,11 +15,11 @@
  */
 
 import {productLinesInitialState, productLinesReducer} from '../../src/reducers/productLinesReducer'
-import {productLinesTypes} from '../../src/actions/productLinesActions'
+import {ProductLinesActions} from '../../src/actions/productLinesActions'
 
 describe('productLinesReducer', () => {
   test('initialState', () => {
-    expect(productLinesReducer(undefined, {})).toEqual(productLinesInitialState)
+    expect(productLinesReducer(undefined, { type: null })).toEqual(productLinesInitialState)
   })
 
   test('PRODUCT_LINES_FETCHING', () => {
@@ -28,7 +28,7 @@ describe('productLinesReducer', () => {
       fetchError: 'a',
     }
 
-    const action = { type: productLinesTypes.PRODUCT_LINES_FETCHING }
+    const action = { type: ProductLinesActions.Fetching.type }
 
     expect(productLinesReducer(state, action)).toEqual({
       ...state,
@@ -44,14 +44,16 @@ describe('productLinesReducer', () => {
     }
 
     const action = {
-      type: productLinesTypes.PRODUCT_LINES_FETCH_SUCCESS,
-      records: [1, 2, 3],
+      type: ProductLinesActions.FetchSuccess.type,
+      payload: {
+        records: 'a',
+      },
     }
 
     expect(productLinesReducer(state, action)).toEqual({
       ...state,
       isFetching: false,
-      records: action.records,
+      records: action.payload.records,
     })
   })
 
@@ -62,14 +64,16 @@ describe('productLinesReducer', () => {
     }
 
     const action = {
-      type: productLinesTypes.PRODUCT_LINES_FETCH_ERROR,
-      error: 'a',
+      type: ProductLinesActions.FetchError.type,
+      payload: {
+        error: 'a',
+      },
     }
 
     expect(productLinesReducer(state, action)).toEqual({
       ...state,
       isFetching: false,
-      fetchError: action.error,
+      fetchError: action.payload.error,
     })
   })
 
@@ -79,7 +83,7 @@ describe('productLinesReducer', () => {
       fetchJobsError: 'a',
     }
 
-    const action = { type: productLinesTypes.PRODUCT_LINES_FETCHING_JOBS }
+    const action = { type: ProductLinesActions.FetchingJobs.type }
 
     expect(productLinesReducer(state, action)).toEqual({
       ...state,
@@ -95,14 +99,16 @@ describe('productLinesReducer', () => {
     }
 
     const action = {
-      type: productLinesTypes.PRODUCT_LINES_FETCH_JOBS_SUCCESS,
-      jobs: [1, 2, 3],
+      type: ProductLinesActions.FetchJobsSuccess.type,
+      payload: {
+        jobs: 'a',
+      },
     }
 
     expect(productLinesReducer(state, action)).toEqual({
       ...state,
       isFetchingJobs: false,
-      jobs: action.jobs,
+      jobs: action.payload.jobs,
     })
   })
 
@@ -113,14 +119,16 @@ describe('productLinesReducer', () => {
     }
 
     const action = {
-      type: productLinesTypes.PRODUCT_LINES_FETCH_JOBS_ERROR,
-      error: 'a',
+      type: ProductLinesActions.FetchJobsError.type,
+      payload: {
+        error: 'a',
+      },
     }
 
     expect(productLinesReducer(state, action)).toEqual({
       ...state,
       isFetchingJobs: false,
-      fetchJobsError: action.error,
+      fetchJobsError: action.payload.error,
     })
   })
 
@@ -128,10 +136,10 @@ describe('productLinesReducer', () => {
     const state = {
       ...productLinesInitialState,
       createdProductLine: 'a',
-      createProductLineError: 'a',
+      createProductLineError: 'b',
     } as any
 
-    const action = { type: productLinesTypes.PRODUCT_LINES_CREATING_PRODUCT_LINE }
+    const action = { type: ProductLinesActions.CreatingProductLine.type }
 
     expect(productLinesReducer(state, action)).toEqual({
       ...productLinesInitialState,
@@ -149,15 +157,17 @@ describe('productLinesReducer', () => {
     } as any
 
     const action = {
-      type: productLinesTypes.PRODUCT_LINES_CREATE_PRODUCT_LINE_SUCCESS,
-      createdProductLine: 'a',
+      type: ProductLinesActions.CreateProductLineSuccess.type,
+      payload: {
+        createdProductLine: 'b',
+      },
     }
 
     expect(productLinesReducer(state, action)).toEqual({
       ...state,
       isCreatingProductLine: false,
-      createdProductLine: action.createdProductLine,
-      records: [...state.records, action.createdProductLine],
+      createdProductLine: action.payload.createdProductLine,
+      records: [...state.records, action.payload.createdProductLine],
     })
   })
 
@@ -168,14 +178,16 @@ describe('productLinesReducer', () => {
     }
 
     const action = {
-      type: productLinesTypes.PRODUCT_LINES_CREATE_PRODUCT_LINE_ERROR,
-      error: 'a',
+      type: ProductLinesActions.CreateProductLineError.type,
+      payload: {
+        error: 'a',
+      },
     }
 
     expect(productLinesReducer(state, action)).toEqual({
       ...state,
       isCreatingProductLine: false,
-      createProductLineError: action.error,
+      createProductLineError: action.payload.error,
     })
   })
 })

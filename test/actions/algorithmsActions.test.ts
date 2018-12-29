@@ -21,7 +21,7 @@ import configureStore, {MockStoreEnhanced} from 'redux-mock-store'
 import * as sinon from 'sinon'
 import {SinonSpy} from 'sinon'
 import {ALGORITHM_ENDPOINT} from '../../src/config'
-import {algorithmsActions, algorithmsTypes} from '../../src/actions/algorithmsActions'
+import {Algorithms, AlgorithmsActions} from '../../src/actions/algorithmsActions'
 import {algorithmsInitialState} from '../../src/reducers/algorithmsReducer'
 import {getClient} from '../../src/api/session'
 import {AppState, initialState} from '../../src/store'
@@ -73,22 +73,24 @@ describe('algorithmsActions', () => {
       }
       mockAdapter.onGet(ALGORITHM_ENDPOINT).reply(200, mockResponse)
 
-      await store.dispatch(algorithmsActions.fetch() as any)
+      await store.dispatch(Algorithms.fetch() as any)
 
       expect(clientSpies.get.callCount).toEqual(1)
       expect(clientSpies.get.args[0]).toEqual([ALGORITHM_ENDPOINT])
 
       expect(store.getActions()).toEqual([
-        { type: algorithmsTypes.ALGORITHMS_FETCHING },
+        { type: AlgorithmsActions.Fetching.type },
         {
-          type: algorithmsTypes.ALGORITHMS_FETCH_SUCCESS,
-          records: mockResponse.algorithms.map(record => ({
-            description: record.description,
-            id: record.service_id,
-            maxCloudCover: record.max_cloud_cover,
-            name: record.name,
-            type: record.interface,
-          })),
+          type: AlgorithmsActions.FetchSuccess.type,
+          payload: {
+            records: mockResponse.algorithms.map(record => ({
+              description: record.description,
+              id: record.service_id,
+              maxCloudCover: record.max_cloud_cover,
+              name: record.name,
+              type: record.interface,
+            })),
+          },
         },
       ])
     })
@@ -96,31 +98,31 @@ describe('algorithmsActions', () => {
     test('request error', async () => {
       mockAdapter.onGet(ALGORITHM_ENDPOINT).reply(400)
 
-      await store.dispatch(algorithmsActions.fetch() as any)
+      await store.dispatch(Algorithms.fetch() as any)
 
       const actions = store.getActions()
       expect(actions.length).toEqual(2)
-      expect(actions[0]).toEqual({ type: algorithmsTypes.ALGORITHMS_FETCHING })
-      expect(actions[1].type).toEqual(algorithmsTypes.ALGORITHMS_FETCH_ERROR)
-      expect(actions[1].error).toBeDefined()
+      expect(actions[0]).toEqual({ type: AlgorithmsActions.Fetching.type })
+      expect(actions[1].type).toEqual(AlgorithmsActions.FetchError.type)
+      expect(actions[1].payload).toHaveProperty('error')
     })
 
     test('non-request error', async () => {
       mockAdapter.onGet(ALGORITHM_ENDPOINT).reply(200)
 
-      await store.dispatch(algorithmsActions.fetch() as any)
+      await store.dispatch(Algorithms.fetch() as any)
 
       const actions = store.getActions()
       expect(actions.length).toEqual(2)
-      expect(actions[0]).toEqual({ type: algorithmsTypes.ALGORITHMS_FETCHING })
-      expect(actions[1].type).toEqual(algorithmsTypes.ALGORITHMS_FETCH_ERROR)
-      expect(actions[1].error).toBeDefined()
+      expect(actions[0]).toEqual({ type: AlgorithmsActions.Fetching.type })
+      expect(actions[1].type).toEqual(AlgorithmsActions.FetchError.type)
+      expect(actions[1].payload).toHaveProperty('error')
     })
   })
 
   describe('serialize()', () => {
     test('success', async () => {
-      await store.dispatch(algorithmsActions.serialize() as any)
+      await store.dispatch(Algorithms.serialize() as any)
 
       expect(sessionStorage.setItem).toHaveBeenCalledTimes(1)
       expect(sessionStorage.setItem).toHaveBeenCalledWith(
@@ -129,7 +131,7 @@ describe('algorithmsActions', () => {
       )
 
       expect(store.getActions()).toEqual([
-        { type: algorithmsTypes.ALGORITHMS_SERIALIZED },
+        { type: AlgorithmsActions.Serialized.type },
       ])
     })
   })
@@ -140,15 +142,15 @@ describe('algorithmsActions', () => {
       const mockSavedRecords: any[] = []
       sessionStorage.setItem('algorithms_records', JSON.stringify(mockSavedRecords))
 
-      await store.dispatch(algorithmsActions.deserialize())
+      await store.dispatch(Algorithms.deserialize())
 
       expect(sessionStorage.getItem).toHaveBeenCalledTimes(1)
       expect(sessionStorage.getItem).toHaveBeenCalledWith('algorithms_records')
 
       expect(store.getActions()).toEqual([
         {
-          type: algorithmsTypes.ALGORITHMS_DESERIALIZED,
-          deserialized: {
+          type: AlgorithmsActions.Deserialized.type,
+          payload: {
             records: mockSavedRecords,
           },
         },
@@ -156,15 +158,15 @@ describe('algorithmsActions', () => {
     })
 
     test('no saved data', async () => {
-      await store.dispatch(algorithmsActions.deserialize())
+      await store.dispatch(Algorithms.deserialize())
 
       expect(sessionStorage.getItem).toHaveBeenCalledTimes(1)
       expect(sessionStorage.getItem).toHaveBeenCalledWith('algorithms_records')
 
       expect(store.getActions()).toEqual([
         {
-          type: algorithmsTypes.ALGORITHMS_DESERIALIZED,
-          deserialized: {
+          type: AlgorithmsActions.Deserialized.type,
+          payload: {
             records: algorithmsInitialState.records,
           },
         },
@@ -175,7 +177,7 @@ describe('algorithmsActions', () => {
       // Mock local storage.
       sessionStorage.setItem('algorithms_records', 'badJson')
 
-      await store.dispatch(algorithmsActions.deserialize())
+      await store.dispatch(Algorithms.deserialize())
 
       // Deserialize should gracefully handle errors.
       expect(sessionStorage.getItem).toHaveBeenCalledTimes(1)
@@ -183,8 +185,10 @@ describe('algorithmsActions', () => {
 
       expect(store.getActions()).toEqual([
         {
-          type: algorithmsTypes.ALGORITHMS_DESERIALIZED,
-          deserialized: {},
+          type: AlgorithmsActions.Deserialized.type,
+          payload: {
+            records: algorithmsInitialState.records,
+          },
         },
       ])
     })

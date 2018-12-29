@@ -14,7 +14,8 @@
  * limitations under the License.
  **/
 
-import {jobsTypes} from '../actions/jobsActions'
+import {Action} from 'redux'
+import {JobsActions as Actions} from '../actions/jobsActions'
 
 export type JobsState = {
   records: beachfront.Job[]
@@ -48,91 +49,107 @@ export const jobsInitialState: JobsState = {
   createJobError: null,
 }
 
-export function jobsReducer(state = jobsInitialState, action: any) {
+export function jobsReducer(state = jobsInitialState, action: Action): JobsState {
   switch (action.type) {
-    case jobsTypes.JOBS_FETCHING:
+    case Actions.Fetching.type:
       return {
         ...state,
         isFetching: true,
         fetchError: null,
       }
-    case jobsTypes.JOBS_FETCH_SUCCESS:
+    case Actions.FetchSuccess.type: {
+      const payload = (action as Actions.FetchSuccess).payload
       return {
         ...state,
         isFetching: false,
-        records: action.records,
+        records: payload.records,
         initialFetchComplete: true,
       }
-    case jobsTypes.JOBS_FETCH_ERROR:
+    }
+    case Actions.FetchError.type: {
+      const payload = (action as Actions.FetchError).payload
       return {
         ...state,
         isFetching: false,
-        fetchError: action.error,
+        fetchError: payload.error,
       }
-    case jobsTypes.JOBS_FETCHING_ONE:
+    }
+    case Actions.FetchingOne.type:
       return {
         ...state,
         isFetchingOne: true,
         fetchOneError: null,
       }
-    case jobsTypes.JOBS_FETCH_ONE_SUCCESS:
+    case Actions.FetchOneSuccess.type: {
+      const payload = (action as Actions.FetchOneSuccess).payload
       return {
         ...state,
         isFetchingOne: false,
-        records: [...state.records, action.record],
-        lastOneFetched: action.record,
+        records: [...state.records, payload.record],
+        lastOneFetched: payload.record,
       }
-    case jobsTypes.JOBS_FETCH_ONE_ERROR:
+    }
+    case Actions.FetchOneError.type: {
+      const payload = (action as Actions.FetchOneError).payload
       return {
         ...state,
         isFetchingOne: false,
-        fetchOneError: action.error,
+        fetchOneError: payload.error,
       }
-    case jobsTypes.JOBS_CREATING_JOB:
+    }
+    case Actions.CreatingJob.type:
       return {
         ...state,
         isCreatingJob: true,
         createdJob: null,
         createJobError: null,
       }
-    case jobsTypes.JOBS_CREATE_JOB_SUCCESS:
+    case Actions.CreateJobSuccess.type: {
+      const payload = (action as Actions.CreateJobSuccess).payload
       return {
         ...state,
         isCreatingJob: false,
-        createdJob: action.createdJob,
-        records: [...state.records, action.createdJob],
+        createdJob: payload.createdJob,
+        records: [...state.records, payload.createdJob],
       }
-    case jobsTypes.JOBS_CREATE_JOB_ERROR:
+    }
+    case Actions.CreateJobError.type: {
+      const payload = (action as Actions.CreateJobError).payload
       return {
         ...state,
         isCreatingJob: false,
-        createJobError: action.error,
+        createJobError: payload.error,
       }
-    case jobsTypes.JOBS_CREATE_JOB_ERROR_DISMISSED:
+    }
+    case Actions.CreateJobErrorDismissed.type:
       return {
         ...state,
         createJobError: null,
       }
-    case jobsTypes.JOBS_DELETING_JOB:
+    case Actions.DeletingJob.type: {
+      const payload = (action as Actions.DeletingJob).payload
       return {
         ...state,
-        records: state.records.filter(job => job.id !== action.deletedJob.id),
+        records: state.records.filter(job => job.id !== payload.deletedJob.id),
         isDeletingJob: true,
-        deletedJob: action.deletedJob,
+        deletedJob: payload.deletedJob,
         deleteJobError: null,
       }
-    case jobsTypes.JOBS_DELETE_JOB_SUCCESS:
+    }
+    case Actions.DeleteJobSuccess.type:
       return {
         ...state,
         isDeletingJob: false,
       }
-    case jobsTypes.JOBS_DELETE_JOB_ERROR:
+    case Actions.DeleteJobError.type: {
+      const payload = (action as Actions.DeleteJobError).payload
       return {
         ...state,
-        records: [...state.records, state.deletedJob],
+        records: [...state.records, state.deletedJob!],
         isDeletingJob: false,
-        deleteJobError: action.error,
+        deleteJobError: payload.error,
       }
+    }
     default:
       return state
   }

@@ -15,32 +15,34 @@
  */
 
 import {routeInitialState, routeReducer} from '../../src/reducers/routeReducer'
-import {routeTypes} from '../../src/actions/routeActions'
+import {RouteActions} from '../../src/actions/routeActions'
 
 describe('routeReducer', () => {
   test('initialState', () => {
-    expect(routeReducer(undefined, {})).toEqual(routeInitialState)
+    expect(routeReducer(undefined, { type: null })).toEqual(routeInitialState)
   })
 
   test('ROUTE_CHANGED', () => {
     const action = {
-      type: routeTypes.ROUTE_CHANGED,
-      hash: 'a',
-      href: 'a',
-      jobIds: ['a', 'b', 'c'],
-      pathname: 'a',
-      search: 'a',
-      selectedFeature: 'a',
+      type: RouteActions.Changed.type,
+      payload: {
+        hash: 'a',
+        href: 'b',
+        jobIds: 'c',
+        pathname: 'd',
+        search: 'e',
+        selectedFeature: 'f',
+      },
     }
 
     expect(routeReducer(routeInitialState, action)).toEqual({
       ...routeInitialState,
-      hash: action.hash,
-      href: action.href,
-      jobIds: action.jobIds,
-      pathname: action.pathname,
-      search: action.search,
-      selectedFeature: action.selectedFeature,
+      hash: action.payload.hash,
+      href: action.payload.href,
+      jobIds: action.payload.jobIds,
+      pathname: action.payload.pathname,
+      search: action.payload.search,
+      selectedFeature: action.payload.selectedFeature,
     })
   })
 })

@@ -18,7 +18,7 @@ import thunk from 'redux-thunk'
 import configureStore, {MockStoreEnhanced} from 'redux-mock-store'
 import * as sinon from 'sinon'
 import {SinonStub} from 'sinon'
-import {tourActions, tourTypes} from '../../src/actions/tourActions'
+import {Tour, TourActions} from '../../src/actions/tourActions'
 import {tourInitialState} from '../../src/reducers/tourReducer'
 import * as domUtils from '../../src/utils/domUtils'
 import {AppState, initialState} from '../../src/store'
@@ -36,12 +36,14 @@ describe('tourActions', () => {
     test('success', async () => {
       const mockSteps = [1, 2, 3]
 
-      await store.dispatch(tourActions.setSteps(mockSteps as any))
+      await store.dispatch(Tour.setSteps(mockSteps as any))
 
       expect(store.getActions()).toEqual([
         {
-          type: tourTypes.TOUR_STEPS_UPDATED,
-          steps: mockSteps,
+          type: TourActions.StepsUpdated.type,
+          payload: {
+            steps: mockSteps,
+          },
         },
       ])
     })
@@ -49,20 +51,20 @@ describe('tourActions', () => {
 
   describe('start()', () => {
     test('success', async () => {
-      await store.dispatch(tourActions.start())
+      await store.dispatch(Tour.start())
 
       expect(store.getActions()).toEqual([
-        { type: tourTypes.TOUR_STARTED },
+        { type: TourActions.Started.type },
       ])
     })
   })
 
   describe('end()', () => {
     test('success', async () => {
-      await store.dispatch(tourActions.end())
+      await store.dispatch(Tour.end())
 
       expect(store.getActions()).toEqual([
-        { type: tourTypes.TOUR_ENDED },
+        { type: TourActions.Ended.type },
       ])
     })
   })
@@ -98,17 +100,19 @@ describe('tourActions', () => {
         },
       }) as any
 
-      await store.dispatch(tourActions.goToStep(2) as any)
+      await store.dispatch(Tour.goToStep(2) as any)
 
       expect(mockSteps[0].after!.callCount).toEqual(1)
       expect(mockSteps[1].before!.callCount).toEqual(1)
       expect(scrollIntoViewStub.callCount).toEqual(1)
 
       expect(store.getActions()).toEqual([
-        { type: tourTypes.TOUR_STEP_CHANGING },
+        { type: TourActions.StepChanging.type },
         {
-          type: tourTypes.TOUR_STEP_CHANGE_SUCCESS,
-          step: 2,
+          type: TourActions.StepChangeSuccess.type,
+          payload: {
+            step: 2,
+          },
         },
       ])
     })
@@ -118,7 +122,7 @@ describe('tourActions', () => {
         {
           step: 1,
           after: () => {
-            throw Error('after error')
+            throw Error('error')
           },
         },
         {
@@ -134,13 +138,13 @@ describe('tourActions', () => {
         },
       }) as any
 
-      await store.dispatch(tourActions.goToStep(2) as any)
+      await store.dispatch(Tour.goToStep(2) as any)
 
       const actions = store.getActions()
       expect(actions.length).toEqual(2)
-      expect(actions[0]).toEqual({ type: tourTypes.TOUR_STEP_CHANGING })
-      expect(actions[1].type).toEqual(tourTypes.TOUR_STEP_CHANGE_ERROR)
-      expect(actions[1].error).toEqual(expect.objectContaining({ message: 'after error' }))
+      expect(actions[0]).toEqual({ type: TourActions.StepChanging.type })
+      expect(actions[1].type).toEqual(TourActions.StepChangeError.type)
+      expect(actions[1].payload).toHaveProperty('error')
     })
 
     test('"before" callback error', async () => {
@@ -151,7 +155,7 @@ describe('tourActions', () => {
         {
           step: 2,
           before: () => {
-            throw Error('before error')
+            throw Error('error')
           },
         },
       ]
@@ -164,13 +168,13 @@ describe('tourActions', () => {
         },
       }) as any
 
-      await store.dispatch(tourActions.goToStep(2) as any)
+      await store.dispatch(Tour.goToStep(2) as any)
 
       const actions = store.getActions()
       expect(actions.length).toEqual(2)
-      expect(actions[0]).toEqual({ type: tourTypes.TOUR_STEP_CHANGING })
-      expect(actions[1].type).toEqual(tourTypes.TOUR_STEP_CHANGE_ERROR)
-      expect(actions[1].error).toEqual(expect.objectContaining({ message: 'before error' }))
+      expect(actions[0]).toEqual({ type: TourActions.StepChanging.type })
+      expect(actions[1].type).toEqual(TourActions.StepChangeError.type)
+      expect(actions[1].payload).toHaveProperty('error')
     })
 
     test('do nothing if already changing steps', async () => {
@@ -182,7 +186,7 @@ describe('tourActions', () => {
         },
       }) as any
 
-      await store.dispatch(tourActions.goToStep(2) as any)
+      await store.dispatch(Tour.goToStep(2) as any)
 
       expect(store.getActions()).toEqual([])
     })
@@ -196,7 +200,7 @@ describe('tourActions', () => {
             {
               step: 1,
               before: () => {
-                throw Error('before error')
+                throw Error('error')
               },
             },
             { step: 2 },
@@ -207,15 +211,15 @@ describe('tourActions', () => {
 
       const alertSpy = sinon.spy(window, 'alert')
 
-      await store.dispatch(tourActions.goToStep(1) as any)
+      await store.dispatch(Tour.goToStep(1) as any)
 
       expect(alertSpy.callCount).toEqual(1)
 
       const actions = store.getActions()
       expect(actions.length).toEqual(2)
-      expect(actions[0]).toEqual({ type: tourTypes.TOUR_STEP_CHANGING })
-      expect(actions[1].type).toEqual(tourTypes.TOUR_STEP_CHANGE_ERROR)
-      expect(actions[1].error).toEqual(expect.objectContaining({ message: 'before error' }))
+      expect(actions[0]).toEqual({ type: TourActions.StepChanging.type })
+      expect(actions[1].type).toEqual(TourActions.StepChangeError.type)
+      expect(actions[1].payload).toHaveProperty('error')
 
       alertSpy.restore()
     })
@@ -232,13 +236,15 @@ describe('tourActions', () => {
         },
       }) as any
 
-      await store.dispatch(tourActions.goToStep(2) as any)
+      await store.dispatch(Tour.goToStep(2) as any)
 
       expect(store.getActions()).toEqual([
-        { type: tourTypes.TOUR_STEP_CHANGING },
+        { type: TourActions.StepChanging.type },
         {
-          type: tourTypes.TOUR_STEP_CHANGE_SUCCESS,
-          step: 2,
+          type: TourActions.StepChangeSuccess.type,
+          payload: {
+            step: 2,
+          },
         },
       ])
     })
@@ -268,7 +274,7 @@ describe('tourActions', () => {
         },
       }) as any
 
-      await store.dispatch(tourActions.goToStep(3) as any)
+      await store.dispatch(Tour.goToStep(3) as any)
 
       expect(mockSteps[0].after!.callCount).toEqual(1)
       expect(mockSteps[1].before!.callCount).toEqual(0)
@@ -276,12 +282,44 @@ describe('tourActions', () => {
       expect(mockSteps[2].before!.callCount).toEqual(1)
 
       expect(store.getActions()).toEqual([
-        { type: tourTypes.TOUR_STEP_CHANGING },
+        { type: TourActions.StepChanging.type },
         {
-          type: tourTypes.TOUR_STEP_CHANGE_SUCCESS,
-          step: 3,
+          type: TourActions.StepChangeSuccess.type,
+          payload: {
+            step: 3,
+          },
         },
       ])
+    })
+
+    test('missing current step', async () => {
+      store = mockStore({
+        ...initialState,
+        tour: {
+          ...tourInitialState,
+          steps: [{ step: 1 }],
+          step: 0,
+        },
+      }) as any
+
+      await store.dispatch(Tour.goToStep(1) as any)
+
+      expect(store.getActions()).toEqual([])
+    })
+
+    test('missing next step', async () => {
+      store = mockStore({
+        ...initialState,
+        tour: {
+          ...tourInitialState,
+          steps: [{ step: 1 }],
+          step: 1,
+        },
+      }) as any
+
+      await store.dispatch(Tour.goToStep(2) as any)
+
+      expect(store.getActions()).toEqual([])
     })
   })
 })

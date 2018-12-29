@@ -15,11 +15,11 @@
  */
 
 import {jobsInitialState, jobsReducer, JobsState} from '../../src/reducers/jobsReducer'
-import {jobsTypes} from '../../src/actions/jobsActions'
+import {JobsActions} from '../../src/actions/jobsActions'
 
 describe('jobsReducer', () => {
   test('initialState', () => {
-    expect(jobsReducer(undefined, {})).toEqual(jobsInitialState)
+    expect(jobsReducer(undefined, { type: null })).toEqual(jobsInitialState)
   })
 
   test('JOBS_FETCHING', () => {
@@ -28,7 +28,7 @@ describe('jobsReducer', () => {
       fetchError: 'a',
     }
 
-    const action = { type: jobsTypes.JOBS_FETCHING }
+    const action = { type: JobsActions.Fetching.type }
 
     expect(jobsReducer(state, action)).toEqual({
       ...state,
@@ -44,14 +44,16 @@ describe('jobsReducer', () => {
     }
 
     const action = {
-      type: jobsTypes.JOBS_FETCH_SUCCESS,
-      records: ['a', 'b', 'c'],
+      type: JobsActions.FetchSuccess.type,
+      payload: {
+        records: 'a',
+      },
     }
 
     expect(jobsReducer(state, action)).toEqual({
       ...state,
       isFetching: false,
-      records: action.records,
+      records: action.payload.records,
       initialFetchComplete: true,
     })
   })
@@ -63,14 +65,16 @@ describe('jobsReducer', () => {
     }
 
     const action = {
-      type: jobsTypes.JOBS_FETCH_ERROR,
-      error: 'a',
+      type: JobsActions.FetchError.type,
+      payload: {
+        error: 'a',
+      },
     }
 
     expect(jobsReducer(state, action)).toEqual({
       ...state,
       isFetching: false,
-      fetchError: action.error,
+      fetchError: action.payload.error,
     })
   })
 
@@ -80,7 +84,7 @@ describe('jobsReducer', () => {
       fetchOneError: 'a',
     }
 
-    const action = { type: jobsTypes.JOBS_FETCHING_ONE }
+    const action = { type: JobsActions.FetchingOne.type }
 
     expect(jobsReducer(state, action)).toEqual({
       ...state,
@@ -96,15 +100,17 @@ describe('jobsReducer', () => {
     }
 
     const action = {
-      type: jobsTypes.JOBS_FETCH_ONE_SUCCESS,
-      record: 'a',
+      type: JobsActions.FetchOneSuccess.type,
+      payload: {
+        record: 'a',
+      },
     }
 
     expect(jobsReducer(state, action)).toEqual({
       ...state,
       isFetchingOne: false,
-      records: [...state.records, action.record],
-      lastOneFetched: action.record,
+      records: [...state.records, action.payload.record],
+      lastOneFetched: action.payload.record,
     })
   })
 
@@ -115,14 +121,16 @@ describe('jobsReducer', () => {
     }
 
     const action = {
-      type: jobsTypes.JOBS_FETCH_ONE_ERROR,
-      error: 'a',
+      type: JobsActions.FetchOneError.type,
+      payload: {
+        error: 'a',
+      },
     }
 
     expect(jobsReducer(state, action)).toEqual({
       ...state,
       isFetchingOne: false,
-      fetchOneError: action.error,
+      fetchOneError: action.payload.error,
     })
   })
 
@@ -130,10 +138,10 @@ describe('jobsReducer', () => {
     const state = {
       ...jobsInitialState,
       createdJob: 'a',
-      createJobError: 'a',
+      createJobError: 'b',
     }
 
-    const action = { type: jobsTypes.JOBS_CREATING_JOB }
+    const action = { type: JobsActions.CreatingJob.type }
 
     expect(jobsReducer(state as any, action)).toEqual({
       ...state,
@@ -151,15 +159,17 @@ describe('jobsReducer', () => {
     }
 
     const action = {
-      type: jobsTypes.JOBS_CREATE_JOB_SUCCESS,
-      createdJob: 'a',
+      type: JobsActions.CreateJobSuccess.type,
+      payload: {
+        createdJob: 'a',
+      },
     }
 
     expect(jobsReducer(state as any, action)).toEqual({
       ...state,
       isCreatingJob: false,
-      createdJob: action.createdJob,
-      records: [...state.records, action.createdJob],
+      createdJob: action.payload.createdJob,
+      records: [...state.records, action.payload.createdJob],
     })
   })
 
@@ -170,14 +180,16 @@ describe('jobsReducer', () => {
     }
 
     const action = {
-      type: jobsTypes.JOBS_CREATE_JOB_ERROR,
-      error: 'a',
+      type: JobsActions.CreateJobError.type,
+      payload: {
+        error: 'a',
+      },
     }
 
     expect(jobsReducer(state, action)).toEqual({
       ...state,
       isCreatingJob: false,
-      createJobError: action.error,
+      createJobError: action.payload.error,
     })
   })
 
@@ -187,7 +199,7 @@ describe('jobsReducer', () => {
       createJobError: 'a',
     }
 
-    const action = { type: jobsTypes.JOBS_CREATE_JOB_ERROR_DISMISSED }
+    const action = { type: JobsActions.CreateJobErrorDismissed.type }
 
     expect(jobsReducer(state, action)).toEqual({
       ...state,
@@ -198,22 +210,21 @@ describe('jobsReducer', () => {
   test('JOBS_DELETING_JOB', () => {
     const state = {
       ...jobsInitialState,
-      records: [
-        { id: 'a' },
-        { id: 'b' },
-      ],
-      deletedJobError: 'a',
+      records: [{ id: 'a' }, { id: 'b' }],
+      deletedJobError: 'c',
     }
 
     const action = {
-      type: jobsTypes.JOBS_DELETING_JOB,
-      deletedJob: { id: 'a' },
+      type: JobsActions.DeletingJob.type,
+      payload: {
+        deletedJob: { id: 'a' },
+      },
     }
 
     expect(jobsReducer(state as any, action)).toEqual({
       ...state,
       isDeletingJob: true,
-      deletedJob: action.deletedJob,
+      deletedJob: action.payload.deletedJob,
       deleteJobError: null,
       records: [{ id: 'b' }],
     })
@@ -225,7 +236,7 @@ describe('jobsReducer', () => {
       isDeletingJob: true,
     }
 
-    const action = { type: jobsTypes.JOBS_DELETE_JOB_SUCCESS }
+    const action = { type: JobsActions.DeleteJobSuccess.type }
 
     expect(jobsReducer(state, action)).toEqual({
       ...state,
@@ -237,19 +248,21 @@ describe('jobsReducer', () => {
     const state = {
       ...jobsInitialState,
       isDeletingJob: true,
-      deletedJob: { id: 'a' },
-      records: [{ id: 'b' }],
+      deletedJob: 'a',
+      records: ['b'],
     }
 
     const action = {
-      type: jobsTypes.JOBS_DELETE_JOB_ERROR,
-      error: 'a',
+      type: JobsActions.DeleteJobError.type,
+      payload: {
+        error: 'a',
+      },
     }
 
     expect(jobsReducer(state as any, action)).toEqual({
       ...state,
       isDeletingJob: false,
-      deleteJobError: action.error,
+      deleteJobError: action.payload.error,
       records: [...state.records, state.deletedJob],
     })
   })

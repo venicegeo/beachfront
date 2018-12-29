@@ -14,21 +14,95 @@
  * limitations under the License.
  **/
 
-import {Dispatch} from 'redux'
+import {Action, Dispatch} from 'redux'
 import {ALGORITHM_ENDPOINT} from '../config'
 import {getClient} from '../api/session'
 import {AppState} from '../store'
 import {algorithmsInitialState, AlgorithmsState} from '../reducers/algorithmsReducer'
 
-export const algorithmsTypes: ActionTypes = {
-  ALGORITHMS_FETCHING: 'ALGORITHMS_FETCHING',
-  ALGORITHMS_FETCH_SUCCESS: 'ALGORITHMS_FETCH_SUCCESS',
-  ALGORITHMS_FETCH_ERROR: 'ALGORITHMS_FETCH_ERROR',
-  ALGORITHMS_SERIALIZED: 'ALGORITHMS_SERIALIZED',
-  ALGORITHMS_DESERIALIZED: 'ALGORITHMS_DESERIALIZED',
+export namespace Algorithms {
+  export function fetch() {
+    return async (dispatch: Dispatch<AlgorithmsState>) => {
+      dispatch({...new AlgorithmsActions.Fetching()})
+
+      try {
+        const response = await getClient().get(ALGORITHM_ENDPOINT) as FetchResponse
+        dispatch({...new AlgorithmsActions.FetchSuccess({
+          records: response.data.algorithms.map(record => ({
+            description: record.description,
+            id: record.service_id,
+            maxCloudCover: record.max_cloud_cover,
+            name: record.name,
+            type: record.interface,
+          })),
+        })})
+      } catch (error) {
+        dispatch({...new AlgorithmsActions.FetchError({ error })})
+      }
+    }
+  }
+
+  export function serialize() {
+    return (dispatch: Dispatch<AlgorithmsState>, getState: () => AppState) => {
+      const state = getState()
+
+      sessionStorage.setItem('algorithms_records', JSON.stringify(state.algorithms.records))
+
+      dispatch({...new AlgorithmsActions.Serialized()})
+    }
+  }
+
+  export function deserialize() {
+    let records: beachfront.Algorithm[] | null = null
+    try {
+      records = JSON.parse(sessionStorage.getItem('algorithms_records') || 'null')
+    } catch (error) {
+      console.warn('Failed to deserialize "algorithms_records"')
+    }
+
+    return {...new AlgorithmsActions.Deserialized({
+      records: records || algorithmsInitialState.records,
+    })}
+  }
 }
 
-type FetchResponse = {
+export namespace AlgorithmsActions {
+  export class Fetching implements Action {
+    static type = 'ALGORITHMS_FETCHING'
+    type = Fetching.type
+  }
+
+  export class FetchSuccess implements Action {
+    static type = 'ALGORITHMS_FETCH_SUCCESS'
+    type = FetchSuccess.type
+    constructor(public payload: {
+      records: AlgorithmsState['records']
+    }) {}
+  }
+
+  export class FetchError implements Action {
+    static type = 'ALGORITHMS_FETCH_ERROR'
+    type = FetchError.type
+    constructor(public payload: {
+      error: AlgorithmsState['fetchError']
+    }) {}
+  }
+
+  export class Serialized implements Action {
+    static type = 'ALGORITHMS_SERIALIZED'
+    type = Serialized.type
+  }
+
+  export class Deserialized implements Action {
+    static type = 'ALGORITHMS_DESERIALIZED'
+    type = Deserialized.type
+    constructor(public payload: {
+      records: AlgorithmsState['records']
+    }) {}
+  }
+}
+
+interface FetchResponse {
   data: {
     algorithms: Array<{
       description: string
@@ -38,56 +112,4 @@ type FetchResponse = {
       interface: string
     }>
   }
-}
-
-export const algorithmsActions = {
-  fetch() {
-    return async (dispatch: Dispatch<AlgorithmsState>) => {
-      dispatch({ type: algorithmsTypes.ALGORITHMS_FETCHING })
-
-      try {
-        const response = await getClient().get(ALGORITHM_ENDPOINT) as FetchResponse
-        dispatch({
-          type: algorithmsTypes.ALGORITHMS_FETCH_SUCCESS,
-          records: response.data.algorithms.map(record => ({
-            description: record.description,
-            id: record.service_id,
-            maxCloudCover: record.max_cloud_cover,
-            name: record.name,
-            type: record.interface,
-          })),
-        })
-      } catch (error) {
-        dispatch({
-          type: algorithmsTypes.ALGORITHMS_FETCH_ERROR,
-          error,
-        })
-      }
-    }
-  },
-
-  serialize() {
-    return (dispatch: Dispatch<AlgorithmsState>, getState: () => AppState) => {
-      const state = getState()
-
-      sessionStorage.setItem('algorithms_records', JSON.stringify(state.algorithms.records))
-
-      dispatch({ type: algorithmsTypes.ALGORITHMS_SERIALIZED })
-    }
-  },
-
-  deserialize() {
-    const deserialized: any = {}
-
-    try {
-      deserialized.records = JSON.parse(sessionStorage.getItem('algorithms_records') || 'null') || algorithmsInitialState.records
-    } catch (error) {
-      console.warn('Failed to deserialize "algorithms_records"')
-    }
-
-    return {
-      type: algorithmsTypes.ALGORITHMS_DESERIALIZED,
-      deserialized,
-    }
-  },
 }

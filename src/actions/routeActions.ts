@@ -14,10 +14,47 @@
  * limitations under the License.
  **/
 
+import {Action} from 'redux'
 import {generateRoute} from '../utils/routeUtils'
+import {RouteState} from '../reducers/routeReducer'
 
-export const routeTypes: ActionTypes = {
-  ROUTE_CHANGED: 'ROUTE_CHANGED',
+export namespace Route {
+  export function navigateTo(args: RouteNavigateToArgs) {
+    args = {
+      ...args,
+      pushHistory: (args.pushHistory != null) ? args.pushHistory : true,
+    }
+
+    const route = generateRoute(args.loc)
+
+    if (args.pushHistory) {
+      history.pushState(null, '', route.href)
+    }
+
+    return {...new RouteActions.Changed({
+      hash: route.hash,
+      href: route.href,
+      jobIds: route.jobIds,
+      pathname: route.pathname,
+      search: route.search,
+      selectedFeature: route.selectedFeature,
+    })}
+  }
+}
+
+export namespace RouteActions {
+  export class Changed implements Action {
+    static type = 'ROUTE_CHANGED'
+    type = Changed.type
+    constructor(public payload: {
+      hash: RouteState['hash']
+      href: RouteState['href']
+      jobIds: RouteState['jobIds']
+      pathname: RouteState['pathname']
+      search: RouteState['search']
+      selectedFeature: RouteState['selectedFeature']
+    }) {}
+  }
 }
 
 export interface RouteLocation {
@@ -30,29 +67,4 @@ export interface RouteLocation {
 export interface RouteNavigateToArgs {
   loc: RouteLocation
   pushHistory?: boolean
-}
-
-export const routeActions = {
-  navigateTo(args: RouteNavigateToArgs) {
-    args = {
-      ...args,
-      pushHistory: (args.pushHistory != null) ? args.pushHistory : true,
-    }
-
-    const route = generateRoute(args.loc)
-
-    if (args.pushHistory) {
-      history.pushState(null, '', route.href)
-    }
-
-    return {
-      type: routeTypes.ROUTE_CHANGED,
-      hash: route.hash,
-      href: route.href,
-      jobIds: route.jobIds,
-      pathname: route.pathname,
-      search: route.search,
-      selectedFeature: route.selectedFeature,
-    }
-  },
 }

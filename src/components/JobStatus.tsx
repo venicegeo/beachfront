@@ -35,11 +35,11 @@ import {
   STATUS_FAIL,
 } from '../constants'
 import {connect} from 'react-redux'
-import {mapActions} from '../actions/mapActions'
-import {jobsActions} from '../actions/jobsActions'
+import {Map} from '../actions/mapActions'
+import {Jobs} from '../actions/jobsActions'
 import {AppState} from '../store'
 import {Extent, featureToExtentWrapped} from '../utils/geometries'
-import {routeActions, RouteNavigateToArgs} from '../actions/routeActions'
+import {Route, RouteNavigateToArgs} from '../actions/routeActions'
 
 type StateProps = ReturnType<typeof mapStateToProps>
 type DispatchProps = ReturnType<typeof mapDispatchToProps>
@@ -94,7 +94,7 @@ export class JobStatus extends React.Component<Props, State> {
 
   render() {
     const { id, properties } = this.props.job
-    const hasError = properties.errorDetails ? true : false
+    const hasError = !!properties.errorDetails
     const timeOfCollect = moment.utc(properties.time_of_collect).local().format('llll')
 
     return (
@@ -244,7 +244,7 @@ export class JobStatus extends React.Component<Props, State> {
       this.toggleExpansion()
     }
 
-    this.props.actions.map.setSelectedFeature(this.props.job)
+    this.props.dispatch.map.setSelectedFeature(this.props.job)
   }
 
   private handleDownloadProgress(loaded: number, total: number) {
@@ -268,7 +268,7 @@ export class JobStatus extends React.Component<Props, State> {
   }
 
   private handleRemoveJobConfirm() {
-    this.props.actions.jobs.deleteJob(this.props.job)
+    this.props.dispatch.jobs.deleteJob(this.props.job)
   }
 
   private handleViewOnMapClick(loc: Location) {
@@ -276,13 +276,13 @@ export class JobStatus extends React.Component<Props, State> {
       throw new Error('Map is null!')
     }
 
-    this.props.actions.route.navigateTo({ loc })
+    this.props.dispatch.route.navigateTo({ loc })
     const feature = this.props.jobs.records.find(j => loc.search.includes(j.id))
     if (!feature) {
       throw new Error('Could not find feature!')
     }
 
-    this.props.actions.map.panToExtent(featureToExtentWrapped(this.props.map.map, feature))
+    this.props.dispatch.map.panToExtent(featureToExtentWrapped(this.props.map.map, feature))
   }
 
   private toggleExpansion() {
@@ -312,16 +312,16 @@ function mapStateToProps(state: AppState) {
 
 function mapDispatchToProps(dispatch: Function) {
   return {
-    actions: {
+    dispatch: {
       map: {
-        setSelectedFeature: (feature: GeoJSON.Feature<any> | null) => dispatch(mapActions.setSelectedFeature(feature)),
-        panToExtent: (extent: Extent) => dispatch(mapActions.panToExtent(extent)),
+        setSelectedFeature: (feature: GeoJSON.Feature<any> | null) => dispatch(Map.setSelectedFeature(feature)),
+        panToExtent: (extent: Extent) => dispatch(Map.panToExtent(extent)),
       },
       jobs: {
-        deleteJob: (job: beachfront.Job) => dispatch(jobsActions.deleteJob(job)),
+        deleteJob: (job: beachfront.Job) => dispatch(Jobs.deleteJob(job)),
       },
       route: {
-        navigateTo: (args: RouteNavigateToArgs) => dispatch(routeActions.navigateTo(args)),
+        navigateTo: (args: RouteNavigateToArgs) => dispatch(Route.navigateTo(args)),
       },
     },
   }

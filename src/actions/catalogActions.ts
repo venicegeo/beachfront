@@ -14,67 +14,28 @@
  * limitations under the License.
  **/
 
-import {Dispatch} from 'redux'
+import {Action, Dispatch} from 'redux'
+import {GeoJSON} from 'geojson'
 import {AppState} from '../store'
 import {IMAGERY_ENDPOINT, SCENE_TILE_PROVIDERS} from '../config'
 import {getClient} from '../api/session'
 import {wrap} from '../utils/math'
 import {catalogInitialState, CatalogState} from '../reducers/catalogReducer'
 
-export const catalogTypes: ActionTypes = {
-  CATALOG_INITIALIZING: 'CATALOG_INITIALIZING',
-  CATALOG_INITIALIZE_SUCCESS: 'CATALOG_INITIALIZE_SUCCESS',
-  CATALOG_INITIALIZE_ERROR: 'CATALOG_INITIALIZE_ERROR',
-  CATALOG_API_KEY_UPDATED: 'CATALOG_API_KEY_UPDATED',
-  CATALOG_SEARCH_CRITERIA_UPDATED: 'CATALOG_SEARCH_CRITERIA_UPDATED',
-  CATALOG_SEARCH_CRITERIA_RESET: 'CATALOG_SEARCH_CRITERIA_RESET',
-  CATALOG_SEARCHING: 'CATALOG_SEARCHING',
-  CATALOG_SEARCH_SUCCESS: 'CATALOG_SEARCH_SUCCESS',
-  CATALOG_SEARCH_ERROR: 'CATALOG_SEARCH_ERROR',
-  CATALOG_SERIALIZED: 'CATALOG_SERIALIZED',
-  CATALOG_DESERIALIZED: 'CATALOG_DESERIALIZED',
-}
-
-export interface CatalogSearchArgs {
-  startIndex: number
-  count: number
-}
-
-export interface CatalogUpdateSearchCriteriaArgs {
-  cloudCover?: number
-  dateFrom?: string
-  dateTo?: string
-  source?: string
-}
-
-type SearchResponse = {
-  data: {
-    features: Array<{
-      id: string
-    }>
+export namespace Catalog {
+  export function setApiKey(apiKey: string) {
+    return {...new CatalogActions.ApiKeyUpdated({ apiKey })}
   }
-}
 
-export const catalogActions = {
-  setApiKey(apiKey: string) {
-    return {
-      type: catalogTypes.CATALOG_API_KEY_UPDATED,
-      apiKey,
-    }
-  },
+  export function updateSearchCriteria(searchCriteria: CatalogUpdateSearchCriteriaArgs) {
+    return {...new CatalogActions.SearchCriteriaUpdated({ searchCriteria })}
+  }
 
-  updateSearchCriteria(searchCriteria: CatalogUpdateSearchCriteriaArgs) {
-    return {
-      type: catalogTypes.CATALOG_SEARCH_CRITERIA_UPDATED,
-      searchCriteria,
-    }
-  },
+  export function resetSearchCriteria() {
+    return {...new CatalogActions.SearchCriteriaReset()}
+  }
 
-  resetSearchCriteria() {
-    return { type: catalogTypes.CATALOG_SEARCH_CRITERIA_RESET }
-  },
-
-  search(args: CatalogSearchArgs = {startIndex: 0, count: 100}) {
+  export function search(args: CatalogSearchArgs = { startIndex: 0, count: 100 }) {
     return async (dispatch: Dispatch<CatalogState>, getState: () => AppState) => {
       const state = getState()
 
@@ -83,7 +44,7 @@ export const catalogActions = {
         return
       }
 
-      dispatch({ type: catalogTypes.CATALOG_SEARCHING })
+      dispatch({...new CatalogActions.Searching()})
 
       console.warn('(catalog:search): Discarding parameters `count` (%s) and `startIndex` (%s)', args.count, args.startIndex)
 
@@ -95,10 +56,9 @@ export const catalogActions = {
 
       let sceneTileProvider = SCENE_TILE_PROVIDERS.find(p => p.prefix === state.catalog.searchCriteria.source)
       if (!sceneTileProvider) {
-        dispatch({
-          type: catalogTypes.CATALOG_SEARCH_ERROR,
+        dispatch({...new CatalogActions.SearchError({
           error: new Error(`Unknown data source prefix: '${state.catalog.searchCriteria.source}'`),
-        })
+        })})
         return
       }
 
@@ -120,25 +80,21 @@ export const catalogActions = {
           f.id = state.catalog.searchCriteria.source + ':' + f.id
         })
 
-        dispatch({
-          type: catalogTypes.CATALOG_SEARCH_SUCCESS,
+        dispatch({...new CatalogActions.SearchSuccess({
           searchResults: {
             images: response.data,
             count: response.data.features.length,
             startIndex: 0,
             totalCount: response.data.features.length,
           },
-        })
+        })})
       } catch (error) {
-        dispatch({
-          type: catalogTypes.CATALOG_SEARCH_ERROR,
-          error,
-        })
+        dispatch({...new CatalogActions.SearchError({ error })})
       }
     }
-  },
+  }
 
-  serialize() {
+  export function serialize() {
     return (dispatch: Dispatch<CatalogState>, getState: () => AppState) => {
       const state = getState()
 
@@ -146,30 +102,106 @@ export const catalogActions = {
       sessionStorage.setItem('searchResults', JSON.stringify(state.catalog.searchResults))
       localStorage.setItem('catalog_apiKey', state.catalog.apiKey)  // HACK
 
-      dispatch({ type: catalogTypes.CATALOG_SERIALIZED })
+      dispatch({...new CatalogActions.Serialized()})
     }
-  },
+  }
 
-  deserialize() {
-    const deserialized: any = {}
-
+  export function deserialize() {
+    let searchCriteria: typeof catalogInitialState.searchCriteria | null = null
     try {
-      deserialized.searchCriteria = JSON.parse(sessionStorage.getItem('searchCriteria') || 'null') || catalogInitialState.searchCriteria
+      searchCriteria = JSON.parse(sessionStorage.getItem('searchCriteria') || 'null')
     } catch (error) {
       console.warn('Failed to deserialize "searchCriteria"')
     }
 
+    let searchResults: typeof catalogInitialState.searchResults | null = null
     try {
-      deserialized.searchResults = JSON.parse(sessionStorage.getItem('searchResults') || 'null')
+      searchResults = JSON.parse(sessionStorage.getItem('searchResults') || 'null')
     } catch (error) {
       console.warn('Failed to deserialize "searchResults"')
     }
 
-    deserialized.apiKey = localStorage.getItem('catalog_apiKey') || catalogInitialState.apiKey
+    const apiKey: string | null = localStorage.getItem('catalog_apiKey')
 
-    return {
-      type: catalogTypes.CATALOG_DESERIALIZED,
-      deserialized,
-    }
-  },
+    return {...new CatalogActions.Deserialized({
+      searchCriteria: searchCriteria || catalogInitialState.searchCriteria,
+      searchResults,
+      apiKey: apiKey || catalogInitialState.apiKey,
+    })}
+  }
+}
+
+export namespace CatalogActions {
+  export class ApiKeyUpdated implements Action {
+    static type = 'CATALOG_API_KEY_UPDATED'
+    type = ApiKeyUpdated.type
+    constructor(public payload: {
+      apiKey: CatalogState['apiKey']
+    }) {}
+  }
+
+  export class SearchCriteriaUpdated implements Action {
+    static type = 'CATALOG_SEARCH_CRITERIA_UPDATED'
+    type = SearchCriteriaUpdated.type
+    constructor(public payload: {
+      searchCriteria: CatalogUpdateSearchCriteriaArgs
+    }) {}
+  }
+
+  export class SearchCriteriaReset implements Action {
+    static type = 'CATALOG_SEARCH_CRITERIA_RESET'
+    type = SearchCriteriaReset.type
+  }
+
+  export class Searching implements Action {
+    static type = 'CATALOG_SEARCHING'
+    type = Searching.type
+  }
+
+  export class SearchSuccess implements Action {
+    static type = 'CATALOG_SEARCH_SUCCESS'
+    type = SearchSuccess.type
+    constructor(public payload: {
+      searchResults: NonNullable<CatalogState['searchResults']>
+    }) {}
+  }
+
+  export class SearchError implements Action {
+    static type = 'CATALOG_SEARCH_ERROR'
+    type = SearchError.type
+    constructor(public payload: {
+      error: CatalogState['searchError']
+    }) {}
+  }
+
+  export class Serialized implements Action {
+    static type = 'CATALOG_SERIALIZED'
+    type = Serialized.type
+  }
+
+  export class Deserialized implements Action {
+    static type = 'CATALOG_DESERIALIZED'
+    type = Deserialized.type
+    constructor(public payload: {
+      searchCriteria: CatalogState['searchCriteria']
+      searchResults: CatalogState['searchResults']
+      apiKey: CatalogState['apiKey']
+    }) {}
+  }
+}
+
+export interface CatalogSearchArgs {
+  startIndex: number
+  count: number
+}
+
+export interface CatalogUpdateSearchCriteriaArgs {
+  cloudCover?: number
+  dateFrom?: string
+  dateTo?: string
+  source?: string
+}
+
+interface SearchResponse {
+  data: GeoJSON.FeatureCollection<any>
 }
