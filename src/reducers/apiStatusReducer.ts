@@ -16,6 +16,7 @@
 
 import {ApiStatusActions as Actions} from '../actions/apiStatusActions'
 import {Action} from 'redux'
+import {RequestError} from '../utils/requestError'
 
 export interface ApiStatusState {
   readonly geoserver: {
@@ -23,7 +24,7 @@ export interface ApiStatusState {
   }
   readonly enabledPlatforms: string[]
   readonly isFetching: boolean
-  readonly fetchError: any
+  readonly fetchError: RequestError | null
 }
 
 export const apiStatusInitialState: ApiStatusState = {

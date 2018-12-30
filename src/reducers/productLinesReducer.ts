@@ -16,17 +16,18 @@
 
 import {Action} from 'redux'
 import {ProductLinesActions as Actions} from '../actions/productLinesActions'
+import {RequestError} from '../utils/requestError'
 
 export interface ProductLinesState {
   readonly records: beachfront.ProductLine[]
   readonly isFetching: boolean
-  readonly fetchError: any
+  readonly fetchError: RequestError | null
   readonly jobs: beachfront.Job[]
   readonly isFetchingJobs: boolean
-  readonly fetchJobsError: any
+  readonly fetchJobsError: RequestError | null
   readonly isCreatingProductLine: boolean
   readonly createdProductLine: beachfront.ProductLine | null
-  readonly createProductLineError: any
+  readonly createProductLineError: RequestError | null
 }
 
 export const productLinesInitialState: ProductLinesState = {

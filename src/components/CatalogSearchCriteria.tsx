@@ -187,16 +187,15 @@ export class CatalogSearchCriteria extends React.Component<Props> {
   }
 
   private renderErrorElement() {
-    const error: Error = this.props.catalog.searchError
-    if (!error) {
+    if (!this.props.catalog.searchError) {
       return  // Nothing to do
     }
 
     let heading, details, stacktrace
 
-    stacktrace = error.toString()
+    stacktrace = this.props.catalog.searchError.toString()
 
-    const {response} = error as AxiosError
+    const {response} = this.props.catalog.searchError
     switch (response && response.status) {
       case 401:
       case 403:
@@ -227,7 +226,7 @@ export class CatalogSearchCriteria extends React.Component<Props> {
       default:
         heading = 'Search failed'
         details = 'An unknown error has occurred. Please contact the Beachfront team for technical support.'
-        stacktrace = error.stack
+        stacktrace = this.props.catalog.searchError.stack
         break
     }
 

@@ -46,13 +46,15 @@ export const AlgorithmList = (props: Props) => (
             warningMessage={props.warningMessage}
             onSelect={props.onSelect}
             onSubmit={props.onSubmit}
-            errorElement={props.jobs.createJobError && (
+            errorElement={props.jobs.createJobError ? (
               <div className={styles.errorMessage}>
                 <h4><i className="fa fa-warning"/> Algorithm failed</h4>
-                <p>{props.jobs.createJobError.response.data}</p>
+                {props.jobs.createJobError.response && (
+                  <p>{props.jobs.createJobError.response.data}</p>
+                )}
                 <pre>{props.jobs.createJobError.stack}</pre>
               </div>
-            )}
+            ) : <div></div>}
           />
         </li>
       ))}
